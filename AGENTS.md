@@ -73,13 +73,16 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 
 ### TUI 特性
 
-- 浮动窗口 + 背景遮罩（无边框）
+- 浮动窗口 + 无边框
 - 仿 lazy.nvim 的渲染引擎：每段独立 `append(text, hl)` + extmark 高亮
-- 自定义高亮组（7 个）链接到主题标准组，自动适配当前 colorscheme
-- **快捷键**：`i` 安装 `u` 更新 `X` 卸载 `U` 更新全部 `Z` 卸载全部 `Enter` 展开/日志 `?` 帮助 `/` 搜索 `q` 退出
+- 自定义高亮组（8 个 `CocConverter*`）链接到主题标准组，自动适配当前 colorscheme
+- **顶部按钮**：`coc-converter(H)` 首页  `Install(I)` 模式  `Update(U)` 更新全部  `Help(?)` 帮助
+- **模式按钮**：`I` 进入 Install 模式（按钮亮起） `U` 更新全部（按钮亮起） `H` 回首页 `?` 帮助
+- **包操作**：`i` 安装 `u` 更新 `X` 卸载 `<CR>` 展开/折叠详情/日志
+- **其他**：`/` 搜索 `q` / `<Esc>` 关闭
 - **展开详情**：description / type / source / languages / categories / homepage
-- **安装日志**：`▶` 紧凑行 → `Enter` 展开完整日志（含执行的命令）
-- **进度显示**：`[step/total] 正在转换代码...` + `$ 执行的命令`
+- **安装日志**：`▶` 紧凑行 → `<CR>` 展开完整日志（含执行的命令）
+- **进度显示**：`[step/total]` + 执行的命令
 
 ### 命令
 
@@ -97,6 +100,14 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 cd coc-converter
 npm install
 npm run build    # esbuild → lib/index.js
+```
+
+### 安装
+
+```bash
+cd ~/.config/coc/extensions
+npm install /path/to/coc-converter    # 或
+:CocInstall /path/to/coc-converter
 ```
 
 ## Pending (next session)
