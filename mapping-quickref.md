@@ -12,8 +12,8 @@
 | `Position` (class) | `Position` (interface) | ≈ vscode 有 translate/with/compareTo 等方法 |
 | `Range` (class) | `Range` (interface) | ≈ vscode 有 contains/intersection/union |
 | `Selection` | — | vscode 独有 |
-| `Uri` (class) | — | coc 用 `DocumentUri = string` |
-| `Uri` | `DocumentUri` (string) | 类型不同 |
+| `Uri` (class) | `Uri` (class) | ≈ coc 构造器为 protected |
+| `Uri` | `DocumentUri` (string) | coc 额外有 DocumentUri 类型别名 |
 | `TextDocument` | `TextDocument` | ≈ coc 缺少 fileName/isUntitled/isDirty/validateRange 等 |
 | `TextDocument` | `LinesTextDocument` | ≈ coc 扩展版，多了 bufnr/lineAt() |
 | `TextLine` | `TextLine` | 完全相同 |

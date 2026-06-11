@@ -23,7 +23,7 @@
 | — | `LinesTextDocument` | coc 独有（extends TextDocument） |
 | `TextLine` | `TextLine` | 是 |
 | `EndOfLine` | — | vscode 独有 |
-| — | `Uri` (type) | coc 无 class，顶层无 Uri |
+| `Uri` | `Uri` | ≈ class vs class（coc 构造器为 protected） |
 | — | `DocumentUri` | coc 独有（`= string`） |
 | `Command` | `Command` | ≈ coc 少 tooltip |
 | `TextEdit` | `TextEdit` | ≈ class vs interface |
@@ -72,8 +72,8 @@
 | `CompletionItemKind` | `CompletionItemKind` | ≈ enum vs namespace + type |
 | `CompletionList` | `CompletionList` | ≈ class vs interface |
 | `CompletionTriggerKind` | `CompletionTriggerKind` | ≈ enum vs namespace + type |
-| `InsertTextFormat` | `InsertTextFormat` | ≈ enum vs namespace + type |
-| `InsertTextMode` | `InsertTextMode` | ≈ enum vs namespace + type |
+| — | `InsertTextFormat` | coc 独有（LSP，vscode 用 `string \| SnippetString`） |
+| — | `InsertTextMode` | coc 独有（LSP） |
 | `CompletionItemTag` | `CompletionItemTag` | ≈ enum vs namespace + type |
 | `InsertReplaceEdit` | `InsertReplaceEdit` | ≈ |
 | `CompletionItemLabelDetails` | `CompletionItemLabelDetails` | 是 |
@@ -149,7 +149,7 @@
 | `CallHierarchyItem` | `CallHierarchyItem` | ≈ class vs interface |
 | `CallHierarchyIncomingCall` | `CallHierarchyIncomingCall` | ≈ |
 | `CallHierarchyOutgoingCall` | `CallHierarchyOutgoingCall` | ≈ |
-| `TypeHierarchyItem` | `TypeHierarchyItem` | ≈ class vs interface |
+| `TypeHierarchyItem` | `TypeHierarchyItem` | ≈ class vs type alias |
 | `LinkedEditingRanges` | `LinkedEditingRanges` | ≈ class vs interface |
 
 ---
@@ -158,7 +158,7 @@
 
 | VS Code | coc.nvim | 完全一致？ |
 |---------|----------|-----------|
-| `InlayHint` | `InlayHint` | ≈ class vs interface |
+| `InlayHint` | `InlayHint` | ≈ class vs type alias |
 | `InlayHintKind` | `InlayHintKind` | ≈ enum vs namespace |
 | `InlayHintLabelPart` | `InlayHintLabelPart` | ≈ |
 | `SemanticTokensLegend` | `SemanticTokensLegend` | 是 |

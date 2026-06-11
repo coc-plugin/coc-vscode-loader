@@ -30,7 +30,7 @@
 | 导出总数 | ~524 | ~536 |
 | 命名空间 | 15 (`window`, `workspace`, `languages`, `commands`, `env`, `extensions`, `debug`, `tasks`, `notebooks`, `scm`, `tests`, `authentication`, `l10n`, `chat`, `lm`) | 4 (`window`, `workspace`, `languages`, `commands`) + `snippetManager` |
 | 架构 | 丰富的 class + interface + enum + namespace | 偏 LSP 风格，多数为 interface + factory namespace，enum 用 type alias |
-| Uri 方案 | `class Uri` | `type DocumentUri = string` |
+| Uri 方案 | `class Uri` | `class Uri` + `type DocumentUri = string` |
 | 文档模型 | `TextDocument` (完整) | `TextDocument` (精简) + `LinesTextDocument` (扩展) |
 | LSP 集成 | 底层封装 | 原生 LSP 类型贯穿始终 |
 
@@ -73,12 +73,15 @@
 
 ### 2.4 Uri
 
-| 项目 | VS Code | coc.nvim |
-|------|---------|----------|
-| `class Uri` | 有 | **无** — 使用 `type DocumentUri = string` |
-| scheme/authority/path/query/fragment/fsPath | 有 | **无** |
-| Uri.parse() / Uri.file() / Uri.from() / Uri.joinPath() | 有 | **无** |
-| with() / toString() / toJSON() | 有 | **无** |
+| 项目 | VS Code | coc.nvim | 差异 |
+|------|---------|----------|------|
+| `class Uri` | 有 | 有 | coc 构造器为 `protected` |
+| scheme/authority/path/query/fragment/fsPath | 有 | 有 | 相同 |
+| Uri.parse() / Uri.file() / Uri.from() | 有 | 有 | 相同 |
+| with() / toString() / toJSON() | 有 | 有 | 相同 |
+| Uri.joinPath() | 有 | **无** | vscode 独有 |
+| Uri.isUri() | **无** | 有 | coc 独有 |
+| `type DocumentUri = string` | **无** | 有 | coc 独有（LSP 风格） |
 
 ### 2.5 TextDocument
 
