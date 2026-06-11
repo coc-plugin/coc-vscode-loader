@@ -1,7 +1,7 @@
-# Provider 注册签名卡 — coc.nvim vs VS Code
+# Provider 注册签名卡 — VS Code vs coc.nvim
 
-> coc 统一模式：`(name: string, shortcut: string, selector: DocumentSelector | null, provider, ...)`
 > vscode 统一模式：`(selector: DocumentSelector, provider, ...)`
+> coc 统一模式：`(name: string, shortcut: string, selector: DocumentSelector | null, provider, ...)`
 
 ---
 
@@ -351,25 +351,25 @@ window.registerTerminalProfileProvider(id, provider)
 
 ## 快速转换表
 
-| coc 注册函数 | vscode 注册函数 | 参数调整 |
-|-------------|----------------|---------|
-| `registerCompletionItemProvider(n,s,sel,p,t?,pri?,ac?)` | `registerCompletionItemProvider(sel,p,...t)` | 去掉 n,s,pri,ac；t 变 rest |
+| vscode 注册函数 | coc 注册函数 | 参数调整 |
+|----------------|-------------|---------|
+| `registerCompletionItemProvider(sel,p,...t)` | `registerCompletionItemProvider(n,s,sel,p,t?,pri?,ac?)` | 加上 n,s,pri,ac；t 从 rest 变数组 |
 | `registerInlineCompletionItemProvider(sel,p)` | `registerInlineCompletionItemProvider(sel,p)` | 不变 |
 | `registerHoverProvider(sel,p)` | `registerHoverProvider(sel,p)` | 不变 |
 | `registerDefinitionProvider(sel,p)` | `registerDefinitionProvider(sel,p)` | 不变 |
-| `registerReferencesProvider(sel,p)` | `registerReferenceProvider(sel,p)` | 函数名去 s |
+| `registerReferenceProvider(sel,p)` | `registerReferencesProvider(sel,p)` | 函数名加 s |
 | `registerDocumentHighlightProvider(sel,p)` | `registerDocumentHighlightProvider(sel,p)` | 不变 |
 | `registerDocumentSymbolProvider(sel,p,m?)` | `registerDocumentSymbolProvider(sel,p,m?)` | 不变 |
 | `registerWorkspaceSymbolProvider(p)` | `registerWorkspaceSymbolProvider(p)` | 不变 |
-| `registerCodeActionProvider(sel,p,cid?,kinds?)` | `registerCodeActionsProvider(sel,p,m?)` | 函数名 +s；cid/kinds 合成 metadata |
+| `registerCodeActionsProvider(sel,p,m?)` | `registerCodeActionProvider(sel,p,cid?,kinds?)` | 函数名去 s；metadata 拆成 cid/kinds |
 | `registerCodeLensProvider(sel,p)` | `registerCodeLensProvider(sel,p)` | 不变 |
-| `registerDocumentFormatProvider(sel,p,pri?)` | `registerDocumentFormattingEditProvider(sel,p)` | 补全函数名；去 priority |
-| `registerDocumentRangeFormatProvider(sel,p,pri?)` | `registerDocumentRangeFormattingEditProvider(sel,p)` | 同上 |
-| `registerOnTypeFormattingEditProvider(sel,p,t[])` | `registerOnTypeFormattingEditProvider(sel,p,...t)` | 数组展开为 rest |
+| `registerDocumentFormattingEditProvider(sel,p)` | `registerDocumentFormatProvider(sel,p,pri?)` | 简写函数名；加 priority |
+| `registerDocumentRangeFormattingEditProvider(sel,p)` | `registerDocumentRangeFormatProvider(sel,p,pri?)` | 同上 |
+| `registerOnTypeFormattingEditProvider(sel,p,...t)` | `registerOnTypeFormattingEditProvider(sel,p,t[])` | rest 参数变为数组 |
 | `registerRenameProvider(sel,p)` | `registerRenameProvider(sel,p)` | 不变 |
-| `registerSignatureHelpProvider(sel,p,t?)` | `registerSignatureHelpProvider(sel,p,...t)` 或 `(sel,p,meta)` | 数组 vs rest；无 metadata |
+| `registerSignatureHelpProvider(sel,p,...t)` 或 `(sel,p,meta)` | `registerSignatureHelpProvider(sel,p,t?)` | rest 变数组；无 metadata |
 | `registerDocumentLinkProvider(sel,p)` | `registerDocumentLinkProvider(sel,p)` | 不变 |
-| `registerDocumentColorProvider(sel,p)` | `registerColorProvider(sel,p)` | 函数名去 Document |
+| `registerColorProvider(sel,p)` | `registerDocumentColorProvider(sel,p)` | 函数名加 Document |
 | `registerFoldingRangeProvider(sel,p)` | `registerFoldingRangeProvider(sel,p)` | 不变 |
 | `registerSelectionRangeProvider(sel,p)` | `registerSelectionRangeProvider(sel,p)` | 不变 |
 | `registerCallHierarchyProvider(sel,p)` | `registerCallHierarchyProvider(sel,p)` | 不变 |

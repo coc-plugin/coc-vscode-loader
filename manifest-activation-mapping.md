@@ -1,33 +1,10 @@
-# package.json / activate 对比：coc.nvim → VS Code
+# package.json / activate 对比：VS Code → coc.nvim
 
 ---
 
 ## 1. 入口配置
 
 ```jsonc
-// coc.nvim package.json
-{
-  "main": "lib/index.js",
-  "activationEvents": [
-    "onLanguage:typescript"
-  ],
-  "engines": {
-    "coc": "^0.0.82"
-  },
-  "contributes": {
-    "configuration": {
-      "type": "object",
-      "properties": {
-        "myExt.enable": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable my extension"
-        }
-      }
-    }
-  }
-}
-
 // VS Code package.json
 {
   "main": "./out/extension.js",
@@ -50,27 +27,50 @@
     }
   }
 }
+
+// coc.nvim package.json
+{
+  "main": "lib/index.js",
+  "activationEvents": [
+    "onLanguage:typescript"
+  ],
+  "engines": {
+    "coc": "^0.0.82"
+  },
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "myExt.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable my extension"
+        }
+      }
+    }
+  }
+}
 ```
 
 ---
 
 ## 2. activationEvents 映射
 
-| coc | VS Code | 备注 |
-|-----|---------|------|
+| VS Code | coc | 备注 |
+|---------|-----|------|
 | `onLanguage:langId` | `onLanguage:langId` | 相同 |
 | `onCommand:cmdId` | `onCommand:cmdId` | 相同 |
 | `*` | `*` | 相同（启动时立即激活） |
 | `onFileSystem:scheme` | `onFileSystem:scheme` | 相同 |
 | `workspaceContains:filePattern` | `workspaceContains:filePattern` | 相同 |
-| `onNotification:method` | — | coc 独有（监听 LSP notification） |
-| — | `onStartupFinished` | vscode 独有（编辑器完成初始化后激活） |
-| — | `onUri` | vscode 独有（处理自定义 URI 协议） |
-| — | `onCustomEditor:viewType` | vscode 独有（自定义编辑器） |
-| — | `onWebviewPanel:viewType` | vscode 独有（webview 面板） |
-| — | `onRenderer:viewType` | vscode 独有（ notebooks 渲染器） |
-| — | `onTerminalProfile` | vscode 独有（终端配置文件） |
-| — | `onAuthenticationRequest:authId` | vscode 独有（认证请求） |
+| — | `onNotification:method` | coc 独有（监听 LSP notification） |
+| `onStartupFinished` | — | vscode 独有（编辑器完成初始化后激活） |
+| `onUri` | — | vscode 独有（处理自定义 URI 协议） |
+| `onCustomEditor:viewType` | — | vscode 独有（自定义编辑器） |
+| `onWebviewPanel:viewType` | — | vscode 独有（webview 面板） |
+| `onRenderer:viewType` | — | vscode 独有（notebooks 渲染器） |
+| `onTerminalProfile` | — | vscode 独有（终端配置文件） |
+| `onAuthenticationRequest:authId` | — | vscode 独有（认证请求） |
 
 ---
 
@@ -79,16 +79,6 @@
 ### 3.1 commands
 
 ```jsonc
-// coc
-"contributes": {
-  "commands": [
-    {
-      "command": "myExt.hello",
-      "title": "Say Hello"
-    }
-  ]
-}
-
 // VS Code
 "contributes": {
   "commands": [
@@ -101,22 +91,21 @@
     }
   ]
 }
+
+// coc
+"contributes": {
+  "commands": [
+    {
+      "command": "myExt.hello",
+      "title": "Say Hello"
+    }
+  ]
+}
 ```
 
 ### 3.2 keybindings
 
 ```jsonc
-// coc
-"contributes": {
-  "keybindings": [
-    {
-      "command": "myExt.hello",
-      "key": "leader e"
-    }
-  ]
-}
-// ⚠️ coc 使用 vim 格式的 key 字符串（如 "leader e"、"<C-p>"）
-
 // VS Code
 "contributes": {
   "keybindings": [
@@ -128,25 +117,23 @@
     }
   ]
 }
+// ⚠️ VS Code 使用标准 key 字符串（如 "ctrl+e"）
+
+// coc
+"contributes": {
+  "keybindings": [
+    {
+      "command": "myExt.hello",
+      "key": "leader e"
+    }
+  ]
+}
+// ⚠️ coc 使用 vim 格式的 key 字符串（如 "leader e"、"<C-p>"）
 ```
 
 ### 3.3 configuration
 
 ```jsonc
-// coc
-"contributes": {
-  "configuration": {
-    "type": "object",
-    "properties": {
-      "myExt.enable": {
-        "type": "boolean",
-        "default": true,
-        "description": "Enable"
-      }
-    }
-  }
-}
-
 // VS Code
 "contributes": {
   "configuration": {
@@ -166,14 +153,25 @@
     }
   }
 }
+
+// coc
+"contributes": {
+  "configuration": {
+    "type": "object",
+    "properties": {
+      "myExt.enable": {
+        "type": "boolean",
+        "default": true,
+        "description": "Enable"
+      }
+    }
+  }
+}
 ```
 
 ### 3.4 menus
 
 ```jsonc
-// coc — coc 通常不支持 contributes.menus
-// (coc 用 vim 的插键和命令方式替代)
-
 // VS Code
 "contributes": {
   "menus": {
@@ -186,12 +184,14 @@
     ]
   }
 }
+
+// coc — coc 通常不支持 contributes.menus
+// (coc 用 vim 的插键和命令方式替代)
 ```
 
 ### 3.5 configurationDefaults
 
 ```jsonc
-// coc 无
 // VS Code
 "contributes": {
   "configurationDefaults": {
@@ -200,12 +200,13 @@
     }
   }
 }
+
+// coc 无
 ```
 
 ### 3.6 icons / iconThemes / productIconThemes
 
 ```jsonc
-// coc 无
 // VS Code
 "contributes": {
   "icons": {
@@ -218,12 +219,13 @@
     }
   }
 }
+
+// coc 无
 ```
 
 ### 3.7 views / viewsContainers
 
 ```jsonc
-// coc 无
 // VS Code
 "contributes": {
   "viewsContainers": {
@@ -237,12 +239,13 @@
     ]
   }
 }
+
+// coc 无
 ```
 
 ### 3.8 languages / grammars / semantictokenScopes
 
 ```jsonc
-// coc 无（coc 不定义语言语法）
 // VS Code
 "contributes": {
   "languages": [{
@@ -256,23 +259,26 @@
     "path": "./syntaxes/mylang.tmLanguage.json"
   }]
 }
+
+// coc 无（coc 不定义语言语法）
 ```
 
 ### 3.9 problemMatchers / taskDefinitions
 
 ```jsonc
-// coc 无
 // VS Code
 "contributes": {
   "problemMatchers": [{ ... }],
   "taskDefinitions": [{ ... }]
 }
+
+// coc 无
 ```
 
 ### 3.10 snippets
 
 ```jsonc
-// coc
+// VS Code
 "contributes": {
   "snippets": [
     {
@@ -282,13 +288,12 @@
   ]
 }
 
-// VS Code — 相同
+// coc — 相同
 ```
 
 ### 3.11 types / typescriptServerPlugins
 
 ```jsonc
-// coc 无
 // VS Code
 "contributes": {
   "types": "src/types.d.ts",
@@ -296,12 +301,13 @@
     { "name": "typescript-plugin-css-modules" }
   ]
 }
+
+// coc 无
 ```
 
 ### 3.12 authentication 认证
 
 ```jsonc
-// coc 无
 // VS Code
 "contributes": {
   "authentication": [
@@ -311,26 +317,30 @@
     }
   ]
 }
+
+// coc 无
 ```
 
 ### 3.13 notebooks / notebookRenderers
 
 ```jsonc
-// coc 无
 // VS Code
 "contributes": {
   "notebooks": [{ "type": "jupyter-notebook", ... }]
 }
+
+// coc 无
 ```
 
 ### 3.14 walkthroughs
 
 ```jsonc
-// coc 无
 // VS Code
 "contributes": {
   "walkthroughs": [{ "id": "myWalkthrough", ... }]
 }
+
+// coc 无
 ```
 
 ---
@@ -338,17 +348,6 @@
 ## 4. ExtensionContext 属性对比
 
 ```typescript
-// coc ExtensionContext
-interface ExtensionContext {
-  subscriptions: Disposable[]
-  extensionPath: string
-  extensionUri: Uri                 // 对 coc 来说 string
-  storagePath: string | undefined
-  globalState: Memento
-  workspaceState: Memento
-  asAbsolutePath(relativePath: string): string
-}
-
 // vscode ExtensionContext
 interface ExtensionContext {
   subscriptions: Disposable[]
@@ -363,6 +362,17 @@ interface ExtensionContext {
   workspaceState: Memento
   asAbsolutePath(relativePath: string): string
   secrets: SecretStorage              // ⚠️ coc 无
+}
+
+// coc ExtensionContext
+interface ExtensionContext {
+  subscriptions: Disposable[]
+  extensionPath: string
+  extensionUri: Uri                 // 对 coc 来说 string
+  storagePath: string | undefined
+  globalState: Memento
+  workspaceState: Memento
+  asAbsolutePath(relativePath: string): string
 }
 ```
 
