@@ -2,7 +2,7 @@
 
 ## What this repo is
 
-Reference documentation for migrating VS Code extensions to coc.nvim. **Not a code project** — no package.json, no build/test/lint commands, no TypeScript compilation.
+Reference documentation for migrating VS Code extensions to coc.nvim + **converter prototype** (`converter/`) that automatically converts VS Code extensions to coc plugins.
 
 ## Repo map
 
@@ -18,32 +18,55 @@ Reference documentation for migrating VS Code extensions to coc.nvim. **Not a co
 | `pattern-migration-examples.md` | Migration code examples for common patterns |
 | `manifest-activation-mapping.md` | `package.json` / `activationEvents` / `contributes` mapping |
 | `vscode-api-feasibility.md` | Feasibility analysis of porting vscode APIs to coc |
+| `converter-design-v2.md` | Converter architecture + bridge preset system |
+| `converter/README.md` | Converter tool docs and usage |
+| `volar-migration-guide.md` | Volar (Vue) migration case study |
 | `logs/YYYY-MM-DD.md` | Daily sync change logs (auto-generated) |
+
+## Converter status
+
+**Verified conversions:**
+
+| Plugin | Type | Status | Key issues solved |
+|--------|------|--------|-----------------|
+| Volar (Vue) | TS-bridge | ✅ | tsserver/request bridge, typescriptServerPlugins, globalPlugins |
+| Prisma | Pure LSP | ✅ | exports field restriction, bin entry detection |
+| HTML CSS Support | Direct API | ✅ | class→factory, getWordRangeAtPosition polyfill, fileName→uri |
+
+**Implemented transforms:**
+
+| Transform | What it does |
+|-----------|-------------|
+| `import-mapping` | `from 'vscode'` → `from 'coc.nvim'` |
+| `class-to-factory` | `new Xxx()` → `Xxx.create()` |
+| `provider-register` | Adapt provider registration signatures |
+| `enum-offset` | Comment on enum value differences |
+| `language-client` | LanguageClient signature adaptation |
+
+**Bridge preset system** (`converter/src/presets.ts`):
+- Bridge logic is preset-driven, not hardcoded in convert.ts
+- Currently only `ts-bridge` preset exists
+- Adding a new bridge type: edit presets.ts + scanner.ts
+
+## coc-tsserver PR
+
+- PR: https://github.com/neoclide/coc-tsserver/pull/493
+- Changes: `globalPlugins` + `pluginPaths` in configure, `typescript.tsserverRequest` command
+- Pre-merge: `npm install ChuYanLon/coc-tsserver`
+
+## Pending (next session)
+
+- [ ] Add more transforms (uri-mapping, more provider signatures)
+- [ ] Build registry system (JSON config for conversion parameters)
+- [ ] coc-converter package manager plugin
+- [ ] Test more plugins (Angular, ESLint, JSON)
+- [ ] Add python-bridge / rust-bridge preset examples
 
 ## Type sync workflow (CI only)
 
 - `.github/workflows/sync-types.yml` runs daily at 02:00 UTC
-- Downloads `vscode.d.ts` from vscode `main` branch and `coc.d.ts` from coc.nvim `master`
-- Compares with local copies; if changed, commits the update
-- Logs API additions/removals to `logs/YYYY-MM-DD.md`
-- Requires `ripgrep` (`rg`) — installed in CI via apt
-- **Do not manually edit `vscode.d.ts` or `coc.d.ts`** — they are overwritten by the sync script
-
-## Branches
-
-- `main` — primary branch
-- `master` — stale, kept for compatibility
-- `sync/types-YYYY-MM-DD` — push branches created by CI sync (not long-lived)
+- **Do not manually edit `vscode.d.ts` or `coc.d.ts`**
 
 ## Language
 
 All documentation is written in Chinese (zh-CN).
-
-## Key conversions to know
-
-- vscode `EventEmitter<T>` → coc `Emitter<T>` (different name)
-- vscode `Uri` class → coc `DocumentUri = string`
-- vscode `CodeActionKind` class → coc `CodeActionKind = string` alias
-- `LinesTextDocument` (extends `TextDocument`) — coc only, no vscode equivalent
-- `DiagnosticSeverity` values are offset by 1 (coc: 1-4, vscode: 0-3)
-- Provider registration in coc takes extra `name` + `shortcut` args vs vscode just `selector`
