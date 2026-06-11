@@ -1,6 +1,7 @@
 import {
   LanguageClient,
   TransportKind,
+  RevealOutputChannelOn,
   workspace,
   window,
   commands,
@@ -35,14 +36,21 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }
     if (!serverModule) { window.showErrorMessage('Cannot find @vue/language-server.'); return }
 
-    // 3. 启动 Vue 语言服务器
-    const client = new LanguageClient('vue', 'Vue Language Server', {
-      module: serverModule,
-      transport: TransportKind.ipc,
-    }, {
-      documentSelector: ['vue'],
-      outputChannelName: 'Vue Language Server',
-    })
+    // 3. 启动 Vue LSP
+    const client = new LanguageClient(
+      'vue',
+      'Vue Language Server',
+      {
+        module: serverModule,
+        transport: TransportKind.ipc,
+      },
+      {
+        documentSelector: [{ language: 'vue', scheme: 'file' }],
+        outputChannelName: 'Vue Language Server',
+        revealOutputChannelOn: RevealOutputChannelOn.Never,
+        progressOnInitialization: true,
+      },
+    )
     context.subscriptions.push(client)
     context.subscriptions.push(cocServices.registerLanguageClient(client))
     client.start()
@@ -60,7 +68,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       }
     })
 
-    // 5. 重启命令
+    // 5. 命令
     context.subscriptions.push(
       commands.registerCommand('vue.action.restartServer', async () => {
         await client.stop()
