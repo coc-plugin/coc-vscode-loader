@@ -302,7 +302,8 @@
   ]
 }
 
-// coc — 支持（需要 coc-tsserver >= 2.4.0 + PR #493）
+// coc — 支持（需要 coc-tsserver 含 PR #493，合并前使用我们的 fork）
+// 安装: cd ~/.config/coc/extensions && npm install ChuYanLon/coc-tsserver
 "contributes": {
   "typescriptServerPlugins": [
     {

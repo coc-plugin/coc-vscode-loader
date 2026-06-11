@@ -28,6 +28,15 @@
 
 ## 2. 逐文件迁移方案
 
+### 前置条件
+
+安装修改版 coc-tsserver（PR [#493](https://github.com/neoclide/coc-tsserver/pull/493)，合并前使用 fork）：
+
+```bash
+cd ~/.config/coc/extensions
+npm install ChuYanLon/coc-tsserver --legacy-peer-deps
+```
+
 ### 🟢 2.1 `extension.ts` — 主入口
 
 **VS Code 写法（简化）：**

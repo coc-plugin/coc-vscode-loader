@@ -533,7 +533,14 @@ client.onNotification('tsserver/request', async ([seq, command, args]) => {
 })
 ```
 
-**注意：** `typescript.tsserverRequest` 命令由 coc-tsserver（PR #493）提供，需要在 `package.json` 中声明 `typescriptServerPlugins` contribution，coc-tsserver 会自动加载插件。
+**注意：** `typescript.tsserverRequest` 命令由 coc-tsserver 提供（PR [#493](https://github.com/neoclide/coc-tsserver/pull/493)）。PR 合并前需使用我们的 [fork](https://github.com/ChuYanLon/coc-tsserver)：
+
+```bash
+cd ~/.config/coc/extensions
+npm install ChuYanLon/coc-tsserver --legacy-peer-deps
+```
+
+同时需要在 `package.json` 中声明 `typescriptServerPlugins` contribution，coc-tsserver 会自动加载插件。
 
 ```jsonc
 // coc 插件 package.json
