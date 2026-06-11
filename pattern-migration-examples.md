@@ -499,3 +499,53 @@ workspace.watchGlobal('g:my_var', () => { /* ... */ })
 ```
 
 `onDidChangeConfiguration` 签名字段基本相同。coc 额外有 `watchOption`/`watchGlobal`（vim 特有）。
+
+---
+
+## 15. LanguageClient + tsserver 桥接（TS 插件专用）
+
+某些语言服务器（如 Volar v3）需要 LSP 客户端做 `tsserver/request` ↔ `tsserver/response` 桥接，将 TypeScript 请求转发给 tsserver：
+
+```typescript
+// VS Code
+import * as vscode from 'vscode'
+import { LanguageClient } from 'vscode-languageclient/node'
+
+const client = new LanguageClient('vue', { ... }, {
+  documentSelector: [{ language: 'vue' }],
+})
+
+client.onNotification('tsserver/request', ([seq, command, args]) => {
+  vscode.commands.executeCommand('typescript.tsserverRequest', command, args, { isAsync: true })
+    .then(res => client.sendNotification('tsserver/response', [seq, res?.body]))
+})
+
+// coc.nvim
+import { LanguageClient, commands } from 'coc.nvim'
+
+const client = new LanguageClient('vue', 'Vue Language Server', { ... }, {
+  documentSelector: [{ language: 'vue' }],
+})
+
+client.onNotification('tsserver/request', async ([seq, command, args]) => {
+  const result = await commands.executeCommand('typescript.tsserverRequest', command, args, { isAsync: true })
+  client.sendNotification('tsserver/response', [seq, result?.body])
+})
+```
+
+**注意：** `typescript.tsserverRequest` 命令由 coc-tsserver（PR #493）提供，需要在 `package.json` 中声明 `typescriptServerPlugins` contribution，coc-tsserver 会自动加载插件。
+
+```jsonc
+// coc 插件 package.json
+{
+  "contributes": {
+    "typescriptServerPlugins": [
+      {
+        "name": "@vue/typescript-plugin",
+        "languages": ["vue"],
+        "enableForWorkspaceTypeScriptVersions": true
+      }
+    ]
+  }
+}
+```

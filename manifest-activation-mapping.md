@@ -302,7 +302,17 @@
   ]
 }
 
-// coc 无
+// coc — 支持（需要 coc-tsserver >= 2.4.0 + PR #493）
+"contributes": {
+  "typescriptServerPlugins": [
+    {
+      "name": "@vue/typescript-plugin",
+      "languages": ["vue"],
+      "enableForWorkspaceTypeScriptVersions": true
+    }
+  ]
+}
+// coc-tsserver 启动时自动加载这些插件（globalPlugins + pluginPaths）
 ```
 
 ### 3.12 authentication 认证
