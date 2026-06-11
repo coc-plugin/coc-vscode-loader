@@ -5,9 +5,13 @@ import { scan } from './scanner.js'
 import { TransformContext } from './types.js'
 import { transformImportMapping } from './transforms/import-mapping.js'
 import { transformLanguageClient } from './transforms/language-client.js'
+import { transformClassToFactory } from './transforms/class-to-factory.js'
+import { transformProviderRegister } from './transforms/provider-register.js'
 
 const TRANSFORMS = [
   { name: 'import-mapping', fn: transformImportMapping },
+  { name: 'class-to-factory', fn: transformClassToFactory },
+  { name: 'provider-register', fn: transformProviderRegister },
   { name: 'language-client', fn: transformLanguageClient },
 ]
 
@@ -105,6 +109,28 @@ export async function convert(opts: Options): Promise<void> {
       )
     }
 
+    // Replace getWordRangeAtPosition calls with inline word boundary calculation.
+    // In coc's TextDocument there's no getWordRangeAtPosition.
+    content = content.replace(
+      /const range = document\.getWordRangeAtPosition\(([^,]+),\s*([^)]+)\)/g,
+      'const line = document.getText().split("\\n")[$1.line]; const pre = line.slice(0, $1.character); const m = pre.match($2); const range = m ? Range.create($1.line, $1.character - m[0].length, $1.line, $1.character) : undefined'
+    )
+    content = content.replace(
+      /const range = document\.getWordRangeAtPosition\(([^)]+)\)/g,
+      'const line = document.getText().split("\\n")[$1.line]; const pre = line.slice(0, $1.character); const m = pre.match(/[_a-zA-Z0-9-]+/); const range = m ? Range.create($1.line, $1.character - m[0].length, $1.line, $1.character) : undefined'
+    )
+    // Also replace usage without 'const' (already declared)
+    content = content.replace(
+      /range = document\.getWordRangeAtPosition\(([^,]+),\s*([^)]+)\)/g,
+      '(() => { const ln = document.getText().split("\\n")[$1.line]; const pr = ln.slice(0, $1.character); const mt = pr.match($2); return mt ? Range.create($1.line, $1.character - mt[0].length, $1.line, $1.character) : undefined; })()'
+    )
+    // fileName → uri (coc's DocumentUri is a string path)
+    if (content.includes('.fileName')) {
+      content = content.replace(/\.fileName/g, '.uri')
+      // uri is a full path in coc, but fileName might have had file:// prefix in vscode
+      // Add comment about potential file:// handling
+    }
+
     // Remove unsupported import packages
     content = content.replace(
       /import .* from ['"]@volar\/vscode['"];?\n?/g,
@@ -134,8 +160,10 @@ export async function convert(opts: Options): Promise<void> {
     console.log(`  detected server: ${serverModuleNames.join(', ')}`)
   }
 
-  // 9. Generate bridge index.ts for TS-bridge plugins
+  // 9. Determine plugin type and entry point
   const hasTsBridge = result.hasTsBridge
+  const hasServer = serverModuleNames.length > 0
+  const isDirectApi = !hasServer && !hasTsBridge  // no LSP server, uses coc API directly
   const pluginName = origPkg.name || path.basename(input)
   const description = origPkg.description || ''
 
@@ -164,7 +192,14 @@ export async function convert(opts: Options): Promise<void> {
   })
   const serverResolveCalls = serverResolveParts.join('\n')
 
-  const bridgeCode = `\
+  let bridgeCode = ''
+  let esbuildEntry = 'src/index.ts'
+  if (isDirectApi) {
+    // Non-LSP plugin: use the original extension.ts as entry (with transforms applied)
+    esbuildEntry = 'src/extension.ts'
+  } else {
+    // LSP-based plugin: generate a LanguageClient entry point
+    bridgeCode = `\
 import {
   LanguageClient,
   TransportKind,
@@ -230,28 +265,44 @@ ${hasTsBridge ? `\
   }
 }
 `
-  fs.writeFileSync(path.join(output, 'src', 'index.ts'), bridgeCode)
+  }
+  if (bridgeCode) {
+    fs.writeFileSync(path.join(output, 'src', 'index.ts'), bridgeCode)
+  }
 
-  // 10. Detect dependencies from original package.json + peer deps
+  // 10. Detect dependencies from original package.json
   const serverDeps: Record<string, string> = {}
-  const knownServerPatterns = ['language-server', 'language-server/node', '-server', 'languageserver']
-  for (const [dep, ver] of Object.entries(origPkg.dependencies || {})) {
-    if (ver.startsWith('workspace:')) continue
-    if (knownServerPatterns.some(p => dep.includes(p))) {
+  if (isDirectApi) {
+    // Non-LSP: keep all original deps (including devDeps, since they may be imported at runtime)
+    const allDeps = { ...origPkg.dependencies, ...origPkg.devDependencies }
+    for (const [dep, ver] of Object.entries(allDeps)) {
+      if (ver.startsWith('workspace:')) continue
+      if (dep.startsWith('@types/')) continue // skip type packages
+      if (['typescript', 'mocha', 'c8', 'prettier', 'rollup', '@vscode/'].some(p => dep.startsWith(p))) continue
+      if (['tslib'].includes(dep)) continue
       serverDeps[dep] = ver as string
     }
-  }
-  // Add detected server modules
-  for (const name of serverModuleNames) {
-    const pkgName = name.startsWith('@') ? name.split('/').slice(0, 2).join('/') : name.split('/')[0]
-    if (!serverDeps[pkgName]) serverDeps[pkgName] = '*'
-  }
-  // TS bridge plugins always need TypeScript
-  if (hasTsBridge && !serverDeps['typescript']) {
-    serverDeps['typescript'] = '*'
+  } else {
+    // LSP-based: only include server-related dependencies
+    const knownPatterns = ['language-server', 'language-server/node', '-server', 'languageserver']
+    for (const [dep, ver] of Object.entries(origPkg.dependencies || {})) {
+      if (ver.startsWith('workspace:')) continue
+      if (knownPatterns.some(p => dep.includes(p))) {
+        serverDeps[dep] = ver as string
+      }
+    }
+    for (const name of serverModuleNames) {
+      const pkgName = name.startsWith('@') ? name.split('/').slice(0, 2).join('/') : name.split('/')[0]
+      if (!serverDeps[pkgName]) serverDeps[pkgName] = '*'
+    }
+    if (hasTsBridge && !serverDeps['typescript']) {
+      serverDeps['typescript'] = '*'
+    }
   }
   const activationEvents = Array.isArray(origPkg.activationEvents) ? origPkg.activationEvents : []
   const activationEvent = activationEvents.find((e: string) => e.startsWith('onLanguage:'))
+    || (activationEvents.includes('*') ? '*' : undefined)
+    || (activationEvents.includes('onStartupFinished') ? '*' : undefined)
     || `onLanguage:${configNamespace}`
     || 'onLanguage'
   const pkg = {
@@ -305,7 +356,7 @@ ${hasTsBridge ? `\
 import * as esbuild from 'esbuild'
 
 const options = {
-  entryPoints: ['src/index.ts'],
+  entryPoints: ['${escapeStr(esbuildEntry)}'],
   bundle: true,
   minify: false,
   mainFields: ['module', 'main'],

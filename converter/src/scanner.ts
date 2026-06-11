@@ -48,7 +48,7 @@ export function scan(dir: string): ScanResult {
     const relative = path.relative(dir, filePath)
 
     // Check for vscode imports
-    if (content.includes("from 'vscode'") || content.includes('require("vscode")')) {
+    if (content.includes("from 'vscode'") || content.includes('from "vscode"') || content.includes('require("vscode")')) {
       apis.push('vscode')
     }
 
