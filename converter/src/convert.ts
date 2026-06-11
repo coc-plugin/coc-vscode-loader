@@ -128,144 +128,127 @@ export async function convert(opts: Options): Promise<void> {
     ? [...new Set(Object.keys(origProps).map(k => k.split('.')[0]))][0]
     : origPkg.name || path.basename(input)
 
-  // 8. Generate bridge index.ts for TS-bridge plugins
+  // 8. Detect server module from original source
+  const serverModuleNames = detectServerModules(input, result)
+  if (serverModuleNames.length > 0) {
+    console.log(`  detected server: ${serverModuleNames.join(', ')}`)
+  }
+
+  // 9. Generate bridge index.ts for TS-bridge plugins
   const hasTsBridge = result.hasTsBridge
   const pluginName = origPkg.name || path.basename(input)
   const description = origPkg.description || ''
 
-  let bridgeCode = ''
-  if (hasTsBridge) {
-    bridgeCode = `\
+  // Build server resolution code
+  const serverResolveParts = serverModuleNames.map(name => {
+    return `\
+    try { serverModule = require.resolve('${escapeStr(name)}') } catch {}
+    // Try bin entry: some servers export functions from main, need bin to start
+    try {
+      const _mainPath = require.resolve('${escapeStr(name)}');
+      // Walk up from the resolved main entry to find the package root
+      let _dir = require('path').dirname(_mainPath);
+      while (_dir !== require('path').dirname(_dir)) {
+        const _pkgPath = require('path').join(_dir, 'package.json');
+        if (require('fs').existsSync(_pkgPath)) {
+          const _pkg = JSON.parse(require('fs').readFileSync(_pkgPath, 'utf-8'));
+          if (_pkg.bin) {
+            const _entry = typeof _pkg.bin === 'string' ? _pkg.bin : Object.values(_pkg.bin)[0];
+            serverModule = require('path').join(_dir, _entry);
+          }
+          break;
+        }
+        _dir = require('path').dirname(_dir);
+      }
+    } catch {}`
+  })
+  const serverResolveCalls = serverResolveParts.join('\n')
+
+  const bridgeCode = `\
 import {
   LanguageClient,
   TransportKind,
-  RevealOutputChannelOn,
   workspace,
   window,
   commands,
-  extensions,
   services as cocServices,
-  ExtensionContext,
+  ExtensionContext,${hasTsBridge ? '\n  extensions,' : ''}
 } from 'coc.nvim'
 import * as path from 'path'
 import * as fs from 'fs'
 
 export async function activate(context: ExtensionContext): Promise<void> {
   try {
-    // Ensure coc-tsserver is active (loads TS plugins like @vue/typescript-plugin)
+${hasTsBridge ? `\
+    // Ensure coc-tsserver is active (for ts-bridge plugins)
     const tsExt = extensions.all.find(e => e.id === 'coc-tsserver')
-    if (tsExt && !tsExt.isActive) {
-      await tsExt.activate()
-    }
+    if (tsExt && !tsExt.isActive) { await tsExt.activate() }
     const tsSvc = cocServices.getService('tsserver')
-    if (tsSvc) {
-      await tsSvc.start()
-    }
-
-    // Find language server module
-    const config = workspace.getConfiguration('${configNamespace}')
+    if (tsSvc) { await tsSvc.start() }
+` : ''}\
+    const config = workspace.getConfiguration('${escapeStr(configNamespace)}')
     let serverModule = config.get<string>('server.path', '')
     if (serverModule) {
       serverModule = path.isAbsolute(serverModule) ? serverModule : path.join(workspace.root, serverModule)
     }
     if (!serverModule || !fs.existsSync(serverModule)) {
-      try { serverModule = require.resolve('@vue/language-server/index.js') }
-      catch { try { serverModule = require.resolve('@vue/language-server/bin/vue-language-server.js') } catch {} }
+${serverResolveCalls}
     }
     if (!serverModule) { window.showErrorMessage('Cannot find language server.'); return }
 
-    // Start LSP client
     const client = new LanguageClient(
-      '${pluginName}',
-      '${description || pluginName}',
+      '${escapeStr(pluginName)}',
+      '${escapeStr(description || pluginName)}',
       { module: serverModule, transport: TransportKind.ipc },
       {
-        documentSelector: [{ language: '${configNamespace}', scheme: 'file' }],
-        outputChannelName: '${description || pluginName}',
-        revealOutputChannelOn: RevealOutputChannelOn.Never,
-        progressOnInitialization: true,
+        documentSelector: [{ language: '${escapeStr(configNamespace)}', scheme: 'file' }],
+        outputChannelName: '${escapeStr(description || pluginName)}',
       },
     )
     context.subscriptions.push({ dispose: () => client.stop() })
     context.subscriptions.push(cocServices.registerLanguageClient(client))
     client.start()
 
+${hasTsBridge ? `\
     // tsserver bridge
     client.onNotification('tsserver/request', async ([seq, command, args]: [number, string, any]) => {
       try {
-        const result = await commands.executeCommand<any>(
-          'typescript.tsserverRequest', command, args,
-          { isAsync: true, lowPriority: true },
-        )
+        const result = await commands.executeCommand<any>('typescript.tsserverRequest', command, args, { isAsync: true, lowPriority: true })
         client.sendNotification('tsserver/response', [seq, result?.body])
-      } catch {
-        client.sendNotification('tsserver/response', [seq, undefined])
-      }
+      } catch { client.sendNotification('tsserver/response', [seq, undefined]) }
     })
-
+` : ''}\
     // Restart command
     context.subscriptions.push(
-      commands.registerCommand('${pluginName}.restartServer', async () => {
+      commands.registerCommand('${escapeStr(pluginName)}.restartServer', async () => {
         await client.stop()
         client.start()
       }),
     )
   } catch (e: any) {
-    window.showErrorMessage('${pluginName} error: ' + (e.message || String(e)))
+    window.showErrorMessage('${escapeStr(pluginName)} error: ' + (e.message || String(e)))
   }
 }
 `
-  } else {
-    bridgeCode = `\
-import {
-  LanguageClient,
-  TransportKind,
-  workspace,
-  window,
-  ExtensionContext,
-} from 'coc.nvim'
-import * as path from 'path'
-import * as fs from 'fs'
-
-export async function activate(context: ExtensionContext): Promise<void> {
-  try {
-    const config = workspace.getConfiguration('${configNamespace}')
-    let serverModule = config.get<string>('server.path', '')
-    if (serverModule) {
-      serverModule = path.isAbsolute(serverModule) ? serverModule : path.join(workspace.root, serverModule)
-    }
-    if (!serverModule || !fs.existsSync(serverModule)) {
-      try { serverModule = require.resolve('./server/index.js') } catch {}
-    }
-    if (!serverModule) { window.showErrorMessage('Cannot find server.'); return }
-
-    const client = new LanguageClient(
-      '${pluginName}',
-      '${description || pluginName}',
-      { module: serverModule, transport: TransportKind.ipc },
-      {
-        documentSelector: [{ language: '${configNamespace}', scheme: 'file' }],
-        outputChannelName: '${description || pluginName}',
-      },
-    )
-    context.subscriptions.push({ dispose: () => client.stop() })
-    context.subscriptions.push(client)
-    client.start()
-  } catch (e: any) {
-    window.showErrorMessage('${pluginName} error: ' + (e.message || String(e)))
-  }
-}
-`
-  }
-
   fs.writeFileSync(path.join(output, 'src', 'index.ts'), bridgeCode)
 
-  // 9. Generate package.json with dependencies
+  // 10. Detect dependencies from original package.json + peer deps
   const serverDeps: Record<string, string> = {}
-  if (hasTsBridge) {
-    // Default deps for TS bridge plugins, override in registry per plugin
-    serverDeps['@vue/language-server'] = '^3.3.4'
-    serverDeps['typescript'] = '^5.0.0'
+  const knownServerPatterns = ['language-server', 'language-server/node', '-server', 'languageserver']
+  for (const [dep, ver] of Object.entries(origPkg.dependencies || {})) {
+    if (ver.startsWith('workspace:')) continue
+    if (knownServerPatterns.some(p => dep.includes(p))) {
+      serverDeps[dep] = ver as string
+    }
+  }
+  // Add detected server modules
+  for (const name of serverModuleNames) {
+    const pkgName = name.startsWith('@') ? name.split('/').slice(0, 2).join('/') : name.split('/')[0]
+    if (!serverDeps[pkgName]) serverDeps[pkgName] = '*'
+  }
+  // TS bridge plugins always need TypeScript
+  if (hasTsBridge && !serverDeps['typescript']) {
+    serverDeps['typescript'] = '*'
   }
   const activationEvents = Array.isArray(origPkg.activationEvents) ? origPkg.activationEvents : []
   const activationEvent = activationEvents.find((e: string) => e.startsWith('onLanguage:'))
@@ -276,6 +259,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
     version: origPkg.version || '0.1.0',
     dependencies: {
       ...serverDeps,
+    },
+    devDependencies: {
       esbuild: '^0.28.0',
     },
     description: description,
@@ -313,6 +298,9 @@ export async function activate(context: ExtensionContext): Promise<void> {
   fs.writeFileSync(path.join(output, 'package.json'), JSON.stringify(pkg, null, 2))
 
   // 10. Generate esbuild config
+  const externalMods = ['coc.nvim', ...serverModuleNames]
+    .map(n => n.startsWith('@') ? n.split('/').slice(0, 2).join('/') : n.split('/')[0])
+    .filter((v, i, a) => v && a.indexOf(v) === i)
   const esbuildConfig = `\
 import * as esbuild from 'esbuild'
 
@@ -321,7 +309,7 @@ const options = {
   bundle: true,
   minify: false,
   mainFields: ['module', 'main'],
-  external: ['coc.nvim'],
+  external: [${externalMods.map(m => `'${escapeStr(m)}'`).join(', ')}],
   platform: 'node',
   target: 'node18',
   outfile: 'lib/index.js',
@@ -358,4 +346,47 @@ if (result.errors.length) {
   console.log(`    cd ${output}`)
   console.log('    npm install')
   console.log('    npm run build')
+}
+
+/** Escape string for template literal */
+function escapeStr(s: string): string {
+  return s.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')
+}
+
+/** Clean up server path: relative → bare package name, subpath → base */
+function sanitizeServerPath(p: string): string | null {
+  if (p.startsWith('../node_modules/')) p = p.replace(/^\.\.\/node_modules\//, '')
+  if (p.startsWith('./')) return null
+  if (p.startsWith('../')) return null
+  if (p.startsWith('@')) {
+    const parts = p.split('/')
+    if (parts.length > 2) return parts.slice(0, 2).join('/')
+  } else {
+    const parts = p.split('/')
+    if (parts.length > 1) return parts[0]
+  }
+  return p
+}
+
+/**
+ * Detect language server module names from original source code.
+ * Returns an array of `require.resolve` argument strings (bare module names).
+ */
+function detectServerModules(input: string, _result: any): string[] {
+  const serverModules: string[] = []
+  const seen = new Set<string>()
+  const scanDir = path.join(input, 'src')
+  if (fs.existsSync(scanDir)) {
+    for (const file of fs.readdirSync(scanDir)) {
+      if (!file.endsWith('.ts')) continue
+      const content = fs.readFileSync(path.join(scanDir, file), 'utf-8')
+      for (const re of [/(?:require\s*(?:\.\s*resolve)?\s*\(|from\s+)['"]([^'"]+(?:language-server|server|Server)[^'"]*)['"]\s*\)?/g]) {
+        for (const m of content.matchAll(re)) {
+          const name = sanitizeServerPath(m[1])
+          if (name && !seen.has(name)) { seen.add(name); serverModules.push(name) }
+        }
+      }
+    }
+  }
+  return serverModules
 }
