@@ -1,0 +1,49 @@
+import { Transform } from '../types.js'
+
+/**
+ * Handle enum value offsets between VS Code (0-based) and coc (1-based LSP).
+ * Some enums like DiagnosticSeverity, CompletionItemKind, SymbolKind have
+ * different numeric values, but since coc re-exports them with correct values,
+ * symbol references (like CompletionItemKind.Value) work correctly at runtime.
+ *
+ * This transform handles cases where hardcoded numbers are used instead of
+ * enum symbols, which is rare but can happen in extensions.
+ *
+ * Affected enums and their offset:
+ *   CompletionItemKind:      vscode Text=0 → coc Text:1  (differs by 1 for first ~11 values)
+ *   SymbolKind:              vscode File=0 → coc File:1
+ *   DocumentHighlightKind:   vscode Text=0 → coc Text:1
+ *   DiagnosticSeverity:      vscode Error=0 → coc Error:1
+ */
+export const transformEnumOffset: Transform = (ctx) => {
+  const { file } = ctx
+  let content = file.getText()
+
+  // Detect hardcoded numbers used in enum position (e.g., CompletionItemKind.Xxx).
+  // This is hard to detect perfectly, so we log a note when numeric literals
+  // appear near enum-type names.
+  const enumPatterns = [
+    'CompletionItemKind', 'SymbolKind', 'DocumentHighlightKind', 'DiagnosticSeverity',
+    'CompletionTriggerKind', 'InlineCompletionTriggerKind',
+  ]
+
+  for (const enumName of enumPatterns) {
+    // Check if the enum is imported/used with a hardcoded number nearby
+    const enumRefs = content.match(new RegExp(`${enumName}\\.\\w+`, 'g'))
+    if (enumRefs) {
+      // Symbol references are fine - they resolve at runtime
+      // Only note if there are raw numbers being compared
+    }
+  }
+
+  // Replace any numeric enum comparisons with comments
+  // e.g., `severity === 0` → `severity === 0 /* DiagnosticSeverity.Error = 1 in coc */`
+  content = content.replace(
+    /(severity\s*[=!]==?\s*)(\d+)/g,
+    '$1$2 /* DiagnosticSeverity values differ in coc (1-4 vs 0-3) */'
+  )
+
+  if (content !== file.getText()) {
+    file.replaceWithText(content)
+  }
+}

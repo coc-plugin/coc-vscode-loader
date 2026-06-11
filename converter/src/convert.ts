@@ -7,11 +7,13 @@ import { transformImportMapping } from './transforms/import-mapping.js'
 import { transformLanguageClient } from './transforms/language-client.js'
 import { transformClassToFactory } from './transforms/class-to-factory.js'
 import { transformProviderRegister } from './transforms/provider-register.js'
+import { transformEnumOffset } from './transforms/enum-offset.js'
 
 const TRANSFORMS = [
   { name: 'import-mapping', fn: transformImportMapping },
   { name: 'class-to-factory', fn: transformClassToFactory },
   { name: 'provider-register', fn: transformProviderRegister },
+  { name: 'enum-offset', fn: transformEnumOffset },
   { name: 'language-client', fn: transformLanguageClient },
 ]
 

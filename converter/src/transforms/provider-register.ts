@@ -37,10 +37,14 @@ export const transformProviderRegister: Transform = (ctx) => {
       /registerCompletionItemProvider\(/g,
       `registerCompletionItemProvider('plugin', 'PL', `
     )
-    // Make the last string arg an array if it's a single trigger char
+    // Wrap the last argument in an array if it's a string (trigger chars)
     content = content.replace(
-      /registerCompletionItemProvider\([^)]+,\s*['"]([^'"]+)['"]\)/g,
-      (match, trigger) => match.replace(`'${trigger}'`, `['${trigger}']`)
+      /(registerCompletionItemProvider\([^)]+),\s*'([^']+)'\)/g,
+      '$1, ["$2"])'
+    )
+    content = content.replace(
+      /(registerCompletionItemProvider\([^)]+),\s*"([^"]+)"\)/g,
+      '$1, ["$2"])'
     )
     changed = true
   }

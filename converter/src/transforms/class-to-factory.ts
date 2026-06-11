@@ -33,12 +33,22 @@ export const transformClassToFactory: Transform = (ctx) => {
   }
 
   // Text fallback: catch remaining new Xxx() that AST might have missed
-  const content = file.getText()
-  const newContent = content.replace(
+  let text = file.getText()
+  text = text.replace(
     /\bnew\s+(Position|Range|Location|Diagnostic|TextEdit)\s*\(/g,
     (match, type) => `${type}.create(`
   )
-  if (newContent !== content) {
-    file.replaceWithText(newContent)
+
+  // CompletionItem.create(label) doesn't accept kind in coc.
+  // Convert `CompletionItem.create(label, kind)` to `item = CompletionItem.create(label); item.kind = kind`
+  text = text.replace(
+    /const\s+(\w+)\s*=\s*CompletionItem\.create\(([^,]+),\s*([^)]+)\)/g,
+    (_, varName, label, kind) => {
+      return `const ${varName} = CompletionItem.create(${label}); ${varName}.kind = ${kind}`
+    }
+  )
+
+  if (text !== file.getText()) {
+    file.replaceWithText(text)
   }
 }
