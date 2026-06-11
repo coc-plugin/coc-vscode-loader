@@ -309,13 +309,11 @@ export class TUI {
     buf: LineBuffer, pkgLineMap: Map<number, string>, logSet: Set<number>,
     entry: PackageEntry,
   ) {
-    const curLine = (): number => buf.lineCount() - 1
-
     const icon = entry.status === 'installed' ? '●' : entry.status === 'failed' ? '✗' : '○'
     const iconHl = entry.status === 'installed' ? 'CocConverterInstalled'
       : entry.status === 'failed' ? 'ErrorMsg' : 'CocConverterAvailable'
 
-    const pkgLine = curLine()
+    const pkgLine = buf.currentLine()
     pkgLineMap.set(pkgLine, entry.info.name)
 
     buf.append(' ')
@@ -326,42 +324,49 @@ export class TUI {
     buf.append(entry.info.type, 'CocConverterType')
 
     if (entry.expanded) {
-      const items = [
+      buf.nl()
+      for (const text of [
         entry.info.description,
         `type        ${entry.info.type}`,
         `source      ${sourceStr(entry.info.source)}`,
         `languages   ${entry.info.languages.join(', ')}`,
         `categories  ${entry.info.categories.join(', ')}`,
         `homepage    ${entry.info.url}`,
-      ]
-      for (const text of items) {
+      ]) {
+        const ln = buf.currentLine()
         buf.nl(`     ${text}`)
-        pkgLineMap.set(curLine(), entry.info.name)
+        pkgLineMap.set(ln, entry.info.name)
       }
     }
 
     if (entry.progress) {
+      buf.nl()
       if (entry.logExpanded) {
+        const ln = buf.currentLine()
         buf.nl(`     ▼ Install log:`)
-        logSet.add(curLine())
-        pkgLineMap.set(curLine(), entry.info.name)
+        logSet.add(ln)
+        pkgLineMap.set(ln, entry.info.name)
         for (const log of entry.progressLog) {
           for (const l of log.split('\n')) {
+            const ln2 = buf.currentLine()
             buf.nl(`       ${l}`)
-            logSet.add(curLine())
-            pkgLineMap.set(curLine(), entry.info.name)
+            logSet.add(ln2)
+            pkgLineMap.set(ln2, entry.info.name)
           }
         }
       } else {
+        const ln = buf.currentLine()
         buf.nl(`     ▶ ${entry.progress}`)
-        logSet.add(curLine())
-        pkgLineMap.set(curLine(), entry.info.name)
+        logSet.add(ln)
+        pkgLineMap.set(ln, entry.info.name)
       }
     }
 
     if (entry.error) {
+      buf.nl()
+      const ln = buf.currentLine()
       buf.nl(`     ✗ ${entry.error}`)
-      pkgLineMap.set(curLine(), entry.info.name)
+      pkgLineMap.set(ln, entry.info.name)
     }
 
     buf.nl()

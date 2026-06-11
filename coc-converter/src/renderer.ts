@@ -33,6 +33,10 @@ export class LineBuffer {
     return this.lines.length
   }
 
+  currentLine(): number {
+    return this.li
+  }
+
   highlight(pattern: RegExp, hlGroup: string) {
     const segs = this.lines[this.li]
     let full = ''
