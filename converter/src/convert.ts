@@ -180,7 +180,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       '${description || pluginName}',
       { module: serverModule, transport: TransportKind.ipc },
       {
-        documentSelector: [{ language: 'vue', scheme: 'file' }],
+        documentSelector: [{ language: '${configNamespace}', scheme: 'file' }],
         outputChannelName: '${description || pluginName}',
         revealOutputChannelOn: RevealOutputChannelOn.Never,
         progressOnInitialization: true,
@@ -244,7 +244,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       '${description || pluginName}',
       { module: serverModule, transport: TransportKind.ipc },
       {
-        documentSelector: [{ language: 'vue', scheme: 'file' }],
+        documentSelector: [{ language: '${configNamespace}', scheme: 'file' }],
         outputChannelName: '${description || pluginName}',
       },
     )
