@@ -21,6 +21,8 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | `converter-design-v2.md` | Converter architecture + bridge preset system |
 | `converter/README.md` | Converter tool docs and usage |
 | `volar-migration-guide.md` | Volar (Vue) migration case study |
+| `coc-converter/` | **coc-converter 包管理器插件** |
+| `coc-converter/README.md` | Converter plugin docs and usage |
 | `logs/YYYY-MM-DD.md` | Daily sync change logs (auto-generated) |
 
 ## Converter status
@@ -54,12 +56,55 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 - Changes: `globalPlugins` + `pluginPaths` in configure, `typescript.tsserverRequest` command
 - Pre-merge: `npm install ChuYanLon/coc-tsserver`
 
+## coc-converter 包管理器插件
+
+`coc-converter/` 是一个 coc.nvim 插件，提供 TUI 界面来安装/更新/卸载转换后的插件。
+
+### 架构
+
+| 文件 | 说明 |
+|------|------|
+| `src/index.ts` | 插件入口 + 5 个 CocCommand |
+| `src/tui.ts` | TUI 窗口管理 + 渲染 + 快捷键分发 |
+| `src/state.ts` | 状态管理（debounced 渲染） |
+| `src/registry.ts` | 内置注册表（7 个插件） |
+| `src/pipeline.ts` | 安装/更新/卸载流程（模拟步骤） |
+| `src/renderer.ts` | LineBuffer 渲染引擎（仿 lazy.nvim） |
+
+### TUI 特性
+
+- 浮动窗口 + 背景遮罩（无边框）
+- 仿 lazy.nvim 的渲染引擎：每段独立 `append(text, hl)` + extmark 高亮
+- 自定义高亮组（7 个）链接到主题标准组，自动适配当前 colorscheme
+- **快捷键**：`i` 安装 `u` 更新 `X` 卸载 `U` 更新全部 `Z` 卸载全部 `Enter` 展开/日志 `?` 帮助 `/` 搜索 `q` 退出
+- **展开详情**：description / type / source / languages / categories / homepage
+- **安装日志**：`▶` 紧凑行 → `Enter` 展开完整日志（含执行的命令）
+- **进度显示**：`[step/total] 正在转换代码...` + `$ 执行的命令`
+
+### 命令
+
+| Command | 动作 |
+|---------|------|
+| `:CocCommand converter.open` | 打开 TUI |
+| `:CocCommand converter.install <name>` | 安装指定包 |
+| `:CocCommand converter.uninstall <name>` | 卸载指定包 |
+| `:CocCommand converter.update <name>` | 更新指定包 |
+| `:CocCommand converter.uninstallAll` | 卸载全部（需确认） |
+
+### 构建
+
+```bash
+cd coc-converter
+npm install
+npm run build    # esbuild → lib/index.js
+```
+
 ## Pending (next session)
 
+- [ ] 对接真实 converter/ 管道（代替模拟步骤）
+- [ ] 注册表热更新（从 GitHub 拉远程 registry）
+- [ ] 添加更多插件到注册表
 - [ ] Add more transforms (uri-mapping, more provider signatures)
-- [ ] Build registry system (JSON config for conversion parameters)
-- [ ] coc-converter package manager plugin
-- [ ] Test more plugins (Angular, ESLint, JSON)
 - [ ] Add python-bridge / rust-bridge preset examples
 
 ## Type sync workflow (CI only)

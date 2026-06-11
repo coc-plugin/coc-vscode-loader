@@ -186,7 +186,7 @@ export class TUI {
     const buf = workspace.nvim.createBuffer(this.bufnr)
     const entries: [string, string][] = [
       ['q', 'q'], ['<Esc>', 'esc'], ['?', 'question'], ['/', 'slash'],
-      ['U', 'U'], ['Z', 'Z'], ['i', 'i'], ['u', 'u'], ['X', 'X'], ['<CR>', 'cr'],
+      ['U', 'U'], ['Z', 'Z'],       ['I', 'i'], ['U', 'u'], ['X', 'X'], ['<CR>', 'cr'],
     ]
     for (const [vimKey, id] of entries) {
       buf.setKeymap('n', vimKey, `:<C-u>call CocConverterDispatch("${id}")<CR>`, { silent: true, nowait: true })
@@ -271,11 +271,11 @@ export class TUI {
 
     buf.nl()
     buf.append('coc-converter', 'CocConverterTitle')
-    for (const [name, key] of [['Install', 'i'], ['Update', 'u'], ['Uninstall', 'X'], ['Help', '?']]) {
+    for (const [name, key] of [['Install', 'I'], ['Update', 'U'], ['Help', '?']]) {
       buf.append('  ')
       buf.append(`${name}(${key})`, 'CocConverterPill')
     }
-    buf.highlight(/\([iuX?]\)/g, 'CocConverterKey')
+    buf.highlight(/\([IU?]\)/g, 'CocConverterKey')
     buf.nl()
     buf.nl()
     buf.append(`Total: ${filtered.length} packages`, 'CocConverterTotal')
