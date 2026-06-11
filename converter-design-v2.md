@@ -67,7 +67,7 @@ VS Code 的实现依赖 `typescript.tsserverRequest` 内置命令，coc 没有�
           │   import → coc.nvim          │
           │   LanguageClient 适配        │
           │   Provider 注册重命名        │
-          │   删除不可移植 API           │
+          │   标记不可移植 API（注释保留）  │
           └────────┬────────────────────┘
                    ▼
           ┌─────────────────────────────┐
@@ -180,7 +180,7 @@ VS Code 的实现依赖 `typescript.tsserverRequest` 内置命令，coc 没有�
       "type": "ts-bridge",
       "tsPluginName": "@vue/typescript-plugin",
       "tsPluginLanguages": ["vue"],
-      "transforms": ["import-mapping", "language-client", "strip-unsupported"],
+      "transforms": ["import-mapping", "language-client", "mark-unsupported"],
       "patches": ["volar/client.patch"],
       "latestVersion": "3.3.4"
     },
@@ -223,7 +223,7 @@ converter.install volar
   │     ├─ import-mapping    from 'vscode' → from 'coc.nvim'
   │     ├─ language-client   LanguageClient 参数适配
   │     ├─ provider-register 注册函数重命名
-  │     ├─ strip-unsupported 删除 decoration/webview 等
+  │     ├─ mark-unsupported 标记 decoration/webview（注释保留）
   │     └─ bridge-generator  (如果有桥接) 生成桥接代码
   │
   ├─ 5. 生成 package.json
@@ -252,7 +252,7 @@ converter.install volar
 | `globalPlugins` 注入 | ✅ | coc-tsserver 在 configure 时发送 |
 | `typescriptServerPlugins` | ✅ | 通过 package.json contribution 声明 |
 | `pluginPaths` 配置 | ✅ | 告诉 tsserver 在哪里找 Vue 插件 |
-| decoration / webview | ✅ | 删除不可移植代码 |
+| decoration / webview | ✅ | 标记不可移植代码（注释保留） |
 | `package.json` 精简 | ✅ | grammars/menus 等删掉 |
 
 ---
@@ -266,7 +266,7 @@ converter.install volar
 | `scanner` | 扫描 API，检测插件类型 |
 | `import-mapping` | 替换 import + 重命名 |
 | `language-client` | LanguageClient 适配 |
-| `strip-unsupported` | 删除不可移植 API |
+| `mark-unsupported` | 标记不可移植 API（注释保留，不删除） |
 | `package-manager` | 生成 package.json |
 | `bridge-generator` | 根据 registry 生成桥接代码 |
 | `cli` | `install`/`list`/`update`/`uninstall` 命令 |
