@@ -27,7 +27,7 @@
 
 | 方面 | VS Code | coc.nvim |
 |------|---------|----------|
-| 导出总数 | ~524 | ~536 |
+| 导出总数 | ~524 (≈776 含内部类型) | ~536 (≈653 含 LSP 内部类型) |
 | 命名空间 | 15 (`window`, `workspace`, `languages`, `commands`, `env`, `extensions`, `debug`, `tasks`, `notebooks`, `scm`, `tests`, `authentication`, `l10n`, `chat`, `lm`) | 4 (`window`, `workspace`, `languages`, `commands`) + `snippetManager` |
 | 架构 | 丰富的 class + interface + enum + namespace | 偏 LSP 风格，多数为 interface + factory namespace，enum 用 type alias |
 | Uri 方案 | `class Uri` | `class Uri` + `type DocumentUri = string` |
@@ -195,6 +195,23 @@
 |------|-----------------|----------------------|------|
 | contents | `Array<MarkdownString \| MarkedString>` | `MarkupContent \| MarkedString \| MarkedString[]` | 类型不同 |
 | range? | 有 | 有 | 相同 |
+| 构造 | `new Hover(contents, range?)` | 直接构造 `{ contents, range }` 对象 | coc 无工厂方法 |
+
+### 2.18 枚举值偏移（LSP 1-based vs vscode 0-based）
+
+coc 使用 LSP 协议风格（值从 1 开始），而 vscode 多数枚举从 0 开始。除 `DiagnosticSeverity` 外，以下枚举也存在相同偏移：
+
+| 枚举 | vscode | coc | 差异 |
+|------|--------|-----|------|
+| `CompletionItemKind` | `Text = 0` | `Text: 1` | 偏移 1 |
+| `SymbolKind` | `File = 0` | `File: 1` | 偏移 1 |
+| `DocumentHighlightKind` | `Text = 0` | `Text: 1` | 偏移 1 |
+| `InlineCompletionTriggerKind` | `Invoke = 0` | `Invoked: 1` | 偏移 1 + 命名不同 |
+| `CompletionTriggerKind` | `Invoke = 0` | `Invoked: 1` | 偏移 1 + 命名不同 |
+| `CodeActionTriggerKind` | `Invoke = 1` | `Invoked: 1` | 值相同，命名不同 |
+| `SignatureHelpTriggerKind` | `Invoke = 1` | `Invoked: 1` | 值相同，命名不同 |
+
+**注意命名差异：** vscode 统一使用 `Invoke`（动词原形），coc 遵循 LSP 规范使用 `Invoked`（过去分词）。
 
 ---
 
@@ -318,6 +335,7 @@
 |-----|---------|----------|------|
 | withProgress | 有 | 有 | `Thenable` vs `Promise` |
 | withScmProgress | 有 | **无** | — |
+| ProgressOptions | `{location, title?, cancellable?}` | `{title?, cancellable?}` | coc 无 `location` 字段 |
 
 ### 4.9 树状视图
 
@@ -420,7 +438,7 @@
 | match(selector, document) | 有 | 有 | coc 用 `TextDocumentMatch` 替代 `TextDocument` |
 | createDiagnosticCollection | 有 | 有 | **相同** |
 | createLanguageStatusItem | 有 | **无** | — |
-| getDiagnostics / onDidChangeDiagnostics | 有 | **无** (coc 在 workspace 提供) | 位置不同 |
+| getDiagnostics / onDidChangeDiagnostics | 有 | **无** (coc 在 `diagnosticManager` 提供, 事件名为 `onDidRefresh`) | 位置/命名不同 |
 
 ### 6.2 Provider 注册函数
 
@@ -455,7 +473,7 @@
 | SemanticTokensProvider | `registerDocumentSemanticTokensProvider` | `registerDocumentSemanticTokensProvider` | **相同** |
 | RangeSemanticTokensProvider | `registerDocumentRangeSemanticTokensProvider` | `registerDocumentRangeSemanticTokensProvider` | **相同** |
 | **EvaluatableExpressionProvider** | `registerEvaluatableExpressionProvider` | **无** | — |
-| **InlineValuesProvider** | `registerInlineValuesProvider` | **无** | — |
+| **InlineValuesProvider** | `registerInlineValuesProvider` | **无** (接口存在但无注册函数) | 仅有 `InlineValuesProvider` 接口导出，无注册入口 |
 | **DocumentDropEditProvider** | `registerDocumentDropEditProvider` | **无** | — |
 | **DocumentPasteEditProvider** | `registerDocumentPasteEditProvider` | **无** | — |
 
@@ -474,7 +492,7 @@
 | registerCommand | `(command, callback, thisArg?)` | `(id, impl, thisArg?, internal?)` | 参数名不同，coc 有额外 `internal` 参数且 callback 返回 `void` 而非 `any` |
 | registerTextEditorCommand | 有 | **无** | — |
 | executeCommand | `Thenable<T>` | `Promise<T>` | Thenable vs Promise |
-| getCommands | `Thenable<string[]>` | **无** (coc 有 `commandList` 属性) | 完全不同 |
+| getCommands | `Thenable<string[]>` | **无** (coc 有 `commandList` + 另有一个 `getCommands()` 返回 Vim 命令描述) | 完全不同 |
 
 ---
 

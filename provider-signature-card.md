@@ -337,7 +337,7 @@ workspace.registerTextDocumentContentProvider(
 ## 23. vscode 独有 Provider（coc 无）
 
 ```typescript
-// 以下在 coc 中不存在
+// 以下在 coc 中不存在（InlineValuesProvider 接口存在，但无注册函数）
 languages.registerEvaluatableExpressionProvider(selector, provider)
 languages.registerInlineValuesProvider(selector, provider)
 languages.registerDocumentDropEditProvider(selector, provider, metadata?)

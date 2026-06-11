@@ -36,7 +36,7 @@
 | — | `MarkupContent` | coc 独有（LSP） |
 | — | `MarkupKind` | coc 独有 |
 | `MarkedString` | `MarkedString` | 是 |
-| `Hover` | `Hover` | ≈ class vs interface |
+| `Hover` | `Hover` | ≈ class vs interface，coc 无工厂方法 |
 | `ThemeColor` | — | coc 无 |
 | `ThemeIcon` | — | coc 无 |
 | `IconPath` | — | vscode 独有 |
@@ -69,9 +69,9 @@
 | VS Code | coc.nvim | 完全一致？ |
 |---------|----------|-----------|
 | `CompletionItem` | `CompletionItem` | ≈ class vs interface |
-| `CompletionItemKind` | `CompletionItemKind` | ≈ enum vs namespace + type |
+| `CompletionItemKind` | `CompletionItemKind` | ≈ enum vs namespace + type，值偏移 1 (vscode Text=0, coc Text=1) |
 | `CompletionList` | `CompletionList` | ≈ class vs interface |
-| `CompletionTriggerKind` | `CompletionTriggerKind` | ≈ enum vs namespace + type |
+| `CompletionTriggerKind` | `CompletionTriggerKind` | ≈ enum vs namespace + type，vscode `Invoke=0` vs coc `Invoked:1` |
 | — | `InsertTextFormat` | coc 独有（LSP，vscode 用 `string \| SnippetString`） |
 | — | `InsertTextMode` | coc 独有（LSP） |
 | `CompletionItemTag` | `CompletionItemTag` | ≈ enum vs namespace + type |
@@ -90,7 +90,7 @@
 | `CodeAction` | `CodeAction` | ≈ class vs interface |
 | `CodeActionKind` | `CodeActionKind` | ≈ class vs string alias |
 | `CodeActionContext` | `CodeActionContext` | ≈ |
-| `CodeActionTriggerKind` | `CodeActionTriggerKind` | ≈ enum vs namespace |
+| `CodeActionTriggerKind` | `CodeActionTriggerKind` | ≈ enum vs namespace，命名不同 vscode `Invoke` vs coc `Invoked` |
 | `CodeLens` | `CodeLens` | ≈ class vs interface |
 
 ---
@@ -99,14 +99,14 @@
 
 | VS Code | coc.nvim | 完全一致？ |
 |---------|----------|-----------|
-| `SymbolKind` | `SymbolKind` | ≈ enum vs namespace |
+| `SymbolKind` | `SymbolKind` | ≈ enum vs namespace，值偏移 1 (vscode File=0, coc File=1) |
 | `SymbolTag` | `SymbolTag` | ≈ enum vs namespace |
 | `DocumentSymbol` | `DocumentSymbol` | ≈ class vs interface |
 | `SymbolInformation` | `SymbolInformation` | ≈ class vs interface |
 | — | `BaseSymbolInformation` | coc 独有（LSP） |
 | — | `WorkspaceSymbol` | coc 独有（LSP） |
 | `DocumentHighlight` | `DocumentHighlight` | ≈ class vs interface |
-| `DocumentHighlightKind` | `DocumentHighlightKind` | ≈ enum vs namespace |
+| `DocumentHighlightKind` | `DocumentHighlightKind` | ≈ enum vs namespace，值偏移 1 (vscode Text=0, coc Text=1) |
 
 ---
 
@@ -252,7 +252,7 @@
 | `InlayHintsProvider` | `InlayHintsProvider` | 是 |
 | `DocumentSemanticTokensProvider` | `DocumentSemanticTokensProvider` | 是 |
 | `DocumentRangeSemanticTokensProvider` | `DocumentRangeSemanticTokensProvider` | 是 |
-| `InlineValuesProvider` | — | coc 无 |
+| `InlineValuesProvider` | `InlineValuesProvider` | ≈ 接口存在，但无注册函数可用 |
 | `EvaluatableExpressionProvider` | — | coc 无 |
 
 ---

@@ -102,13 +102,12 @@ languages.registerHoverProvider(
 )
 
 // coc.nvim
-import { Hover } from 'coc.nvim'
 
 languages.registerHoverProvider(
   [{ language: 'python' }],
   {
     provideHover(document, position, token) {
-      return Hover.create('Hello from coc', Range.create(0, 0, 0, 10))
+      return { contents: 'Hello from coc', range: Range.create(0, 0, 0, 10) }
     },
   }
 )
@@ -117,7 +116,7 @@ languages.registerHoverProvider(
 **差异点：**
 | vscode | coc |
 |--------|-----|
-| `new Hover(contents, range?)` | `Hover.create(contents, range?)` |
+| `new Hover(contents, range?)` | 直接构造 `{ contents, range }` 对象 |
 | contents: `MarkdownString[] \| MarkedString[]` | contents: `MarkupContent \| MarkedString \| MarkedString[]` |
 | `new Range(sl, sc, el, ec)` | `Range.create(sl, sc, el, ec)` |
 

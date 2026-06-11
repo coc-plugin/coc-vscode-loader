@@ -166,7 +166,7 @@
 | `commands.registerCommand(command, callback, thisArg?)` | `commands.registerCommand(id, impl, thisArg?, internal?)` | ≈ coc 多 internal 参数 |
 | `commands.registerTextEditorCommand` | — | vscode 独有 |
 | `commands.executeCommand` | `commands.executeCommand` | ≈ Thenable vs Promise |
-| `commands.getCommands` | `commands.commandList` | ≈ 完全不同 |
+| `commands.getCommands` | `commands.commandList` / `getCommands()` | ≈ coc 另有 `getCommands()` 返回 Vim 命令描述 |
 
 ### extensions
 
