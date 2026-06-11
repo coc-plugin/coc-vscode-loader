@@ -68,7 +68,7 @@
 
 | VS Code | coc.nvim | 完全一致？ |
 |---------|----------|-----------|
-| `CompletionItem` | `CompletionItem` | ≈ class vs interface |
+| `CompletionItem` | `CompletionItem` | ≈ class vs interface，coc `create(label)` 只接受 label，kind 需单独设 `item.kind =` |
 | `CompletionItemKind` | `CompletionItemKind` | ≈ enum vs namespace + type，值偏移 1 (vscode Text=0, coc Text=1) |
 | `CompletionList` | `CompletionList` | ≈ class vs interface |
 | `CompletionTriggerKind` | `CompletionTriggerKind` | ≈ enum vs namespace + type，vscode `Invoke=0` vs coc `Invoked:1` |

@@ -76,6 +76,9 @@ npm install ChuYanLon/coc-tsserver --legacy-peer-deps
 | registerCompletionItemProvider | `(sel, p, ...t)` | `(name, shortcut, sel, p, t?)` | 补齐参数 |
 | registerCodeActionsProvider | `registerCodeActionsProvider` | `registerCodeActionProvider` | 重命名 |
 | registerReferenceProvider | `registerReferenceProvider` | `registerReferencesProvider` | 重命名 |
+| CompletionItem.create | `new CompletionItem(label, kind)` | `CompletionItem.create(label)` + `item.kind = kind` | kind 需单独设置 |
+| 触发字符参数 | `" "` (字符串) | `[" "]` (数组) | rest 参数转数组 |
+| CompletionItemKind 枚举 | `Value = 11`, `Enum = 12` | `Value = 12`, `Enum = 13` | 偏移 1，符号引用自动适配 |
 | documentSelector | `[{ language: 'xxx' }]` | 相同 | 自动从 package.json 推断 |
 | getWordRangeAtPosition | `document.getWordRangeAtPosition()` | 不存在 | 替换为手动计算 |
 | fileName | `document.fileName` | 不存在 | 替换为 `document.uri` |
