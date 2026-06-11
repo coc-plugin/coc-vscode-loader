@@ -1,0 +1,74 @@
+{
+  "name": "coc-volar-test",
+  "version": "0.0.1",
+  "description": "Vue language support for coc.nvim (test)",
+  "main": "lib/index.js",
+  "files": [
+    "lib/"
+  ],
+  "engines": {
+    "coc": "^0.0.82"
+  },
+  "activationEvents": [
+    "onLanguage:vue"
+  ],
+  "contributes": {
+    "typescriptServerPlugins": [
+      {
+        "name": "@vue/typescript-plugin",
+        "languages": ["vue"],
+        "enableForWorkspaceTypeScriptVersions": true
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Vue",
+      "properties": {
+        "vue.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between coc.nvim and the Vue language server."
+        },
+        "vue.server.path": {
+          "type": "string",
+          "default": "",
+          "description": "Custom path to @vue/language-server module."
+        },
+        "vue.server.maxOldSpaceSize": {
+          "type": "number",
+          "default": null,
+          "description": "Set --max-old-space-size option on server process."
+        },
+        "vue.server.logFile": {
+          "type": "string",
+          "default": "",
+          "description": "Path to log file for debugging (e.g. /tmp/vue.log)."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "vue.action.restartServer",
+        "title": "Restart Vue Server",
+        "category": "Vue"
+      }
+    ]
+  },
+  "dependencies": {
+    "@vue/language-server": "^3.3.4",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "node esbuild.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "coc.nvim": "^0.0.83-next.9",
+    "esbuild": "^0.28.0"
+  }
+}
