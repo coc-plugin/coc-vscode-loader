@@ -16,7 +16,9 @@
     "typescriptServerPlugins": [
       {
         "name": "@vue/typescript-plugin",
-        "languages": ["vue"],
+        "languages": [
+          "vue"
+        ],
         "enableForWorkspaceTypeScriptVersions": true
       }
     ],
@@ -26,7 +28,11 @@
       "properties": {
         "vue.trace.server": {
           "type": "string",
-          "enum": ["off", "messages", "verbose"],
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
           "default": "off",
           "description": "Traces Volar LSP communication."
         },

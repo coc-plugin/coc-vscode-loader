@@ -15,7 +15,7 @@ import * as fs from 'fs'
 export async function activate(context: ExtensionContext): Promise<void> {
   try {
     // 1. 确保 coc-tsserver 已激活（加载 @vue/typescript-plugin）
-    const tsExt = extensions.getExtensionById('coc-tsserver')
+    const tsExt = extensions.all.find(e => e.id === 'coc-tsserver')
     if (tsExt && !tsExt.isActive) {
       await tsExt.activate()
     }
@@ -51,7 +51,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
         progressOnInitialization: true,
       },
     )
-    context.subscriptions.push(client)
+    context.subscriptions.push({ dispose: () => client.stop() })
     context.subscriptions.push(cocServices.registerLanguageClient(client))
     client.start()
 
