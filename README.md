@@ -41,16 +41,18 @@ cd ./output && npm install && npm run build
 |------|------|------|------|
 | Volar (Vue) | TS 桥接型 | ✅ | 需要修改版 coc-tsserver (PR #493) |
 | Prisma | 纯 LSP | ✅ | 自动检测 bin 入口 |
+| HTML CSS Support | 直接 API | ✅ | 自动处理 new→create、缺失 API polyfill |
 
 **转换器架构：**
 
 ```
-输入 → 扫描 (API 检测 + 插件分类)
-     → AST 变换 (import / LanguageClient / provider)
-     → 标记不可移植代码 (decoration / webview)
-     → 生成桥接代码 (TS 桥接型自动加 tsserver/request 转发)
-     → 生成 package.json + esbuild 配置
-     → 输出 coc 插件目录
+输入 → 扫描 (API 检测 + 插件分类 → TS桥接/纯LSP/直接API)
+     → AST 变换 (import / class-to-factory / provider-register / LanguageClient)
+     → 缺失 API 替换 (getWordRangeAtPosition / fileName 等 polyfill)
+     → 标记不可移植代码 (decoration / webview / 复杂缺失API)
+     → 生成入口 (桥接代码 / LanguageClient / 保留原始 extension.ts)
+     → 生成 package.json + esbuild external 自动注入
+     → 输出 coc 插件目录 + 迁移报告
 ```
 
 详见 [`converter-design-v2.md`](./converter-design-v2.md)。
