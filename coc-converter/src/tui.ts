@@ -42,6 +42,15 @@ export class TUI {
     const nvim = workspace.nvim
     this.ns = await nvim.createNamespace('coc-converter')
 
+    await nvim.command('highlight default link CocConverterTitle IncSearch')
+    await nvim.command('highlight default link CocConverterPill Visual')
+    await nvim.command('highlight CocConverterKey guifg=#569CD6 guibg=NONE ctermbg=NONE')
+    await nvim.command('highlight default link CocConverterInstalled String')
+    await nvim.command('highlight default link CocConverterAvailable Comment')
+    await nvim.command('highlight default link CocConverterType Type')
+    await nvim.command('highlight default link CocConverterSection Title')
+    await nvim.command('highlight default link CocConverterTotal Identifier')
+
     const buf = await nvim.createNewBuffer(false, true)
     this.bufnr = buf.id
 
@@ -208,15 +217,19 @@ export class TUI {
         ? this.renderHelp()
         : this.renderPackageList(state, filtered)
 
-      nvim.pauseNotification()
-      nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', true], true)
-      nvim.call('nvim_buf_clear_namespace', [this.bufnr, this.ns, 0, -1], true)
-      nvim.call('nvim_buf_set_lines', [this.bufnr, 0, -1, false, result.lines], true)
-      nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', false], true)
-      for (const h of result.highlights) {
-        nvim.call('nvim_buf_add_highlight', [this.bufnr, this.ns, h.hlGroup, h.line, h.colStart, h.colEnd], true)
-      }
-      await nvim.resumeNotification()
+    nvim.pauseNotification()
+    nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', true], true)
+    nvim.call('nvim_buf_clear_namespace', [this.bufnr, this.ns, 0, -1], true)
+    nvim.call('nvim_buf_set_lines', [this.bufnr, 0, -1, false, result.lines], true)
+    nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', false], true)
+    for (const h of result.highlights) {
+      nvim.call('nvim_buf_set_extmark', [this.bufnr, this.ns, h.line, h.colStart, {
+        end_col: h.colEnd,
+        hl_group: h.hlGroup,
+        hl_mode: 'combine',
+      }], true)
+    }
+    await nvim.resumeNotification()
 
       this.pkgLineMap = result.pkgLineMap
       this.logLineSet = result.logLines
@@ -257,31 +270,32 @@ export class TUI {
     const buf = new LineBuffer()
 
     buf.nl()
-    buf.append('  Install (i)   Update (u)   Uninstall (X)   Update All (U)   Uninstall All (Z)   Help (?)')
-    buf.highlight(/Install|Update|Uninstall|Update All|Uninstall All|Help/g, 'String')
-    buf.highlight(/\([iuXUZ?]\)/g, 'Special')
+    buf.append('  coc-converter', 'CocConverterTitle')
+    for (const [name, key] of [['Install', 'i'], ['Update', 'u'], ['Uninstall', 'X'], ['Help', '?']]) {
+      buf.append('  ')
+      buf.append(`${name}(${key})`, 'CocConverterPill')
+    }
+    buf.highlight(/\([iuX?]\)/g, 'CocConverterKey')
     buf.nl()
-    buf.append(`  Total: ${filtered.length} packages`)
+    buf.nl()
+    buf.append(`  Total: ${filtered.length} packages`, 'CocConverterTotal')
+    buf.nl()
     buf.nl()
 
     const installed = filtered.filter(e => e.status === 'installed')
     const available = filtered.filter(e => e.status !== 'installed')
 
-    if (installed.length > 0) {
-      buf.nl(`  Installed (${installed.length})`)
-      for (const entry of installed) {
-        this.renderEntry(buf, pkgLineMap, logSet, entry, '●', 'String')
+    const section = (title: string, entries: PackageEntry[]) => {
+      if (entries.length === 0) return
+      buf.nl(`  ${title}`)
+      for (const e of entries) {
+        this.renderEntry(buf, pkgLineMap, logSet, e)
       }
+      buf.nl()
+      buf.nl()
     }
-
-    if (available.length > 0) {
-      buf.nl(`  Available (${available.length})`)
-      for (const entry of available) {
-        const icon = entry.status === 'failed' ? '✗' : '○'
-        const hl = entry.status === 'failed' ? 'ErrorMsg' : 'Comment'
-        this.renderEntry(buf, pkgLineMap, logSet, entry, icon, hl)
-      }
-    }
+    section(`Installed (${installed.length})`, installed)
+    section(`Available (${available.length})`, available)
 
     if (filtered.length === 0 && state.searchQuery) {
       buf.nl('  no matching packages')
@@ -293,17 +307,23 @@ export class TUI {
 
   private renderEntry(
     buf: LineBuffer, pkgLineMap: Map<number, string>, logSet: Set<number>,
-    entry: PackageEntry, icon: string, iconHl: string,
+    entry: PackageEntry,
   ) {
     const curLine = (): number => buf.lineCount() - 1
 
-    buf.nl()
+    const icon = entry.status === 'installed' ? '●' : entry.status === 'failed' ? '✗' : '○'
+    const iconHl = entry.status === 'installed' ? 'CocConverterInstalled'
+      : entry.status === 'failed' ? 'ErrorMsg' : 'CocConverterAvailable'
+
     const pkgLine = curLine()
     pkgLineMap.set(pkgLine, entry.info.name)
 
-    buf.append(`  ${icon} `, iconHl)
+    buf.append('  ')
+    buf.append(icon, iconHl)
+    buf.append(' ')
     buf.append(entry.info.displayName)
-    buf.append(`   ${entry.info.type}`, 'Type')
+    buf.append('  ')
+    buf.append(entry.info.type, 'CocConverterType')
 
     if (entry.expanded) {
       const items = [
@@ -343,6 +363,8 @@ export class TUI {
       buf.nl(`     ✗ ${entry.error}`)
       pkgLineMap.set(curLine(), entry.info.name)
     }
+
+    buf.nl()
   }
 
   private hl(line: number, hlGroup: string, colStart: number, colEnd: number) {
