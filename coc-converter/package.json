@@ -1,0 +1,30 @@
+{
+  "name": "coc-converter",
+  "version": "0.1.0",
+  "description": "VS Code extension to coc.nvim plugin converter & package manager",
+  "main": "lib/index.js",
+  "engines": {
+    "coc": ">= 0.0.80"
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "prepare": "node esbuild.mjs"
+  },
+  "devDependencies": {
+    "coc.nvim": "^0.0.83-next.18",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.3.3"
+  },
+  "activationEvents": [
+    "onCommand:converter.open"
+  ],
+  "contributes": {
+    "commands": [
+      { "command": "converter.open", "title": "Open converter package manager" },
+      { "command": "converter.install", "title": "Install a VS Code extension" },
+      { "command": "converter.uninstall", "title": "Uninstall a converter package" },
+      { "command": "converter.update", "title": "Update a converter package" },
+      { "command": "converter.uninstallAll", "title": "Uninstall all converter packages" }
+    ]
+  }
+}
