@@ -26,28 +26,19 @@
       "properties": {
         "vue.trace.server": {
           "type": "string",
-          "enum": [
-            "off",
-            "messages",
-            "verbose"
-          ],
+          "enum": ["off", "messages", "verbose"],
           "default": "off",
-          "description": "Traces the communication between coc.nvim and the Vue language server."
+          "description": "Traces Volar LSP communication."
         },
         "vue.server.path": {
           "type": "string",
           "default": "",
-          "description": "Custom path to @vue/language-server module."
+          "description": "Custom path to @vue/language-server."
         },
         "vue.server.maxOldSpaceSize": {
           "type": "number",
           "default": null,
-          "description": "Set --max-old-space-size option on server process."
-        },
-        "vue.server.logFile": {
-          "type": "string",
-          "default": "",
-          "description": "Path to log file for debugging (e.g. /tmp/vue.log)."
+          "description": "Max memory for language server (MB)."
         }
       }
     },
