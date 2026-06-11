@@ -270,7 +270,7 @@ export class TUI {
     const buf = new LineBuffer()
 
     buf.nl()
-    buf.append('  coc-converter', 'CocConverterTitle')
+    buf.append('coc-converter', 'CocConverterTitle')
     for (const [name, key] of [['Install', 'i'], ['Update', 'u'], ['Uninstall', 'X'], ['Help', '?']]) {
       buf.append('  ')
       buf.append(`${name}(${key})`, 'CocConverterPill')
@@ -278,7 +278,7 @@ export class TUI {
     buf.highlight(/\([iuX?]\)/g, 'CocConverterKey')
     buf.nl()
     buf.nl()
-    buf.append(`  Total: ${filtered.length} packages`, 'CocConverterTotal')
+    buf.append(`Total: ${filtered.length} packages`, 'CocConverterTotal')
     buf.nl()
     buf.nl()
 
@@ -287,7 +287,7 @@ export class TUI {
 
     const section = (title: string, entries: PackageEntry[]) => {
       if (entries.length === 0) return
-      buf.nl(`  ${title}`)
+      buf.nl(`${title}`)
       for (const e of entries) {
         this.renderEntry(buf, pkgLineMap, logSet, e)
       }
@@ -298,10 +298,10 @@ export class TUI {
     section(`Available (${available.length})`, available)
 
     if (filtered.length === 0 && state.searchQuery) {
-      buf.nl('  no matching packages')
+      buf.nl('no matching packages')
     }
 
-    const result = buf.render()
+    const result = buf.render(2)
     return { lines: result.lines, pkgLineMap, logLines: logSet, highlights: result.highlights }
   }
 
@@ -318,7 +318,7 @@ export class TUI {
     const pkgLine = curLine()
     pkgLineMap.set(pkgLine, entry.info.name)
 
-    buf.append('  ')
+    buf.append(' ')
     buf.append(icon, iconHl)
     buf.append(' ')
     buf.append(entry.info.displayName)

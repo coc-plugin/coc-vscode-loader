@@ -49,7 +49,7 @@ export class LineBuffer {
     return this
   }
 
-  render(): RenderResult {
+  render(padding = 0): RenderResult {
     const lines: string[] = []
     const highlights: RenderResult['highlights'] = []
 
@@ -58,18 +58,23 @@ export class LineBuffer {
       let full = ''
 
       for (const seg of segs) {
-        const colStart = byteLen(full)
+        const colStart = byteLen(full) + padding
         full += seg.text
-        const colEnd = byteLen(full)
+        const colEnd = byteLen(full) + padding
         if (seg.hl) {
           highlights.push({ line: li, hlGroup: seg.hl, colStart, colEnd })
         }
       }
 
+      if (padding > 0 && full.length > 0) {
+        full = ' '.repeat(padding) + full
+      }
       lines.push(full)
     }
 
     for (const h of this.patternHls) {
+      h.colStart += padding
+      h.colEnd += padding
       highlights.push(h)
     }
     this.patternHls = []
