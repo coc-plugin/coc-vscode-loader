@@ -16,6 +16,8 @@ export interface AppState {
   packages: PackageEntry[]
   searchQuery: string
   showHelp: boolean
+  activePill: string | null
+  viewFilter: 'all' | 'not-installed' | 'installed'
 }
 
 type Listener = (state: AppState) => void
@@ -28,7 +30,7 @@ export function createInitialState(): AppState {
     expanded: false,
     logExpanded: false,
   }))
-  return { packages, searchQuery: '', showHelp: false }
+  return { packages, searchQuery: '', showHelp: false, activePill: null, viewFilter: 'all' }
 }
 
 export class StateManager {
@@ -100,14 +102,28 @@ export class StateManager {
     this.mutate(s => { s.showHelp = !s.showHelp })
   }
 
+  setViewFilter(filter: 'all' | 'not-installed' | 'installed') {
+    this.mutate(s => { s.viewFilter = filter })
+  }
+
+  setActivePill(pill: string | null) {
+    this.mutate(s => { s.activePill = pill })
+  }
+
   setSearchQuery(query: string) {
     this.mutate(s => { s.searchQuery = query })
   }
 
   getFilteredPackages(): PackageEntry[] {
+    let pkgs = this.state.packages
+    if (this.state.viewFilter === 'not-installed') {
+      pkgs = pkgs.filter(p => p.status === 'not-installed')
+    } else if (this.state.viewFilter === 'installed') {
+      pkgs = pkgs.filter(p => p.status === 'installed')
+    }
     const q = this.state.searchQuery.toLowerCase()
-    if (!q) return this.state.packages
-    return this.state.packages.filter(p =>
+    if (!q) return pkgs
+    return pkgs.filter(p =>
       p.info.name.toLowerCase().includes(q) ||
       p.info.displayName.toLowerCase().includes(q) ||
       p.info.description.toLowerCase().includes(q)

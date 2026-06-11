@@ -32,9 +32,9 @@ async function runPipeline(
   }
 }
 
-export function installPackage(state: StateManager, name: string) {
+export function installPackage(state: StateManager, name: string): Promise<void> {
   state.setPackageStatus(name, 'installing', { progress: '[1/5] Preparing...', appendLog: true })
-  runPipeline(INSTALL_STEPS, (short, log) => {
+  return runPipeline(INSTALL_STEPS, (short, log) => {
     state.setPackageStatus(name, 'installing', { progress: short, logEntry: log })
   }).then(() => {
     state.setPackageStatus(name, 'installed')
@@ -43,9 +43,9 @@ export function installPackage(state: StateManager, name: string) {
   })
 }
 
-export function uninstallPackage(state: StateManager, name: string) {
+export function uninstallPackage(state: StateManager, name: string): Promise<void> {
   state.setPackageStatus(name, 'uninstalling', { progress: '[1/2] Preparing...', appendLog: true })
-  runPipeline(UNINSTALL_STEPS, (short, log) => {
+  return runPipeline(UNINSTALL_STEPS, (short, log) => {
     state.setPackageStatus(name, 'uninstalling', { progress: short, logEntry: log })
   }).then(() => {
     state.setPackageStatus(name, 'not-installed')
@@ -54,9 +54,9 @@ export function uninstallPackage(state: StateManager, name: string) {
   })
 }
 
-export function updatePackage(state: StateManager, name: string) {
+export function updatePackage(state: StateManager, name: string): Promise<void> {
   state.setPackageStatus(name, 'updating', { progress: '[1/5] Preparing...', appendLog: true })
-  runPipeline(INSTALL_STEPS, (short, log) => {
+  return runPipeline(INSTALL_STEPS, (short, log) => {
     state.setPackageStatus(name, 'updating', { progress: short, logEntry: log })
   }).then(() => {
     state.setPackageStatus(name, 'installed')

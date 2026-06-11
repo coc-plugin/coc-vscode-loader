@@ -42,8 +42,9 @@ export class TUI {
     const nvim = workspace.nvim
     this.ns = await nvim.createNamespace('coc-converter')
 
-    await nvim.command('highlight default link CocConverterTitle IncSearch')
+    await nvim.command('highlight default link CocConverterTitle Title')
     await nvim.command('highlight default link CocConverterPill Visual')
+    await nvim.command('highlight default link CocConverterPillActive IncSearch')
     await nvim.command('highlight CocConverterKey guifg=#569CD6 guibg=NONE ctermbg=NONE')
     await nvim.command('highlight default link CocConverterInstalled String')
     await nvim.command('highlight default link CocConverterAvailable Comment')
@@ -130,6 +131,16 @@ export class TUI {
     const s = this.state.getState()
 
     if (id === 'q') { this.close(); return }
+    if (id === 'I') {
+      this.state.setActivePill('I')
+      return
+    }
+    if (id === 'H') {
+      this.state.setSearchQuery('')
+      this.state.setActivePill(null)
+      if (s.showHelp) this.state.toggleHelp()
+      return
+    }
     if (id === 'esc') {
       if (s.showHelp) { this.state.toggleHelp(); return }
       if (s.searchQuery) { this.state.setSearchQuery(''); return }
@@ -144,9 +155,11 @@ export class TUI {
       return
     }
     if (id === 'U') {
-      for (const pkg of s.packages.filter(p => p.status === 'installed')) {
-        updatePackage(this.state, pkg.info.name)
-      }
+      const installed = s.packages.filter(p => p.status === 'installed')
+      if (installed.length === 0) return
+      this.state.setActivePill('U')
+      Promise.all(installed.map(p => updatePackage(this.state, p.info.name)))
+        .finally(() => this.state.setActivePill(null))
       return
     }
     if (id === 'Z') {
@@ -186,10 +199,10 @@ export class TUI {
     const buf = workspace.nvim.createBuffer(this.bufnr)
     const entries: [string, string][] = [
       ['q', 'q'], ['<Esc>', 'esc'], ['?', 'question'], ['/', 'slash'],
-      ['U', 'U'], ['Z', 'Z'],       ['I', 'i'], ['U', 'u'], ['X', 'X'], ['<CR>', 'cr'],
+      ['U', 'U'], ['Z', 'Z'], ['i', 'i'], ['I', 'I'], ['H', 'H'], ['u', 'u'], ['X', 'X'], ['x', 'X'], ['<CR>', 'cr'],
     ]
     for (const [vimKey, id] of entries) {
-      buf.setKeymap('n', vimKey, `:<C-u>call CocConverterDispatch("${id}")<CR>`, { silent: true, nowait: true })
+      buf.setKeymap('n', vimKey, `<Cmd>call CocConverterDispatch("${id}")<CR>`, { silent: true, nowait: true })
     }
   }
 
@@ -270,10 +283,14 @@ export class TUI {
     const buf = new LineBuffer()
 
     buf.nl()
-    buf.append('coc-converter', 'CocConverterTitle')
-    for (const [name, key] of [['Install', 'I'], ['Update', 'U'], ['Help', '?']]) {
+    const needHome = !!(state.showHelp || state.searchQuery)
+    buf.append('coc-converter(H)', needHome ? 'CocConverterPillActive' : 'CocConverterTitle')
+    for (const [name, key] of [['Install', 'I'], ['Update', 'U'], ['Help', '?']] as const) {
       buf.append('  ')
-      buf.append(`${name}(${key})`, 'CocConverterPill')
+      const isActive = key === '?' && state.showHelp
+        || key === 'I' && state.activePill === 'I'
+        || key === 'U' && state.activePill === 'U'
+      buf.append(`${name}(${key})`, isActive ? 'CocConverterPillActive' : 'CocConverterPill')
     }
     buf.highlight(/\([IU?]\)/g, 'CocConverterKey')
     buf.nl()
