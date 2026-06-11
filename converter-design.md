@@ -1,4 +1,6 @@
-# vscode → coc 插件转换器 — 技术方案
+# vscode → coc 插件转换器 — 技术方案 (v1)
+
+> ⚠️ 此版本已被 [converter-design-v2.md](./converter-design-v2.md) 替代。
 
 ## 一、整体架构
 
