@@ -154,14 +154,65 @@ VS Code 的实现依赖 `typescript.tsserverRequest` 内置命令，coc 没有�
 | `stdio` | 子进程 stdin/stdout 转发 | 本地工具链 |
 | `http` | HTTP POST 请求转发 | 远程 API |
 
+### 桥接检测与选择
+
+桥接的检测和选择由三个层次决定，优先级从高到低：
+
+```
+① Registry 配置  → 显式指定 preset/桥接（最高优先级）
+② 源码扫描      → 自动匹配 preset（如发现 tsserver/request 自动选 ts-bridge）
+③ 默认          → 纯 LSP / 直接 API（无桥接）
+```
+
+**当前扫描检测规则（`scanner.ts`）：**
+
+| 模式 | 匹配的 preset | 示例插件 |
+|------|-------------|---------|
+| `tsserver/request`、`_vue:`、`typescript.tsserverRequest` | `ts-bridge` | Volar |
+| `client.onNotification('xxx/yyy', ...)` 未知模式 | 无 | 标记 TODO |
+
+**未来添加新桥接的步骤：**
+
+```
+1. 在 presets.ts 中定义新 preset
+   └─ 包括 notification 名、handler 类型、依赖等
+
+2. 在 scanner.ts 中添加对应的检测模式
+   └─ 搜索关键词 → 匹配到新 preset
+
+3. （可选）在 registry 中为特定插件指定 preset
+   └─ "presets": ["python-bridge"]
+```
+
+示例：添加 Python 桥接
+
+```typescript
+// presets.ts
+const PRESETS = {
+  'python-bridge': {
+    name: 'python-bridge',
+    notification: 'python/analysis',
+    handler: { type: 'command', command: 'python.bridgeRequest' },
+  },
+}
+```
+
+```typescript
+// scanner.ts 添加检测模式
+const BRIDGE_PATTERNS = [
+  { pattern: 'tsserver/request', preset: 'ts-bridge' },
+  { pattern: 'python/analysis',  preset: 'python-bridge' },  // 新增
+]
+```
+
 ### 桥接预设（Bridge Presets）
 
 桥接定义有三种层级：
 
 ```
-预设 (built-in)     → ts-bridge, lsp-rewrite
+预设 (built-in)     → ts-bridge 等转换器内置的快捷配置
   │
-注册表 (registry)   → 插件级别的桥接配置
+注册表 (registry)   → 针对特定插件的桥接配置
   │
 内联 (inline)       → 转换时从源码自动检测
 ```
