@@ -53,6 +53,28 @@ npm install ChuYanLon/coc-tsserver --legacy-peer-deps
   └─ generate esbuild.mjs    构建配置
 ```
 
+## 桥接预设系统
+
+桥接逻辑通过预设（preset）驱动，而非硬编码：
+
+```typescript
+// presets.ts - 所有桥接预设定义在这里
+const PRESETS = {
+  'ts-bridge': {
+    notification: 'tsserver/request',
+    responseNotification: 'tsserver/response',
+    handler: { type: 'command', command: 'typescript.tsserverRequest' },
+    extraDeps: ['typescript'],
+  },
+  // 未来可扩展: python-bridge, rust-bridge 等
+}
+```
+
+`convert.ts` 不关心具体桥接逻辑，只调用 `getActivePresets()` + `generateBridgeCode()`。
+添加新桥接类型只需要在 `presets.ts` 加预设，不需要改主流程。
+
+详见 [`converter-design-v2.md`](../converter-design-v2.md#桥接预设bridge-presets)。
+
 ## 文件结构
 
 | 文件 | 行数 | 说明 |

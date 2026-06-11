@@ -154,14 +154,103 @@ VS Code 的实现依赖 `typescript.tsserverRequest` 内置命令，coc 没有�
 | `stdio` | 子进程 stdin/stdout 转发 | 本地工具链 |
 | `http` | HTTP POST 请求转发 | 远程 API |
 
-### TS 桥接的特殊处理
+### 桥接预设（Bridge Presets）
 
-当 `type: "ts-bridge"` 时，转换器自动：
+桥接定义有三种层级：
 
-1. 在生成的 `package.json` 中添加 `typescriptServerPlugins` contribution
-2. 在 coc-tsserver 中注入 `globalPlugins` + `pluginPaths`
-3. 生成 `tsserver/request` → `typescript.tsserverRequest` 的桥接代码
-4. 如果需要，在 registry 中记录 coc-tsserver 的补丁版本
+```
+预设 (built-in)     → ts-bridge, lsp-rewrite
+  │
+注册表 (registry)   → 插件级别的桥接配置
+  │
+内联 (inline)       → 转换时从源码自动检测
+```
+
+预设是可以快捷引用的预定义桥接配置。转换器内置了一些预设，插件 registry 可以直接引用：
+
+```jsonc
+// registry 引用预设
+{
+  "volar": {
+    "presets": ["ts-bridge"],          // ← 引用预设，相当于展开下方配置
+  }
+}
+```
+
+预设 `ts-bridge` 展开等价于：
+
+```jsonc
+{
+  "detect": {
+    "packageExtra": {
+      "typescriptServerPlugins": [],    // ← 从源码检测哪些 TS 插件需要加载
+      "dependencies": ["typescript"]
+    },
+    "packageModify": {
+      "coc-tsserver": "ChuYanLon/coc-tsserver"  // ← 需要修改版 coc-tsserver
+    }
+  },
+  "bridges": [
+    {
+      "notification": "tsserver/request",
+      "responseNotification": "tsserver/response",
+      "description": "Forward TS requests from language server to tsserver",
+      "handler": {
+        "type": "command",
+        "command": "typescript.tsserverRequest",
+        "args": ["{{command}}", "{{args}}", "{isAsync: true, lowPriority: true}"],
+        "responseMapping": "{{result.body}}"
+      }
+    }
+  ],
+  "actions": {
+    "beforeBuild": [
+      "ensure-coc-tsserver-patched"     // ← 构建前检查 coc-tsserver 版本
+    ]
+  }
+}
+```
+
+预设和普通桥接的区别：
+
+| 方面 | 预设 | 普通桥接 |
+|------|------|---------|
+| 定义位置 | 转换器内置 | registry 或 inline |
+| 影响 package.json | ✅ 可以 | ❌ 不能 |
+| 影响构建流程 | ✅ 可以 | ❌ 不能 |
+| 可参数化 | ✅ 接受参数 | ✅ 完整配置 |
+
+这样 TS 桥接和 Python/Rust 桥接走同一套机制，TS 桥接只是多了一个预设可以快捷引用，并不特殊。
+
+### 自定义桥接示例
+
+```jsonc
+{
+  "rust-analyzer": {
+    "type": "pure-lsp",
+    "bridges": []
+  },
+  "some-python-plugin": {
+    "bridges": [
+      {
+        "notification": "python/analysis",
+        "handler": {
+          "type": "command",
+          "command": "python.bridgeRequest",
+          "args": ["{{notification}}", "{{params}}"]
+        }
+      }
+    ]
+  }
+}
+```
+
+如果 registry 中没有定义桥接，转换器会在生成的入口文件中插入空桩代码：
+
+```typescript
+// [converter] TODO: 需要手动实现桥接
+// client.onNotification('some/notification', handler)
+```
 
 ---
 

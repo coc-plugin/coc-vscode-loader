@@ -8,6 +8,7 @@ import { transformLanguageClient } from './transforms/language-client.js'
 import { transformClassToFactory } from './transforms/class-to-factory.js'
 import { transformProviderRegister } from './transforms/provider-register.js'
 import { transformEnumOffset } from './transforms/enum-offset.js'
+import { getActivePresets, generateBridgeCode } from './presets.js'
 
 const TRANSFORMS = [
   { name: 'import-mapping', fn: transformImportMapping },
@@ -165,18 +166,17 @@ export async function convert(opts: Options): Promise<void> {
   // 9. Determine plugin type and entry point
   const hasTsBridge = result.hasTsBridge
   const hasServer = serverModuleNames.length > 0
-  const isDirectApi = !hasServer && !hasTsBridge  // no LSP server, uses coc API directly
+  const isDirectApi = !hasServer && !hasTsBridge
   const pluginName = origPkg.name || path.basename(input)
   const description = origPkg.description || ''
+  const activePresets = getActivePresets(hasTsBridge, result)
 
   // Build server resolution code
-  const serverResolveParts = serverModuleNames.map(name => {
+  const serverResolveCalls = serverModuleNames.map(name => {
     return `\
     try { serverModule = require.resolve('${escapeStr(name)}') } catch {}
-    // Try bin entry: some servers export functions from main, need bin to start
     try {
       const _mainPath = require.resolve('${escapeStr(name)}');
-      // Walk up from the resolved main entry to find the package root
       let _dir = require('path').dirname(_mainPath);
       while (_dir !== require('path').dirname(_dir)) {
         const _pkgPath = require('path').join(_dir, 'package.json');
@@ -191,17 +191,19 @@ export async function convert(opts: Options): Promise<void> {
         _dir = require('path').dirname(_dir);
       }
     } catch {}`
-  })
-  const serverResolveCalls = serverResolveParts.join('\n')
+  }).join('\n')
 
-  let bridgeCode = ''
+  // Generate bridge code from presets
+  const bridgeCode = generateBridgeCode(activePresets)
+  const needsExtensions = activePresets.some(p => p.name === 'ts-bridge')
+  const needsCommands = activePresets.some(p => p.requiresCommand)
+
+  let fullCode = ''
   let esbuildEntry = 'src/index.ts'
   if (isDirectApi) {
-    // Non-LSP plugin: use the original extension.ts as entry (with transforms applied)
     esbuildEntry = 'src/extension.ts'
   } else {
-    // LSP-based plugin: generate a LanguageClient entry point
-    bridgeCode = `\
+    fullCode = `\
 import {
   LanguageClient,
   TransportKind,
@@ -209,15 +211,14 @@ import {
   window,
   commands,
   services as cocServices,
-  ExtensionContext,${hasTsBridge ? '\n  extensions,' : ''}
+  ExtensionContext${needsExtensions ? ',\n  extensions' : ''},
 } from 'coc.nvim'
 import * as path from 'path'
 import * as fs from 'fs'
 
 export async function activate(context: ExtensionContext): Promise<void> {
   try {
-${hasTsBridge ? `\
-    // Ensure coc-tsserver is active (for ts-bridge plugins)
+${needsExtensions ? `\
     const tsExt = extensions.all.find(e => e.id === 'coc-tsserver')
     if (tsExt && !tsExt.isActive) { await tsExt.activate() }
     const tsSvc = cocServices.getService('tsserver')
@@ -246,15 +247,7 @@ ${serverResolveCalls}
     context.subscriptions.push(cocServices.registerLanguageClient(client))
     client.start()
 
-${hasTsBridge ? `\
-    // tsserver bridge
-    client.onNotification('tsserver/request', async ([seq, command, args]: [number, string, any]) => {
-      try {
-        const result = await commands.executeCommand<any>('typescript.tsserverRequest', command, args, { isAsync: true, lowPriority: true })
-        client.sendNotification('tsserver/response', [seq, result?.body])
-      } catch { client.sendNotification('tsserver/response', [seq, undefined]) }
-    })
-` : ''}\
+${bridgeCode ? bridgeCode + '\n\n' : ''}\
     // Restart command
     context.subscriptions.push(
       commands.registerCommand('${escapeStr(pluginName)}.restartServer', async () => {
@@ -268,12 +261,18 @@ ${hasTsBridge ? `\
 }
 `
   }
-  if (bridgeCode) {
-    fs.writeFileSync(path.join(output, 'src', 'index.ts'), bridgeCode)
+  if (fullCode) {
+    fs.writeFileSync(path.join(output, 'src', 'index.ts'), fullCode)
   }
 
-  // 10. Detect dependencies from original package.json
+  // 10. Detect dependencies from original package.json + preset extras
   const serverDeps: Record<string, string> = {}
+  // Add preset extra deps (e.g. typescript for ts-bridge)
+  for (const preset of activePresets) {
+    for (const dep of (preset.extraDeps || [])) {
+      if (!serverDeps[dep]) serverDeps[dep] = '*'
+    }
+  }
   if (isDirectApi) {
     // Non-LSP: keep all original deps (including devDeps, since they may be imported at runtime)
     const allDeps = { ...origPkg.dependencies, ...origPkg.devDependencies }
@@ -296,9 +295,6 @@ ${hasTsBridge ? `\
     for (const name of serverModuleNames) {
       const pkgName = name.startsWith('@') ? name.split('/').slice(0, 2).join('/') : name.split('/')[0]
       if (!serverDeps[pkgName]) serverDeps[pkgName] = '*'
-    }
-    if (hasTsBridge && !serverDeps['typescript']) {
-      serverDeps['typescript'] = '*'
     }
   }
   const activationEvents = Array.isArray(origPkg.activationEvents) ? origPkg.activationEvents : []
@@ -331,13 +327,13 @@ ${hasTsBridge ? `\
         title: c.title,
       })) || undefined,
       ...(hasTsBridge ? {
-        typescriptServerPlugins: [
-          {
-            name: '@vue/typescript-plugin',
-            languages: ['vue'],
-            enableForWorkspaceTypeScriptVersions: true,
-          },
-        ],
+        typescriptServerPlugins: (origPkg.contributes?.typescriptServerPlugins?.length
+          ? origPkg.contributes?.typescriptServerPlugins
+          : scanTypeScriptPlugins(input, result).map(p => ({
+              ...p,
+              languages: p.languages.length ? p.languages : [configNamespace],
+            }))
+        ) || [],
       } : {}),
     },
   }
@@ -399,6 +395,49 @@ if (result.errors.length) {
   console.log(`    cd ${output}`)
   console.log('    npm install')
   console.log('    npm run build')
+}
+
+/**
+ * Scan original source for TypeScript plugin names used by the extension.
+ * Checks: explicit imports, require() calls, package.json dependencies.
+ */
+function scanTypeScriptPlugins(input: string, _result: any): Array<{ name: string; languages: string[]; enableForWorkspaceTypeScriptVersions: boolean }> {
+  const plugins: Array<{ name: string; languages: string[]; enableForWorkspaceTypeScriptVersions: boolean }> = []
+  const scanDir = path.join(input, 'src')
+  if (!fs.existsSync(scanDir)) return plugins
+
+  // Collect all .ts file content
+  const allContent: string[] = []
+  for (const file of fs.readdirSync(scanDir)) {
+    if (!file.endsWith('.ts')) continue
+    allContent.push(fs.readFileSync(path.join(scanDir, file), 'utf-8'))
+  }
+  const content = allContent.join('\n')
+
+  // Check for plugin names in require() / import statements
+  // Patterns like: @vue/typescript-plugin, @angular/language-service, etc.
+  const pluginRefs = content.matchAll(/['"](@[^'"]+\/(?:typescript-plugin|language-service)[^'"]*)['"]|['"](\w+(?:-typescript-plugin|-language-service))['"]/g)
+  for (const m of pluginRefs) {
+    const name = m[1] || m[2]
+    if (name && !plugins.some(p => p.name === name)) {
+      plugins.push({ name, languages: [], enableForWorkspaceTypeScriptVersions: true })
+    }
+  }
+
+  // Check package.json for typescript plugin dependencies
+  const pkgPath = path.join(input, 'package.json')
+  if (fs.existsSync(pkgPath)) {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+    for (const dep of Object.keys(pkg.dependencies || {})) {
+      if (dep.includes('typescript-plugin') || dep.includes('language-service')) {
+        if (!plugins.some(p => p.name === dep)) {
+          plugins.push({ name: dep, languages: [], enableForWorkspaceTypeScriptVersions: true })
+        }
+      }
+    }
+  }
+
+  return plugins
 }
 
 /** Escape string for template literal */
