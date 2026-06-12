@@ -14,13 +14,14 @@
 
 ---
 
-## 一、已端到端验证（1 个）
+## 一、已端到端验证（2 个）
 
 **2026-06-12 从 TUI 安装到 Deno LSP 在 coc.nvim 中运行，全链路验证通过。**
 
 | 扩展 | 仓库 | 状态 | 说明 |
 |------|------|------|------|
 | **Deno** | `denoland/vscode_deno` | 🟢 LSP 运行中 | Converter 转换 → pipeline 下载二进制 → patch → Deno LSP 正常启动 |
+| **TOML (Taplo)** | `tamasfe/taplo` | 🟢 LSP 运行中 | Rust 原生二进制 + JS wrapper，需 serverBinary + .gz 解压 + raw-arch 模板 |
 
 ## 二、构建成功、运行时未验证（5 个）
 
@@ -30,7 +31,6 @@
 |------|------|------|
 | **ESLint** | `microsoft/vscode-eslint` | 纯 LSP，npm 包服务器自动安装。需 ESLint 环境 |
 | **Tailwind CSS IntelliSense** | `tailwindlabs/tailwindcss-intellisense` | 纯 LSP，npm 包服务器 |
-| **TOML (Taplo)** | `tamasfe/taplo` | 纯 LSP，npm 包服务器 |
 | **PowerShell** | `PowerShell/vscode-powershell` | 系统需装 PowerShell 7+ |
 | **Ansible** | `ansible/vscode-ansible` | npm 包服务器 |
 
@@ -134,8 +134,8 @@ API 上评估为 Level 0（纯 LSP/简单 Direct API），但实际构建失败�
 
 | 等级 | 数量 | 占比 |
 |------|------|------|
-| **已端到端验证** | **1** | **2%** |
-| 构建成功、运行时未验证 | 5 | 11% |
+| **已端到端验证** | **2** | **4%** |
+| 构建成功、运行时未验证 | 4 | 9% |
 | Level 0b — Converter 待修 | 21 | 45% |
 | Level 1 — 少量适配 | 7 | 15% |
 | Level 2 — 扩展转换器 | 5 | 11% |

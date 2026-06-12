@@ -77,6 +77,7 @@ Registry entries can specify `minPluginVersion` (e.g. `"1.1.2"`) to require a mi
 - **Install logs**: `▶` compact line → `<CR>` expand full log with commands
 - **Progress**: `[step/total]` + status text
 - **Registry auto-fetch**: remote registry fetched in background when TUI opens
+- **Binary server support**: auto-download + extract (.zip, .gz, .tar.gz) server binaries from GitHub Releases, patch generated code for command-mode startup, fix documentSelector and activationEvents
 
 ### Commands
 
