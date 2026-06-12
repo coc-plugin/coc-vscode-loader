@@ -1,0 +1,19 @@
+{
+  "name": "coc-vscode-loader",
+  "private": true,
+  "description": "Monorepo for VS Code extension to coc.nvim converter and package manager",
+  "scripts": {
+    "build:plugin": "cd plugin && npm run build",
+    "build:converter": "cd converter && npm run build",
+    "build": "npm run build:converter && npm run build:plugin"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coc-plugin/coc-vscode-loader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/coc-plugin/coc-vscode-loader/issues"
+  },
+  "homepage": "https://github.com/coc-plugin/coc-vscode-loader",
+  "license": "MIT"
+}
