@@ -413,7 +413,7 @@ export class TUI {
 
     if (entry.expanded) {
       buf.nl()
-      for (const text of [
+      const extras: (string | null)[] = [
         entry.info.description,
         `type        ${entry.info.type}`,
         entry.commit ? `commit      ${entry.commit}` : null,
@@ -421,7 +421,9 @@ export class TUI {
         `languages   ${entry.info.languages.join(', ')}`,
         `categories  ${entry.info.categories.join(', ')}`,
         `homepage    ${entry.info.url}`,
-      ].filter(Boolean) as string[]) {
+        entry.info.serverBinary ? `server      ${entry.info.serverBinary.repo} (binary release)` : null,
+      ]
+      for (const text of extras.filter(Boolean) as string[]) {
         const ln = buf.currentLine()
         buf.nl(`     ${text}`)
         pkgLineMap.set(ln, entry.info.name)
