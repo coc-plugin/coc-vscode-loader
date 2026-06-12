@@ -230,3 +230,47 @@ export async function updatePackage(state: StateManager, name: string): Promise<
     state.setPackageStatus(name, 'failed', { error: e.message })
   }
 }
+
+async function runWithOutput(cmd: string, args: string[], cwd: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: true })
+    let out = ''
+    child.stdout.on('data', (d: Buffer) => { out += d.toString() })
+    child.stderr.on('data', (d: Buffer) => { out += d.toString() })
+    child.on('close', code => code === 0 ? resolve(out.trim()) : reject(new Error(`exit ${code}`)))
+    child.on('error', reject)
+  })
+}
+
+export async function checkUpdates(state: StateManager): Promise<void> {
+  const s = state.getState()
+  const results: Record<string, boolean> = {}
+
+  state.setStatusMessage('Checking for updates...')
+
+  for (const pkg of s.packages) {
+    if (pkg.status !== 'installed' || !pkg.commit) continue
+    state.setStatusMessage(`Checking ${pkg.info.displayName}...`)
+    try {
+      const out = await runWithOutput('git', ['ls-remote', `https://github.com/${pkg.info.source.repo}.git`, 'HEAD'], os.homedir())
+      const remote = out.split('\t')[0]
+      if (remote) results[pkg.info.name] = remote.substring(0, 7) !== pkg.commit
+    } catch {}
+  }
+
+  const updateCount = Object.values(results).filter(Boolean).length
+  state.mutate(s => {
+    for (const p of s.packages) {
+      if (results[p.info.name] !== undefined) p.hasUpdate = results[p.info.name]
+    }
+    s.statusMessage = undefined
+  })
+
+  if (updateCount > 0) {
+    state.setStatusMessage(`Found ${updateCount} package(s) with updates. Use 'u' to update.`)
+    setTimeout(() => state.setStatusMessage(), 5000)
+  } else {
+    state.setStatusMessage('All packages up to date.')
+    setTimeout(() => state.setStatusMessage(), 3000)
+  }
+}

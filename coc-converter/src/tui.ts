@@ -1,6 +1,6 @@
 import { workspace, window as cocWindow, Disposable } from 'coc.nvim'
 import { StateManager, PackageEntry, AppState } from './state'
-import { installPackage, uninstallPackage, updatePackage } from './pipeline'
+import { installPackage, uninstallPackage, updatePackage, checkUpdates } from './pipeline'
 import { LineBuffer, RenderResult } from './renderer'
 
 const HELP_TEXT = [
@@ -10,6 +10,7 @@ const HELP_TEXT = [
   '    i          Install package under cursor',
   '    u          Update package under cursor',
   '    U          Update all installed packages',
+  '    C          Check for updates from remote',
   '    X          Uninstall package under cursor',
   '    Z          Uninstall all installed packages (with confirm)',
   '    <Enter>    Toggle expand/collapse details',
@@ -171,6 +172,12 @@ export class TUI {
       }
       return
     }
+    if (id === 'C') {
+      this.state.setActivePill('C')
+      await checkUpdates(this.state)
+      this.state.setActivePill(null)
+      return
+    }
 
     const pkgName = this.pkgLineMap.get(line0)
     if (!pkgName) return
@@ -199,7 +206,7 @@ export class TUI {
     const buf = workspace.nvim.createBuffer(this.bufnr)
     const entries: [string, string][] = [
       ['q', 'q'], ['<Esc>', 'esc'], ['?', 'question'], ['/', 'slash'],
-      ['U', 'U'], ['Z', 'Z'], ['i', 'i'], ['I', 'I'], ['H', 'H'], ['u', 'u'], ['X', 'X'], ['x', 'X'], ['<CR>', 'cr'],
+      ['U', 'U'], ['Z', 'Z'], ['C', 'C'], ['i', 'i'], ['I', 'I'], ['H', 'H'], ['u', 'u'], ['X', 'X'], ['x', 'X'], ['<CR>', 'cr'],
     ]
     for (const [vimKey, id] of entries) {
       buf.setKeymap('n', vimKey, `<Cmd>call CocConverterDispatch("${id}")<CR>`, { silent: true, nowait: true })
@@ -285,17 +292,22 @@ export class TUI {
     buf.nl()
     const needHome = !!(state.showHelp || state.searchQuery)
     buf.append('coc-converter(H)', needHome ? 'CocConverterPillActive' : 'CocConverterTitle')
-    for (const [name, key] of [['Install', 'I'], ['Update', 'U'], ['Help', '?']] as const) {
+    for (const [name, key] of [['Install', 'I'], ['Update', 'U'], ['Check', 'C'], ['Help', '?']] as const) {
       buf.append('  ')
       const isActive = key === '?' && state.showHelp
         || key === 'I' && state.activePill === 'I'
         || key === 'U' && state.activePill === 'U'
+        || key === 'C' && state.activePill === 'C'
       buf.append(`${name}(${key})`, isActive ? 'CocConverterPillActive' : 'CocConverterPill')
     }
-    buf.highlight(/\([IU?]\)/g, 'CocConverterKey')
+    buf.highlight(/\([IU?C]\)/g, 'CocConverterKey')
     buf.nl()
     buf.nl()
     buf.append(`Total: ${filtered.length} packages`, 'CocConverterTotal')
+    if (state.statusMessage) {
+      buf.append('  ·  ')
+      buf.append(state.statusMessage, 'Comment')
+    }
     buf.nl()
     buf.nl()
 
@@ -337,8 +349,11 @@ export class TUI {
     buf.append(icon, iconHl)
     buf.append(' ')
     buf.append(entry.info.displayName)
-    buf.append('  ')
+    buf.append(' ')
     buf.append(entry.info.type, 'CocConverterType')
+    if (entry.hasUpdate) {
+      buf.append('  ↑', 'CocConverterKey')
+    }
 
     if (entry.expanded) {
       buf.nl()

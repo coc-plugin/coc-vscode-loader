@@ -13,6 +13,7 @@ export interface PackageEntry {
   info: PackageInfo
   status: Status
   commit?: string
+  hasUpdate?: boolean
   progress?: string
   progressLog: string[]
   expanded: boolean
@@ -25,6 +26,7 @@ export interface AppState {
   searchQuery: string
   showHelp: boolean
   activePill: string | null
+  statusMessage?: string
   viewFilter: 'all' | 'not-installed' | 'installed'
 }
 
@@ -125,6 +127,10 @@ export class StateManager {
 
   setViewFilter(filter: 'all' | 'not-installed' | 'installed') {
     this.mutate(s => { s.viewFilter = filter })
+  }
+
+  setStatusMessage(msg?: string) {
+    this.mutate(s => { s.statusMessage = msg })
   }
 
   setActivePill(pill: string | null) {
