@@ -27,23 +27,44 @@ case "${1:-}" in
     echo "Switching to npm published version..."
     rm -rf "$EXT_DIR/$PLUGIN_NAME"
 
-    # Fix extensions/package.json temporarily to avoid npm errors
+    # Remove all file: deps + retired node_modules (npm 11 moves them aside then chokes)
     node -e "
       const fs = require('fs');
+      const path = require('path');
       const pkgPath = '$HOME/.config/coc/extensions/package.json';
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+      const deps = pkg.dependencies || {};
+      const fileDeps = Object.entries(deps).filter(([,v]) => v.startsWith('file:'));
+      fs.writeFileSync(pkgPath + '.bak', JSON.stringify({
+        fileDeps: Object.fromEntries(fileDeps),
+        rest: Object.fromEntries(Object.entries(deps).filter(([,v]) => !v.startsWith('file:'))),
+      }));
       delete pkg.dependencies['$PLUGIN_NAME'];
+      for (const [k] of fileDeps) delete deps[k];
       fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+      // Clean retired dirs left by npm 11
+      const nm = path.dirname(pkgPath) + '/node_modules';
+      if (fs.existsSync(nm)) {
+        for (const d of fs.readdirSync(nm)) {
+          if (d.startsWith('.')) {
+            fs.rmSync(nm + '/' + d, { recursive: true, force: true });
+          }
+        }
+      }
     "
     cd "$HOME/.config/coc/extensions" && npm install "$PLUGIN_NAME" --legacy-peer-deps 2>&1 | tail -3
 
-    # Restore to npm version
+    # Restore package.json
     node -e "
       const fs = require('fs');
       const pkgPath = '$HOME/.config/coc/extensions/package.json';
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+      const bak = JSON.parse(fs.readFileSync(pkgPath + '.bak', 'utf-8'));
+      pkg.dependencies = bak.rest;
       pkg.dependencies['$PLUGIN_NAME'] = 'latest';
+      Object.assign(pkg.dependencies, bak.fileDeps);
       fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+      fs.unlinkSync(pkgPath + '.bak');
     "
     echo "✅ Now using npm version: $(npm view $PLUGIN_NAME version 2>/dev/null || echo 'latest')"
     ;;

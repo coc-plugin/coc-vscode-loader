@@ -111,5 +111,13 @@ export async function activate(context: ExtensionContext) {
     })
   )
 
+  // Background fetch remote registry on startup
+  updateRegistry().then(count => {
+    state.refreshPackages()
+    cocWindow.showInformationMessage(`Registry updated: ${count} packages available`)
+  }).catch(() => {
+    // silently fall back to built-in/cached registry
+  })
+
   cocWindow.showInformationMessage('coc-loader activated! Use :CocCommand loader.open')
 }

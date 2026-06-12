@@ -177,4 +177,25 @@ export class StateManager {
   getPackage(name: string): PackageEntry | undefined {
     return this.state.packages.find(p => p.info.name === name)
   }
+
+  refreshPackages() {
+    this.mutate(s => {
+      const updated = getAllPackages()
+      const oldMap = new Map(s.packages.map(p => [p.info.name, p]))
+      s.packages = updated.map(info => {
+        const old = oldMap.get(info.name)
+        if (old) {
+          old.info = info
+          return old
+        }
+        return {
+          info,
+          status: isInstalled(info.name) ? 'installed' : 'not-installed',
+          progressLog: [],
+          expanded: false,
+          logExpanded: false,
+        }
+      })
+    })
+  }
 }
