@@ -33,12 +33,12 @@ npm install /path/to/coc-converter
 
 | Command | 动作 |
 |---------|------|
-| `:CocCommand converter.open` | 打开 TUI |
-| `:CocCommand converter.install <name>` | 安装指定包 |
-| `:CocCommand converter.uninstall <name>` | 卸载指定包 |
-| `:CocCommand converter.update <name>` | 更新指定包 |
-| `:CocCommand converter.uninstallAll` | 卸载全部（需确认） |
-| `:CocCommand converter.updateRegistry` | 从 GitHub 拉取最新注册表 |
+| `:CocCommand loader.open` | 打开 TUI |
+| `:CocCommand loader.install <name>` | 安装指定包 |
+| `:CocCommand loader.uninstall <name>` | 卸载指定包 |
+| `:CocCommand loader.update <name>` | 更新指定包 |
+| `:CocCommand loader.uninstallAll` | 卸载全部（需确认） |
+| `:CocCommand loader.updateRegistry` | 从 GitHub 拉取最新注册表 |
 
 ## 特性
 
@@ -47,7 +47,7 @@ npm install /path/to/coc-converter
 - **Commit 追踪** — 安装后记录当前 commit SHA，展开详情可见
 - **检查更新** — `C` 键对比远端 HEAD，有更新标 `↑`
 - **自动重启** — 关 TUI 时如有变更自动 `:CocRestart`
-- **注册表热更新** — `:CocCommand converter.updateRegistry` 从 GitHub 拉取远程 registry
+- **注册表热更新** — `:CocCommand loader.updateRegistry` 从 GitHub 拉取远程 registry
 - **安装日志** — 每一步的真实命令输出，可展开查看
 
 ## 架构

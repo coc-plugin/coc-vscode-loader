@@ -10,7 +10,7 @@ export async function activate(context: ExtensionContext) {
   const state = new StateManager(createInitialState())
 
   context.subscriptions.push(
-    commands.registerCommand('converter.open', async () => {
+    commands.registerCommand('loader.open', async () => {
       if (currentTUI && currentTUI.isOpen()) {
         await currentTUI.close()
       }
@@ -20,7 +20,7 @@ export async function activate(context: ExtensionContext) {
   )
 
   context.subscriptions.push(
-    commands.registerCommand('converter.install', async (name?: string) => {
+    commands.registerCommand('loader.install', async (name?: string) => {
       if (!name) {
         name = await workspace.nvim.call('input', ['Plugin name: ', '']) as string
         if (!name) return
@@ -39,7 +39,7 @@ export async function activate(context: ExtensionContext) {
   )
 
   context.subscriptions.push(
-    commands.registerCommand('converter.uninstall', async (name?: string) => {
+    commands.registerCommand('loader.uninstall', async (name?: string) => {
       if (!name) {
         name = await workspace.nvim.call('input', ['Plugin name: ', '']) as string
         if (!name) return
@@ -58,7 +58,7 @@ export async function activate(context: ExtensionContext) {
   )
 
   context.subscriptions.push(
-    commands.registerCommand('converter.update', async (name?: string) => {
+    commands.registerCommand('loader.update', async (name?: string) => {
       if (!name) {
         name = await workspace.nvim.call('input', ['Plugin name: ', '']) as string
         if (!name) return
@@ -77,7 +77,7 @@ export async function activate(context: ExtensionContext) {
   )
 
   context.subscriptions.push(
-    commands.registerCommand('converter.uninstallAll', async () => {
+    commands.registerCommand('loader.uninstallAll', async () => {
       const installed = state.getState().packages.filter(p => p.status === 'installed')
       if (installed.length === 0) {
         cocWindow.showInformationMessage('No packages installed')
@@ -93,7 +93,7 @@ export async function activate(context: ExtensionContext) {
   )
 
   context.subscriptions.push(
-    commands.registerCommand('converter.updateRegistry', async () => {
+    commands.registerCommand('loader.updateRegistry', async () => {
       try {
         const count = await updateRegistry()
         cocWindow.showInformationMessage(`Registry updated: ${count} packages available. Restart coc to apply.`)
@@ -104,12 +104,12 @@ export async function activate(context: ExtensionContext) {
   )
 
   context.subscriptions.push(
-    commands.registerCommand('converter._dispatch', async (key: string) => {
+    commands.registerCommand('loader._dispatch', async (key: string) => {
       if (currentTUI) {
         await currentTUI.handleKey(key)
       }
     })
   )
 
-  cocWindow.showInformationMessage('coc-converter activated! Use :CocCommand converter.open')
+  cocWindow.showInformationMessage('coc-loader activated! Use :CocCommand loader.open')
 }

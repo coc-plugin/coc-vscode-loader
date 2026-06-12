@@ -12,8 +12,8 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | `vscode.d.ts` | Upstream VS Code extension API types (auto-synced) |
 | `coc.d.ts` | Upstream coc.nvim API types (auto-synced) |
 | `converter/` | Source code: CLI conversion tool |
-| `coc-converter/` | **coc-converter 包管理器插件** |
-| `coc-converter/README.md` | Converter plugin docs and usage |
+| `coc-vscode-loader/` | **coc-loader 包管理器插件** |
+| `coc-vscode-loader/README.md` | Converter plugin docs and usage |
 | `logs/YYYY-MM-DD.md` | Daily sync change logs |
 | `AGENTS.md` | Dev instructions for AI agents |
 
@@ -50,9 +50,9 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 - Changes: `globalPlugins` + `pluginPaths` in configure, `typescript.tsserverRequest` command
 - Pre-merge: `npm install ChuYanLon/coc-tsserver`
 
-## coc-converter 包管理器插件
+## coc-loader 包管理器插件
 
-`coc-converter/` 是一个 coc.nvim 插件，提供 TUI 界面来安装/更新/卸载转换后的插件。
+`coc-vscode-loader/` 是一个 coc.nvim 插件，提供 TUI 界面来安装/更新/卸载转换后的插件。
 
 ### 架构
 
@@ -82,12 +82,12 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 
 | Command | 动作 |
 |---------|------|
-| `:CocCommand converter.open` | 打开 TUI |
-| `:CocCommand converter.install <name>` | 安装指定包 |
-| `:CocCommand converter.uninstall <name>` | 卸载指定包 |
-| `:CocCommand converter.update <name>` | 更新指定包 |
-| `:CocCommand converter.uninstallAll` | 卸载全部（需确认） |
-| `:CocCommand converter.updateRegistry` | 从 GitHub 拉取最新注册表 |
+| `:CocCommand loader.open` | 打开 TUI |
+| `:CocCommand loader.install <name>` | 安装指定包 |
+| `:CocCommand loader.uninstall <name>` | 卸载指定包 |
+| `:CocCommand loader.update <name>` | 更新指定包 |
+| `:CocCommand loader.uninstallAll` | 卸载全部（需确认） |
+| `:CocCommand loader.updateRegistry` | 从 GitHub 拉取最新注册表 |
 
 ### 构建
 

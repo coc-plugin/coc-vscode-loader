@@ -4,7 +4,7 @@ import { installPackage, uninstallPackage, updatePackage, checkUpdates } from '.
 import { LineBuffer, RenderResult } from './renderer'
 
 const HELP_TEXT = [
-  '  coc-converter — VS Code extension → coc.nvim plugin converter',
+  '  coc-loader — VS Code extension → coc.nvim plugin converter',
   '',
   '  Keymaps:',
   '    i          Install package under cursor',
@@ -41,7 +41,7 @@ export class TUI {
 
   async open() {
     const nvim = workspace.nvim
-    this.ns = await nvim.createNamespace('coc-converter')
+    this.ns = await nvim.createNamespace('coc-loader')
 
     await nvim.command('highlight default link CocConverterTitle Title')
     await nvim.command('highlight default link CocConverterPill Visual')
@@ -112,7 +112,7 @@ export class TUI {
     if (exists === 0) {
       await nvim.command(`
         function! CocConverterDispatch(key) abort
-          execute 'CocCommand converter._dispatch ' . a:key
+          execute 'CocCommand loader._dispatch ' . a:key
         endfunction
       `)
     }
@@ -265,7 +265,7 @@ export class TUI {
   private renderHelp(): TuiRenderResult {
     const header = [
       '',
-      '  coc-converter v0.1',
+      '  coc-loader v0.1',
       '  press ? help | / search | q quit',
       '  ' + '─'.repeat(50),
       '',
@@ -295,7 +295,7 @@ export class TUI {
 
     buf.nl()
     const needHome = !!(state.showHelp || state.searchQuery)
-    buf.append('coc-converter(H)', needHome ? 'CocConverterPillActive' : 'CocConverterTitle')
+    buf.append('coc-loader(H)', needHome ? 'CocConverterPillActive' : 'CocConverterTitle')
     for (const [name, key] of [['Install', 'I'], ['Update', 'U'], ['Check', 'C'], ['Help', '?']] as const) {
       buf.append('  ')
       const isActive = key === '?' && state.showHelp

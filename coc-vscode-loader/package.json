@@ -1,0 +1,33 @@
+{
+  "name": "coc-vscode-loader",
+  "version": "0.1.0",
+  "description": "VS Code extension to coc.nvim plugin converter & package manager",
+  "main": "lib/index.js",
+  "engines": {
+    "coc": ">= 0.0.80"
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "prepare": "node esbuild.mjs"
+  },
+  "devDependencies": {
+    "coc.nvim": "^0.0.83-next.18",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.3.3"
+  },
+  "activationEvents": [
+    "onCommand:loader.open",
+    "onCommand:loader._dispatch"
+  ],
+  "contributes": {
+    "commands": [
+      { "command": "loader.open", "title": "Open VS Code extension loader" },
+      { "command": "loader.install", "title": "Install a VS Code extension" },
+      { "command": "loader.uninstall", "title": "Uninstall a loader package" },
+      { "command": "loader.update", "title": "Update a loader package" },
+      { "command": "loader.uninstallAll", "title": "Uninstall all packages" },
+      { "command": "loader.updateRegistry", "title": "Update package registry" },
+      { "command": "loader._dispatch", "title": "" }
+    ]
+  }
+}
