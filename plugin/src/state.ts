@@ -13,6 +13,8 @@ export interface PackageEntry {
   info: PackageInfo
   status: Status
   commit?: string
+  commitMsg?: string
+  commitDate?: string
   hasUpdate?: boolean
   progress?: string
   progressLog: string[]
@@ -37,18 +39,24 @@ export function createInitialState(): AppState {
   const packages = getAllPackages().map(info => {
     const installed = isInstalled(info.name)
     let commit: string | undefined
+    let commitMsg: string | undefined
+    let commitDate: string | undefined
     if (installed) {
       try {
         const meta = JSON.parse(
           fs.readFileSync(path.join(os.homedir(), '.config', 'coc', 'converter-cache', info.name, 'meta.json'), 'utf-8')
         )
         commit = meta.commit || undefined
+        commitMsg = meta.msg || undefined
+        commitDate = meta.date || undefined
       } catch {}
     }
     return {
       info,
       status: (installed ? 'installed' : 'not-installed') as Status,
       commit,
+      commitMsg,
+      commitDate,
       progressLog: [],
       expanded: false,
       logExpanded: false,

@@ -358,6 +358,16 @@ export class TUI {
     if (entry.hasUpdate) {
       buf.append('  ↑', 'CocConverterKey')
     }
+    // Show commit info like lazy.nvim: hash subject (date)
+    if (entry.commit && entry.commitMsg) {
+      buf.nl()
+      const ln = buf.currentLine()
+      buf.append(`     ${entry.commit} ${entry.commitMsg}`, 'Comment')
+      if (entry.commitDate) {
+        buf.append(` (${entry.commitDate})`, 'Comment')
+      }
+      pkgLineMap.set(ln, entry.info.name)
+    }
 
     if (entry.expanded) {
       buf.nl()
