@@ -12,6 +12,9 @@ usage() {
   echo "  local    Switch to local development version ($LOCAL_PATH)"
   echo "  npm      Switch to npm published version"
   echo "  status   Show current version and source"
+  echo ""
+  echo "  local mode auto-detects coc-vscode-registry/ sibling and uses local registry."
+  echo "  No env vars needed."
   exit 1
 }
 

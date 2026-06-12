@@ -3,3 +3,4 @@ lib/
 dist/
 *.log
 plugin/converter/
+coc-vscode-registry/

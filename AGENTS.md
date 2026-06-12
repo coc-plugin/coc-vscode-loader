@@ -13,6 +13,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | `plugin/` | **coc-vscode-loader plugin** |
 | `plugin/README.md` | Plugin docs and usage |
 | `AGENTS.md` | Dev instructions for AI agents |
+| `coc-vscode-registry/` | Local clone of [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) — registry.json, type defs, API mapping docs |
 
 > 📖 Type definitions, API mapping docs and registry have been moved to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry).
 

@@ -137,22 +137,77 @@ async function buildPackage(
     const sb = info.serverBinary
     onProgress(4, 5, 'Downloading language server...', `fetching ${sb.repo}`)
     try {
-      const tagData = await runWithOutput('gh', ['api', `repos/${sb.repo}/releases/latest`, '--jq', '.tag_name'], os.homedir())
-      const version = tagData.replace(/^v/, '')
+      const tagRes = await fetch(`https://api.github.com/repos/${sb.repo}/releases/latest`)
+      if (!tagRes.ok) throw new Error(`GitHub API: HTTP ${tagRes.status}`)
+      const tagData: any = await tagRes.json()
+      const tag: string = tagData.tag_name
+      const version = tag.replace(/^v/, '')
+
+      // Template variables
+      const archMap: Record<string, string> = {
+        arm64: 'aarch64', x64: 'x86_64',
+      }
+      const platformMap: Record<string, string> = {
+        darwin: 'apple-darwin', linux: 'unknown-linux-gnu', win32: 'pc-windows-msvc',
+      }
       const arch = os.arch() === 'arm64' ? 'arm64' : 'x64'
-      const platform = process.platform === 'win32' ? 'win32' : process.platform === 'darwin' ? 'darwin' : 'linux'
-      const filename = sb.asset.replace('{{version}}', version).replace('{{platform}}', platform).replace('{{arch}}', arch)
-      const url = `https://github.com/${sb.repo}/releases/download/${version}/${filename}`
+      const platform: string = process.platform === 'win32' ? 'win32' : process.platform === 'darwin' ? 'darwin' : 'linux'
+      const rustTarget = `${archMap[arch] || arch}-${platformMap[platform] || platform}`
+
+      const filename = sb.asset
+        .replace(/\{\{version}}/g, version)
+        .replace(/\{\{platform}}/g, platform)
+        .replace(/\{\{arch}}/g, arch)
+        .replace(/\{\{rust-target}}/g, rustTarget)
+      const url = `https://github.com/${sb.repo}/releases/download/${tag}/${filename}`
 
       onProgress(4, 5, 'Downloading...', `curl ${filename}`)
       await run('curl', ['-#SL', url, '-o', path.join(build, filename)], build)
-      onProgress(4, 5, 'Extracting...', `tar xzf ${filename}`)
+      onProgress(4, 5, 'Extracting...', filename)
+
       const serverDir = path.join(build, 'server')
       fs.mkdirSync(serverDir, { recursive: true })
-      await run('tar', ['xzf', filename, '-C', serverDir], build)
-      fs.rmSync(path.join(build, filename))
-    } catch {
-      onProgress(4, 5, 'Warning: server download failed', 'install server binary manually')
+
+      if (filename.endsWith('.zip')) {
+        await run('unzip', ['-o', filename, '-d', serverDir], build)
+      } else {
+        await run('tar', ['xzf', filename, '-C', serverDir], build)
+      }
+      if (sb.binaryPath || filename.match(/\.(zip|gz)$/)) {
+        fs.rmSync(path.join(build, filename))
+      }
+
+      // Wire server binary path into generated lib/index.js
+      const indexPath = path.join(build, 'lib', 'index.js')
+      if (fs.existsSync(indexPath)) {
+        const binPath = sb.binaryPath || sb.asset.split(/-?\{\{/)[0]
+        let code = fs.readFileSync(indexPath, 'utf-8')
+
+        // Replace module-based LanguageClient with command-based for binary servers
+        const svrArgs = sb.args?.length ? JSON.stringify(sb.args) : '[]'
+        code = code.replace(
+          /\{ module:\s*serverModule,\s*transport:\s*\w+\.TransportKind\.ipc\s*\}/,
+          `{ command: serverModule, args: ${svrArgs} }`,
+        )
+
+        // Inject server path resolution into the empty block before Cannot find error
+        code = code.replace(
+          `if (!serverModule || !fs.existsSync(serverModule)) {\n    }`,
+          `if (!serverModule || !fs.existsSync(serverModule)) {\n    try {\n      const _sp = require('path').join(__dirname, '..', 'server', '${binPath}');\n      if (require('fs').existsSync(_sp)) serverModule = _sp;\n    } catch {}\n  }`,
+        )
+
+        // Fix documentSelector: generated code uses config namespace (e.g. "deno"),
+        // replace with actual languages from registry
+        const langSelector = info.languages.map(l => `{ scheme: "file", language: "${l}" }`).join(', ')
+        code = code.replace(
+          /documentSelector:\s*\[\s*\{[^}]*language:\s*['"][^'"]*['"][^}]*\}\s*\]/,
+          `documentSelector: [${langSelector}]`,
+        )
+
+        fs.writeFileSync(indexPath, code)
+      }
+    } catch (e: any) {
+      onProgress(4, 5, `Warning: server download failed (${e.message})`, 'install server binary manually')
     }
   }
 }

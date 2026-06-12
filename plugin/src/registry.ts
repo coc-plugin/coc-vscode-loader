@@ -22,6 +22,7 @@ export interface PackageInfo {
     repo: string
     asset: string       // "name-{{version}}-{{platform}}-{{arch}}.tar.gz"
     binaryPath?: string // relative path inside tarball, e.g. "bin/lua-language-server"
+    args?: string[]     // CLI args to start the LSP, e.g. ["lsp"] for deno
   }
 }
 
@@ -29,6 +30,16 @@ const REMOTE_REGISTRY_URL = 'https://raw.githubusercontent.com/coc-plugin/coc-vs
 const CACHE_PATH = path.join(os.homedir(), '.config', 'coc', 'converter-cache', 'registry.json')
 
 let cached: PackageInfo[] | null = null
+
+// Detect if running in local dev mode by checking for coc-vscode-registry/ sibling
+function getLocalRegistryPath(): string | null {
+  try {
+    const pluginDir = path.dirname(fs.realpathSync(__dirname))
+    const local = path.join(pluginDir, '..', 'coc-vscode-registry', 'registry.json')
+    if (fs.existsSync(local)) return local
+  } catch { /* not in local dev mode */ }
+  return null
+}
 
 function loadCache(): PackageInfo[] | null {
   try {
@@ -40,6 +51,18 @@ function loadCache(): PackageInfo[] | null {
 }
 
 export async function updateRegistry(): Promise<number> {
+  // Support local registry via env var (for development)
+  const localPath = process.env.COC_REGISTRY_PATH || getLocalRegistryPath()
+  if (localPath) {
+    if (!fs.existsSync(localPath)) throw new Error(`Local registry not found: ${localPath}`)
+    const data: PackageInfo[] = JSON.parse(fs.readFileSync(localPath, 'utf-8'))
+    if (!Array.isArray(data)) throw new Error('Invalid registry format')
+    fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true })
+    fs.writeFileSync(CACHE_PATH, JSON.stringify(data, null, 2))
+    cached = data
+    return data.length
+  }
+
   const res = await fetch(REMOTE_REGISTRY_URL)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const data: PackageInfo[] = await res.json()
