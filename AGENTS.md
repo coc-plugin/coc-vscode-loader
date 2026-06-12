@@ -49,9 +49,17 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | `src/index.ts` | Plugin entry + 8 CocCommands |
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
-| `src/registry.ts` | Remote registry fetch + disk cache |
-| `src/pipeline.ts` | Real install/update/uninstall flow (git / npx tsx / npm / node / cp) |
+| `src/registry.ts` | Remote registry fetch + disk cache + version compatibility filter |
+| `src/pipeline.ts` | Real install/update/uninstall flow (git / npx tsx / npm / node / cp) + binary server download + code patching |
 | `src/renderer.ts` | LineBuffer render engine (inspired by lazy.nvim) |
+
+### Version compatibility (minPluginVersion)
+
+Registry entries can specify `minPluginVersion` (e.g. `"1.1.2"`) to require a minimum `coc-vscode-loader` version.
+- `registry.ts` reads plugin version from `package.json` at runtime via `pluginVersion()`
+- `getAllPackages()` filters out entries whose `minPluginVersion` > current version
+- Old plugin versions never see incompatible entries in the TUI
+- Adding entries to the remote registry before release is safe — old clients will not see them
 
 ### TUI features
 
