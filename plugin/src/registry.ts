@@ -18,6 +18,11 @@ export interface PackageInfo {
   url: string
   languages: string[]
   categories: string[]
+  serverBinary?: {
+    repo: string
+    asset: string       // "name-{{version}}-{{platform}}-{{arch}}.tar.gz"
+    binaryPath?: string // relative path inside tarball, e.g. "bin/lua-language-server"
+  }
 }
 
 const REMOTE_REGISTRY_URL = 'https://raw.githubusercontent.com/coc-plugin/coc-vscode-registry/main/registry.json'

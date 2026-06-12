@@ -97,7 +97,7 @@ async function convertSource(
 }
 
 async function buildPackage(
-  name: string,
+  name: string, inputDir: string, info: PackageInfo,
   onProgress: (step: number, total: number, msg: string, cmd: string) => void,
 ): Promise<void> {
   const build = buildDir(name)
@@ -105,8 +105,46 @@ async function buildPackage(
   onProgress(3, 5, 'Installing dependencies...', 'npm install --legacy-peer-deps')
   await run('npm', ['install', '--legacy-peer-deps'], build, () => {})
 
+  // Run postinstall if present (some extensions download servers here)
+  onProgress(3, 5, 'Running postinstall...', 'npm run postinstall')
+  await run('npm', ['run', 'postinstall', '--if-present'], build, () => {}).catch(() => {})
+
+  // Check for server directory in original source and install its deps
+  const serverDir = path.join(inputDir, 'server')
+  if (fs.existsSync(serverDir) && fs.existsSync(path.join(serverDir, 'package.json'))) {
+    onProgress(3, 5, 'Installing server dependencies...', `npm install in ${serverDir}`)
+    await run('npm', ['install', '--legacy-peer-deps'], serverDir, () => {})
+    const destServer = path.join(build, 'server')
+    if (fs.existsSync(destServer)) fs.rmSync(destServer, { recursive: true })
+    fs.cpSync(serverDir, destServer, { recursive: true })
+  }
+
   onProgress(4, 5, 'Building...', 'node esbuild.mjs')
   await run('node', ['esbuild.mjs'], build, () => {})
+
+  // Download binary language server from GitHub release (configured in registry)
+  if (info.serverBinary) {
+    const sb = info.serverBinary
+    onProgress(4, 5, 'Downloading language server...', `fetching ${sb.repo}`)
+    try {
+      const tagData = await runWithOutput('gh', ['api', `repos/${sb.repo}/releases/latest`, '--jq', '.tag_name'], os.homedir())
+      const version = tagData.replace(/^v/, '')
+      const arch = os.arch() === 'arm64' ? 'arm64' : 'x64'
+      const platform = process.platform === 'win32' ? 'win32' : process.platform === 'darwin' ? 'darwin' : 'linux'
+      const filename = sb.asset.replace('{{version}}', version).replace('{{platform}}', platform).replace('{{arch}}', arch)
+      const url = `https://github.com/${sb.repo}/releases/download/${version}/${filename}`
+
+      onProgress(4, 5, 'Downloading...', `curl ${filename}`)
+      await run('curl', ['-sSL', url, '-o', path.join(build, filename)], build, () => {})
+      onProgress(4, 5, 'Extracting...', `tar xzf ${filename}`)
+      const serverDir = path.join(build, 'server')
+      fs.mkdirSync(serverDir, { recursive: true })
+      await run('tar', ['xzf', filename, '-C', serverDir], build, () => {})
+      fs.rmSync(path.join(build, filename))
+    } catch {
+      onProgress(4, 5, 'Warning: server download failed', 'install server binary manually')
+    }
+  }
 }
 
 function extensionsPkgPath(): string {
@@ -166,7 +204,7 @@ export async function installPackage(state: StateManager, name: string): Promise
   try {
     const input = await downloadSource(info, name, prog)
     await convertSource(input, name, prog)
-    await buildPackage(name, prog)
+    await buildPackage(name, input, info, prog)
     await installToCoc(name, prog)
     saveMeta(name)
     state.setDirty()
@@ -242,7 +280,7 @@ export async function updatePackage(state: StateManager, name: string): Promise<
   try {
     const input = await downloadSource(info, name, prog)
     await convertSource(input, name, prog)
-    await buildPackage(name, prog)
+    await buildPackage(name, input, info, prog)
     await installToCoc(name, prog)
     saveMeta(name)
     state.setDirty()
@@ -265,6 +303,18 @@ export async function updatePackage(state: StateManager, name: string): Promise<
   } catch (e: any) {
     state.setPackageStatus(name, 'failed', { error: e.message })
   }
+}
+
+function walkDir(dir: string): string[] {
+  const files: string[] = []
+  try {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, entry.name)
+      if (entry.isDirectory()) files.push(...walkDir(p))
+      else files.push(p)
+    }
+  } catch {}
+  return files
 }
 
 async function runWithOutput(cmd: string, args: string[], cwd: string): Promise<string> {

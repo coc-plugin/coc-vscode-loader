@@ -41,6 +41,18 @@ echo "==> Installing dependencies ..."
 cd "$OUT_DIR"
 npm install --legacy-peer-deps
 
+# Run postinstall if present (some extensions download servers here)
+npm run postinstall --if-present 2>/dev/null || true
+
+# Check for server subdirectory in original source and install its deps
+if [ -d "$INPUT/server" ] && [ -f "$INPUT/server/package.json" ]; then
+  echo "==> Installing server dependencies ..."
+  cd "$INPUT/server" && npm install --legacy-peer-deps 2>&1 | tail -2
+  # Copy server to output
+  mkdir -p "$OUT_DIR/server"
+  cp -r "$INPUT/server" "$OUT_DIR/"
+fi
+
 echo "==> Building ..."
 node esbuild.mjs
 
