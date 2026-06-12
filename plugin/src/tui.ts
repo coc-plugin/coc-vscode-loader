@@ -1,6 +1,6 @@
 import { workspace, window as cocWindow, Disposable } from 'coc.nvim'
 import { StateManager, PackageEntry, AppState, ViewFilter, SortBy } from './state'
-import { installPackage, uninstallPackage, updatePackage, checkUpdates } from './pipeline'
+import { installPackage, uninstallPackage, updatePackage, checkUpdates, runConcurrent } from './pipeline'
 import { updateRegistry } from './registry'
 import { LineBuffer, RenderResult } from './renderer'
 
@@ -179,7 +179,8 @@ export class TUI {
       const installed = s.packages.filter(p => p.status === 'installed')
       if (installed.length === 0) return
       this.state.setActivePill('U')
-      await Promise.all(installed.map(p => updatePackage(this.state, p.info.name)))
+      const names = installed.map(p => p.info.name)
+      await runConcurrent(names, name => updatePackage(this.state, name))
       this.state.setActivePill(null)
       return
     }

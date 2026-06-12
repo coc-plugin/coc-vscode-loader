@@ -341,6 +341,22 @@ async function runWithOutput(cmd: string, args: string[], cwd: string): Promise<
   })
 }
 
+export async function runConcurrent<T>(
+  items: T[],
+  fn: (item: T) => Promise<void>,
+  concurrency = 3,
+): Promise<void> {
+  const pool = new Set<Promise<void>>()
+  for (const item of items) {
+    const p = fn(item).finally(() => pool.delete(p))
+    pool.add(p)
+    if (pool.size >= concurrency) {
+      await Promise.race(pool)
+    }
+  }
+  await Promise.all(pool)
+}
+
 export async function checkUpdates(state: StateManager): Promise<void> {
   const s = state.getState()
   const results: Record<string, boolean> = {}
