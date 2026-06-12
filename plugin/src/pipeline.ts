@@ -238,6 +238,14 @@ async function buildPackage(
           `try { serverModule = ${serverPath} } catch {}`,
         )
 
+        // Replace config-based server path resolution with direct binary path
+        // Converter generates: let serverModule = config.get("server.path", "");
+        // We need: let serverModule = require('path').join(...server/deno);
+        code = code.replace(
+          /let\s+serverModule\s*=\s*config\.get\([^)]+\)\s*;?\s*/g,
+          `let serverModule = ${serverPath};`,
+        )
+
         fs.writeFileSync(indexPath, code)
       }
     } catch (e: any) {
