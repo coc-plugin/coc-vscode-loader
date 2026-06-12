@@ -14,16 +14,17 @@
 
 ---
 
-## 一、已端到端验证（2 个）
+## 一、已端到端验证（3 个）
 
-**2026-06-12 从 TUI 安装到 Deno LSP 在 coc.nvim 中运行，全链路验证通过。**
+**2026-06-13 从 TUI 安装到 Ansible LSP 在 coc.nvim 中运行，全链路验证通过。**
 
 | 扩展 | 仓库 | 状态 | 说明 |
 |------|------|------|------|
 | **Deno** | `denoland/vscode_deno` | 🟢 LSP 运行中 | Converter 转换 → pipeline 下载二进制 → patch → Deno LSP 正常启动 |
 | **TOML (Taplo)** | `tamasfe/taplo` | 🟢 LSP 运行中 | Rust 原生二进制 + JS wrapper，需 serverBinary + .gz 解压 + raw-arch 模板 |
+| **Ansible** | `ansible/vscode-ansible` | 🟢 LSP 运行中 | npm 包服务器 + pip 安装 ansible-lint，python3 + pip 自动检测 |
 
-## 二、构建成功、运行时未验证（5 个）
+## 二、构建成功、运行时未验证（3 个）
 
 **Converter 转换 + esbuild 构建成功，但未在 coc 中测试实际 LSP 功能。**
 
@@ -32,13 +33,12 @@
 | **ESLint** | `microsoft/vscode-eslint` | 纯 LSP，npm 包服务器自动安装。需 ESLint 环境 |
 | **Tailwind CSS IntelliSense** | `tailwindlabs/tailwindcss-intellisense` | 纯 LSP，npm 包服务器 |
 | **PowerShell** | `PowerShell/vscode-powershell` | 系统需装 PowerShell 7+ |
-| **Ansible** | `ansible/vscode-ansible` | npm 包服务器 + pip 安装 ansible-lint |
 
 > ~~Metals (#31)~~ — 需要 Coursier + Maven 下载流程，pipeline 不支持，已移除 registry
 
 ---
 
-## 二、Level 0b — 理论可转，Converter 待修复（21 个）
+## 三、Level 0b — 理论可转，Converter 待修复（21 个）
 
 API 上评估为 Level 0（纯 LSP/简单 Direct API），但实际构建失败，原因是 converter 存在以下 bug：
 
@@ -101,7 +101,7 @@ API 上评估为 Level 0（纯 LSP/简单 Direct API），但实际构建失败�
 
 ---
 
-## 三、Level 1 — 少量适配（7 个）
+## 四、Level 1 — 少量适配（7 个）
 
 | # | 扩展 | 难点 | 处理方式 |
 |---|------|------|----------|
@@ -115,7 +115,7 @@ API 上评估为 Level 0（纯 LSP/简单 Direct API），但实际构建失败�
 
 ---
 
-## 四、Level 2 — 需要扩展转换器（5 个）
+## 五、Level 2 — 需要扩展转换器（5 个）
 
 | # | 扩展 | 需要的新功能 |
 |---|------|-------------|
@@ -127,7 +127,7 @@ API 上评估为 Level 0（纯 LSP/简单 Direct API），但实际构建失败�
 
 ---
 
-## 五、Level 3 — 大规模改造（5 个）
+## 六、Level 3 — 大规模改造（5 个）
 
 | # | 扩展 | 主要障碍 |
 |---|------|----------|
@@ -143,8 +143,8 @@ API 上评估为 Level 0（纯 LSP/简单 Direct API），但实际构建失败�
 
 | 等级 | 数量 | 占比 |
 |------|------|------|
-| **已端到端验证** | **2** | **4%** |
-| 构建成功、运行时未验证 | 4 | 9% |
+| **已端到端验证** | **3** | **7%** |
+| 构建成功、运行时未验证 | 3 | 7% |
 | Level 0b — Converter 待修 | 21 | 45% |
 | Level 1 — 少量适配 | 7 | 15% |
 | Level 2 — 扩展转换器 | 5 | 11% |
