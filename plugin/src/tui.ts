@@ -246,7 +246,7 @@ export class TUI {
     if (id === 'u' && entry.status === 'installed') { await updatePackage(this.state, pkgName); return }
     if (id === 'X' && entry.status === 'installed') { uninstallPackage(this.state, pkgName); return }
     if (id === 'R' && entry.status === 'installed') {
-      uninstallPackage(this.state, pkgName)
+      await uninstallPackage(this.state, pkgName)
       await installPackage(this.state, pkgName)
       return
     }
@@ -504,10 +504,6 @@ export class TUI {
     }
 
     buf.nl()
-  }
-
-  private hl(line: number, hlGroup: string, colStart: number, colEnd: number) {
-    this.hlLines.push({ line, hlGroup, colStart, colEnd })
   }
 
   isOpen(): boolean {

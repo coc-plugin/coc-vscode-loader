@@ -25,6 +25,7 @@ export interface PackageInfo {
     binaryPath?: string // relative path inside tarball, e.g. "bin/lua-language-server"
     args?: string[]     // CLI args to start the LSP, e.g. ["lsp"] for deno
   }
+  pipPackages?: string[]  // Python packages to install via pip, e.g. ["ansible-lint"]
 }
 
 function pluginVersion(): string {
@@ -94,11 +95,10 @@ function satisfiesVersion(required: string): boolean {
 }
 
 export function getAllPackages(): PackageInfo[] {
-  if (cached) return cached
-  cached = loadCache()
-  if (!cached) return []
-  cached = cached.filter(p => !p.minPluginVersion || satisfiesVersion(p.minPluginVersion))
-  return cached
+  if (!cached) {
+    cached = loadCache() || []
+  }
+  return cached.filter(p => !p.minPluginVersion || satisfiesVersion(p.minPluginVersion))
 }
 
 export function getPackage(name: string): PackageInfo | undefined {

@@ -116,8 +116,11 @@ export class StateManager {
         }
         pkg.status = status
         if (extra?.progress !== undefined) pkg.progress = extra.progress
-        if (extra?.logEntry !== undefined) pkg.progressLog.push(extra.logEntry)
-        if (extra?.appendLog && extra?.progress !== undefined) pkg.progressLog.push(extra.progress)
+        if (extra?.logEntry !== undefined) {
+          pkg.progressLog.push(extra.logEntry)
+        } else if (extra?.progress !== undefined) {
+          pkg.progressLog.push(extra.progress)
+        }
         if (extra?.error !== undefined) pkg.error = extra.error
         if (status === 'installed' || status === 'not-installed') {
           pkg.progress = undefined

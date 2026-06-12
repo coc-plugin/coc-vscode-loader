@@ -1,6 +1,6 @@
 import { StateManager } from './state'
 import { getPackage, PackageInfo } from './registry'
-import { spawn, execSync } from 'child_process'
+import { spawn } from 'child_process'
 import { window as cocWindow } from 'coc.nvim'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -26,12 +26,9 @@ function pluginDir(name: string): string {
 
 function converterCliPath(): string {
   const base = path.resolve(__dirname, '..')
-  const cwd = process.cwd()
   const candidates = [
     path.join(base, 'converter', 'src', 'cli.ts'),
     path.join(base, '..', 'converter', 'src', 'cli.ts'),
-    path.join(cwd, 'converter', 'src', 'cli.ts'),
-    path.join(cwd, '..', 'converter', 'src', 'cli.ts'),
   ]
   for (const p of candidates) {
     if (fs.existsSync(p)) return p
@@ -117,6 +114,31 @@ async function buildPackage(
   // Run postinstall if present (some extensions download servers here)
   onProgress(3, 5, 'Running postinstall...', 'npm run postinstall')
   await run('npm', ['run', 'postinstall', '--if-present'], build, npmLog).catch(() => {})
+  // Install pip packages if configured in registry
+  if (info.pipPackages?.length) {
+    const pipLog = (chunk: string) => onProgress(3, 5, chunk.trim(), '')
+    // Try multiple python binary paths (coc's process may not have Homebrew in PATH)
+    const pythonPaths = [
+      '/opt/homebrew/bin/python3',
+      '/usr/local/bin/python3',
+      '/usr/bin/python3',
+      'python3',
+    ]
+    let pythonBin = ''
+    for (const p of pythonPaths) {
+      if (p === 'python3') {
+        try { await run('python3', ['--version'], build); pythonBin = 'python3'; break } catch { continue }
+      } else if (fs.existsSync(p)) {
+        pythonBin = p; break
+      }
+    }
+    if (!pythonBin) throw new Error('python3 not found, cannot install pip packages: ' + info.pipPackages.join(', '))
+    const pipArgs = ['-m', 'pip', 'install']
+    // --break-system-packages only needed on Linux (PEP 668); not supported on older pip
+    if (process.platform === 'linux') pipArgs.push('--break-system-packages')
+    onProgress(3, 5, 'Installing pip packages...', `${pythonBin} -m pip install ${info.pipPackages.join(' ')}`)
+    await run(pythonBin, pipArgs.concat(...info.pipPackages), build, pipLog)
+  }
 
   // Check for server directory in original source and install its deps
   const serverDir = path.join(inputDir, 'server')
@@ -237,8 +259,16 @@ async function buildPackage(
       `documentSelector: [${langSelector}]`,
     )
 
-    // Fix transport: generated code uses TransportKind.ipc but most LSP servers need stdio
-    code = code.replace(/TransportKind\.ipc/g, 'TransportKind.stdio')
+    // Remove bin-walking serverModule override: the main entry from
+    // require.resolve is usually the correct server module, not the bin script.
+    code = code.replace(/serverModule\s*=\s*require\("path"\)\.join\(_dir,\s*_entry\);\s*/g, '')
+
+    // Wrap client.start() in a guard to prevent disposed connection errors
+    // when the server and client initialize asynchronously
+    code = code.replace(
+      /client\.start\(\);/g,
+      "client.start().catch(() => {/* init may complete async */});",
+    )
 
     fs.writeFileSync(docSelPath, code)
   }
@@ -291,10 +321,10 @@ function metaPath(name: string): string {
   return path.join(cacheDir(name), 'meta.json')
 }
 
-function saveMeta(name: string): void {
+async function saveMeta(name: string): Promise<void> {
   const srcDir = sourceDir(name)
   try {
-    const log = execSync(`git -C "${srcDir}" log -1 --format="%h|%s|%ar"`, { encoding: 'utf-8' }).toString().trim()
+    const log = await runWithOutput('git', ['-C', srcDir, 'log', '-1', '--format=%h|%s|%ar'], srcDir)
     const [commit, msg, date] = log.split('|')
     fs.writeFileSync(metaPath(name), JSON.stringify({ commit, msg, date, updatedAt: Date.now() }, null, 2))
   } catch { /* non-critical: commit tracking metadata */ }
@@ -319,7 +349,7 @@ export async function installPackage(state: StateManager, name: string): Promise
     await convertSource(input, name, prog)
     await buildPackage(name, input, info, prog)
     await installToCoc(name, prog)
-    saveMeta(name)
+    await saveMeta(name)
     state.setDirty()
     state.setPackageStatus(name, 'installed')
     cocWindow.showInformationMessage(`coc-${name} installed`)
@@ -397,7 +427,7 @@ export async function updatePackage(state: StateManager, name: string): Promise<
     await convertSource(input, name, prog)
     await buildPackage(name, input, info, prog)
     await installToCoc(name, prog)
-    saveMeta(name)
+    await saveMeta(name)
     state.setDirty()
     state.setPackageStatus(name, 'installed')
     cocWindow.showInformationMessage(`coc-${name} installed`)

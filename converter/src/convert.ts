@@ -407,17 +407,29 @@ if (result.errors.length) {
  * Scan original source for TypeScript plugin names used by the extension.
  * Checks: explicit imports, require() calls, package.json dependencies.
  */
+function walkTsFiles(dir: string): string[] {
+  const files: string[] = []
+  try {
+    for (const entry of fs.readdirSync(dir)) {
+      const full = path.join(dir, entry)
+      const stat = fs.statSync(full)
+      if (stat.isDirectory()) {
+        files.push(...walkTsFiles(full))
+      } else if (entry.endsWith('.ts') || entry.endsWith('.d.ts')) {
+        files.push(full)
+      }
+    }
+  } catch {}
+  return files
+}
+
 function scanTypeScriptPlugins(input: string, _result: any): Array<{ name: string; languages: string[]; enableForWorkspaceTypeScriptVersions: boolean }> {
   const plugins: Array<{ name: string; languages: string[]; enableForWorkspaceTypeScriptVersions: boolean }> = []
   const scanDir = path.join(input, 'src')
   if (!fs.existsSync(scanDir)) return plugins
 
-  // Collect all .ts file content
-  const allContent: string[] = []
-  for (const file of fs.readdirSync(scanDir)) {
-    if (!file.endsWith('.ts')) continue
-    allContent.push(fs.readFileSync(path.join(scanDir, file), 'utf-8'))
-  }
+  // Collect all .ts file content (recursive)
+  const allContent = walkTsFiles(scanDir).map(f => fs.readFileSync(f, 'utf-8'))
   const content = allContent.join('\n')
 
   // Check for plugin names in require() / import statements
@@ -471,13 +483,12 @@ function sanitizeServerPath(p: string): string | null {
  * Returns an array of `require.resolve` argument strings (bare module names).
  */
 function detectServerModules(input: string, _result: any): string[] {
-  const serverModules: string[] = []
   const seen = new Set<string>()
+  const serverModules: string[] = []
   const scanDir = path.join(input, 'src')
   if (fs.existsSync(scanDir)) {
-    for (const file of fs.readdirSync(scanDir)) {
-      if (!file.endsWith('.ts') && !file.endsWith('.d.ts')) continue
-      const content = fs.readFileSync(path.join(scanDir, file), 'utf-8')
+    for (const file of walkTsFiles(scanDir)) {
+      const content = fs.readFileSync(file, 'utf-8')
       for (const re of [/(?:require\s*(?:\.\s*resolve)?\s*\(|from\s+)['"]([^'"]+(?:language-server|server|Server|lsp)[^'"]*)['"]\s*\)?/g]) {
         for (const m of content.matchAll(re)) {
           const name = sanitizeServerPath(m[1])
