@@ -8,7 +8,7 @@
     "convert": "tsx src/cli.ts"
   },
   "dependencies": {
-    "ts-morph": "^25.0.0",
+    "ts-morph": "^28.0.0",
     "commander": "^15.0.0"
   },
   "devDependencies": {
