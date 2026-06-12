@@ -8,7 +8,8 @@
     "build": "npm run build:converter && npm run build:plugin",
     "switch:local": "bash switch.sh local",
     "switch:npm": "bash switch.sh npm",
-    "switch:status": "bash switch.sh status"
+    "switch:status": "bash switch.sh status",
+    "pr": "bash scripts/create-pr.sh"
   },
   "repository": {
     "type": "git",
