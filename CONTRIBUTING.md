@@ -29,11 +29,18 @@ Thanks for your interest in contributing to coc-vscode-loader!
 
 ```
 coc-vscode-loader/
-├── converter/     CLI conversion tool
+├── converter/     CLI conversion tool (AST transforms)
 ├── plugin/        coc.nvim plugin (coc-vscode-loader)
-├── examples/      Test cases
-├── types/         Type definitions (auto-synced)
+└── examples/      Test cases
 ```
+
+## Areas we need help with
+
+- **Add new plugins** to the [registry](https://github.com/coc-plugin/coc-vscode-registry) — see `CONTRIBUTING.md` there
+- **Implement more transforms** — check `converter/src/transforms/` for patterns
+- **Provider signature coverage** — extend `provider-register.ts` with more adapters
+- **Bridge presets** — add python-bridge, rust-bridge examples to `presets.ts`
+- **Test with real extensions** — pick a VS Code extension and run the converter
 
 ## Questions?
 

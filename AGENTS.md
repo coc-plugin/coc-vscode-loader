@@ -105,7 +105,15 @@ npm install /path/to/coc-converter    # or
 :CocInstall /path/to/coc-converter
 ```
 
-## Pending (next session)
+## Milestones
+
+| Milestone | Target | Description |
+|-----------|--------|-------------|
+| [v1.2.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-08 | Registry expansion: Angular, ESLint, YAML, etc. |
+| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-10 | More transforms & bridge presets |
+| [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | Stable ecosystem: 10+ plugins, full transform coverage |
+
+## Pending
 
 - [ ] Add more plugins to registry
 - [ ] Add more transforms (uri-mapping, more provider signatures)

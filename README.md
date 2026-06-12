@@ -1,8 +1,14 @@
 # vscode-coc-loader
 
-![TUI preview](https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png)
+[![npm](https://img.shields.io/npm/v/coc-vscode-loader)](https://www.npmjs.com/package/coc-vscode-loader)
+[![license](https://img.shields.io/github/license/coc-plugin/coc-vscode-loader)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader/stargazers)
+[![last commit](https://img.shields.io/github/last-commit/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader)
+[![open issues](https://img.shields.io/github/issues/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader/issues)
 
-Run VS Code extensions seamlessly in coc.nvim.
+在 coc.nvim 中无缝运行 VS Code 扩展。
+
+![TUI preview](https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png)
 
 ## Background
 
@@ -44,6 +50,41 @@ Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API
 
 > See [coc-vscode-registry/docs](https://github.com/coc-plugin/coc-vscode-registry/tree/main/docs) for full API mapping docs.
 
-## Reference
+## Roadmap
 
-- `types/vscode.d.ts`, `types/coc.d.ts` — see [coc-vscode-registry/types](https://github.com/coc-plugin/coc-vscode-registry/tree/main/types)
+| Milestone | Target | Focus |
+|-----------|--------|-------|
+| [v1.2.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-08 | Registry expansion: Angular, ESLint, YAML |
+| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-10 | More transforms + bridge presets |
+| [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | 10+ plugins, full coverage |
+
+---
+
+> 📖 API docs & registry — [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)
+>
+> 📦 npm — [coc-vscode-loader](https://www.npmjs.com/package/coc-vscode-loader)
+
+## FAQ
+
+### Plugin installed but not working?
+
+Close the TUI — it will auto-run `:CocRestart`. Or manually run `:CocRestart`.
+
+### Which VS Code extensions are supported?
+
+Currently Volar (Vue), Prisma, and HTML CSS Support. More are being added to the [registry](https://github.com/coc-plugin/coc-vscode-registry).
+
+### How is this different from running the VS Code extension directly?
+
+The converter rewrites VS Code API calls to coc.nvim equivalents. You get the same functionality without needing VS Code.
+
+### Can I add my own extension?
+
+Yes! Fork the [registry repo](https://github.com/coc-plugin/coc-vscode-registry), add an entry to `registry.json`, and submit a PR.
+
+## Community & Support
+
+- 💬 [Discussions](https://github.com/coc-plugin/coc-vscode-loader/discussions)
+- 🐛 [Issues](https://github.com/coc-plugin/coc-vscode-loader/issues)
+- 📖 [Documentation](https://github.com/coc-plugin/coc-vscode-registry)
+- ⭐ Star the repo if you find it useful!
