@@ -1,4 +1,11 @@
 import { getAllPackages, PackageInfo } from './registry'
+import * as path from 'path'
+import * as fs from 'fs'
+import * as os from 'os'
+
+function isInstalled(name: string): boolean {
+  return fs.existsSync(path.join(os.homedir(), '.config', 'coc', 'extensions', 'node_modules', `coc-${name}`))
+}
 
 export type Status = 'not-installed' | 'installing' | 'installed' | 'updating' | 'uninstalling' | 'failed'
 
@@ -25,7 +32,7 @@ type Listener = (state: AppState) => void
 export function createInitialState(): AppState {
   const packages = getAllPackages().map(info => ({
     info,
-    status: 'not-installed' as Status,
+    status: (isInstalled(info.name) ? 'installed' : 'not-installed') as Status,
     progressLog: [],
     expanded: false,
     logExpanded: false,

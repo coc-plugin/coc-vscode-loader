@@ -1,70 +1,218 @@
 import { StateManager } from './state'
+import { getPackage, PackageInfo } from './registry'
+import { spawn } from 'child_process'
+import * as path from 'path'
+import * as fs from 'fs'
+import * as os from 'os'
 
-interface Step {
-  msg: string
-  cmd: string
+const CACHE_ROOT = path.join(os.homedir(), '.config', 'coc', 'converter-cache')
+
+function cacheDir(name: string): string {
+  return path.join(CACHE_ROOT, name)
 }
 
-const INSTALL_STEPS: Step[] = [
-  { msg: 'Cloning repository...', cmd: 'git clone --depth=1 https://github.com/vuejs/language-tools' },
-  { msg: 'Scanning API...', cmd: 'scanner: analyzing 128 source files' },
-  { msg: 'Transforming code...', cmd: 'transform: import-mapping, class-to-factory, provider-register' },
-  { msg: 'Building...', cmd: 'npm install && npm run build' },
-  { msg: 'Installing to coc...', cmd: 'ln -s ./dist ~/.config/coc/extensions/node_modules/coc-converted-plugin' },
-]
+function sourceDir(name: string): string {
+  return path.join(cacheDir(name), 'source')
+}
 
-const UNINSTALL_STEPS: Step[] = [
-  { msg: 'Removing files...', cmd: 'rm -rf node_modules, lib, dist' },
-  { msg: 'Cleaning config...', cmd: 'clean: package.json, coc-settings.json' },
-]
+function buildDir(name: string): string {
+  return path.join(cacheDir(name), 'build')
+}
 
-async function runPipeline(
-  steps: Step[],
-  onProgress: (short: string, log: string) => void,
+function pluginDir(name: string): string {
+  return path.join(os.homedir(), '.config', 'coc', 'extensions', 'node_modules', `coc-${name}`)
+}
+
+function converterCliPath(): string {
+  const base = path.resolve(__dirname, '..')
+  const candidates = [
+    path.join(base, '..', 'converter', 'src', 'cli.ts'),
+    path.join(base, '..', '..', 'converter', 'src', 'cli.ts'),
+    path.join(base, '..', '..', '..', 'converter', 'src', 'cli.ts'),
+  ]
+  for (const p of candidates) {
+    if (fs.existsSync(p)) return p
+  }
+  throw new Error(
+    'converter CLI not found. ' +
+    'Please set $COC_CONVERTER_PATH to the converter/ directory, ' +
+    'or ensure it is at the same level as coc-converter/'
+  )
+}
+
+async function run(
+  cmd: string, args: string[], cwd: string,
+  onLine: (line: string) => void,
 ): Promise<void> {
-  for (let i = 0; i < steps.length; i++) {
-    const n = i + 1, total = steps.length
-    onProgress(
-      `[${n}/${total}] ${steps[i].msg}`,
-      `[${n}/${total}] ${steps[i].msg}\n  $ ${steps[i].cmd}`,
-    )
-    await sleep(800 + Math.random() * 600)
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: true })
+    const lines: string[] = []
+    const handler = (data: Buffer) => {
+      const text = data.toString()
+      lines.push(text)
+      onLine(text)
+    }
+    child.stdout.on('data', handler)
+    child.stderr.on('data', handler)
+    child.on('close', code => {
+      if (code === 0) resolve()
+      else reject(new Error(`${cmd} ${args.join(' ')} exited with code ${code}`))
+    })
+    child.on('error', reject)
+  })
+}
+
+async function downloadSource(
+  info: PackageInfo, name: string,
+  onProgress: (step: number, total: number, msg: string, cmd: string) => void,
+): Promise<string> {
+  const srcDir = sourceDir(name)
+  const cache = cacheDir(name)
+  const repoUrl = `https://github.com/${info.source.repo}.git`
+
+  if (fs.existsSync(srcDir)) {
+    onProgress(1, 5, 'Updating source...', `git -C ${srcDir} pull`)
+    await run('git', ['-C', srcDir, 'pull'], cache, () => {})
+  } else {
+    onProgress(1, 5, 'Cloning repository...', `git clone --depth=1 ${repoUrl}`)
+    fs.mkdirSync(cache, { recursive: true })
+    await run('git', ['clone', '--depth=1', repoUrl, srcDir], cache, () => {})
+  }
+
+  return info.source.subdir ? path.join(srcDir, info.source.subdir) : srcDir
+}
+
+async function convertSource(
+  inputDir: string, name: string,
+  onProgress: (step: number, total: number, msg: string, cmd: string) => void,
+): Promise<void> {
+  const build = buildDir(name)
+  if (fs.existsSync(build)) fs.rmSync(build, { recursive: true })
+
+  const cli = converterCliPath()
+  onProgress(2, 5, 'Converting...', `converter convert ${inputDir} -o ${build}`)
+  await run('npx', ['tsx', cli, 'convert', inputDir, '-o', build], cacheDir(name), () => {})
+}
+
+async function buildPackage(
+  name: string,
+  onProgress: (step: number, total: number, msg: string, cmd: string) => void,
+): Promise<void> {
+  const build = buildDir(name)
+
+  onProgress(3, 5, 'Installing dependencies...', 'npm install --legacy-peer-deps')
+  await run('npm', ['install', '--legacy-peer-deps'], build, () => {})
+
+  onProgress(4, 5, 'Building...', 'node esbuild.mjs')
+  await run('node', ['esbuild.mjs'], build, () => {})
+}
+
+function extensionsPkgPath(): string {
+  return path.join(os.homedir(), '.config', 'coc', 'extensions', 'package.json')
+}
+
+async function installToCoc(
+  name: string,
+  onProgress: (step: number, total: number, msg: string, cmd: string) => void,
+): Promise<void> {
+  const src = buildDir(name)
+  const dest = pluginDir(name)
+
+  onProgress(5, 5, 'Installing to coc...', `copy to ${dest} + register in extensions/package.json`)
+
+  if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true })
+  fs.mkdirSync(path.dirname(dest), { recursive: true })
+  fs.cpSync(src, dest, { recursive: true })
+
+  const pkgPath = extensionsPkgPath()
+  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+  const depName = `coc-${name}`
+  if (!pkg.dependencies[depName]) {
+    pkg.dependencies[depName] = `file:${dest}`
+    pkg.lastUpdate = Date.now()
+    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
   }
 }
 
-export function installPackage(state: StateManager, name: string): Promise<void> {
-  state.setPackageStatus(name, 'installing', { progress: '[1/5] Preparing...', appendLog: true })
-  return runPipeline(INSTALL_STEPS, (short, log) => {
-    state.setPackageStatus(name, 'installing', { progress: short, logEntry: log })
-  }).then(() => {
+export async function installPackage(state: StateManager, name: string): Promise<void> {
+  const info = getPackage(name)
+  if (!info) { state.setPackageStatus(name, 'failed', { error: `Unknown package: ${name}` }); return }
+
+  const prog = (step: number, total: number, msg: string, cmd: string) => {
+    state.setPackageStatus(name, 'installing', {
+      progress: `[${step}/${total}] ${msg}`,
+      logEntry: `[${step}/${total}] ${msg}\n  $ ${cmd}`,
+      appendLog: true,
+    })
+  }
+
+  state.setPackageStatus(name, 'installing', { progress: 'Starting...' })
+
+  try {
+    const input = await downloadSource(info, name, prog)
+    await convertSource(input, name, prog)
+    await buildPackage(name, prog)
+    await installToCoc(name, prog)
     state.setPackageStatus(name, 'installed')
-  }).catch(err => {
-    state.setPackageStatus(name, 'failed', { error: err.message })
-  })
+  } catch (e: any) {
+    state.setPackageStatus(name, 'failed', { error: e.message })
+  }
 }
 
-export function uninstallPackage(state: StateManager, name: string): Promise<void> {
-  state.setPackageStatus(name, 'uninstalling', { progress: '[1/2] Preparing...', appendLog: true })
-  return runPipeline(UNINSTALL_STEPS, (short, log) => {
-    state.setPackageStatus(name, 'uninstalling', { progress: short, logEntry: log })
-  }).then(() => {
+export async function uninstallPackage(state: StateManager, name: string): Promise<void> {
+  state.setPackageStatus(name, 'uninstalling', { progress: '[1/3] Removing from coc...' })
+
+  try {
+    const dest = pluginDir(name)
+    if (fs.existsSync(dest)) {
+      fs.rmSync(dest, { recursive: true })
+    }
+
+    state.setPackageStatus(name, 'uninstalling', { progress: '[2/3] Removing from package.json...' })
+
+    const pkgPath = extensionsPkgPath()
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+    const depName = `coc-${name}`
+    if (pkg.dependencies[depName]) {
+      delete pkg.dependencies[depName]
+      pkg.lastUpdate = Date.now()
+      fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
+    }
+
+    state.setPackageStatus(name, 'uninstalling', { progress: '[3/3] Removing cache...' })
+
+    const cache = cacheDir(name)
+    if (fs.existsSync(cache)) {
+      fs.rmSync(cache, { recursive: true })
+    }
+
     state.setPackageStatus(name, 'not-installed')
-  }).catch(err => {
-    state.setPackageStatus(name, 'failed', { error: err.message })
-  })
+  } catch (e: any) {
+    state.setPackageStatus(name, 'failed', { error: e.message })
+  }
 }
 
-export function updatePackage(state: StateManager, name: string): Promise<void> {
-  state.setPackageStatus(name, 'updating', { progress: '[1/5] Preparing...', appendLog: true })
-  return runPipeline(INSTALL_STEPS, (short, log) => {
-    state.setPackageStatus(name, 'updating', { progress: short, logEntry: log })
-  }).then(() => {
+export async function updatePackage(state: StateManager, name: string): Promise<void> {
+  const info = getPackage(name)
+  if (!info) { state.setPackageStatus(name, 'failed', { error: `Unknown package: ${name}` }); return }
+
+  const prog = (step: number, total: number, msg: string, cmd: string) => {
+    state.setPackageStatus(name, 'updating', {
+      progress: `[${step}/${total}] ${msg}`,
+      logEntry: `[${step}/${total}] ${msg}\n  $ ${cmd}`,
+      appendLog: true,
+    })
+  }
+
+  state.setPackageStatus(name, 'updating', { progress: 'Starting...' })
+
+  try {
+    const input = await downloadSource(info, name, prog)
+    await convertSource(input, name, prog)
+    await buildPackage(name, prog)
+    await installToCoc(name, prog)
     state.setPackageStatus(name, 'installed')
-  }).catch(err => {
-    state.setPackageStatus(name, 'failed', { error: err.message })
-  })
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  } catch (e: any) {
+    state.setPackageStatus(name, 'failed', { error: e.message })
+  }
 }
