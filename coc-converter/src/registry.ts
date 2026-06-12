@@ -20,7 +20,7 @@ export interface PackageInfo {
   categories: string[]
 }
 
-const REMOTE_REGISTRY_URL = 'https://raw.githubusercontent.com/neoclide/coc-vscode-loader/main/coc-converter/registry.json'
+const REMOTE_REGISTRY_URL = 'https://raw.githubusercontent.com/coc-plugin/coc-vscode-registry/main/registry.json'
 const CACHE_PATH = path.join(os.homedir(), '.config', 'coc', 'converter-cache', 'registry.json')
 
 const BUILTIN_REGISTRY: PackageInfo[] = [

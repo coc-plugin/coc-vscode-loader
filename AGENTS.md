@@ -8,22 +8,16 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 
 | File | Purpose |
 |------|---------|
-| `README.md` | Entry point with doc table of contents |
+| `README.md` | Entry point |
 | `vscode.d.ts` | Upstream VS Code extension API types (auto-synced) |
 | `coc.d.ts` | Upstream coc.nvim API types (auto-synced) |
-| `vscode-vs-coc-api-diff.md` | Full API diff (vscode vs coc) |
-| `mapping-quickref.md` | Fast bidirectional API lookup |
-| `import-mapping.md` | Import name mapping: `vscode` → `coc.nvim` |
-| `provider-signature-card.md` | Provider registration signatures side-by-side |
-| `pattern-migration-examples.md` | Migration code examples for common patterns |
-| `manifest-activation-mapping.md` | `package.json` / `activationEvents` / `contributes` mapping |
-| `vscode-api-feasibility.md` | Feasibility analysis of porting vscode APIs to coc |
-| `converter-design-v2.md` | Converter architecture + bridge preset system |
-| `converter/README.md` | Converter tool docs and usage |
-| `volar-migration-guide.md` | Volar (Vue) migration case study |
+| `converter/` | Source code: CLI conversion tool |
 | `coc-converter/` | **coc-converter 包管理器插件** |
 | `coc-converter/README.md` | Converter plugin docs and usage |
-| `logs/YYYY-MM-DD.md` | Daily sync change logs (auto-generated) |
+| `logs/YYYY-MM-DD.md` | Daily sync change logs |
+| `AGENTS.md` | Dev instructions for AI agents |
+
+> 📖 API mapping docs and registry have been moved to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry).
 
 ## Converter status
 

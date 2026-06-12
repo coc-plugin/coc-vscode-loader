@@ -6,10 +6,11 @@
 
 [coc.nvim](https://github.com/neoclide/coc.nvim) 的 API 设计深受 VS Code 扩展 API 影响——两者使用相同的 LSP 协议、相似的 Provider 体系、近似的命名空间结构。这使得 VS Code 扩展有可能通过机械转换移植到 coc.nvim。
 
-本仓库包含三部分内容：
-1. **API 映射文档** — 完整的迁移参考
-2. **转换器原型** ([`converter/`](./converter/)) — 自动将 VS Code 扩展转为 coc 插件
-3. **验证案例** — Volar (Vue) 和 Prisma 的成功转换
+本仓库包含两部分内容：
+1. **转换器原型** ([`converter/`](./converter/)) — 自动将 VS Code 扩展转为 coc 插件
+2. **包管理器插件** ([`coc-converter/`](./coc-converter/)) — coc.nvim 插件，TUI 界面安装转换后的插件
+
+> 📖 API 映射文档和注册表已迁移到独立仓库 [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)。
 
 ## API 文档
 

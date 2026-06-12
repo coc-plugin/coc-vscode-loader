@@ -96,7 +96,7 @@ export async function activate(context: ExtensionContext) {
     commands.registerCommand('converter.updateRegistry', async () => {
       try {
         const count = await updateRegistry()
-        cocWindow.showInformationMessage(`Registry updated: ${count} packages available. Restart to apply.`)
+        cocWindow.showInformationMessage(`Registry updated: ${count} packages available. Restart coc to apply.`)
       } catch (e: any) {
         cocWindow.showErrorMessage(`Registry update failed: ${e.message}`)
       }
