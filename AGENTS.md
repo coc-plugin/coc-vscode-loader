@@ -67,7 +67,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 - Floating window, no border
 - lazy.nvim-inspired render engine: per-segment `append(text, hl)` + extmark highlights
 - 9 custom `CocConverter*` highlight groups linked to theme standard groups
-- **Top buttons**: `coc-loader(H)` Home  `Install(I)`  `Update(U)`  `Check(C)`  `Help(?)`
+- **Top buttons**: `coc-loader(H)` (Home)  `Install(I)`  `Update(U)`  `Check(C)`  `Help(?)`
 - **Package operations**: `i` install `u` update `X` uninstall `<CR>` toggle details/logs
 - **Update check**: `C` git ls-remote compares commits, shows `↑` when outdated
 - **Other**: `/` search `q` / `<Esc>` close (auto `:CocRestart` if changed)
@@ -125,7 +125,6 @@ npm install coc-vscode-loader    # or
 - [ ] Add more plugins to registry
 - [ ] Add more transforms (uri-mapping, more provider signatures)
 - [ ] Add python-bridge / rust-bridge preset examples
-- [ ] Implement `--bridge` CLI option (force bridge mode)
 
 ## Type sync workflow
 

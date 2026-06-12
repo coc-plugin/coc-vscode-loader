@@ -36,6 +36,17 @@ cd ./output && npm install && npm run build
 | Prisma | Pure LSP | ✅ | Auto-detects bin entry |
 | HTML CSS Support | Direct API | ✅ | Handles new→create, missing API polyfills |
 
+**Quick conversion script:**
+
+Use [`scripts/convert-plugin.sh`](./scripts/convert-plugin.sh) for one-step convert & install:
+
+```bash
+bash scripts/convert-plugin.sh <name> <github-repo> [subdir]
+# Example:
+bash scripts/convert-plugin.sh eslint microsoft/vscode-eslint
+bash scripts/convert-plugin.sh volar vuejs/language-tools extensions/vscode
+```
+
 **Converter architecture:**
 
 ```
@@ -86,6 +97,8 @@ npm run switch:status
 npm run switch:local
 npm run switch:npm
 ```
+
+> **Note for npm 11+**: `switch.sh npm` temporarily removes `file:` dependencies from `extensions/package.json` to avoid reify errors, then restores them automatically.
 
 After switching, run `:CocRestart` in Neovim.
 

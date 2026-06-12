@@ -28,39 +28,6 @@ export interface PackageInfo {
 const REMOTE_REGISTRY_URL = 'https://raw.githubusercontent.com/coc-plugin/coc-vscode-registry/main/registry.json'
 const CACHE_PATH = path.join(os.homedir(), '.config', 'coc', 'converter-cache', 'registry.json')
 
-const BUILTIN_REGISTRY: PackageInfo[] = [
-  {
-    name: 'volar',
-    displayName: 'Volar (Vue)',
-    description: 'Vue language support — template/script/style IntelliSense',
-    type: 'ts-bridge',
-    source: { type: 'github', repo: 'vuejs/language-tools', subdir: 'extensions/vscode' },
-    url: 'https://github.com/vuejs/language-tools',
-    languages: ['vue'],
-    categories: ['LSP', 'TypeScript'],
-  },
-  {
-    name: 'prisma',
-    displayName: 'Prisma',
-    description: 'Prisma schema language support — syntax highlight, lint, format',
-    type: 'pure-lsp',
-    source: { type: 'github', repo: 'prisma/language-tools', subdir: 'packages/vscode' },
-    url: 'https://github.com/prisma/language-tools',
-    languages: ['prisma'],
-    categories: ['LSP'],
-  },
-  {
-    name: 'html-css-support',
-    displayName: 'HTML CSS Support',
-    description: 'CSS class name completion for HTML attributes',
-    type: 'direct-api',
-    source: { type: 'github', repo: 'ecmel/vscode-html-css' },
-    url: 'https://github.com/ecmel/vscode-html-css',
-    languages: ['html', 'css'],
-    categories: ['Completion'],
-  },
-]
-
 let cached: PackageInfo[] | null = null
 
 function loadCache(): PackageInfo[] | null {
@@ -86,7 +53,7 @@ export async function updateRegistry(): Promise<number> {
 export function getAllPackages(): PackageInfo[] {
   if (cached) return cached
   cached = loadCache()
-  return cached || BUILTIN_REGISTRY
+  return cached || []
 }
 
 export function getPackage(name: string): PackageInfo | undefined {
