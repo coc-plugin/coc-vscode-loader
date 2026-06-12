@@ -1,6 +1,6 @@
 {
   "name": "coc-vscode-loader",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "description": "Run VS Code extensions seamlessly in coc.nvim",
   "main": "lib/index.js",
   "keywords": [
@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/coc-plugin/coc-vscode-loader/issues"
   },
-  "homepage": "https://github.com/coc-plugin/coc-vscode-loader",
+  "homepage": "https://www.npmjs.com/package/coc-vscode-loader",
   "license": "MIT",
   "engines": {
     "coc": ">= 0.0.80"

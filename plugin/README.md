@@ -1,15 +1,22 @@
 # coc-vscode-loader
 
+![TUI preview](./assets/tui-preview.png)
+
 VS Code extension → coc.nvim plugin loader with TUI package manager.
 
 Install/update/uninstall converted VS Code extensions via a floating terminal UI.
 
 ## Install
 
+```vim
+:CocInstall coc-vscode-loader
+```
+
+Or via npm:
+
 ```bash
 cd ~/.config/coc/extensions
-npm install /path/to/coc-vscode-loader
-# or :CocInstall /path/to/coc-vscode-loader
+npm install coc-vscode-loader
 ```
 
 ## TUI Keymaps

@@ -14,6 +14,6 @@
   "bugs": {
     "url": "https://github.com/coc-plugin/coc-vscode-loader/issues"
   },
-  "homepage": "https://github.com/coc-plugin/coc-vscode-loader",
+  "homepage": "https://www.npmjs.com/package/coc-vscode-loader",
   "license": "MIT"
 }
