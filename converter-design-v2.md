@@ -7,8 +7,7 @@
 ```
 :CocInstall coc-converter
 :CocCommand converter.install volar     ← 下载 VS Code 插件 → 转换 → 安装
-:CocCommand converter.list              ← 查看已安装
-:CocCommand converter.update            ← 全部更新
+:CocCommand converter.open              ← TUI 管理界面
 :CocCommand converter.uninstall volar   ← 卸载
 ```
 
@@ -50,7 +49,7 @@ VS Code 的实现依赖 `typescript.tsserverRequest` 内置命令，coc 没有�
 ## 二、整体架构
 
 ```
-                    ┌──────────────────────┐
+                     ┌──────────────────────┐
                     │   输入：VS Code 插件   │
                     │   (目录 / npm / git)  │
                     └────────┬─────────────┘
@@ -59,28 +58,26 @@ VS Code 的实现依赖 `typescript.tsserverRequest` 内置命令，coc 没有�
                │     scanner              │
                │   遍历 .ts 文件          │
                │   提取 API 调用           │
-               │   检测插件类型（纯LSP/桥接）│
+               │   检测插件类型（桥接/纯LSP/直接API）│
                └────────┬────────────────┘
                         ▼
-          ┌─────────────────────────────┐
-          │     transforms/              │
-          │   import → coc.nvim          │
-          │   LanguageClient 适配        │
-          │   Provider 注册重命名        │
-          │   标记不可移植 API（注释保留）  │
-          └────────┬────────────────────┘
+          ┌──────────────────────────────────┐
+          │     transforms/ (AST 变换)        │
+          │   ├ import-mapping               │
+          │   ├ class-to-factory             │
+          │   ├ provider-register            │
+          │   ├ language-client              │
+          │   ├ enum-offset                  │
+          │   └ mark-unsupported (文本替换)   │
+          └────────┬─────────────────────────┘
                    ▼
-          ┌─────────────────────────────┐
-          │     bridge-generator         │
-          │   根据 registry 配置生成      │
-          │   桥接代码或链路注释          │
-          └────────┬────────────────────┘
-                   ▼
-          ┌─────────────────────────────┐
-          │     package-manager          │
-          │   engines 转换               │
-          │   + typescriptServerPlugins  │
-          └────────┬────────────────────┘
+          ┌──────────────────────────────────┐
+          │     convert.ts (主流程)            │
+          │   ├ 生成入口 index.ts（桥接模板）   │
+          │   ├ 生成 package.json + esbuild    │
+          │   ├ 桥接代码由 presets.ts 驱动     │
+          │   └ 输出转换报告                   │
+          └────────┬─────────────────────────┘
                    ▼
           ┌─────────────────────────────┐
           │    输出：coc 插件目录 + 报告   │
@@ -89,294 +86,108 @@ VS Code 的实现依赖 `typescript.tsserverRequest` 内置命令，coc 没有�
 
 ---
 
-## 三、可配置桥接系统
+## 三、桥接预设系统
 
-每种插件的特殊桥接需求定义在 registry 中，转换器按配置生成代码：
+桥接逻辑通过 preset 驱动，定义在 `presets.ts` 中。`convert.ts` 不关心桥接细节，只调用 `getActivePresets()` + `generateBridgeCode()`。
 
-```jsonc
-// registry.json
-{
-  "volar": {
-    "source": {
-      "type": "github",
-      "repo": "vuejs/language-tools",
-      "subdir": "extensions/vscode"
-    },
-    "type": "ts-bridge",           // ← 插件类型
-    "tsPluginName": "@vue/typescript-plugin",  // ← 需要注入 tsserver 的插件
-    "tsPluginLanguages": ["vue"],              // ← 插件支持的文件类型
-    "bridges": [
-      {
-        "notification": "tsserver/request",
-        "description": "转发 Vue LSP 的 TS 请求到 tsserver",
-        "handler": {
-          "type": "command",
-          "command": "typescript.tsserverRequest",
-          "args": ["{{command}}", "{{args}}", "{isAsync: true, lowPriority: true}"],
-          "responseNotification": "tsserver/response",
-          "responseArgs": ["{{seq}}", "{{result.body}}"]
-        }
-      }
-    ]
-  },
-  "eslint": {
-    "source": {
-      "type": "npm",
-      "package": "vscode-eslint"
-    },
-    "type": "pure-lsp",            // ← 纯 LSP，无桥接
-    "bridges": []
-  },
-  "some-python-plugin": {
-    "source": "...",
-    "type": "custom-bridge",       // ← 自定义桥接
-    "bridges": [
-      {
-        "notification": "python/analysis",
-        "description": "转发到 Python 分析服务",
-        "handler": {
-          "type": "tcp",           // ← TCP 转发
-          "host": "127.0.0.1",
-          "port": 8080
-        }
-      }
-    ]
-  }
-}
-```
-
-### 桥接类型
-
-| handler.type | 说明 | 适用场景 |
-|-------------|------|---------|
-| `command` | 调用 coc 命令转发 | TS 桥接、编辑器内部通信 |
-| `tcp` | TCP socket 转发 | 外部语言服务 |
-| `stdio` | 子进程 stdin/stdout 转发 | 本地工具链 |
-| `http` | HTTP POST 请求转发 | 远程 API |
-
-### 桥接检测与选择
-
-桥接的检测和选择由三个层次决定，优先级从高到低：
-
-```
-① Registry 配置  → 显式指定 preset/桥接（最高优先级）
-② 源码扫描      → 自动匹配 preset（如发现 tsserver/request 自动选 ts-bridge）
-③ 默认          → 纯 LSP / 直接 API（无桥接）
-```
-
-**当前扫描检测规则（`scanner.ts`）：**
-
-| 模式 | 匹配的 preset | 示例插件 |
-|------|-------------|---------|
-| `tsserver/request`、`_vue:`、`typescript.tsserverRequest` | `ts-bridge` | Volar |
-| `client.onNotification('xxx/yyy', ...)` 未知模式 | 无 | 标记 TODO |
-
-**未来添加新桥接的步骤：**
-
-```
-1. 在 presets.ts 中定义新 preset
-   └─ 包括 notification 名、handler 类型、依赖等
-
-2. 在 scanner.ts 中添加对应的检测模式
-   └─ 搜索关键词 → 匹配到新 preset
-
-3. （可选）在 registry 中为特定插件指定 preset
-   └─ "presets": ["python-bridge"]
-```
-
-示例：添加 Python 桥接
+### BridgePreset 接口
 
 ```typescript
-// presets.ts
-const PRESETS = {
-  'python-bridge': {
-    name: 'python-bridge',
-    notification: 'python/analysis',
-    handler: { type: 'command', command: 'python.bridgeRequest' },
-  },
+interface BridgePreset {
+  name: string
+  notification: string
+  responseNotification?: string
+  code: string                    // 生成的桥接代码模板
+  requiresCommand?: string
+  extraDeps?: string[]
 }
 ```
+
+### 当前内置 preset
 
 ```typescript
-// scanner.ts 添加检测模式
-const BRIDGE_PATTERNS = [
-  { pattern: 'tsserver/request', preset: 'ts-bridge' },
-  { pattern: 'python/analysis',  preset: 'python-bridge' },  // 新增
-]
-```
-
-### 桥接预设（Bridge Presets）
-
-桥接定义有三种层级：
-
-```
-预设 (built-in)     → ts-bridge 等转换器内置的快捷配置
-  │
-注册表 (registry)   → 针对特定插件的桥接配置
-  │
-内联 (inline)       → 转换时从源码自动检测
-```
-
-预设是可以快捷引用的预定义桥接配置。转换器内置了一些预设，插件 registry 可以直接引用：
-
-```jsonc
-// registry 引用预设
-{
-  "volar": {
-    "presets": ["ts-bridge"],          // ← 引用预设，相当于展开下方配置
-  }
+// presets.ts — 只有一个 ts-bridge preset
+'ts-bridge': {
+  name: 'ts-bridge',
+  notification: 'tsserver/request',
+  responseNotification: 'tsserver/response',
+  requiresCommand: 'typescript.tsserverRequest',
+  extraDeps: ['typescript'],
+  code: `client.onNotification('tsserver/request', async ([seq, command, args]) => {
+    const result = await commands.executeCommand('typescript.tsserverRequest', ...)
+    client.sendNotification('tsserver/response', [seq, result?.body])
+  })`,
 }
 ```
 
-预设 `ts-bridge` 展开等价于：
+### 桥接检测
 
-```jsonc
-{
-  "detect": {
-    "packageExtra": {
-      "typescriptServerPlugins": [],    // ← 从源码检测哪些 TS 插件需要加载
-      "dependencies": ["typescript"]
-    },
-    "packageModify": {
-      "coc-tsserver": "ChuYanLon/coc-tsserver"  // ← 需要修改版 coc-tsserver
-    }
-  },
-  "bridges": [
-    {
-      "notification": "tsserver/request",
-      "responseNotification": "tsserver/response",
-      "description": "Forward TS requests from language server to tsserver",
-      "handler": {
-        "type": "command",
-        "command": "typescript.tsserverRequest",
-        "args": ["{{command}}", "{{args}}", "{isAsync: true, lowPriority: true}"],
-        "responseMapping": "{{result.body}}"
-      }
-    }
-  ],
-  "actions": {
-    "beforeBuild": [
-      "ensure-coc-tsserver-patched"     // ← 构建前检查 coc-tsserver 版本
-    ]
-  }
-}
-```
+scanner 从源码检测 `tsserver/request`、`_vue:`、`typescript.tsserverRequest` 等关键词，匹配到 `ts-bridge` preset。
 
-预设和普通桥接的区别：
+### 添加新桥接
 
-| 方面 | 预设 | 普通桥接 |
-|------|------|---------|
-| 定义位置 | 转换器内置 | registry 或 inline |
-| 影响 package.json | ✅ 可以 | ❌ 不能 |
-| 影响构建流程 | ✅ 可以 | ❌ 不能 |
-| 可参数化 | ✅ 接受参数 | ✅ 完整配置 |
-
-这样 TS 桥接和 Python/Rust 桥接走同一套机制，TS 桥接只是多了一个预设可以快捷引用，并不特殊。
-
-### 自定义桥接示例
-
-```jsonc
-{
-  "rust-analyzer": {
-    "type": "pure-lsp",
-    "bridges": []
-  },
-  "some-python-plugin": {
-    "bridges": [
-      {
-        "notification": "python/analysis",
-        "handler": {
-          "type": "command",
-          "command": "python.bridgeRequest",
-          "args": ["{{notification}}", "{{params}}"]
-        }
-      }
-    ]
-  }
-}
-```
-
-如果 registry 中没有定义桥接，转换器会在生成的入口文件中插入空桩代码：
-
-```typescript
-// [converter] TODO: 需要手动实现桥接
-// client.onNotification('some/notification', handler)
-```
+只需在 `presets.ts` 加新 preset + `scanner.ts` 加检测模式，不需要改 `convert.ts`。
 
 ---
 
-## 四、注册表
+## 四、注册表（coc-converter）
 
-```jsonc
-{
-  "version": 1,
-  "plugins": {
-    "volar": {
-      "source": {
-        "type": "github",
-        "repo": "vuejs/language-tools",
-        "subdir": "extensions/vscode"
-      },
-      "type": "ts-bridge",
-      "tsPluginName": "@vue/typescript-plugin",
-      "tsPluginLanguages": ["vue"],
-      "transforms": ["import-mapping", "language-client", "mark-unsupported"],
-      "patches": ["volar/client.patch"],
-      "latestVersion": "3.3.4"
-    },
-    "eslint": {
-      "source": { "type": "npm", "package": "vscode-eslint" },
-      "type": "pure-lsp",
-      "transforms": ["import-mapping", "provider-register"],
-      "patches": [],
-      "latestVersion": "3.1.2"
-    },
-    "angular": {
-      "source": { "type": "github", "repo": "angular/vscode-ng-language-service" },
-      "type": "ts-bridge",
-      "tsPluginName": "@angular/language-service",
-      "tsPluginLanguages": ["html"],
-      "transforms": ["import-mapping", "language-client"],
-      "patches": [],
-      "latestVersion": "19.0.0"
-    }
-  }
+内置在 `coc-converter/src/registry.ts` 中，定义为一个 `PackageInfo[]` 数组：
+
+```typescript
+interface PackageInfo {
+  name: string
+  displayName: string
+  description: string
+  type: 'ts-bridge' | 'pure-lsp' | 'direct-api'
+  source: { type: 'github' | 'npm'; repo?: string; package?: string; subdir?: string }
+  url: string
+  languages: string[]
+  categories: string[]
 }
 ```
 
-注册表可以内置在 coc-converter 插件中，也可从 GitHub 热更新（`:CocCommand converter.update-registry`）。
+当前 7 个内置包：Volar、Prisma、HTML CSS Support、Angular、ESLint、JSON Language Features、YAML Language Support。
+
+> 已对接验证的 3 个：Volar（ts-bridge）、Prisma（pure-lsp）、HTML CSS Support（direct-api）。
+
+扫描和转换逻辑内置在 `converter/` 中，不依赖 registry 配置（自动检测 server 模块、自动分类）。
 
 ---
 
-## 五、安装流程
+## 五、转换流程
 
 ```
-converter.install volar
+convert <input-vscode-ext> -o <output-dir>
   │
-  ├─ 1. 查 registry，找到 volar 条目
+  ├─ 1. 扫描 API → 检测插件类型（ts-bridge / pure-lsp / direct-api）
   │
-  ├─ 2. 下载源码
+  ├─ 2. 复制 .ts 源文件到输出目录
   │
-  ├─ 3. 扫描 API -> 生成迁移报告
+  ├─ 3. 运行 AST 变换（ts-morph）
+  │     ├─ import-mapping        from 'vscode' → from 'coc.nvim'
+  │     ├─ class-to-factory      new Xxx() → Xxx.create()
+  │     ├─ provider-register     注册函数重命名 + 补齐签名
+  │     ├─ language-client       LanguageClient {run,debug} → {module,transport}
+  │     └─ enum-offset           注释提醒枚举值差异
   │
-  ├─ 4. 运行转换管道
-  │     ├─ import-mapping    from 'vscode' → from 'coc.nvim'
-  │     ├─ language-client   LanguageClient 参数适配
-  │     ├─ provider-register 注册函数重命名
-  │     ├─ mark-unsupported 标记 decoration/webview（注释保留）
-  │     └─ bridge-generator  (如果有桥接) 生成桥接代码
+  ├─ 4. 不可移植 API 替换（文本替换）
+  │     ├─ getWordRangeAtPosition → 内联词边界计算
+  │     ├─ .fileName → .uri
+  │     └─ decoration/webview/createWebviewPanel 标记 TODO 注释
   │
-  ├─ 5. 生成 package.json
-  │     ├─ engines, main, activationEvents
-  │     ├─ contributes.configuration (保留)
-  │     ├─ contributes.typescriptServerPlugins (TS 桥接型)
-  │     └─ commands (保留)
+  ├─ 5. 生成入口文件
+  │     ├─ direct-api → 保留原 extension.ts
+  │     ├─ 纯 LSP → 生成 LanguageClient 入口（自动检测 server 模块）
+  │     └─ ts-bridge → 同上 + tsserver/request 桥接代码（来自 preset）
   │
-  ├─ 6. 应用补丁 (patches/)
+  ├─ 6. 生成 package.json + esbuild.mjs
+  │     ├─ dependencies（仅 LSP 相关）
+  │     ├─ activationEvents
+  │     ├─ typescriptServerPlugins（ts-bridge 型）
+  │     └─ esbuild external 自动注入
   │
-  ├─ 7. 构建 (npm install && npm run build)
-  │
-  └─ 8. 注册到 coc (链接到 extensions/node_modules/)
+  └─ 7. 输出转换报告 + 使用说明（cd output && npm install && npm run build）
 ```
 
 ---
@@ -397,32 +208,28 @@ converter.install volar
 
 ---
 
-## 七、第一阶段实现计划
+## 七、当前状态
 
-### v0.1 — 核心管道
+### 已实现
 
-| 模块 | 内容 |
-|------|------|
-| `scanner` | 扫描 API，检测插件类型 |
-| `import-mapping` | 替换 import + 重命名 |
-| `language-client` | LanguageClient 适配 |
-| `mark-unsupported` | 标记不可移植 API（注释保留，不删除） |
-| `package-manager` | 生成 package.json |
-| `bridge-generator` | 根据 registry 生成桥接代码 |
-| `cli` | `install`/`list`/`update`/`uninstall` 命令 |
+| 模块 | 位置 | 内容 |
+|------|------|------|
+| `scanner` | `converter/src/scanner.ts` | 扫描 API，检测插件类型，检测 ts-bridge |
+| 5 个 AST transform | `converter/src/transforms/` | import-mapping, class-to-factory, provider-register, language-client, enum-offset |
+| 不可移植 API 替换 | `converter/src/convert.ts` | getWordRangeAtPosition polyfill, fileName→uri, 标记 TODO |
+| 入口模板生成 | `converter/src/convert.ts` | 三种类型分别生成不同模板 |
+| package.json 生成 | `converter/src/convert.ts` | 自动检测 server 依赖、typescriptServerPlugins |
+| esbuild 配置生成 | `converter/src/convert.ts` | external 自动注入 |
+| 桥接 preset 系统 | `converter/src/presets.ts` | ts-bridge preset |
+| CLI | `converter/src/cli.ts` | `convert <input> -o <output>` |
+| coc-converter TUI | `coc-converter/` | TUI 管理界面，7 个内置包 |
+| 验证案例 | 3 个 | Volar、Prisma、HTML CSS Support |
 
-### v0.2 — Registry
+### Pending
 
-| 模块 | 内容 |
-|------|------|
-| 注册表格式定义 | json schema |
-| 内置注册表 | 预置 Volar、ESLint、Angular |
-| 热更新 | 从 GitHub 拉取最新注册表 |
-| 补丁系统 | patches/ 目录，git-style patch |
-
-### v0.3 — 验证
-
-- 对 Volar 跑完整安装流程
-- 对 ESLint 跑完整安装流程
-- 对比功能完整性
-- 输出迁移报告
+- [ ] `--bridge` CLI 选项实现（强制 bridge 模式）
+- [ ] 对接真实 converter 管道到 coc-converter（代替模拟步骤）
+- [ ] 注册表热更新（从 GitHub 拉远程 registry）
+- [ ] 添加更多插件到注册表
+- [ ] 更多 provider 签名适配
+- [ ] python-bridge / rust-bridge preset 示例

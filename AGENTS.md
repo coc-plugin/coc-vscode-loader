@@ -75,7 +75,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 
 - 浮动窗口 + 无边框
 - 仿 lazy.nvim 的渲染引擎：每段独立 `append(text, hl)` + extmark 高亮
-- 自定义高亮组（8 个 `CocConverter*`）链接到主题标准组，自动适配当前 colorscheme
+- 自定义高亮组（9 个 `CocConverter*`）链接到主题标准组，自动适配当前 colorscheme
 - **顶部按钮**：`coc-converter(H)` 首页  `Install(I)` 模式  `Update(U)` 更新全部  `Help(?)` 帮助
 - **模式按钮**：`I` 进入 Install 模式（按钮亮起） `U` 更新全部（按钮亮起） `H` 回首页 `?` 帮助
 - **包操作**：`i` 安装 `u` 更新 `X` 卸载 `<CR>` 展开/折叠详情/日志

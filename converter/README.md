@@ -46,7 +46,8 @@ npm install ChuYanLon/coc-tsserver --legacy-peer-deps
   │   ├─ import-mapping      from 'vscode' → from 'coc.nvim'
   │   ├─ class-to-factory    new Xxx() → Xxx.create()
   │   ├─ provider-register   补齐注册函数签名差异
-  │   └─ language-client     LanguageClient 签名适配
+  │   ├─ language-client     LanguageClient 签名适配
+  │   └─ enum-offset         枚举值偏移注释提醒（DiagnosticSeverity 等）
   ├─ mark-unsupported  标记/替换缺失 API（getWordRangeAtPosition、fileName 等）
   ├─ generate src/index.ts   主入口（含自动桥接/纯 LSP 两种模板）
   ├─ generate package.json   依赖/配置/esbuild external
@@ -80,13 +81,14 @@ const PRESETS = {
 | 文件 | 行数 | 说明 |
 |------|------|------|
 | `src/cli.ts` | 28 | CLI 入口 |
-| `src/convert.ts` | ~440 | 主流程 + 模板生成 + API 替换 |
+| `src/convert.ts` | 484 | 主流程 + 模板生成 + API 替换 |
 | `src/scanner.ts` | 136 | API 扫描 + 插件分类 |
 | `src/transforms/import-mapping.ts` | 47 | import 替换 |
 | `src/transforms/language-client.ts` | 48 | LanguageClient 适配 |
-| `src/transforms/class-to-factory.ts` | 40 | new Xxx() → Xxx.create() |
-| `src/transforms/provider-register.ts` | 49 | provider 注册签名补齐 |
-| **总计** | **~790** | |
+| `src/transforms/class-to-factory.ts` | 54 | new Xxx() → Xxx.create() |
+| `src/transforms/provider-register.ts` | 55 | provider 注册签名补齐 |
+| `src/transforms/enum-offset.ts` | 49 | 枚举值偏移注释提醒 |
+| **总计** | **~870** | |
 
 ## 已处理的 API 差异
 

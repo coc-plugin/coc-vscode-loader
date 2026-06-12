@@ -65,9 +65,9 @@ languages.registerCompletionItemProvider(
   [{ language: 'typescript' }],  // selector
   {
     provideCompletionItems(document, position, token, context) {
-      return [
-        CompletionItem.create('console.log', CompletionItemKind.Method),
-      ] as CompletionItem[]
+      const item = CompletionItem.create('console.log')
+      item.kind = CompletionItemKind.Method
+      return [item] as CompletionItem[]
     },
   },
   ['.']                     // triggerCharacters
@@ -78,7 +78,7 @@ languages.registerCompletionItemProvider(
 | vscode | coc |
 |--------|-----|
 | `registerCompletionItemProvider(selector, provider, ...triggers)` | `registerCompletionItemProvider(name, shortcut, selector, provider, triggers?)` |
-| `new CompletionItem(label, kind)` | `CompletionItem.create(label, kind)` |
+| `new CompletionItem(label, kind)` | `CompletionItem.create(label); item.kind = kind` |
 | `context` 不含 `option: CompleteOption` 字段 | `context` 多 `option: CompleteOption` 字段 |
 
 ---
