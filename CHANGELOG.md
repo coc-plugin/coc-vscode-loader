@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.2] - 2026-06-12
+
+### Added
+- TUI preview image in README
+
+### Changed
+- Install instructions for npm published package
+- Image path uses repo-relative URL for npm compatibility
+
+## [1.0.1] - 2026-06-12
+
+### Added
+- npm package metadata (keywords, repo, license, homepage)
+
+### Changed
+- Bump to 1.0.1 for npm publish
+
 ## [1.0.0] - 2026-06-12
 
 ### Added
