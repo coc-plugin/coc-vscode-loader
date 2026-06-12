@@ -1,6 +1,6 @@
 # coc-vscode-loader
 
-![TUI preview](./assets/tui-preview.png)
+![TUI preview](https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png)
 
 VS Code extension → coc.nvim plugin loader with TUI package manager.
 

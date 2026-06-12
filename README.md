@@ -1,6 +1,6 @@
 # vscode-coc-loader
 
-![TUI preview](./plugin/assets/tui-preview.png)
+![TUI preview](https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png)
 
 Run VS Code extensions seamlessly in coc.nvim.
 
