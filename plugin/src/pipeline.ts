@@ -42,25 +42,30 @@ function converterCliPath(): string {
   )
 }
 
+const CMD_TIMEOUT = 300_000 // 5 minutes
+
 async function run(
   cmd: string, args: string[], cwd: string,
-  onLine: (line: string) => void,
+  onLine?: (line: string) => void,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: true })
-    const lines: string[] = []
+    const timer = setTimeout(() => {
+      child.kill('SIGTERM')
+      reject(new Error(`Timed out after ${CMD_TIMEOUT / 1000}s: ${cmd} ${args.join(' ')}`))
+    }, CMD_TIMEOUT)
     const handler = (data: Buffer) => {
       const text = data.toString()
-      lines.push(text)
-      onLine(text)
+      onLine?.(text)
     }
     child.stdout.on('data', handler)
     child.stderr.on('data', handler)
     child.on('close', code => {
+      clearTimeout(timer)
       if (code === 0) resolve()
       else reject(new Error(`${cmd} ${args.join(' ')} exited with code ${code}`))
     })
-    child.on('error', reject)
+    child.on('error', (e) => { clearTimeout(timer); reject(e) })
   })
 }
 
@@ -72,13 +77,14 @@ async function downloadSource(
   const cache = cacheDir(name)
   const repoUrl = `https://github.com/${info.source.repo}.git`
 
+  const log = (chunk: string) => onProgress(1, 5, chunk.trim(), '')
   if (fs.existsSync(srcDir)) {
     onProgress(1, 5, 'Updating source...', `git -C ${srcDir} pull`)
-    await run('git', ['-C', srcDir, 'pull'], cache, () => {})
+    await run('git', ['-C', srcDir, 'pull'], cache, log)
   } else {
     onProgress(1, 5, 'Cloning repository...', `git clone --depth=1 ${repoUrl}`)
     fs.mkdirSync(cache, { recursive: true })
-    await run('git', ['clone', '--depth=1', repoUrl, srcDir], cache, () => {})
+    await run('git', ['clone', '--depth=1', repoUrl, srcDir], cache, log)
   }
 
   return info.source.subdir ? path.join(srcDir, info.source.subdir) : srcDir
@@ -93,7 +99,8 @@ async function convertSource(
 
   const cli = converterCliPath()
   onProgress(2, 5, 'Converting...', `converter convert ${inputDir} -o ${build}`)
-  await run('npx', ['tsx', cli, 'convert', inputDir, '-o', build], cacheDir(name), () => {})
+  const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
+  await run('npx', ['tsx', cli, 'convert', inputDir, '-o', build], cacheDir(name), log)
 }
 
 async function buildPackage(
@@ -102,25 +109,27 @@ async function buildPackage(
 ): Promise<void> {
   const build = buildDir(name)
 
+  const npmLog = (chunk: string) => onProgress(3, 5, chunk.trim(), '')
   onProgress(3, 5, 'Installing dependencies...', 'npm install --legacy-peer-deps')
-  await run('npm', ['install', '--legacy-peer-deps'], build, () => {})
+  await run('npm', ['install', '--legacy-peer-deps'], build, npmLog)
 
   // Run postinstall if present (some extensions download servers here)
   onProgress(3, 5, 'Running postinstall...', 'npm run postinstall')
-  await run('npm', ['run', 'postinstall', '--if-present'], build, () => {}).catch(() => {})
+  await run('npm', ['run', 'postinstall', '--if-present'], build, npmLog).catch(() => {})
 
   // Check for server directory in original source and install its deps
   const serverDir = path.join(inputDir, 'server')
   if (fs.existsSync(serverDir) && fs.existsSync(path.join(serverDir, 'package.json'))) {
     onProgress(3, 5, 'Installing server dependencies...', `npm install in ${serverDir}`)
-    await run('npm', ['install', '--legacy-peer-deps'], serverDir, () => {})
+    await run('npm', ['install', '--legacy-peer-deps'], serverDir, npmLog)
     const destServer = path.join(build, 'server')
     if (fs.existsSync(destServer)) fs.rmSync(destServer, { recursive: true })
     fs.cpSync(serverDir, destServer, { recursive: true })
   }
 
   onProgress(4, 5, 'Building...', 'node esbuild.mjs')
-  await run('node', ['esbuild.mjs'], build, () => {})
+  const buildLog = (chunk: string) => onProgress(4, 5, chunk.trim(), '')
+  await run('node', ['esbuild.mjs'], build, buildLog)
 
   // Download binary language server from GitHub release (configured in registry)
   if (info.serverBinary) {
@@ -135,11 +144,11 @@ async function buildPackage(
       const url = `https://github.com/${sb.repo}/releases/download/${version}/${filename}`
 
       onProgress(4, 5, 'Downloading...', `curl ${filename}`)
-      await run('curl', ['-sSL', url, '-o', path.join(build, filename)], build, () => {})
+      await run('curl', ['-#SL', url, '-o', path.join(build, filename)], build)
       onProgress(4, 5, 'Extracting...', `tar xzf ${filename}`)
       const serverDir = path.join(build, 'server')
       fs.mkdirSync(serverDir, { recursive: true })
-      await run('tar', ['xzf', filename, '-C', serverDir], build, () => {})
+      await run('tar', ['xzf', filename, '-C', serverDir], build)
       fs.rmSync(path.join(build, filename))
     } catch {
       onProgress(4, 5, 'Warning: server download failed', 'install server binary manually')
@@ -184,7 +193,7 @@ function saveMeta(name: string): void {
     const log = execSync(`git -C "${srcDir}" log -1 --format="%h|%s|%ar"`, { encoding: 'utf-8' }).toString().trim()
     const [commit, msg, date] = log.split('|')
     fs.writeFileSync(metaPath(name), JSON.stringify({ commit, msg, date, updatedAt: Date.now() }, null, 2))
-  } catch {}
+  } catch { /* non-critical: commit tracking metadata */ }
 }
 
 export async function installPackage(state: StateManager, name: string): Promise<void> {
@@ -223,7 +232,7 @@ export async function installPackage(state: StateManager, name: string): Promise
           }
         })
       }
-    } catch {}
+    } catch { /* non-critical: commit display */ }
   } catch (e: any) {
     state.setPackageStatus(name, 'failed', { error: e.message })
   }
@@ -299,7 +308,7 @@ export async function updatePackage(state: StateManager, name: string): Promise<
           }
         })
       }
-    } catch {}
+    } catch { /* non-critical: commit display */ }
   } catch (e: any) {
     state.setPackageStatus(name, 'failed', { error: e.message })
   }
@@ -313,18 +322,22 @@ function walkDir(dir: string): string[] {
       if (entry.isDirectory()) files.push(...walkDir(p))
       else files.push(p)
     }
-  } catch {}
+  } catch { /* non-critical: file listing */ }
   return files
 }
 
 async function runWithOutput(cmd: string, args: string[], cwd: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: true })
+    const timer = setTimeout(() => {
+      child.kill('SIGTERM')
+      reject(new Error(`Timed out after ${CMD_TIMEOUT / 1000}s: ${cmd} ${args.join(' ')}`))
+    }, CMD_TIMEOUT)
     let out = ''
     child.stdout.on('data', (d: Buffer) => { out += d.toString() })
     child.stderr.on('data', (d: Buffer) => { out += d.toString() })
-    child.on('close', code => code === 0 ? resolve(out.trim()) : reject(new Error(`exit ${code}`)))
-    child.on('error', reject)
+    child.on('close', code => { clearTimeout(timer); code === 0 ? resolve(out.trim()) : reject(new Error(`exit ${code}`)) })
+    child.on('error', (e) => { clearTimeout(timer); reject(e) })
   })
 }
 
@@ -341,7 +354,7 @@ export async function checkUpdates(state: StateManager): Promise<void> {
       const out = await runWithOutput('git', ['ls-remote', `https://github.com/${pkg.info.source.repo}.git`, 'HEAD'], os.homedir())
       const remote = out.split('\t')[0]
       if (remote) results[pkg.info.name] = remote.substring(0, 7) !== pkg.commit
-    } catch {}
+    } catch { /* non-critical: git ls-remote may fail offline */ }
   }
 
   const updateCount = Object.values(results).filter(Boolean).length

@@ -35,7 +35,7 @@ function loadCache(): PackageInfo[] | null {
     if (fs.existsSync(CACHE_PATH)) {
       return JSON.parse(fs.readFileSync(CACHE_PATH, 'utf-8'))
     }
-  } catch {}
+  } catch { /* corrupted cache file */ }
   return null
 }
 

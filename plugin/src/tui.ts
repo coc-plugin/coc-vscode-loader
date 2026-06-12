@@ -121,7 +121,10 @@ export class TUI {
     await this.setupKeymaps()
 
     // Fetch remote registry in background when TUI opens
-    updateRegistry().then(() => this.state.refreshPackages()).catch(() => {})
+    updateRegistry().then(() => this.state.refreshPackages()).catch(() => {
+      this.state.setStatusMessage('Failed to fetch remote registry (offline?)')
+      setTimeout(() => this.state.setStatusMessage(), 5000)
+    })
 
     await this.render()
   }

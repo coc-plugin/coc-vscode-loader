@@ -50,7 +50,7 @@ export function createInitialState(): AppState {
         commit = meta.commit || undefined
         commitMsg = meta.msg || undefined
         commitDate = meta.date || undefined
-      } catch {}
+      } catch { /* non-critical: commit info */ }
     }
     return {
       info,
