@@ -3,3 +3,4 @@ tsconfig.json
 esbuild.mjs
 registry.json
 node_modules/
+!converter/node_modules/

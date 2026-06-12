@@ -25,10 +25,12 @@ function pluginDir(name: string): string {
 
 function converterCliPath(): string {
   const base = path.resolve(__dirname, '..')
+  const cwd = process.cwd()
   const candidates = [
+    path.join(base, 'converter', 'src', 'cli.ts'),
     path.join(base, '..', 'converter', 'src', 'cli.ts'),
-    path.join(base, '..', '..', 'converter', 'src', 'cli.ts'),
-    path.join(base, '..', '..', '..', 'converter', 'src', 'cli.ts'),
+    path.join(cwd, 'converter', 'src', 'cli.ts'),
+    path.join(cwd, '..', 'converter', 'src', 'cli.ts'),
   ]
   for (const p of candidates) {
     if (fs.existsSync(p)) return p

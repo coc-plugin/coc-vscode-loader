@@ -24,7 +24,8 @@
     "coc": ">= 0.0.80"
   },
   "scripts": {
-    "build": "node esbuild.mjs",
+    "bundle-converter": "rm -rf converter && cp -r ../converter ./converter && cd converter && npm install --legacy-peer-deps",
+    "build": "npm run bundle-converter && node esbuild.mjs",
     "prepare": "node esbuild.mjs"
   },
   "devDependencies": {
@@ -34,6 +35,11 @@
   },
   "activationEvents": [
     "onCommand:loader.open",
+    "onCommand:loader.install",
+    "onCommand:loader.uninstall",
+    "onCommand:loader.update",
+    "onCommand:loader.uninstallAll",
+    "onCommand:loader.updateRegistry",
     "onCommand:loader._dispatch"
   ],
   "contributes": {
