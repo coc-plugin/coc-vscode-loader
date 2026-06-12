@@ -1,5 +1,7 @@
 # vscode-coc-loader
 
+![TUI preview](https://github.com/user-attachments/assets/e4e46bbe-23ce-41bd-bf39-260e1f171dbf)
+
 Run VS Code extensions seamlessly in coc.nvim.
 
 ## Background
