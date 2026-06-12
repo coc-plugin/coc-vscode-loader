@@ -64,6 +64,38 @@ Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API
 >
 > 📦 npm — [coc-vscode-loader](https://www.npmjs.com/package/coc-vscode-loader)
 
+## Development
+
+### Switch between local dev and npm release
+
+```bash
+# Check current mode
+bash switch.sh status
+
+# Use local development version
+bash switch.sh local
+
+# Use npm published version
+bash switch.sh npm
+```
+
+Or via npm scripts:
+
+```bash
+npm run switch:status
+npm run switch:local
+npm run switch:npm
+```
+
+After switching, run `:CocRestart` in Neovim.
+
+### Build
+
+```bash
+npm run build          # build everything
+cd plugin && npm run build  # build plugin only
+```
+
 ## FAQ
 
 ### Plugin installed but not working?

@@ -97,6 +97,16 @@ npm install
 npm run build    # esbuild → lib/index.js
 ```
 
+### Switch to local dev mode
+
+```bash
+bash switch.sh local    # symlink → plugin/
+bash switch.sh npm      # revert to npm release
+bash switch.sh status   # check current mode
+```
+
+After switching, restart coc: `:CocRestart`
+
 ### Install
 
 ```bash
