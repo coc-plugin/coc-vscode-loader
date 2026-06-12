@@ -96,6 +96,9 @@ export class StateManager {
     this.mutate(s => {
       const pkg = s.packages.find(p => p.info.name === name)
       if (pkg) {
+        if (status === 'installing' || status === 'updating' || status === 'uninstalling') {
+          pkg.progressLog = []
+        }
         pkg.status = status
         if (extra?.progress !== undefined) pkg.progress = extra.progress
         if (extra?.logEntry !== undefined) pkg.progressLog.push(extra.logEntry)
