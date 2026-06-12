@@ -181,6 +181,7 @@ export async function installPackage(state: StateManager, name: string): Promise
             p.commit = meta.commit
             p.commitMsg = meta.msg
             p.commitDate = meta.date
+            p.updated = true
           }
         })
       }
@@ -256,6 +257,7 @@ export async function updatePackage(state: StateManager, name: string): Promise<
             p.commit = meta.commit
             p.commitMsg = meta.msg
             p.commitDate = meta.date
+            p.updated = true
           }
         })
       }

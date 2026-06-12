@@ -15,6 +15,7 @@ export interface PackageEntry {
   commit?: string
   commitMsg?: string
   commitDate?: string
+  updated?: boolean
   hasUpdate?: boolean
   progress?: string
   progressLog: string[]
