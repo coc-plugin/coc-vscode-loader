@@ -16,7 +16,8 @@
     "typescript": "^5.3.3"
   },
   "activationEvents": [
-    "onCommand:converter.open"
+    "onCommand:converter.open",
+    "onCommand:converter._dispatch"
   ],
   "contributes": {
     "commands": [
@@ -25,7 +26,8 @@
       { "command": "converter.uninstall", "title": "Uninstall a converter package" },
       { "command": "converter.update", "title": "Update a converter package" },
       { "command": "converter.uninstallAll", "title": "Uninstall all converter packages" },
-      { "command": "converter.updateRegistry", "title": "Update registry from remote" }
+      { "command": "converter.updateRegistry", "title": "Update registry from remote" },
+      { "command": "converter._dispatch", "title": "" }
     ]
   }
 }

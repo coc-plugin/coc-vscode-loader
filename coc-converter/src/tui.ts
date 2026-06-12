@@ -159,8 +159,8 @@ export class TUI {
       const installed = s.packages.filter(p => p.status === 'installed')
       if (installed.length === 0) return
       this.state.setActivePill('U')
-      Promise.all(installed.map(p => updatePackage(this.state, p.info.name)))
-        .finally(() => this.state.setActivePill(null))
+      await Promise.all(installed.map(p => updatePackage(this.state, p.info.name)))
+      this.state.setActivePill(null)
       return
     }
     if (id === 'Z') {
@@ -184,8 +184,8 @@ export class TUI {
     const entry = this.state.getPackage(pkgName)
     if (!entry) return
 
-    if (id === 'i' && entry.status === 'not-installed') { installPackage(this.state, pkgName); return }
-    if (id === 'u' && entry.status === 'installed') { updatePackage(this.state, pkgName); return }
+    if (id === 'i' && entry.status === 'not-installed') { await installPackage(this.state, pkgName); return }
+    if (id === 'u' && entry.status === 'installed') { await updatePackage(this.state, pkgName); return }
     if (id === 'X' && entry.status === 'installed') { uninstallPackage(this.state, pkgName); return }
     if (id === 'cr') {
       if (this.logLineSet.has(line0)) {
@@ -214,12 +214,16 @@ export class TUI {
   }
 
   async close() {
+    const needRestart = this.state.getState().dirty
     if (this.unsubscribe) { this.unsubscribe(); this.unsubscribe = null }
     for (const d of this.disposables) { d.dispose() }
     this.disposables = []
     if (this.winid) {
       try { await workspace.nvim.call('nvim_win_close', [this.winid, true]) } catch {}
       this.winid = 0
+    }
+    if (needRestart) {
+      workspace.nvim.command('CocRestart', true)
     }
   }
 

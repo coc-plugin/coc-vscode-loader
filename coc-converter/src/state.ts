@@ -26,6 +26,7 @@ export interface AppState {
   searchQuery: string
   showHelp: boolean
   activePill: string | null
+  dirty: boolean
   statusMessage?: string
   viewFilter: 'all' | 'not-installed' | 'installed'
 }
@@ -53,7 +54,7 @@ export function createInitialState(): AppState {
       logExpanded: false,
     }
   })
-  return { packages, searchQuery: '', showHelp: false, activePill: null, viewFilter: 'all' }
+  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all' }
 }
 
 export class StateManager {
@@ -131,6 +132,10 @@ export class StateManager {
 
   setStatusMessage(msg?: string) {
     this.mutate(s => { s.statusMessage = msg })
+  }
+
+  setDirty() {
+    this.mutate(s => { s.dirty = true })
   }
 
   setActivePill(pill: string | null) {

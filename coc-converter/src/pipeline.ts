@@ -166,6 +166,7 @@ export async function installPackage(state: StateManager, name: string): Promise
     await buildPackage(name, prog)
     await installToCoc(name, prog)
     saveMeta(name)
+    state.setDirty()
     state.setPackageStatus(name, 'installed')
   } catch (e: any) {
     state.setPackageStatus(name, 'failed', { error: e.message })
@@ -200,6 +201,7 @@ export async function uninstallPackage(state: StateManager, name: string): Promi
     }
 
     state.setPackageStatus(name, 'not-installed')
+    state.setDirty()
   } catch (e: any) {
     state.setPackageStatus(name, 'failed', { error: e.message })
   }
@@ -225,6 +227,7 @@ export async function updatePackage(state: StateManager, name: string): Promise<
     await buildPackage(name, prog)
     await installToCoc(name, prog)
     saveMeta(name)
+    state.setDirty()
     state.setPackageStatus(name, 'installed')
   } catch (e: any) {
     state.setPackageStatus(name, 'failed', { error: e.message })

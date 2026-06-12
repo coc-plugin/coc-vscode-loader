@@ -34,7 +34,7 @@ export async function activate(context: ExtensionContext) {
         cocWindow.showInformationMessage(`${name} is already installed`)
         return
       }
-      installPackage(state, name)
+      await installPackage(state, name)
     })
   )
 
@@ -72,7 +72,7 @@ export async function activate(context: ExtensionContext) {
         cocWindow.showInformationMessage(`${name} is not installed`)
         return
       }
-      updatePackage(state, name)
+      await updatePackage(state, name)
     })
   )
 
