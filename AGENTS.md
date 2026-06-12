@@ -9,15 +9,12 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | File | Purpose |
 |------|---------|
 | `README.md` | Entry point |
-| `types/vscode.d.ts` | Upstream VS Code extension API types (auto-synced) — moved to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) |
-| `types/coc.d.ts` | Upstream coc.nvim API types (auto-synced) — moved to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) |
 | `converter/` | Source code: CLI conversion tool |
-| `plugin/` | **coc-loader plugin** |
+| `plugin/` | **coc-vscode-loader plugin** |
 | `plugin/README.md` | Plugin docs and usage |
-| `logs/YYYY-MM-DD.md` | Daily sync change logs |
 | `AGENTS.md` | Dev instructions for AI agents |
 
-> 📖 API mapping docs and registry have been moved to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry).
+> 📖 Type definitions, API mapping docs and registry have been moved to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry).
 
 ## Converter status
 
@@ -111,8 +108,8 @@ After switching, restart coc: `:CocRestart`
 
 ```bash
 cd ~/.config/coc/extensions
-npm install /path/to/coc-converter    # or
-:CocInstall /path/to/coc-converter
+npm install coc-vscode-loader    # or
+:CocInstall coc-vscode-loader
 ```
 
 ## Milestones
