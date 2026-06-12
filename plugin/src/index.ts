@@ -93,6 +93,26 @@ export async function activate(context: ExtensionContext) {
   )
 
   context.subscriptions.push(
+    commands.registerCommand('loader.reinstall', async (name?: string) => {
+      if (!name) {
+        name = await workspace.nvim.call('input', ['Plugin name: ', '']) as string
+        if (!name) return
+      }
+      const pkg = state.getPackage(name)
+      if (!pkg) {
+        cocWindow.showInformationMessage(`Unknown package: ${name}`)
+        return
+      }
+      if (pkg.status !== 'installed') {
+        cocWindow.showInformationMessage(`${name} is not installed`)
+        return
+      }
+      uninstallPackage(state, name)
+      await installPackage(state, name)
+    })
+  )
+
+  context.subscriptions.push(
     commands.registerCommand('loader.updateRegistry', async () => {
       try {
         const count = await updateRegistry()

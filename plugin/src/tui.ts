@@ -1,19 +1,29 @@
 import { workspace, window as cocWindow, Disposable } from 'coc.nvim'
-import { StateManager, PackageEntry, AppState } from './state'
+import { StateManager, PackageEntry, AppState, ViewFilter, SortBy } from './state'
 import { installPackage, uninstallPackage, updatePackage, checkUpdates } from './pipeline'
 import { updateRegistry } from './registry'
 import { LineBuffer, RenderResult } from './renderer'
 
+const VERSION: string = (() => {
+  try {
+    const pkg = JSON.parse(require('fs').readFileSync(require('path').join(__dirname, '..', 'package.json'), 'utf-8'))
+    return pkg.version
+  } catch { return '0.0.0' }
+})()
+
 const HELP_TEXT = [
-  '  coc-loader — VS Code extension → coc.nvim plugin converter',
+  `  coc-loader v${VERSION} — VS Code extension → coc.nvim plugin converter`,
   '',
   '  Keymaps:',
   '    i          Install package under cursor',
   '    u          Update package under cursor',
-  '    U          Update all installed packages',
+  '    U          Update all installed packages (with confirm)',
   '    C          Check for updates from remote',
   '    X          Uninstall package under cursor',
+  '    R          Reinstall package under cursor',
   '    Z          Uninstall all installed packages (with confirm)',
+  '    f          Cycle filter: all → installed → not-installed',
+  '    s          Cycle sort: default → name → status → type',
   '    <Enter>    Toggle expand/collapse details',
   '    /          Search filter',
   '    q / <Esc>  Close window',
@@ -163,6 +173,8 @@ export class TUI {
       } catch {}
       return
     }
+    if (id === 'f') { this.state.cycleViewFilter(); return }
+    if (id === 's') { this.state.cycleSortBy(); return }
     if (id === 'U') {
       const installed = s.packages.filter(p => p.status === 'installed')
       if (installed.length === 0) return
@@ -195,6 +207,11 @@ export class TUI {
     if (id === 'i' && entry.status === 'not-installed') { await installPackage(this.state, pkgName); return }
     if (id === 'u' && entry.status === 'installed') { await updatePackage(this.state, pkgName); return }
     if (id === 'X' && entry.status === 'installed') { uninstallPackage(this.state, pkgName); return }
+    if (id === 'R' && entry.status === 'installed') {
+      uninstallPackage(this.state, pkgName)
+      await installPackage(this.state, pkgName)
+      return
+    }
     if (id === 'cr') {
       if (this.logLineSet.has(line0)) {
         this.state.toggleLog(pkgName)
@@ -207,14 +224,18 @@ export class TUI {
 
   private keyMap: Record<string, string> = {
     q: 'q', esc: '<Esc>', question: '?', slash: '/',
-    U: 'U', Z: 'Z', i: 'i', u: 'u', X: 'X', cr: '<CR>',
+    U: 'U', Z: 'Z', i: 'i', u: 'u', X: 'X', R: 'R', cr: '<CR>',
+    f: 'f', s: 's',
   }
 
   private async setupKeymaps() {
     const buf = workspace.nvim.createBuffer(this.bufnr)
     const entries: [string, string][] = [
       ['q', 'q'], ['<Esc>', 'esc'], ['?', 'question'], ['/', 'slash'],
-      ['U', 'U'], ['Z', 'Z'], ['C', 'C'], ['i', 'i'], ['I', 'I'], ['H', 'H'], ['u', 'u'], ['X', 'X'], ['x', 'X'], ['<CR>', 'cr'],
+      ['U', 'U'], ['Z', 'Z'], ['C', 'C'], ['i', 'i'], ['I', 'I'], ['H', 'H'],
+      ['u', 'u'], ['X', 'X'], ['x', 'X'], ['R', 'R'],
+      ['f', 'f'], ['s', 's'],
+      ['<CR>', 'cr'],
     ]
     for (const [vimKey, id] of entries) {
       buf.setKeymap('n', vimKey, `<Cmd>call CocConverterDispatch("${id}")<CR>`, { silent: true, nowait: true })
@@ -273,7 +294,7 @@ export class TUI {
   private renderHelp(): TuiRenderResult {
     const header = [
       '',
-      '  coc-loader v0.1',
+      `  coc-loader v${VERSION}`,
       '  press ? help | / search | q quit',
       '  ' + '─'.repeat(50),
       '',
@@ -315,7 +336,13 @@ export class TUI {
     buf.highlight(/\([IU?C]\)/g, 'CocConverterKey')
     buf.nl()
     buf.nl()
+    const filterLabel = state.viewFilter === 'all' ? 'All' : state.viewFilter === 'installed' ? 'Installed' : 'Available'
+    const sortLabel = state.sortBy === 'default' ? 'Default' : state.sortBy === 'name' ? 'Name' : state.sortBy === 'status' ? 'Status' : 'Type'
     buf.append(`Total: ${filtered.length} packages`, 'CocConverterTotal')
+    buf.append(`  |  `)
+    buf.append(`F:${filterLabel}(f)`, 'CocConverterPill')
+    buf.append(`  `)
+    buf.append(`S:${sortLabel}(s)`, 'CocConverterPill')
     if (state.statusMessage) {
       buf.append('  ·  ')
       buf.append(state.statusMessage, 'Comment')
@@ -341,6 +368,12 @@ export class TUI {
     if (filtered.length === 0 && state.searchQuery) {
       buf.nl('no matching packages')
     }
+
+    // Footer
+    buf.nl()
+    buf.append(' ' + '─'.repeat(50), 'Comment')
+    buf.nl()
+    buf.append(` ${filtered.length} packages · ${filterLabel} · ${sortLabel} order`, 'Comment')
 
     const result = buf.render(2)
     return { lines: result.lines, pkgLineMap, logLines: logSet, highlights: result.highlights }

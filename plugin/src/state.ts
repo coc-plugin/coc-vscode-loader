@@ -24,6 +24,9 @@ export interface PackageEntry {
   error?: string
 }
 
+export type ViewFilter = 'all' | 'installed' | 'not-installed'
+export type SortBy = 'default' | 'name' | 'status' | 'type'
+
 export interface AppState {
   packages: PackageEntry[]
   searchQuery: string
@@ -31,7 +34,8 @@ export interface AppState {
   activePill: string | null
   dirty: boolean
   statusMessage?: string
-  viewFilter: 'all' | 'not-installed' | 'installed'
+  viewFilter: ViewFilter
+  sortBy: SortBy
 }
 
 type Listener = (state: AppState) => void
@@ -63,7 +67,7 @@ export function createInitialState(): AppState {
       logExpanded: false,
     }
   })
-  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all' }
+  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default' }
 }
 
 export class StateManager {
@@ -138,8 +142,24 @@ export class StateManager {
     this.mutate(s => { s.showHelp = !s.showHelp })
   }
 
-  setViewFilter(filter: 'all' | 'not-installed' | 'installed') {
+  setViewFilter(filter: ViewFilter) {
     this.mutate(s => { s.viewFilter = filter })
+  }
+
+  cycleViewFilter() {
+    this.mutate(s => {
+      s.viewFilter = s.viewFilter === 'all' ? 'installed' : s.viewFilter === 'installed' ? 'not-installed' : 'all'
+    })
+  }
+
+  setSortBy(sortBy: SortBy) {
+    this.mutate(s => { s.sortBy = sortBy })
+  }
+
+  cycleSortBy() {
+    this.mutate(s => {
+      s.sortBy = s.sortBy === 'default' ? 'name' : s.sortBy === 'name' ? 'status' : s.sortBy === 'status' ? 'type' : 'default'
+    })
   }
 
   setStatusMessage(msg?: string) {
@@ -166,12 +186,23 @@ export class StateManager {
       pkgs = pkgs.filter(p => p.status === 'installed')
     }
     const q = this.state.searchQuery.toLowerCase()
-    if (!q) return pkgs
-    return pkgs.filter(p =>
-      p.info.name.toLowerCase().includes(q) ||
-      p.info.displayName.toLowerCase().includes(q) ||
-      p.info.description.toLowerCase().includes(q)
-    )
+    if (q) {
+      pkgs = pkgs.filter(p =>
+        p.info.name.toLowerCase().includes(q) ||
+        p.info.displayName.toLowerCase().includes(q) ||
+        p.info.description.toLowerCase().includes(q)
+      )
+    }
+    const sortBy = this.state.sortBy
+    if (sortBy === 'name') {
+      pkgs = [...pkgs].sort((a, b) => a.info.name.localeCompare(b.info.name))
+    } else if (sortBy === 'status') {
+      const order: Record<string, number> = { installed: 0, installing: 1, updating: 2, uninstalling: 3, failed: 4, 'not-installed': 5 }
+      pkgs = [...pkgs].sort((a, b) => (order[a.status] ?? 9) - (order[b.status] ?? 9))
+    } else if (sortBy === 'type') {
+      pkgs = [...pkgs].sort((a, b) => a.info.type.localeCompare(b.info.type))
+    }
+    return pkgs
   }
 
   getPackage(name: string): PackageEntry | undefined {
