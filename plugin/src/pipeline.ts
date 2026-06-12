@@ -143,8 +143,9 @@ function metaPath(name: string): string {
 function saveMeta(name: string): void {
   const srcDir = sourceDir(name)
   try {
-    const commit = execSync(`git -C "${srcDir}" rev-parse --short HEAD`, { encoding: 'utf-8' }).toString().trim()
-    fs.writeFileSync(metaPath(name), JSON.stringify({ commit, updatedAt: Date.now() }, null, 2))
+    const log = execSync(`git -C "${srcDir}" log -1 --format="%h|%s|%ar"`, { encoding: 'utf-8' }).toString().trim()
+    const [commit, msg, date] = log.split('|')
+    fs.writeFileSync(metaPath(name), JSON.stringify({ commit, msg, date, updatedAt: Date.now() }, null, 2))
   } catch {}
 }
 
@@ -176,7 +177,11 @@ export async function installPackage(state: StateManager, name: string): Promise
       if (meta.commit) {
         state.mutate(s => {
           const p = s.packages.find(p => p.info.name === name)
-          if (p) p.commit = meta.commit
+          if (p) {
+            p.commit = meta.commit
+            p.commitMsg = meta.msg
+            p.commitDate = meta.date
+          }
         })
       }
     } catch {}
@@ -247,7 +252,11 @@ export async function updatePackage(state: StateManager, name: string): Promise<
       if (meta.commit) {
         state.mutate(s => {
           const p = s.packages.find(p => p.info.name === name)
-          if (p) p.commit = meta.commit
+          if (p) {
+            p.commit = meta.commit
+            p.commitMsg = meta.msg
+            p.commitDate = meta.date
+          }
         })
       }
     } catch {}
