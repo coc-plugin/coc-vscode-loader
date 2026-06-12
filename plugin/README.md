@@ -50,7 +50,7 @@ npm install coc-vscode-loader
 ## Features
 
 - **Real conversion pipeline** — git clone → converter → npm install → esbuild → register to coc
-- **Auto-fetch registry** — remote registry fetched in background on startup, no manual refresh needed
+- **Auto-fetch registry** — remote registry fetched in background when TUI opens, no manual refresh needed
 - **Incremental cache** — source/ keeps git repo, updates via git pull only
 - **Commit tracking** — records commit SHA after install, visible in detail view
 - **Update check** — `C` key compares against remote HEAD, shows `↑` when outdated

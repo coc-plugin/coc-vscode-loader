@@ -64,6 +64,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 - **Detail view**: description / type / commit / source / languages / categories / homepage
 - **Install logs**: `▶` compact line → `<CR>` expand full log with commands
 - **Progress**: `[step/total]` + status text
+- **Registry auto-fetch**: remote registry fetched in background when TUI opens
 
 ### Commands
 

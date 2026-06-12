@@ -111,8 +111,7 @@ export async function activate(context: ExtensionContext) {
     })
   )
 
-  // Background fetch remote registry on startup
-  updateRegistry().then(() => state.refreshPackages()).catch(() => {})
+  // Registry fetch happens when TUI opens, not on startup
 
   cocWindow.showInformationMessage('coc-loader activated! Use :CocCommand loader.open')
 }

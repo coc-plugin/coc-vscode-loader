@@ -1,6 +1,7 @@
 import { workspace, window as cocWindow, Disposable } from 'coc.nvim'
 import { StateManager, PackageEntry, AppState } from './state'
 import { installPackage, uninstallPackage, updatePackage, checkUpdates } from './pipeline'
+import { updateRegistry } from './registry'
 import { LineBuffer, RenderResult } from './renderer'
 
 const HELP_TEXT = [
@@ -118,6 +119,10 @@ export class TUI {
     }
 
     await this.setupKeymaps()
+
+    // Fetch remote registry in background when TUI opens
+    updateRegistry().then(() => this.state.refreshPackages()).catch(() => {})
+
     await this.render()
   }
 

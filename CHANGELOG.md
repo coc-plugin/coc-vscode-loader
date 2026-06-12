@@ -3,7 +3,7 @@
 ## [1.1.1] - 2026-06-12
 
 ### Added
-- Auto-fetch remote registry in background on startup
+- Auto-fetch remote registry in background when TUI opens
 - `StateManager.refreshPackages()` to merge updated registry entries
 
 ### Changed
