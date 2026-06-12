@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.0] - 2026-06-12
+## [1.0.0] - 2026-06-12
 
 ### Added
 - Real conversion pipeline: git clone → converter → npm install → esbuild → install to coc
