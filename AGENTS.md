@@ -45,7 +45,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 
 | File | Description |
 |------|-------------|
-| `src/index.ts` | Plugin entry + 7 CocCommands |
+| `src/index.ts` | Plugin entry + 8 CocCommands |
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache |
@@ -58,10 +58,13 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 - lazy.nvim-inspired render engine: per-segment `append(text, hl)` + extmark highlights
 - 9 custom `CocConverter*` highlight groups linked to theme standard groups
 - **Top buttons**: `coc-loader(H)` (Home)  `Install(I)`  `Update(U)`  `Check(C)`  `Help(?)`
-- **Package operations**: `i` install `u` update `X` / `x` uninstall `<CR>` toggle details/logs
+- **Package operations**: `i` install `u` update `X` uninstall `R` reinstall `<CR>` toggle details/logs
+- **Mark & filter**: `x` toggle mark `f` cycle filter `s` cycle sort
+- **Navigation**: `gg` / `G` jump to first / last package
+- **Batch**: `U` update all (max 3 concurrent) `Z` uninstall all `D` cleanup orphaned
 - **Update check**: `C` git ls-remote compares commits, shows `↑` when outdated
-- **Other**: `/` search `q` / `<Esc>` close (auto `:CocRestart` if changed)
-- **Detail view**: description / type / commit / source / languages / categories / homepage
+- **Other**: `/` search `q` close / `<Esc>` step-by-step cancel (help→search→marks→busy guard→close)
+- **Detail view**: description / type / commit / source / languages / categories / homepage / serverBinary
 - **Install logs**: `▶` compact line → `<CR>` expand full log with commands
 - **Progress**: `[step/total]` + status text
 - **Registry auto-fetch**: remote registry fetched in background when TUI opens
@@ -74,6 +77,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | `:CocCommand loader.install <name>` | Install a package |
 | `:CocCommand loader.uninstall <name>` | Uninstall a package |
 | `:CocCommand loader.update <name>` | Update a package |
+| `:CocCommand loader.reinstall <name>` | Reinstall a package |
 | `:CocCommand loader.uninstallAll` | Uninstall all (with confirm) |
 | `:CocCommand loader.updateRegistry` | Fetch latest registry from remote |
 

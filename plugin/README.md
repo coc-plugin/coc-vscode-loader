@@ -24,17 +24,25 @@ npm install coc-vscode-loader
 | Key | Action |
 |-----|--------|
 | `I` | Install mode (button highlight) |
-| `U` | Update all installed packages |
+| `U` | Update all installed packages (max 3 concurrent) |
 | `C` | Check for remote updates (git ls-remote commit compare) |
 | `Z` | Uninstall all installed packages (with confirmation) |
+| `D` | Cleanup orphaned packages (installed but removed from registry) |
 | `H` | Home (reset all state) |
 | `?` | Help |
 | `i` | Install package under cursor |
 | `u` | Update package under cursor |
-| `X` / `x` | Uninstall package under cursor |
+| `X` | Uninstall package under cursor |
+| `R` | Reinstall package under cursor |
+| `x` | Toggle mark package for batch operations |
+| `f` | Cycle filter: all → installed → available |
+| `s` | Cycle sort: default → name → status → type |
+| `gg` | Jump to first package |
+| `G` | Jump to last package |
 | `<CR>` | Toggle details (commit / type / source) or install log |
 | `/` | Search filter |
-| `q` / `<Esc>` | Close (auto `:CocRestart` if changes detected) |
+| `q` | Close (auto `:CocRestart` if changes detected) |
+| `<Esc>` | Help→Search→Clear marks→Cancel|Close |
 
 ## Commands
 
@@ -44,6 +52,7 @@ npm install coc-vscode-loader
 | `:CocCommand loader.install <name>` | Install a package |
 | `:CocCommand loader.uninstall <name>` | Uninstall a package |
 | `:CocCommand loader.update <name>` | Update a package |
+| `:CocCommand loader.reinstall <name>` | Reinstall a package (uninstall + install) |
 | `:CocCommand loader.uninstallAll` | Uninstall all (with confirmation) |
 | `:CocCommand loader.updateRegistry` | Fetch latest registry from remote |
 
@@ -57,12 +66,16 @@ npm install coc-vscode-loader
 - **Auto restart** — `:CocRestart` triggered automatically on close when changes detected
 - **Manual registry update** — `:CocCommand loader.updateRegistry` also available for re-fetch
 - **Install logs** — real command output per step, expandable
+- **Mark & batch** — `x` toggle mark, visual indicator, `D` clean orphaned packages
+- **Filter & sort** — `f` cycle view filter, `s` cycle sort order (name/status/type)
+- **Concurrency limit** — max 3 parallel operations for `U` (Update All)
+- **Desktop notifications** — `showInformationMessage` on install/update/uninstall complete
 
 ## Architecture
 
 | File | Description |
 |------|-------------|
-| `src/index.ts` | Plugin entry + 7 CocCommands |
+| `src/index.ts` | Plugin entry + 8 CocCommands |
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache |
