@@ -112,8 +112,8 @@ npm install /path/to/coc-converter    # or
 - [ ] Add python-bridge / rust-bridge preset examples
 - [ ] Implement `--bridge` CLI option (force bridge mode)
 
-## Type sync workflow (CI only)
+## Type sync workflow
 
-- `.github/workflows/sync-types.yml` runs daily at 02:00 UTC, pushes to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)
-- The actual sync logic lives in `coc-vscode-registry/.github/scripts/sync-types.sh`
+- Type definitions (`vscode.d.ts`, `coc.d.ts`) are auto-synced daily to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)
+- CI workflow and script live in that repo
 - **Do not manually edit type files**
