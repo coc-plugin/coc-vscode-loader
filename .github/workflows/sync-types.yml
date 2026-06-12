@@ -22,7 +22,7 @@ jobs:
 
       - name: Download and compare types
         run: |
-          mkdir -p types logs
+          chmod +x .github/scripts/sync-types.sh
           bash .github/scripts/sync-types.sh
 
       - name: Commit and push

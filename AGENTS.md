@@ -115,4 +115,5 @@ npm install /path/to/coc-converter    # or
 ## Type sync workflow (CI only)
 
 - `.github/workflows/sync-types.yml` runs daily at 02:00 UTC, pushes to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)
+- The actual sync logic lives in `coc-vscode-registry/.github/scripts/sync-types.sh`
 - **Do not manually edit type files**
