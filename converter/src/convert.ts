@@ -387,10 +387,10 @@ if (result.errors.length) {
   }
 
   console.log(`\n  ${output}/`)
-  console.log('    ├── src/index.ts         ← 主入口')
-  console.log('    ├── package.json         ← coc 插件配置')
-  console.log('    ├── esbuild.mjs          ← 构建配置')
-  console.log('    └── src/*.ts             ← 转换后的源码')
+  console.log('    ├── src/index.ts         ← main entry')
+  console.log('    ├── package.json         ← coc plugin config')
+  console.log('    ├── esbuild.mjs          ← build config')
+  console.log('    └── src/*.ts             ← converted source')
   console.log('\n  Next:')
   console.log(`    cd ${output}`)
   console.log('    npm install')

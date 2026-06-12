@@ -5,14 +5,14 @@ import { Transform } from '../types.js'
  * and apply name remapping for known API differences.
  */
 const MAPPINGS: Record<string, string> = {
-  // 命名空间
+  // namespace
   'vscode': 'coc.nvim',
 
-  // 命名差异
+  // naming differences
   'EventEmitter': 'Emitter',
   'Disposable': 'Disposable',
 
-  // 函数/方法
+  // function/method renames
   'getExtension': 'getExtensionById',
   'registerReferenceProvider': 'registerReferencesProvider',
   'registerCodeActionsProvider': 'registerCodeActionProvider',

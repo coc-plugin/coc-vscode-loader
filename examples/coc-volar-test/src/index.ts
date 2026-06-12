@@ -14,7 +14,7 @@ import * as fs from 'fs'
 
 export async function activate(context: ExtensionContext): Promise<void> {
   try {
-    // 1. 确保 coc-tsserver 已激活（加载 @vue/typescript-plugin）
+    // 1. ensure coc-tsserver is active (loads @vue/typescript-plugin)
     const tsExt = extensions.all.find(e => e.id === 'coc-tsserver')
     if (tsExt && !tsExt.isActive) {
       await tsExt.activate()
@@ -24,7 +24,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       await tsSvc.start()
     }
 
-    // 2. 找到 @vue/language-server
+    // 2. locate @vue/language-server
     const config = workspace.getConfiguration('vue')
     let serverModule = config.get<string>('server.path', '')
     if (serverModule) {
@@ -36,7 +36,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     }
     if (!serverModule) { window.showErrorMessage('Cannot find @vue/language-server.'); return }
 
-    // 3. 启动 Vue LSP
+    // 3. start Vue LSP
     const client = new LanguageClient(
       'vue',
       'Vue Language Server',
@@ -55,7 +55,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     context.subscriptions.push(cocServices.registerLanguageClient(client))
     client.start()
 
-    // 4. tsserver 桥接
+    // 4. tsserver bridge
     client.onNotification('tsserver/request', async ([seq, command, args]: [number, string, any]) => {
       try {
         const result = await commands.executeCommand<any>(
@@ -68,7 +68,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
       }
     })
 
-    // 5. 命令
+    // 5. commands
     context.subscriptions.push(
       commands.registerCommand('vue.action.restartServer', async () => {
         await client.stop()
