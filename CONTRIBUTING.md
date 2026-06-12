@@ -21,9 +21,12 @@ Thanks for your interest in contributing to coc-vscode-loader!
 
 ## Adding a new plugin to the registry
 
-1. Edit `plugin/src/registry.ts` with the package info (GitHub source and subdir)
-2. Add the package info with GitHub source and subdir (if applicable)
-3. Verify by installing via `:CocCommand loader.install <name>`
+The package registry is no longer built-in. To add a new plugin:
+
+1. Fork the [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) repo
+2. Edit `registry.json` with the package info (GitHub source and subdir)
+3. Submit a PR to that repo
+4. Once merged, run `:CocCommand loader.updateRegistry` to fetch the updated list
 
 ## Project structure
 

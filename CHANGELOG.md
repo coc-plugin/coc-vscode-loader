@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.1.1] - 2026-06-12
+
+### Added
+- Auto-fetch remote registry in background on startup
+- `StateManager.refreshPackages()` to merge updated registry entries
+
+### Changed
+- `switch.sh npm` handles npm 11 reify changes (backup/restore `file:` deps)
+- Remote registry now sole source of packages (built-in removed)
+- Background registry fetch is silent (no startup notification)
+
+## [1.1.0] - 2026-06-12
+
+### Changed
+- Binary language server download support via `serverBinary` in registry
+
+## [1.0.3] - 2026-06-12
+
+### Added
+- `scripts/convert-plugin.sh` for one-step convert & install
+
 ## [1.0.2] - 2026-06-12
 
 ### Added

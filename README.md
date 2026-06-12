@@ -45,7 +45,7 @@ bash scripts/convert-plugin.sh volar vuejs/language-tools extensions/vscode
 Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API)
       → AST transforms (import / class-to-factory / provider-register / LanguageClient / enum-offset)
       → Missing API replacement (getWordRangeAtPosition / fileName polyfills)
-      → Mark unsupported code (decoration / webview / complex missing APIs)
+      → Mark unsupported code (decoration / webview / tree data provider / env.openExternal)
       → Generate entry point (bridge code / LanguageClient / keep original extension.ts)
       → Generate package.json + esbuild external injection
       → Output coc plugin directory + migration report
@@ -109,7 +109,7 @@ Close the TUI — it will auto-run `:CocRestart`. Or manually run `:CocRestart`.
 
 ### Which VS Code extensions are supported?
 
-Currently Volar (Vue), Prisma, and HTML CSS Support. More are being added to the [registry](https://github.com/coc-plugin/coc-vscode-registry).
+Check the [registry](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json) for the full list. Currently includes Volar (Vue), Prisma, HTML CSS Support, Lua, and more being added.
 
 ### How is this different from running the VS Code extension directly?
 

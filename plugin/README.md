@@ -65,7 +65,7 @@ npm install coc-vscode-loader
 | `src/index.ts` | Plugin entry + 7 CocCommands |
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
-| `src/registry.ts` | Built-in registry + remote update cache |
+| `src/registry.ts` | Remote registry fetch + disk cache |
 | `src/pipeline.ts` | Real install/update/uninstall flow (git + npx tsx + npm + node + cp) |
 | `src/renderer.ts` | LineBuffer render engine (inspired by lazy.nvim) |
 

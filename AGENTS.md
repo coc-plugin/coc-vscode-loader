@@ -2,7 +2,7 @@
 
 ## What this repo is
 
-Reference documentation for migrating VS Code extensions to coc.nvim + **converter prototype** (`converter/`) that automatically converts VS Code extensions to coc plugins.
+Reference documentation for migrating VS Code extensions to coc.nvim + **converter CLI** (`converter/`) that automatically converts VS Code extensions to coc plugins.
 
 ## Repo map
 
@@ -16,17 +16,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 
 > 📖 Type definitions, API mapping docs and registry have been moved to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry).
 
-## Converter status
-
-**Verified conversions:**
-
-| Plugin | Type | Status | Key issues solved |
-|--------|------|--------|-----------------|
-| Volar (Vue) | TS-bridge | ✅ | tsserver/request bridge, typescriptServerPlugins, globalPlugins |
-| Prisma | Pure LSP | ✅ | exports field restriction, bin entry detection |
-| HTML CSS Support | Direct API | ✅ | class→factory, getWordRangeAtPosition polyfill, fileName→uri |
-
-**Implemented transforms:**
+## Converter transforms
 
 | Transform | What it does |
 |-----------|-------------|
@@ -58,7 +48,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | `src/index.ts` | Plugin entry + 7 CocCommands |
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
-| `src/registry.ts` | Built-in registry + remote update cache |
+| `src/registry.ts` | Remote registry fetch + disk cache |
 | `src/pipeline.ts` | Real install/update/uninstall flow (git / npx tsx / npm / node / cp) |
 | `src/renderer.ts` | LineBuffer render engine (inspired by lazy.nvim) |
 
@@ -68,7 +58,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 - lazy.nvim-inspired render engine: per-segment `append(text, hl)` + extmark highlights
 - 9 custom `CocConverter*` highlight groups linked to theme standard groups
 - **Top buttons**: `coc-loader(H)` (Home)  `Install(I)`  `Update(U)`  `Check(C)`  `Help(?)`
-- **Package operations**: `i` install `u` update `X` uninstall `<CR>` toggle details/logs
+- **Package operations**: `i` install `u` update `X` / `x` uninstall `<CR>` toggle details/logs
 - **Update check**: `C` git ls-remote compares commits, shows `↑` when outdated
 - **Other**: `/` search `q` / `<Esc>` close (auto `:CocRestart` if changed)
 - **Detail view**: description / type / commit / source / languages / categories / homepage
