@@ -74,7 +74,7 @@ const PRESETS = {
 `convert.ts` 不关心具体桥接逻辑，只调用 `getActivePresets()` + `generateBridgeCode()`。
 添加新桥接类型只需要在 `presets.ts` 加预设，不需要改主流程。
 
-详见 [`converter-design-v2.md`](../converter-design-v2.md#桥接预设bridge-presets)。
+详见 [coc-vscode-registry/docs/converter-design-v2.md](https://github.com/coc-plugin/coc-vscode-registry/blob/main/docs/converter-design-v2.md)。
 
 ## 文件结构
 

@@ -1,6 +1,6 @@
 # vscode-coc-loader
 
-将 VS Code 扩展转换为 coc.nvim 插件的参考文档、工具与验证案例。
+将 VS Code 扩展转换为 coc.nvim 插件的转换工具与包管理器。
 
 ## 背景
 
@@ -11,20 +11,6 @@
 2. **包管理器插件** ([`coc-converter/`](./coc-converter/)) — coc.nvim 插件，TUI 界面安装转换后的插件
 
 > 📖 API 映射文档和注册表已迁移到独立仓库 [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)。
-
-## API 文档
-
-| 文档 | 说明 |
-|------|------|
-| [vscode-vs-coc-api-diff.md](./vscode-vs-coc-api-diff.md) | VS Code vs coc.nvim API 完整差异对比 |
-| [vscode-api-feasibility.md](./vscode-api-feasibility.md) | 可实现性分析—哪些 VS Code API 能/不能移植到 coc |
-| [mapping-quickref.md](./mapping-quickref.md) | API 速查表（vscode ⇄ coc 双向对照） |
-| [provider-signature-card.md](./provider-signature-card.md) | 所有 Provider 注册函数签名精确对比 |
-| [pattern-migration-examples.md](./pattern-migration-examples.md) | 常见模式的迁移代码示例（vscode → coc） |
-| [manifest-activation-mapping.md](./manifest-activation-mapping.md) | package.json / activationEvents / contributes 对比 |
-| [import-mapping.md](./import-mapping.md) | import 名完整对照（vscode → coc.nvim） |
-| [converter-design-v2.md](./converter-design-v2.md) | 转换器架构设计与 Bridge 系统 |
-| [volar-migration-guide.md](./volar-migration-guide.md) | Volar 迁移案例详解 |
 
 ## 转换器原型
 
@@ -48,7 +34,7 @@ cd ./output && npm install && npm run build
 
 ```
 输入 → 扫描 (API 检测 + 插件分类 → TS桥接/纯LSP/直接API)
-     → AST 变换 (import / class-to-factory / provider-register / LanguageClient)
+     → AST 变换 (import / class-to-factory / provider-register / LanguageClient / enum-offset)
      → 缺失 API 替换 (getWordRangeAtPosition / fileName 等 polyfill)
      → 标记不可移植代码 (decoration / webview / 复杂缺失API)
      → 生成入口 (桥接代码 / LanguageClient / 保留原始 extension.ts)
@@ -56,7 +42,7 @@ cd ./output && npm install && npm run build
      → 输出 coc 插件目录 + 迁移报告
 ```
 
-详见 [`converter-design-v2.md`](./converter-design-v2.md)。
+> 完整的 API 映射文档和迁移指南请参阅 [coc-vscode-registry/docs](https://github.com/coc-plugin/coc-vscode-registry/tree/main/docs)。
 
 ## 参考文件
 
