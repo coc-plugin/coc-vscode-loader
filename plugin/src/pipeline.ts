@@ -152,12 +152,14 @@ async function buildPackage(
       }
       const arch = os.arch() === 'arm64' ? 'arm64' : 'x64'
       const platform: string = process.platform === 'win32' ? 'win32' : process.platform === 'darwin' ? 'darwin' : 'linux'
-      const rustTarget = `${archMap[arch] || arch}-${platformMap[platform] || platform}`
+      const rawArch = archMap[arch] || arch
+      const rustTarget = `${rawArch}-${platformMap[platform] || platform}`
 
       const filename = sb.asset
         .replace(/\{\{version}}/g, version)
         .replace(/\{\{platform}}/g, platform)
         .replace(/\{\{arch}}/g, arch)
+        .replace(/\{\{raw-arch}}/g, rawArch)
         .replace(/\{\{rust-target}}/g, rustTarget)
       const url = `https://github.com/${sb.repo}/releases/download/${tag}/${filename}`
 
@@ -170,45 +172,91 @@ async function buildPackage(
 
       if (filename.endsWith('.zip')) {
         await run('unzip', ['-o', filename, '-d', serverDir], build)
+      } else if (filename.endsWith('.gz') && !filename.endsWith('.tar.gz')) {
+        // Single-file gzip: decompress then move to server dir
+        const outName = filename.replace(/\.gz$/, '')
+        await run('gunzip', [filename], build)
+        fs.renameSync(path.join(build, outName), path.join(serverDir, outName))
       } else {
         await run('tar', ['xzf', filename, '-C', serverDir], build)
       }
+      // Make server binary executable (run BEFORE rmSync in case it fails)
+      try {
+        fs.readdirSync(serverDir).forEach(f => {
+          fs.chmodSync(path.join(serverDir, f), 0o755)
+        })
+      } catch {}
       if (sb.binaryPath || filename.match(/\.(zip|gz)$/)) {
-        fs.rmSync(path.join(build, filename))
+        const archivePath = path.join(build, filename)
+        if (fs.existsSync(archivePath)) fs.rmSync(archivePath)
       }
 
       // Wire server binary path into generated lib/index.js
       const indexPath = path.join(build, 'lib', 'index.js')
       if (fs.existsSync(indexPath)) {
-        const binPath = sb.binaryPath || sb.asset.split(/-?\{\{/)[0]
+        const binPath = (sb.binaryPath || sb.asset.split(/-?\{\{/)[0])
+          .replace(/\{\{version}}/g, version)
+          .replace(/\{\{platform}}/g, platform)
+          .replace(/\{\{arch}}/g, arch)
+          .replace(/\{\{raw-arch}}/g, rawArch)
+          .replace(/\{\{rust-target}}/g, rustTarget)
         let code = fs.readFileSync(indexPath, 'utf-8')
 
         // Replace module-based LanguageClient with command-based for binary servers
         const svrArgs = sb.args?.length ? JSON.stringify(sb.args) : '[]'
         code = code.replace(
-          /\{ module:\s*serverModule,\s*transport:\s*\w+\.TransportKind\.ipc\s*\}/,
+          /\{ module:\s*serverModule,\s*transport:\s*\w+\.TransportKind\.\w+\s*\}/,
           `{ command: serverModule, args: ${svrArgs} }`,
         )
 
-        // Inject server path resolution into the empty block before Cannot find error
+        // Replace require.resolve calls with direct binary path
+        const serverPath = `require('path').join(__dirname, '..', 'server', '${binPath}')`
         code = code.replace(
-          `if (!serverModule || !fs.existsSync(serverModule)) {\n    }`,
-          `if (!serverModule || !fs.existsSync(serverModule)) {\n    try {\n      const _sp = require('path').join(__dirname, '..', 'server', '${binPath}');\n      if (require('fs').existsSync(_sp)) serverModule = _sp;\n    } catch {}\n  }`,
-        )
-
-        // Fix documentSelector: generated code uses config namespace (e.g. "deno"),
-        // replace with actual languages from registry
-        const langSelector = info.languages.map(l => `{ scheme: "file", language: "${l}" }`).join(', ')
-        code = code.replace(
-          /documentSelector:\s*\[\s*\{[^}]*language:\s*['"][^'"]*['"][^}]*\}\s*\]/,
-          `documentSelector: [${langSelector}]`,
+          /try\s*\{[^}]*?require\.resolve\([^)]+\)\s*;?\s*\}\s*catch\s*\{\s*\}/g,
+          `try { serverModule = ${serverPath} } catch {}`,
         )
 
         fs.writeFileSync(indexPath, code)
       }
     } catch (e: any) {
-      onProgress(4, 5, `Warning: server download failed (${e.message})`, 'install server binary manually')
+      onProgress(4, 5, `Warning: serverBinary setup failed (${e.message})`, 'install server binary manually')
     }
+  }
+
+  // Fix documentSelector for ALL extensions (not just serverBinary):
+  // generated code uses config namespace (e.g. "evenBetterToml") but coc needs
+  // the actual language ID (e.g. "toml"). The languages come from registry entry.
+  const docSelPath = path.join(build, 'lib', 'index.js')
+  if (fs.existsSync(docSelPath)) {
+    let code = fs.readFileSync(docSelPath, 'utf-8')
+
+    // Fix documentSelector: generated code uses config namespace (e.g. "evenBetterToml")
+    const langSelector = info.languages.map(l => `{ scheme: "file", language: "${l}" }`).join(', ')
+    code = code.replace(
+      /documentSelector:\s*\[\s*\{[^}]*?language:\s*['"][^'"]*['"][^}]*\}\s*\]/,
+      `documentSelector: [${langSelector}]`,
+    )
+
+    // Fix transport: generated code uses TransportKind.ipc but most LSP servers need stdio
+    code = code.replace(/TransportKind\.ipc/g, 'TransportKind.stdio')
+
+    fs.writeFileSync(docSelPath, code)
+  }
+
+  // Fix activationEvents in package.json: use actual language IDs instead of whatever
+  // converter picked up (e.g. "cargoLock" → "toml")
+  const pkgPath = path.join(build, 'package.json')
+  if (fs.existsSync(pkgPath)) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+      const events = pkg.activationEvents || []
+      const langEvents = info.languages.map(l => `onLanguage:${l}`)
+      const newEvents = events.filter((e: string) => !e.startsWith('onLanguage:')).concat(langEvents)
+      if (newEvents.length > 0 && JSON.stringify(newEvents) !== JSON.stringify(events)) {
+        pkg.activationEvents = newEvents
+        fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
+      }
+    } catch {}
   }
 }
 

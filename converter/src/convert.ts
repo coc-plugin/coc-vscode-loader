@@ -176,7 +176,7 @@ export async function convert(opts: Options): Promise<void> {
     return `\
     try { serverModule = require.resolve('${escapeStr(name)}') } catch {}
     try {
-      const _mainPath = require.resolve('${escapeStr(name)}');
+      const _mainPath = require.resolve('${escapeStr(name)}/package.json');
       let _dir = require('path').dirname(_mainPath);
       while (_dir !== require('path').dirname(_dir)) {
         const _pkgPath = require('path').join(_dir, 'package.json');
@@ -285,9 +285,15 @@ ${bridgeCode ? bridgeCode + '\n\n' : ''}\
     }
   } else {
     // LSP-based: only include server-related dependencies
-    const knownPatterns = ['language-server', 'language-server/node', '-server', 'languageserver']
+    const knownPatterns = ['language-server', 'language-server/node', '-server', 'languageserver', '/lsp']
     for (const [dep, ver] of Object.entries(origPkg.dependencies || {})) {
-      if (ver.startsWith('workspace:')) continue
+      if (ver.startsWith('workspace:')) {
+        // Workspace deps: if it matches a known server pattern, add with wildcard version
+        if (knownPatterns.some(p => dep.includes(p))) {
+          serverDeps[dep] = '*'
+        }
+        continue
+      }
       if (knownPatterns.some(p => dep.includes(p))) {
         serverDeps[dep] = ver as string
       }
@@ -470,9 +476,9 @@ function detectServerModules(input: string, _result: any): string[] {
   const scanDir = path.join(input, 'src')
   if (fs.existsSync(scanDir)) {
     for (const file of fs.readdirSync(scanDir)) {
-      if (!file.endsWith('.ts')) continue
+      if (!file.endsWith('.ts') && !file.endsWith('.d.ts')) continue
       const content = fs.readFileSync(path.join(scanDir, file), 'utf-8')
-      for (const re of [/(?:require\s*(?:\.\s*resolve)?\s*\(|from\s+)['"]([^'"]+(?:language-server|server|Server)[^'"]*)['"]\s*\)?/g]) {
+      for (const re of [/(?:require\s*(?:\.\s*resolve)?\s*\(|from\s+)['"]([^'"]+(?:language-server|server|Server|lsp)[^'"]*)['"]\s*\)?/g]) {
         for (const m of content.matchAll(re)) {
           const name = sanitizeServerPath(m[1])
           if (name && !seen.has(name)) { seen.add(name); serverModules.push(name) }
