@@ -20,6 +20,19 @@ case "${1:-}" in
     echo "Switching to local dev version..."
     rm -rf "$EXT_DIR/$PLUGIN_NAME"
     ln -s "$LOCAL_PATH" "$EXT_DIR/$PLUGIN_NAME"
+
+    # Ensure plugin is listed in package.json dependencies so coc discovers it
+    node -e "
+      const fs = require('fs');
+      const pkgPath = '$EXT_DIR/../package.json';
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+      const deps = pkg.dependencies || (pkg.dependencies = {});
+      if (!deps['$PLUGIN_NAME']) {
+        deps['$PLUGIN_NAME'] = '*';
+        fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+        console.log('Added $PLUGIN_NAME to package.json');
+      }
+    "
     echo "✅ Now using local version: $LOCAL_PATH"
     ;;
 
