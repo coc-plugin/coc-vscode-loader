@@ -1,4 +1,4 @@
-name: Sync Types
+name: Sync Types to Registry
 
 on:
   schedule:
@@ -13,13 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: coc-plugin/coc-vscode-registry
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install dependencies (rg)
+      - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y ripgrep
 
-      - name: Run sync script
+      - name: Download and compare types
         run: |
-          chmod +x .github/scripts/sync-types.sh
+          mkdir -p types logs
           bash .github/scripts/sync-types.sh
 
       - name: Commit and push
