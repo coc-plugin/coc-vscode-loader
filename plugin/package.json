@@ -1,8 +1,25 @@
 {
   "name": "coc-vscode-loader",
   "version": "0.1.0",
-  "description": "VS Code extension to coc.nvim plugin converter & package manager",
+  "description": "Run VS Code extensions seamlessly in coc.nvim",
   "main": "lib/index.js",
+  "keywords": [
+    "coc.nvim",
+    "vscode",
+    "neovim",
+    "lsp",
+    "plugin-loader",
+    "vim"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coc-plugin/coc-vscode-loader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/coc-plugin/coc-vscode-loader/issues"
+  },
+  "homepage": "https://github.com/coc-plugin/coc-vscode-loader",
+  "license": "MIT",
   "engines": {
     "coc": ">= 0.0.80"
   },
@@ -23,8 +40,8 @@
     "commands": [
       { "command": "loader.open", "title": "Open VS Code extension loader" },
       { "command": "loader.install", "title": "Install a VS Code extension" },
-      { "command": "loader.uninstall", "title": "Uninstall a loader package" },
-      { "command": "loader.update", "title": "Update a loader package" },
+      { "command": "loader.uninstall", "title": "Uninstall a package" },
+      { "command": "loader.update", "title": "Update a package" },
       { "command": "loader.uninstallAll", "title": "Uninstall all packages" },
       { "command": "loader.updateRegistry", "title": "Update package registry" },
       { "command": "loader._dispatch", "title": "" }
