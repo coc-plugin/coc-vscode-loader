@@ -1,6 +1,7 @@
 import { StateManager } from './state'
 import { getPackage, PackageInfo } from './registry'
 import { spawn, execSync } from 'child_process'
+import { window as cocWindow } from 'coc.nvim'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
@@ -218,6 +219,7 @@ export async function installPackage(state: StateManager, name: string): Promise
     saveMeta(name)
     state.setDirty()
     state.setPackageStatus(name, 'installed')
+    cocWindow.showInformationMessage(`coc-${name} installed`)
     // Update commit in state
     try {
       const meta = JSON.parse(fs.readFileSync(metaPath(name), 'utf-8'))
@@ -267,6 +269,7 @@ export async function uninstallPackage(state: StateManager, name: string): Promi
 
     state.setPackageStatus(name, 'not-installed')
     state.setDirty()
+    cocWindow.showInformationMessage(`coc-${name} uninstalled`)
   } catch (e: any) {
     state.setPackageStatus(name, 'failed', { error: e.message })
   }
@@ -294,6 +297,7 @@ export async function updatePackage(state: StateManager, name: string): Promise<
     saveMeta(name)
     state.setDirty()
     state.setPackageStatus(name, 'installed')
+    cocWindow.showInformationMessage(`coc-${name} installed`)
     // Update commit in state
     try {
       const meta = JSON.parse(fs.readFileSync(metaPath(name), 'utf-8'))

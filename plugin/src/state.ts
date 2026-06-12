@@ -21,6 +21,7 @@ export interface PackageEntry {
   progressLog: string[]
   expanded: boolean
   logExpanded: boolean
+  marked: boolean
   error?: string
 }
 
@@ -65,6 +66,7 @@ export function createInitialState(): AppState {
       progressLog: [],
       expanded: false,
       logExpanded: false,
+      marked: false,
     }
   })
   return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default' }
@@ -209,6 +211,21 @@ export class StateManager {
     return this.state.packages.find(p => p.info.name === name)
   }
 
+  toggleMark(name: string) {
+    this.mutate(s => {
+      const pkg = s.packages.find(p => p.info.name === name)
+      if (pkg) pkg.marked = !pkg.marked
+    })
+  }
+
+  clearMarks() {
+    this.mutate(s => { for (const p of s.packages) p.marked = false })
+  }
+
+  getMarkedNames(): string[] {
+    return this.state.packages.filter(p => p.marked).map(p => p.info.name)
+  }
+
   refreshPackages() {
     this.mutate(s => {
       const updated = getAllPackages()
@@ -225,6 +242,7 @@ export class StateManager {
           progressLog: [],
           expanded: false,
           logExpanded: false,
+          marked: false,
         }
       })
     })

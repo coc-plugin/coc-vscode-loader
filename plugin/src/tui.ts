@@ -1,7 +1,7 @@
 import { workspace, window as cocWindow, Disposable } from 'coc.nvim'
 import { StateManager, PackageEntry, AppState, ViewFilter, SortBy } from './state'
 import { installPackage, uninstallPackage, updatePackage, checkUpdates, runConcurrent } from './pipeline'
-import { updateRegistry } from './registry'
+import { updateRegistry, getPackage } from './registry'
 import { LineBuffer, RenderResult } from './renderer'
 
 const VERSION: string = (() => {
@@ -175,6 +175,33 @@ export class TUI {
     }
     if (id === 'f') { this.state.cycleViewFilter(); return }
     if (id === 's') { this.state.cycleSortBy(); return }
+    if (id === 'gg') {
+      const firstLine = Math.min(...this.pkgLineMap.keys())
+      if (isFinite(firstLine)) {
+        await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [firstLine + 1, 0]])
+      }
+      return
+    }
+    if (id === 'G') {
+      const lastLine = Math.max(...this.pkgLineMap.keys())
+      if (isFinite(lastLine)) {
+        await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [lastLine + 1, 0]])
+      }
+      return
+    }
+    if (id === 'D') {
+      const installed = s.packages.filter(p => p.status === 'installed')
+      const removed = installed.filter(p => !getPackage(p.info.name))
+      if (removed.length === 0) {
+        cocWindow.showInformationMessage('No orphaned packages found')
+        return
+      }
+      const ok = await cocWindow.showPrompt(`Uninstall ${removed.length} orphaned package(s)?`)
+      if (ok) {
+        for (const p of removed) uninstallPackage(this.state, p.info.name)
+      }
+      return
+    }
     if (id === 'U') {
       const installed = s.packages.filter(p => p.status === 'installed')
       if (installed.length === 0) return
@@ -205,6 +232,7 @@ export class TUI {
     const entry = this.state.getPackage(pkgName)
     if (!entry) return
 
+    if (id === 'x') { this.state.toggleMark(pkgName); return }
     if (id === 'i' && entry.status === 'not-installed') { await installPackage(this.state, pkgName); return }
     if (id === 'u' && entry.status === 'installed') { await updatePackage(this.state, pkgName); return }
     if (id === 'X' && entry.status === 'installed') { uninstallPackage(this.state, pkgName); return }
@@ -226,7 +254,7 @@ export class TUI {
   private keyMap: Record<string, string> = {
     q: 'q', esc: '<Esc>', question: '?', slash: '/',
     U: 'U', Z: 'Z', i: 'i', u: 'u', X: 'X', R: 'R', cr: '<CR>',
-    f: 'f', s: 's',
+    f: 'f', s: 's', x: 'x', D: 'D', gg: 'gg', G: 'G',
   }
 
   private async setupKeymaps() {
@@ -234,8 +262,9 @@ export class TUI {
     const entries: [string, string][] = [
       ['q', 'q'], ['<Esc>', 'esc'], ['?', 'question'], ['/', 'slash'],
       ['U', 'U'], ['Z', 'Z'], ['C', 'C'], ['i', 'i'], ['I', 'I'], ['H', 'H'],
-      ['u', 'u'], ['X', 'X'], ['x', 'X'], ['R', 'R'],
-      ['f', 'f'], ['s', 's'],
+      ['u', 'u'], ['X', 'X'], ['R', 'R'],
+      ['f', 'f'], ['s', 's'], ['x', 'x'], ['D', 'D'],
+      ['gg', 'gg'], ['G', 'G'],
       ['<CR>', 'cr'],
     ]
     for (const [vimKey, id] of entries) {
@@ -391,7 +420,12 @@ export class TUI {
     const pkgLine = buf.currentLine()
     pkgLineMap.set(pkgLine, entry.info.name)
 
-    buf.append(' ')
+    if (entry.marked) {
+      buf.append('▸', 'CocConverterKey')
+      buf.append(' ')
+    } else {
+      buf.append('  ')
+    }
     buf.append(icon, iconHl)
     buf.append(' ')
     buf.append(entry.info.displayName)
