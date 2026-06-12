@@ -2,6 +2,7 @@ import { commands, workspace, window as cocWindow, ExtensionContext } from 'coc.
 import { createInitialState, StateManager } from './state'
 import { TUI } from './tui'
 import { installPackage, uninstallPackage, updatePackage } from './pipeline'
+import { updateRegistry } from './registry'
 
 let currentTUI: TUI | null = null
 
@@ -87,6 +88,17 @@ export async function activate(context: ExtensionContext) {
         for (const pkg of installed) {
           uninstallPackage(state, pkg.info.name)
         }
+      }
+    })
+  )
+
+  context.subscriptions.push(
+    commands.registerCommand('converter.updateRegistry', async () => {
+      try {
+        const count = await updateRegistry()
+        cocWindow.showInformationMessage(`Registry updated: ${count} packages available. Restart to apply.`)
+      } catch (e: any) {
+        cocWindow.showErrorMessage(`Registry update failed: ${e.message}`)
       }
     })
   )
