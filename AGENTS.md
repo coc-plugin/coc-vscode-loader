@@ -50,7 +50,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache + version compatibility filter |
-| `src/pipeline.ts` | Real install/update/uninstall flow (git / npx tsx / npm / node / cp) + binary server download + code patching |
+| `src/pipeline.ts` | Real install/update/uninstall flow (git / npx tsx / npm / node / cp) + pip install + binary server download + code patching (documentSelector, client.start guard) |
 | `src/renderer.ts` | LineBuffer render engine (inspired by lazy.nvim) |
 
 ### Version compatibility (minPluginVersion)
@@ -78,6 +78,7 @@ Registry entries can specify `minPluginVersion` (e.g. `"1.1.2"`) to require a mi
 - **Progress**: `[step/total]` + status text
 - **Registry auto-fetch**: remote registry fetched in background when TUI opens
 - **Binary server support**: auto-download + extract (.zip, .gz, .tar.gz) server binaries from GitHub Releases, patch generated code for command-mode startup, fix documentSelector and activationEvents
+- **Pip packages**: auto-install Python dependencies via pip (e.g. ansible-lint), only uses `--break-system-packages` on Linux
 
 ### Commands
 

@@ -32,7 +32,7 @@
 | **ESLint** | `microsoft/vscode-eslint` | 纯 LSP，npm 包服务器自动安装。需 ESLint 环境 |
 | **Tailwind CSS IntelliSense** | `tailwindlabs/tailwindcss-intellisense` | 纯 LSP，npm 包服务器 |
 | **PowerShell** | `PowerShell/vscode-powershell` | 系统需装 PowerShell 7+ |
-| **Ansible** | `ansible/vscode-ansible` | npm 包服务器 |
+| **Ansible** | `ansible/vscode-ansible` | npm 包服务器 + pip 安装 ansible-lint |
 
 > ~~Metals (#31)~~ — 需要 Coursier + Maven 下载流程，pipeline 不支持，已移除 registry
 
@@ -63,6 +63,15 @@ API 上评估为 Level 0（纯 LSP/简单 Direct API），但实际构建失败�
 | 服务器路径注入 | patch `lib/index.js` 使其自动查找 `../server/{binaryPath}` |
 | `documentSelector` 修复 | 将 converter 生成的错误 language ID（如 `"deno"`）修正为实际语言 |
 | `binaryPath` 自动推导 | 未指定时从 asset 模板名提取（`deno-{{rust-target}}.zip` → `deno`） |
+
+### Pipeline 已修复的 Bug（2026-06-13）
+
+| 修复 | 说明 |
+|------|------|
+| `pip install` 支持 | 新增 `pipPackages` 字段，自动安装 Python 依赖（如 ansible-lint），仅在 Linux 上用 `--break-system-packages` |
+| `client.start()` 保护 | patch 生成的 `lib/index.js`，给 `client.start()` 加 `.catch()` 防止 disposed connection 报错 |
+| 递归扫描 `.ts` 文件 | `walkTsFiles()` 递归遍历子目录，不再只扫 `src/` 一层 |
+| 版本过滤修复 | `getAllPackages()` 在 `updateRegistry()` 后不再绕过 `minPluginVersion` 过滤 |
 
 ### 待修复列表
 
