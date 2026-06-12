@@ -12,6 +12,7 @@ export type Status = 'not-installed' | 'installing' | 'installed' | 'updating' |
 export interface PackageEntry {
   info: PackageInfo
   status: Status
+  commit?: string
   progress?: string
   progressLog: string[]
   expanded: boolean
@@ -30,13 +31,26 @@ export interface AppState {
 type Listener = (state: AppState) => void
 
 export function createInitialState(): AppState {
-  const packages = getAllPackages().map(info => ({
-    info,
-    status: (isInstalled(info.name) ? 'installed' : 'not-installed') as Status,
-    progressLog: [],
-    expanded: false,
-    logExpanded: false,
-  }))
+  const packages = getAllPackages().map(info => {
+    const installed = isInstalled(info.name)
+    let commit: string | undefined
+    if (installed) {
+      try {
+        const meta = JSON.parse(
+          fs.readFileSync(path.join(os.homedir(), '.config', 'coc', 'converter-cache', info.name, 'meta.json'), 'utf-8')
+        )
+        commit = meta.commit || undefined
+      } catch {}
+    }
+    return {
+      info,
+      status: (installed ? 'installed' : 'not-installed') as Status,
+      commit,
+      progressLog: [],
+      expanded: false,
+      logExpanded: false,
+    }
+  })
   return { packages, searchQuery: '', showHelp: false, activePill: null, viewFilter: 'all' }
 }
 

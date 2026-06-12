@@ -1,6 +1,6 @@
 import { StateManager } from './state'
 import { getPackage, PackageInfo } from './registry'
-import { spawn } from 'child_process'
+import { spawn, execSync } from 'child_process'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
@@ -134,6 +134,18 @@ async function installToCoc(
   }
 }
 
+function metaPath(name: string): string {
+  return path.join(cacheDir(name), 'meta.json')
+}
+
+function saveMeta(name: string): void {
+  const srcDir = sourceDir(name)
+  try {
+    const commit = execSync('git', ['-C', srcDir, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf-8' }).toString().trim()
+    fs.writeFileSync(metaPath(name), JSON.stringify({ commit, updatedAt: Date.now() }, null, 2))
+  } catch {}
+}
+
 export async function installPackage(state: StateManager, name: string): Promise<void> {
   const info = getPackage(name)
   if (!info) { state.setPackageStatus(name, 'failed', { error: `Unknown package: ${name}` }); return }
@@ -153,6 +165,7 @@ export async function installPackage(state: StateManager, name: string): Promise
     await convertSource(input, name, prog)
     await buildPackage(name, prog)
     await installToCoc(name, prog)
+    saveMeta(name)
     state.setPackageStatus(name, 'installed')
   } catch (e: any) {
     state.setPackageStatus(name, 'failed', { error: e.message })
@@ -211,6 +224,7 @@ export async function updatePackage(state: StateManager, name: string): Promise<
     await convertSource(input, name, prog)
     await buildPackage(name, prog)
     await installToCoc(name, prog)
+    saveMeta(name)
     state.setPackageStatus(name, 'installed')
   } catch (e: any) {
     state.setPackageStatus(name, 'failed', { error: e.message })

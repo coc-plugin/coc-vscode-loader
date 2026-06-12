@@ -299,8 +299,8 @@ export class TUI {
     buf.nl()
     buf.nl()
 
-    const installed = filtered.filter(e => e.status === 'installed')
-    const available = filtered.filter(e => e.status !== 'installed')
+    const installed = filtered.filter(e => e.status !== 'not-installed')
+    const available = filtered.filter(e => e.status === 'not-installed')
 
     const section = (title: string, entries: PackageEntry[]) => {
       if (entries.length === 0) return
@@ -345,11 +345,12 @@ export class TUI {
       for (const text of [
         entry.info.description,
         `type        ${entry.info.type}`,
+        entry.commit ? `commit      ${entry.commit}` : null,
         `source      ${sourceStr(entry.info.source)}`,
         `languages   ${entry.info.languages.join(', ')}`,
         `categories  ${entry.info.categories.join(', ')}`,
         `homepage    ${entry.info.url}`,
-      ]) {
+      ].filter(Boolean) as string[]) {
         const ln = buf.currentLine()
         buf.nl(`     ${text}`)
         pkgLineMap.set(ln, entry.info.name)
