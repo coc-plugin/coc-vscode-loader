@@ -18,11 +18,20 @@ export interface PackageInfo {
   url: string
   languages: string[]
   categories: string[]
+  minPluginVersion?: string // minimum coc-vscode-loader version required, e.g. "1.2.0"
   serverBinary?: {
     repo: string
     asset: string       // "name-{{version}}-{{platform}}-{{arch}}.tar.gz"
     binaryPath?: string // relative path inside tarball, e.g. "bin/lua-language-server"
     args?: string[]     // CLI args to start the LSP, e.g. ["lsp"] for deno
+  }
+}
+
+function pluginVersion(): string {
+  try {
+    return require('../package.json').version
+  } catch {
+    return '0.0.0'
   }
 }
 
@@ -73,10 +82,23 @@ export async function updateRegistry(): Promise<number> {
   return data.length
 }
 
+function satisfiesVersion(required: string): boolean {
+  const a = pluginVersion().split('.').map(Number)
+  const b = required.split('.').map(Number)
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const va = a[i] || 0, vb = b[i] || 0
+    if (va > vb) return true
+    if (va < vb) return false
+  }
+  return true
+}
+
 export function getAllPackages(): PackageInfo[] {
   if (cached) return cached
   cached = loadCache()
-  return cached || []
+  if (!cached) return []
+  cached = cached.filter(p => !p.minPluginVersion || satisfiesVersion(p.minPluginVersion))
+  return cached
 }
 
 export function getPackage(name: string): PackageInfo | undefined {
