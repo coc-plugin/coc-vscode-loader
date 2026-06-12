@@ -163,6 +163,10 @@ export class TUI {
     if (id === 'esc') {
       if (s.showHelp) { this.state.toggleHelp(); return }
       if (s.searchQuery) { this.state.setSearchQuery(''); return }
+      const hasMarks = s.packages.some(p => p.marked)
+      if (hasMarks) { this.state.clearMarks(); return }
+      const busy = s.packages.some(p => ['installing', 'updating', 'uninstalling'].includes(p.status))
+      if (busy) { cocWindow.showInformationMessage('Operation in progress, wait for it to finish'); return }
       this.close(); return
     }
     if (id === 'question') { this.state.toggleHelp(); return }
