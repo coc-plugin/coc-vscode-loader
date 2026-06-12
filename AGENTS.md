@@ -67,7 +67,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | `src/index.ts` | 插件入口 + 5 个 CocCommand |
 | `src/tui.ts` | TUI 窗口管理 + 渲染 + 快捷键分发 |
 | `src/state.ts` | 状态管理（debounced 渲染） |
-| `src/registry.ts` | 内置注册表（7 个插件） |
+| `src/registry.ts` | 内置注册表（3 个插件） |
 | `src/pipeline.ts` | 安装/更新/卸载流程（模拟步骤） |
 | `src/renderer.ts` | LineBuffer 渲染引擎（仿 lazy.nvim） |
 

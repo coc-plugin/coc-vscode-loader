@@ -147,9 +147,9 @@ interface PackageInfo {
 }
 ```
 
-当前 7 个内置包：Volar、Prisma、HTML CSS Support、Angular、ESLint、JSON Language Features、YAML Language Support。
+当前 3 个内置包：Volar、Prisma、HTML CSS Support。
 
-> 已对接验证的 3 个：Volar（ts-bridge）、Prisma（pure-lsp）、HTML CSS Support（direct-api）。
+> 均已对接验证：Volar（ts-bridge）、Prisma（pure-lsp）、HTML CSS Support（direct-api）。
 
 扫描和转换逻辑内置在 `converter/` 中，不依赖 registry 配置（自动检测 server 模块、自动分类）。
 
@@ -222,7 +222,7 @@ convert <input-vscode-ext> -o <output-dir>
 | esbuild 配置生成 | `converter/src/convert.ts` | external 自动注入 |
 | 桥接 preset 系统 | `converter/src/presets.ts` | ts-bridge preset |
 | CLI | `converter/src/cli.ts` | `convert <input> -o <output>` |
-| coc-converter TUI | `coc-converter/` | TUI 管理界面，7 个内置包 |
+| coc-converter TUI | `coc-converter/` | TUI 管理界面，3 个内置包 |
 | 验证案例 | 3 个 | Volar、Prisma、HTML CSS Support |
 
 ### Pending
