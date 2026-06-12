@@ -28,14 +28,6 @@ npx tsx src/cli.ts convert ../path/to/vscode-ext -o ./output
 cd ./output && npm install && npm run build
 ```
 
-**Verified conversions:**
-
-| Plugin | Type | Status | Notes |
-|--------|------|--------|-------|
-| Volar (Vue) | TS-bridge | ✅ | Requires modified coc-tsserver (PR #493) |
-| Prisma | Pure LSP | ✅ | Auto-detects bin entry |
-| HTML CSS Support | Direct API | ✅ | Handles new→create, missing API polyfills |
-
 **Quick conversion script:**
 
 Use [`scripts/convert-plugin.sh`](./scripts/convert-plugin.sh) for one-step convert & install:
