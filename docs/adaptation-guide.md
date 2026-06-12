@@ -14,18 +14,25 @@
 
 ---
 
-## 一、Level 0 — 实际测试通过（6 个）
+## 一、已端到端验证（1 个）
 
-**2026-06-12 实测 `bash switch.sh local` → TUI 安装 → converter → npm install → esbuild → coc register，完整链路成功。**
+**2026-06-12 从 TUI 安装到 Deno LSP 在 coc.nvim 中运行，全链路验证通过。**
 
-| # | 扩展 | 仓库 | 状态 | 说明 |
-|---|------|------|------|------|
-| 1 | **ESLint** | `microsoft/vscode-eslint` | ✅ 构建通过 | 纯 LSP，npm 包服务器自动安装 |
-| 5 | **Tailwind CSS IntelliSense** | `tailwindlabs/tailwindcss-intellisense` | ✅ 构建通过 | 纯 LSP，npm 包服务器 |
-| 13 | **TOML (Taplo)** | `tamasfe/taplo` | ✅ 构建通过 | 纯 LSP，npm 包服务器 |
-| 26 | **Deno** | `denoland/vscode_deno` | 🟢 LSP 运行中 | 首个二进制 LSP 打通。pipeline 自动下载 deno + patch 代码 |
-| 37 | **PowerShell** | `PowerShell/vscode-powershell` | ✅ 构建通过 | 系统需装 PowerShell 7+ |
-| 38 | **Ansible** | `ansible/vscode-ansible` | ✅ 构建通过 | npm 包服务器 |
+| 扩展 | 仓库 | 状态 | 说明 |
+|------|------|------|------|
+| **Deno** | `denoland/vscode_deno` | 🟢 LSP 运行中 | Converter 转换 → pipeline 下载二进制 → patch → Deno LSP 正常启动 |
+
+## 二、构建成功、运行时未验证（5 个）
+
+**Converter 转换 + esbuild 构建成功，但未在 coc 中测试实际 LSP 功能。**
+
+| 扩展 | 仓库 | 说明 |
+|------|------|------|
+| **ESLint** | `microsoft/vscode-eslint` | 纯 LSP，npm 包服务器自动安装。需 ESLint 环境 |
+| **Tailwind CSS IntelliSense** | `tailwindlabs/tailwindcss-intellisense` | 纯 LSP，npm 包服务器 |
+| **TOML (Taplo)** | `tamasfe/taplo` | 纯 LSP，npm 包服务器 |
+| **PowerShell** | `PowerShell/vscode-powershell` | 系统需装 PowerShell 7+ |
+| **Ansible** | `ansible/vscode-ansible` | npm 包服务器 |
 
 > ~~Metals (#31)~~ — 需要 Coursier + Maven 下载流程，pipeline 不支持，已移除 registry
 
@@ -127,7 +134,8 @@ API 上评估为 Level 0（纯 LSP/简单 Direct API），但实际构建失败�
 
 | 等级 | 数量 | 占比 |
 |------|------|------|
-| **Level 0 — 已验证转换** | **7** | **15%** |
+| **已端到端验证** | **1** | **2%** |
+| 构建成功、运行时未验证 | 5 | 11% |
 | Level 0b — Converter 待修 | 21 | 45% |
 | Level 1 — 少量适配 | 7 | 15% |
 | Level 2 — 扩展转换器 | 5 | 11% |
@@ -136,11 +144,10 @@ API 上评估为 Level 0（纯 LSP/简单 Direct API），但实际构建失败�
 
 ## 优先级建议
 
-1. **P0（已做）**: 7 个 Level 0 扩展已录入 registry 并验证转换链路
-2. **P1（本周）**: 修 converter bug（entry 检测、vscode external、文件拷贝），将 21 个 Level 0b 提升到 Level 0
-3. **P2（下月）**: Prettier、Biome、Protobuf 等 Level 1 扩展
-4. **P3（Q3）**: 扩展 converter 支持 Level 2（Auto Rename Tag、Go、multi-client）
-5. **P4（暂缓）**: Rainbow CSV、Rest Client、Regex Previewer、OCaml 等待 coc 生态成熟
+1. **P0（已做）**: Deno 端到端验证通过，已录入 registry 并发布 v1.1.2
+2. **P1（本周）**: 验证其余 5 个构建成功插件的运行时行为
+3. **P2（下月）**: 修 converter bug（entry 检测、vscode external、文件拷贝），推进 Level 0b
+4. **P3（Q3）**: Prettier、Biome、Protobuf 等 Level 1 + Auto Rename Tag 等 Level 2
 
 ---
 
