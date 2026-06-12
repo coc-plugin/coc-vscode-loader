@@ -143,7 +143,7 @@ function metaPath(name: string): string {
 function saveMeta(name: string): void {
   const srcDir = sourceDir(name)
   try {
-    const commit = execSync('git', ['-C', srcDir, 'rev-parse', '--short', 'HEAD'], { encoding: 'utf-8' }).toString().trim()
+    const commit = execSync(`git -C "${srcDir}" rev-parse --short HEAD`, { encoding: 'utf-8' }).toString().trim()
     fs.writeFileSync(metaPath(name), JSON.stringify({ commit, updatedAt: Date.now() }, null, 2))
   } catch {}
 }
@@ -170,6 +170,16 @@ export async function installPackage(state: StateManager, name: string): Promise
     saveMeta(name)
     state.setDirty()
     state.setPackageStatus(name, 'installed')
+    // Update commit in state
+    try {
+      const meta = JSON.parse(fs.readFileSync(metaPath(name), 'utf-8'))
+      if (meta.commit) {
+        state.mutate(s => {
+          const p = s.packages.find(p => p.info.name === name)
+          if (p) p.commit = meta.commit
+        })
+      }
+    } catch {}
   } catch (e: any) {
     state.setPackageStatus(name, 'failed', { error: e.message })
   }
@@ -231,6 +241,16 @@ export async function updatePackage(state: StateManager, name: string): Promise<
     saveMeta(name)
     state.setDirty()
     state.setPackageStatus(name, 'installed')
+    // Update commit in state
+    try {
+      const meta = JSON.parse(fs.readFileSync(metaPath(name), 'utf-8'))
+      if (meta.commit) {
+        state.mutate(s => {
+          const p = s.packages.find(p => p.info.name === name)
+          if (p) p.commit = meta.commit
+        })
+      }
+    } catch {}
   } catch (e: any) {
     state.setPackageStatus(name, 'failed', { error: e.message })
   }
