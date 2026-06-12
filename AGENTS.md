@@ -64,11 +64,11 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 
 | 文件 | 说明 |
 |------|------|
-| `src/index.ts` | 插件入口 + 5 个 CocCommand |
+| `src/index.ts` | 插件入口 + 7 个 CocCommand |
 | `src/tui.ts` | TUI 窗口管理 + 渲染 + 快捷键分发 |
 | `src/state.ts` | 状态管理（debounced 渲染） |
-| `src/registry.ts` | 内置注册表（3 个插件） |
-| `src/pipeline.ts` | 安装/更新/卸载流程（模拟步骤） |
+| `src/registry.ts` | 内置注册表 + 远程热更新缓存 |
+| `src/pipeline.ts` | 真实安装/更新/卸载流程（git / npx tsx / npm / node / cp） |
 | `src/renderer.ts` | LineBuffer 渲染引擎（仿 lazy.nvim） |
 
 ### TUI 特性
@@ -76,13 +76,13 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 - 浮动窗口 + 无边框
 - 仿 lazy.nvim 的渲染引擎：每段独立 `append(text, hl)` + extmark 高亮
 - 自定义高亮组（9 个 `CocConverter*`）链接到主题标准组，自动适配当前 colorscheme
-- **顶部按钮**：`coc-converter(H)` 首页  `Install(I)` 模式  `Update(U)` 更新全部  `Help(?)` 帮助
-- **模式按钮**：`I` 进入 Install 模式（按钮亮起） `U` 更新全部（按钮亮起） `H` 回首页 `?` 帮助
+- **顶部按钮**：`coc-converter(H)` 首页  `Install(I)`  `Update(U)`  `Check(C)`  `Help(?)`
 - **包操作**：`i` 安装 `u` 更新 `X` 卸载 `<CR>` 展开/折叠详情/日志
-- **其他**：`/` 搜索 `q` / `<Esc>` 关闭
-- **展开详情**：description / type / source / languages / categories / homepage
+- **检查更新**：`C` git ls-remote 对比 commit，有更新标 `↑`
+- **其他**：`/` 搜索 `q` / `<Esc>` 关闭（有变更时自动 `:CocRestart`）
+- **展开详情**：description / type / commit / source / languages / categories / homepage
 - **安装日志**：`▶` 紧凑行 → `<CR>` 展开完整日志（含执行的命令）
-- **进度显示**：`[step/total]` + 执行的命令
+- **进度显示**：`[step/total]` + 状态提示文字
 
 ### 命令
 
@@ -93,6 +93,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | `:CocCommand converter.uninstall <name>` | 卸载指定包 |
 | `:CocCommand converter.update <name>` | 更新指定包 |
 | `:CocCommand converter.uninstallAll` | 卸载全部（需确认） |
+| `:CocCommand converter.updateRegistry` | 从 GitHub 拉取最新注册表 |
 
 ### 构建
 
@@ -112,11 +113,10 @@ npm install /path/to/coc-converter    # 或
 
 ## Pending (next session)
 
-- [ ] 对接真实 converter/ 管道（代替模拟步骤）
-- [ ] 注册表热更新（从 GitHub 拉远程 registry）
 - [ ] 添加更多插件到注册表
 - [ ] Add more transforms (uri-mapping, more provider signatures)
 - [ ] Add python-bridge / rust-bridge preset examples
+- [ ] `--bridge` CLI 选项实现（强制 bridge 模式）
 
 ## Type sync workflow (CI only)
 

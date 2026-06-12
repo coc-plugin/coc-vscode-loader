@@ -228,8 +228,6 @@ convert <input-vscode-ext> -o <output-dir>
 ### Pending
 
 - [ ] `--bridge` CLI 选项实现（强制 bridge 模式）
-- [ ] 对接真实 converter 管道到 coc-converter（代替模拟步骤）
-- [ ] 注册表热更新（从 GitHub 拉远程 registry）
 - [ ] 添加更多插件到注册表
 - [ ] 更多 provider 签名适配
 - [ ] python-bridge / rust-bridge preset 示例
