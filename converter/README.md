@@ -1,65 +1,65 @@
-# converter — vscode → coc 转换器原型
+# converter — vscode → coc converter prototype
 
-将 VS Code 扩展自动转换为 coc.nvim 插件的 CLI 工具。
+CLI tool that automatically converts VS Code extensions to coc.nvim plugins.
 
-## 用法
+## Usage
 
 ```bash
-# 转换一个 VS Code 扩展目录
+# Convert a VS Code extension directory
 npx tsx src/cli.ts convert ./vscode-ext/ -o ./coc-ext/
 
-# 安装到 coc
+# Build and install to coc
 cd ./coc-ext && npm install && npm run build
 cd ~/.config/coc/extensions && npm install /path/to/coc-ext
 ```
 
-## 已验证的转换
+## Verified conversions
 
-| 插件 | 类型 | 自动检测 | 构建 | 功能 | 备注 |
-|------|------|---------|------|------|------|
-| Volar (Vue) | TS 桥接型 | `@vue/language-server` + `typescript` | ✅ | ✅ | 需要修改版 coc-tsserver |
-| Prisma | 纯 LSP | `@prisma/language-server` | ✅ | ✅ | 自动检测 bin 入口 |
-| HTML CSS Support | 直接 API | — | ✅ | ✅ | 自动处理 API 差异 |
+| Plugin | Type | Auto-detected | Build | Working | Notes |
+|--------|------|---------------|-------|---------|-------|
+| Volar (Vue) | TS bridge | `@vue/language-server` + `typescript` | ✅ | ✅ | Requires modified coc-tsserver |
+| Prisma | Pure LSP | `@prisma/language-server` | ✅ | ✅ | Auto-detects bin entry |
+| HTML CSS Support | Direct API | — | ✅ | ✅ | Handles API differences |
 
-### 插件分类
+### Plugin types
 
-| 类型 | 说明 | 处理方式 | 示例 |
-|------|------|---------|------|
-| **TS 桥接型** | 依赖 TypeScript LSP 的语言插件 | 生成 `tsserver/request` 桥接 + `typescriptServerPlugins` | Volar |
-| **纯 LSP** | 使用 LanguageClient 的标准 LSP 插件 | 生成 LanguageClient 入口 + 服务器依赖注入 | Prisma |
-| **直接 API** | 不使用 LanguageClient，直接调用 API | 保留原 `extension.ts` 为入口，不做桥接 | HTML CSS Support |
+| Type | Description | Approach | Example |
+|------|-------------|----------|---------|
+| **TS bridge** | Language plugins depending on TypeScript LSP | Generate `tsserver/request` bridge + `typescriptServerPlugins` | Volar |
+| **Pure LSP** | Standard LSP using LanguageClient | Generate LanguageClient entry + server dependency injection | Prisma |
+| **Direct API** | Direct coc.nvim API calls (no LanguageClient) | Keep original `extension.ts` as entry, no bridge | HTML CSS Support |
 
-TS 桥接型插件需要修改版 coc-tsserver（[PR #493](https://github.com/neoclide/coc-tsserver/pull/493)）：
+TS bridge plugins require a modified coc-tsserver ([PR #493](https://github.com/neoclide/coc-tsserver/pull/493)):
 
 ```bash
 cd ~/.config/coc/extensions
 npm install ChuYanLon/coc-tsserver --legacy-peer-deps
 ```
 
-## 架构
+## Architecture
 
 ```
-输入：VS Code 扩展目录
+Input: VS Code extension directory
   │
-  ├─ scanner        分析 API → 检测插件类型
-  ├─ transforms/    AST 变换
+  ├─ scanner        Analyze API → detect plugin type
+  ├─ transforms/    AST transforms
   │   ├─ import-mapping      from 'vscode' → from 'coc.nvim'
   │   ├─ class-to-factory    new Xxx() → Xxx.create()
-  │   ├─ provider-register   补齐注册函数签名差异
-  │   ├─ language-client     LanguageClient 签名适配
-  │   └─ enum-offset         枚举值偏移注释提醒（DiagnosticSeverity 等）
-  ├─ mark-unsupported  标记/替换缺失 API（getWordRangeAtPosition、fileName 等）
-  ├─ generate src/index.ts   主入口（含自动桥接/纯 LSP 两种模板）
-  ├─ generate package.json   依赖/配置/esbuild external
-  └─ generate esbuild.mjs    构建配置
+  │   ├─ provider-register   Adapt provider registration signatures
+  │   ├─ language-client     Adapt LanguageClient signatures
+  │   └─ enum-offset         Comment on enum value offsets
+  ├─ mark-unsupported  Replace/mark missing APIs (getWordRangeAtPosition, fileName, etc.)
+  ├─ generate src/index.ts   Main entry (bridge / LanguageClient / direct templates)
+  ├─ generate package.json   Dependencies / esbuild external config
+  └─ generate esbuild.mjs    Build config
 ```
 
-## 桥接预设系统
+## Bridge preset system
 
-桥接逻辑通过预设（preset）驱动，而非硬编码：
+Bridge logic is preset-driven rather than hardcoded:
 
 ```typescript
-// presets.ts - 所有桥接预设定义在这里
+// presets.ts - all bridge presets defined here
 const PRESETS = {
   'ts-bridge': {
     notification: 'tsserver/request',
@@ -67,68 +67,68 @@ const PRESETS = {
     handler: { type: 'command', command: 'typescript.tsserverRequest' },
     extraDeps: ['typescript'],
   },
-  // 未来可扩展: python-bridge, rust-bridge 等
+  // future: python-bridge, rust-bridge, etc.
 }
 ```
 
-`convert.ts` 不关心具体桥接逻辑，只调用 `getActivePresets()` + `generateBridgeCode()`。
-添加新桥接类型只需要在 `presets.ts` 加预设，不需要改主流程。
+`convert.ts` only calls `getActivePresets()` + `generateBridgeCode()`, it never touches bridge logic directly.
+Adding a new bridge type = add a new preset in `presets.ts`, no changes to main flow.
 
-详见 [coc-vscode-registry/docs/converter-design-v2.md](https://github.com/coc-plugin/coc-vscode-registry/blob/main/docs/converter-design-v2.md)。
+See [coc-vscode-registry/docs/converter-design-v2.md](https://github.com/coc-plugin/coc-vscode-registry/blob/main/docs/converter-design-v2.md).
 
-## 文件结构
+## File structure
 
-| 文件 | 行数 | 说明 |
-|------|------|------|
-| `src/cli.ts` | 28 | CLI 入口 |
-| `src/convert.ts` | 484 | 主流程 + 模板生成 + API 替换 |
-| `src/scanner.ts` | 136 | API 扫描 + 插件分类 |
-| `src/transforms/import-mapping.ts` | 47 | import 替换 |
-| `src/transforms/language-client.ts` | 48 | LanguageClient 适配 |
+| File | Lines | Description |
+|------|-------|-------------|
+| `src/cli.ts` | 28 | CLI entry |
+| `src/convert.ts` | 484 | Main flow + template generation + API replacement |
+| `src/scanner.ts` | 136 | API scanner + plugin classification |
+| `src/transforms/import-mapping.ts` | 47 | Import replacement |
+| `src/transforms/language-client.ts` | 48 | LanguageClient adaptation |
 | `src/transforms/class-to-factory.ts` | 54 | new Xxx() → Xxx.create() |
-| `src/transforms/provider-register.ts` | 55 | provider 注册签名补齐 |
-| `src/transforms/enum-offset.ts` | 49 | 枚举值偏移注释提醒 |
-| **总计** | **~870** | |
+| `src/transforms/provider-register.ts` | 55 | Provider registration signature fixes |
+| `src/transforms/enum-offset.ts` | 49 | Enum value offset annotations |
+| **Total** | **~870** | |
 
-## 已处理的 API 差异
+## Handled API differences
 
-| API | VS Code | coc.nvim | 处理方式 |
-|-----|---------|----------|---------|
-| import | `from 'vscode'` | `from 'coc.nvim'` | 直接替换 |
-| Position/Range/Location 等 | `new Xxx()` | `Xxx.create()` | AST 替换 |
-| EventEmitter | `EventEmitter<T>` | `Emitter<T>` | 直接替换 |
-| registerCompletionItemProvider | `(sel, p, ...t)` | `(name, shortcut, sel, p, t?)` | 补齐参数 |
-| registerCodeActionsProvider | `registerCodeActionsProvider` | `registerCodeActionProvider` | 重命名 |
-| registerReferenceProvider | `registerReferenceProvider` | `registerReferencesProvider` | 重命名 |
-| CompletionItem.create | `new CompletionItem(label, kind)` | `CompletionItem.create(label)` + `item.kind = kind` | kind 需单独设置 |
-| 触发字符参数 | `" "` (字符串) | `[" "]` (数组) | rest 参数转数组 |
-| CompletionItemKind 枚举 | `Value = 11`, `Enum = 12` | `Value = 12`, `Enum = 13` | 偏移 1，符号引用自动适配 |
-| documentSelector | `[{ language: 'xxx' }]` | 相同 | 自动从 package.json 推断 |
-| getWordRangeAtPosition | `document.getWordRangeAtPosition()` | 不存在 | 替换为手动计算 |
-| fileName | `document.fileName` | 不存在 | 替换为 `document.uri` |
-| createTextEditorDecorationType | `window.createTextEditorDecorationType()` | 不存在 | 标记 TODO |
-| createWebviewPanel | `window.createWebviewPanel()` | 不存在 | 标记 TODO |
+| API | VS Code | coc.nvim | Handling |
+|-----|---------|----------|----------|
+| import | `from 'vscode'` | `from 'coc.nvim'` | Direct replace |
+| Position/Range/Location etc. | `new Xxx()` | `Xxx.create()` | AST replace |
+| EventEmitter | `EventEmitter<T>` | `Emitter<T>` | Direct replace |
+| registerCompletionItemProvider | `(sel, p, ...t)` | `(name, shortcut, sel, p, t?)` | Pad arguments |
+| registerCodeActionsProvider | `registerCodeActionsProvider` | `registerCodeActionProvider` | Rename |
+| registerReferenceProvider | `registerReferenceProvider` | `registerReferencesProvider` | Rename |
+| CompletionItem.create | `new CompletionItem(label, kind)` | `CompletionItem.create(label)` + `item.kind = kind` | kind set separately |
+| Trigger characters | `" "` (string) | `[" "]` (array) | Rest param → array |
+| CompletionItemKind enum | `Value = 11`, `Enum = 12` | `Value = 12`, `Enum = 13` | Offset by 1, symbols auto-adapt |
+| documentSelector | `[{ language: 'xxx' }]` | Same | Auto-infer from package.json |
+| getWordRangeAtPosition | `document.getWordRangeAtPosition()` | Not available | Inline word boundary calculation |
+| fileName | `document.fileName` | Not available | Replace with `document.uri` |
+| createTextEditorDecorationType | `window.createTextEditorDecorationType()` | Not available | Mark TODO |
+| createWebviewPanel | `window.createWebviewPanel()` | Not available | Mark TODO |
 
-### 缺失 API 处理策略
+### Missing API strategy
 
-当 VS Code 的 API 在 coc 中不存在时，优先从 VS Code 源码寻找实现方案：
+When a VS Code API has no coc.nvim equivalent, the approach is:
 
-1. 在 [VS Code 源码](https://github.com/microsoft/vscode) 中找到该 API 的实现
-2. 评估复杂度：
-   - **简单逻辑**（如 `getWordRangeAtPosition`）→ 直接实现内联 polyfill
-   - **复杂逻辑**（如 decoration、webview）→ 标记 TODO，说明原因
-3. polyfill 优先使用 coc 已有 API 组合实现，避免引入新依赖
+1. Find the [VS Code source](https://github.com/microsoft/vscode) implementation
+2. Evaluate complexity:
+   - **Simple** (e.g. `getWordRangeAtPosition`) → inline polyfill
+   - **Complex** (e.g. decoration, webview) → mark TODO with explanation
+3. Polyfill using existing coc APIs where possible, avoid new dependencies
 
-已知 VS Code API 实现位置：
+Known VS Code API source locations:
 - `getWordRangeAtPosition` → `src/vs/editor/common/core/wordHelper.ts`
-- `TextDocument.fileName` → coc 用 `document.uri` 替代（`DocumentUri = string`）
-- decoration 系统 → `src/vs/editor/common/viewModel/viewDecorations.ts`
+- `TextDocument.fileName` → coc uses `document.uri` instead (`DocumentUri = string`)
+- Decoration system → `src/vs/editor/common/viewModel/viewDecorations.ts`
 
-## 关键设计
+## Key design decisions
 
-- **零硬编码** — 服务器包名从源码自动检测
-- **bin 入口回退** — 自动检测并优先使用 `package.json` 的 `bin` 入口
-- **esbuild external 自动注入** — 检测到的服务器包自动标记为 external
-- **TS 桥接型自动注入** — `typescriptServerPlugins` + `tsserver/request` 转发
-- **插件分类** — 自动识别 TS 桥接/纯 LSP/直接 API 三种类型，不同处理
-- **缺失 API 处理** — 能替换的替换，不能替换的标记 TODO
+- **Zero hardcoding** — server package names auto-detected from source
+- **Bin entry fallback** — auto-detect and prefer `package.json` bin entry
+- **Auto esbuild external injection** — detected server packages marked as external
+- **Auto TS bridge injection** — `typescriptServerPlugins` + `tsserver/request` forwarding
+- **Plugin classification** — auto-detect TS bridge / pure LSP / direct API
+- **Missing API handling** — polyfill where possible, mark TODO otherwise

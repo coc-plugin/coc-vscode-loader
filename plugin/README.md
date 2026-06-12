@@ -1,67 +1,67 @@
-# coc-converter
+# coc-vscode-loader
 
-VS Code extension → coc.nvim plugin converter & package manager。
+VS Code extension → coc.nvim plugin loader with TUI package manager.
 
-通过 TUI 界面一键安装/更新/卸载转换后的插件。
+Install/update/uninstall converted VS Code extensions via a floating terminal UI.
 
-## 安装
+## Install
 
 ```bash
 cd ~/.config/coc/extensions
-npm install /path/to/coc-converter
-# 或 :CocInstall /path/to/coc-converter
+npm install /path/to/coc-vscode-loader
+# or :CocInstall /path/to/coc-vscode-loader
 ```
 
-## TUI 快捷键
+## TUI Keymaps
 
-| 按键 | 动作 |
-|------|------|
-| `I` | Install 模式（按钮亮起） |
-| `U` | 更新全部已安装插件（按钮亮起） |
-| `C` | 检查远程更新（git ls-remote 对比 commit） |
-| `Z` | 卸载全部已安装插件（需确认） |
-| `H` | 回首页（清除所有状态） |
-| `?` | 帮助 |
-| `i` | 安装光标处插件 |
-| `u` | 更新光标处插件 |
-| `X` / `x` | 卸载光标处插件 |
-| `<CR>` | 展开/折叠详情（commit / type / source 等）或安装日志 |
-| `/` | 搜索过滤 |
-| `q` / `<Esc>` | 关闭窗口（有变更时自动重启 coc） |
+| Key | Action |
+|-----|--------|
+| `I` | Install mode (button highlight) |
+| `U` | Update all installed packages |
+| `C` | Check for remote updates (git ls-remote commit compare) |
+| `Z` | Uninstall all installed packages (with confirmation) |
+| `H` | Home (reset all state) |
+| `?` | Help |
+| `i` | Install package under cursor |
+| `u` | Update package under cursor |
+| `X` / `x` | Uninstall package under cursor |
+| `<CR>` | Toggle details (commit / type / source) or install log |
+| `/` | Search filter |
+| `q` / `<Esc>` | Close (auto `:CocRestart` if changes detected) |
 
-## 命令
+## Commands
 
-| Command | 动作 |
-|---------|------|
-| `:CocCommand loader.open` | 打开 TUI |
-| `:CocCommand loader.install <name>` | 安装指定包 |
-| `:CocCommand loader.uninstall <name>` | 卸载指定包 |
-| `:CocCommand loader.update <name>` | 更新指定包 |
-| `:CocCommand loader.uninstallAll` | 卸载全部（需确认） |
-| `:CocCommand loader.updateRegistry` | 从 GitHub 拉取最新注册表 |
+| Command | Action |
+|---------|--------|
+| `:CocCommand loader.open` | Open TUI |
+| `:CocCommand loader.install <name>` | Install a package |
+| `:CocCommand loader.uninstall <name>` | Uninstall a package |
+| `:CocCommand loader.update <name>` | Update a package |
+| `:CocCommand loader.uninstallAll` | Uninstall all (with confirmation) |
+| `:CocCommand loader.updateRegistry` | Fetch latest registry from remote |
 
-## 特性
+## Features
 
-- **真实转换管道** — git clone → converter 转换 → npm install → esbuild 构建 → 注册到 coc
-- **增量缓存** — source/ 保留 git 仓库，安装/更新时只 git pull，不重复 clone
-- **Commit 追踪** — 安装后记录当前 commit SHA，展开详情可见
-- **检查更新** — `C` 键对比远端 HEAD，有更新标 `↑`
-- **自动重启** — 关 TUI 时如有变更自动 `:CocRestart`
-- **注册表热更新** — `:CocCommand loader.updateRegistry` 从 GitHub 拉取远程 registry
-- **安装日志** — 每一步的真实命令输出，可展开查看
+- **Real conversion pipeline** — git clone → converter → npm install → esbuild → register to coc
+- **Incremental cache** — source/ keeps git repo, updates via git pull only
+- **Commit tracking** — records commit SHA after install, visible in detail view
+- **Update check** — `C` key compares against remote HEAD, shows `↑` when outdated
+- **Auto restart** — `:CocRestart` triggered automatically on close when changes detected
+- **Registry hot-reload** — `:CocCommand loader.updateRegistry` fetches remote registry
+- **Install logs** — real command output per step, expandable
 
-## 架构
+## Architecture
 
-| 文件 | 说明 |
-|------|------|
-| `src/index.ts` | 插件入口 + 7 个 CocCommand |
-| `src/tui.ts` | TUI 窗口管理 + 渲染 + 快捷键分发 |
-| `src/state.ts` | 状态管理（debounced 渲染） |
-| `src/registry.ts` | 内置注册表 + 远程热更新缓存 |
-| `src/pipeline.ts` | 真实安装/更新/卸载流程（git + npx tsx + npm + node + cp） |
-| `src/renderer.ts` | LineBuffer 渲染引擎（仿 lazy.nvim） |
+| File | Description |
+|------|-------------|
+| `src/index.ts` | Plugin entry + 7 CocCommands |
+| `src/tui.ts` | TUI window management + rendering + key dispatch |
+| `src/state.ts` | State management (debounced rendering) |
+| `src/registry.ts` | Built-in registry + remote update cache |
+| `src/pipeline.ts` | Real install/update/uninstall flow (git + npx tsx + npm + node + cp) |
+| `src/renderer.ts` | LineBuffer render engine (inspired by lazy.nvim) |
 
-## 构建
+## Build
 
 ```bash
 npm install

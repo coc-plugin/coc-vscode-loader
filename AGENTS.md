@@ -9,11 +9,11 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | File | Purpose |
 |------|---------|
 | `README.md` | Entry point |
-| `vscode.d.ts` | Upstream VS Code extension API types (auto-synced) |
-| `coc.d.ts` | Upstream coc.nvim API types (auto-synced) |
+| `types/vscode.d.ts` | Upstream VS Code extension API types (auto-synced) |
+| `types/coc.d.ts` | Upstream coc.nvim API types (auto-synced) |
 | `converter/` | Source code: CLI conversion tool |
-| `plugin/` | **coc-loader 包管理器插件** |
-| `plugin/README.md` | Converter plugin docs and usage |
+| `plugin/` | **coc-loader plugin** |
+| `plugin/README.md` | Plugin docs and usage |
 | `logs/YYYY-MM-DD.md` | Daily sync change logs |
 | `AGENTS.md` | Dev instructions for AI agents |
 
@@ -50,73 +50,69 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 - Changes: `globalPlugins` + `pluginPaths` in configure, `typescript.tsserverRequest` command
 - Pre-merge: `npm install ChuYanLon/coc-tsserver`
 
-## coc-loader 包管理器插件
+## Loader plugin
 
-`plugin/` 是一个 coc.nvim 插件，提供 TUI 界面来安装/更新/卸载转换后的插件。
+`plugin/` is a coc.nvim plugin that provides a TUI to install/update/uninstall converted plugins.
 
-### 架构
+### Architecture
 
-| 文件 | 说明 |
-|------|------|
-| `src/index.ts` | 插件入口 + 7 个 CocCommand |
-| `src/tui.ts` | TUI 窗口管理 + 渲染 + 快捷键分发 |
-| `src/state.ts` | 状态管理（debounced 渲染） |
-| `src/registry.ts` | 内置注册表 + 远程热更新缓存 |
-| `src/pipeline.ts` | 真实安装/更新/卸载流程（git / npx tsx / npm / node / cp） |
-| `src/renderer.ts` | LineBuffer 渲染引擎（仿 lazy.nvim） |
+| File | Description |
+|------|-------------|
+| `src/index.ts` | Plugin entry + 7 CocCommands |
+| `src/tui.ts` | TUI window management + rendering + key dispatch |
+| `src/state.ts` | State management (debounced rendering) |
+| `src/registry.ts` | Built-in registry + remote update cache |
+| `src/pipeline.ts` | Real install/update/uninstall flow (git / npx tsx / npm / node / cp) |
+| `src/renderer.ts` | LineBuffer render engine (inspired by lazy.nvim) |
 
-### TUI 特性
+### TUI features
 
-- 浮动窗口 + 无边框
-- 仿 lazy.nvim 的渲染引擎：每段独立 `append(text, hl)` + extmark 高亮
-- 自定义高亮组（9 个 `CocConverter*`）链接到主题标准组，自动适配当前 colorscheme
-- **顶部按钮**：`coc-converter(H)` 首页  `Install(I)`  `Update(U)`  `Check(C)`  `Help(?)`
-- **包操作**：`i` 安装 `u` 更新 `X` 卸载 `<CR>` 展开/折叠详情/日志
-- **检查更新**：`C` git ls-remote 对比 commit，有更新标 `↑`
-- **其他**：`/` 搜索 `q` / `<Esc>` 关闭（有变更时自动 `:CocRestart`）
-- **展开详情**：description / type / commit / source / languages / categories / homepage
-- **安装日志**：`▶` 紧凑行 → `<CR>` 展开完整日志（含执行的命令）
-- **进度显示**：`[step/total]` + 状态提示文字
+- Floating window, no border
+- lazy.nvim-inspired render engine: per-segment `append(text, hl)` + extmark highlights
+- 9 custom `CocConverter*` highlight groups linked to theme standard groups
+- **Top buttons**: `coc-loader(H)` Home  `Install(I)`  `Update(U)`  `Check(C)`  `Help(?)`
+- **Package operations**: `i` install `u` update `X` uninstall `<CR>` toggle details/logs
+- **Update check**: `C` git ls-remote compares commits, shows `↑` when outdated
+- **Other**: `/` search `q` / `<Esc>` close (auto `:CocRestart` if changed)
+- **Detail view**: description / type / commit / source / languages / categories / homepage
+- **Install logs**: `▶` compact line → `<CR>` expand full log with commands
+- **Progress**: `[step/total]` + status text
 
-### 命令
+### Commands
 
-| Command | 动作 |
-|---------|------|
-| `:CocCommand loader.open` | 打开 TUI |
-| `:CocCommand loader.install <name>` | 安装指定包 |
-| `:CocCommand loader.uninstall <name>` | 卸载指定包 |
-| `:CocCommand loader.update <name>` | 更新指定包 |
-| `:CocCommand loader.uninstallAll` | 卸载全部（需确认） |
-| `:CocCommand loader.updateRegistry` | 从 GitHub 拉取最新注册表 |
+| Command | Action |
+|---------|--------|
+| `:CocCommand loader.open` | Open TUI |
+| `:CocCommand loader.install <name>` | Install a package |
+| `:CocCommand loader.uninstall <name>` | Uninstall a package |
+| `:CocCommand loader.update <name>` | Update a package |
+| `:CocCommand loader.uninstallAll` | Uninstall all (with confirm) |
+| `:CocCommand loader.updateRegistry` | Fetch latest registry from remote |
 
-### 构建
+### Build
 
 ```bash
-cd coc-converter
+cd plugin
 npm install
 npm run build    # esbuild → lib/index.js
 ```
 
-### 安装
+### Install
 
 ```bash
 cd ~/.config/coc/extensions
-npm install /path/to/coc-converter    # 或
+npm install /path/to/coc-converter    # or
 :CocInstall /path/to/coc-converter
 ```
 
 ## Pending (next session)
 
-- [ ] 添加更多插件到注册表
+- [ ] Add more plugins to registry
 - [ ] Add more transforms (uri-mapping, more provider signatures)
 - [ ] Add python-bridge / rust-bridge preset examples
-- [ ] `--bridge` CLI 选项实现（强制 bridge 模式）
+- [ ] Implement `--bridge` CLI option (force bridge mode)
 
 ## Type sync workflow (CI only)
 
 - `.github/workflows/sync-types.yml` runs daily at 02:00 UTC
-- **Do not manually edit `vscode.d.ts` or `coc.d.ts`**
-
-## Language
-
-All documentation is written in Chinese (zh-CN).
+- **Do not manually edit `types/vscode.d.ts` or `types/coc.d.ts`**
