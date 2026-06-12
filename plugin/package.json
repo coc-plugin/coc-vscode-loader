@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "coc.nvim": "^0.0.83-next.18",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.28.1",
     "typescript": "^6.0.3"
   },
   "activationEvents": [
