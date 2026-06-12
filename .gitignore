@@ -3,3 +3,4 @@ lib/
 dist/
 *.log
 plugin/converter/
+switch.sh
