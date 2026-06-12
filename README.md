@@ -8,7 +8,7 @@
 
 本仓库包含两部分内容：
 1. **转换器原型** ([`converter/`](./converter/)) — 自动将 VS Code 扩展转为 coc 插件
-2. **coc 插件加载器** ([`coc-vscode-loader/`](./coc-vscode-loader/)) — coc.nvim 插件，TUI 界面安装转换后的插件
+2. **coc 插件加载器** ([`plugin/`](./plugin/)) — coc.nvim 插件，TUI 界面安装转换后的插件
 
 > 📖 API 映射文档和注册表已迁移到独立仓库 [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)。
 

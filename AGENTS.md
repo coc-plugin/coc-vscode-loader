@@ -12,8 +12,8 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | `vscode.d.ts` | Upstream VS Code extension API types (auto-synced) |
 | `coc.d.ts` | Upstream coc.nvim API types (auto-synced) |
 | `converter/` | Source code: CLI conversion tool |
-| `coc-vscode-loader/` | **coc-loader 包管理器插件** |
-| `coc-vscode-loader/README.md` | Converter plugin docs and usage |
+| `plugin/` | **coc-loader 包管理器插件** |
+| `plugin/README.md` | Converter plugin docs and usage |
 | `logs/YYYY-MM-DD.md` | Daily sync change logs |
 | `AGENTS.md` | Dev instructions for AI agents |
 
@@ -52,7 +52,7 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 
 ## coc-loader 包管理器插件
 
-`coc-vscode-loader/` 是一个 coc.nvim 插件，提供 TUI 界面来安装/更新/卸载转换后的插件。
+`plugin/` 是一个 coc.nvim 插件，提供 TUI 界面来安装/更新/卸载转换后的插件。
 
 ### 架构
 
