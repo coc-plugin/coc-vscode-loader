@@ -44,5 +44,4 @@ Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API
 
 ## Reference
 
-- `types/vscode.d.ts` — VS Code extension API types (auto-synced from vscode main)
-- `types/coc.d.ts` — coc.nvim API types (auto-synced from coc.nvim master)
+- `types/vscode.d.ts`, `types/coc.d.ts` — see [coc-vscode-registry/types](https://github.com/coc-plugin/coc-vscode-registry/tree/main/types)

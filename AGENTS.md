@@ -9,8 +9,8 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 | File | Purpose |
 |------|---------|
 | `README.md` | Entry point |
-| `types/vscode.d.ts` | Upstream VS Code extension API types (auto-synced) |
-| `types/coc.d.ts` | Upstream coc.nvim API types (auto-synced) |
+| `types/vscode.d.ts` | Upstream VS Code extension API types (auto-synced) — moved to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) |
+| `types/coc.d.ts` | Upstream coc.nvim API types (auto-synced) — moved to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) |
 | `converter/` | Source code: CLI conversion tool |
 | `plugin/` | **coc-loader plugin** |
 | `plugin/README.md` | Plugin docs and usage |
@@ -114,5 +114,5 @@ npm install /path/to/coc-converter    # or
 
 ## Type sync workflow (CI only)
 
-- `.github/workflows/sync-types.yml` runs daily at 02:00 UTC
-- **Do not manually edit `types/vscode.d.ts` or `types/coc.d.ts`**
+- `.github/workflows/sync-types.yml` runs daily at 02:00 UTC, pushes to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)
+- **Do not manually edit type files**
