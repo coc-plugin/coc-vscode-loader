@@ -13,6 +13,9 @@ export interface ScannedFile {
 
 export function scan(dir: string): ScanResult {
   const files: ScannedFile[] = []
+  if (!fs.existsSync(dir)) {
+    return { files, summary: 'no source directory found' }
+  }
   const tsFiles = walk(dir).filter(f => f.endsWith('.ts') || f.endsWith('.tsx'))
 
   for (const filePath of tsFiles) {

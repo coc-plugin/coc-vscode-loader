@@ -37,60 +37,46 @@ export const sourceGenerator: StepGenerator = {
     const outputsDir = path.join(output, 'src')
     fs.mkdirSync(outputsDir, { recursive: true })
 
-    // Scan for files with vscode imports
-    const srcDir = path.join(input, 'src')
+    // Copy ALL .ts/.tsx files from source directory (try src/ first, fall back to input root)
+    let srcDir = path.join(input, 'src')
+    if (!fs.existsSync(srcDir)) {
+      srcDir = input
+    }
+    const allFiles: Array<{ src: string; rel: string }> = []
     const vscodeFiles: string[] = []
 
-    if (fs.existsSync(srcDir)) {
-      for (const f of walkFiles(srcDir)) {
-        const rel = path.relative(srcDir, f)
-        if (!f.endsWith('.ts') && !f.endsWith('.tsx')) continue
-        const content = fs.readFileSync(f, 'utf-8')
-        if (content.includes("from 'vscode'") || content.includes('from "vscode"') || content.includes('require("vscode")')) {
-          vscodeFiles.push(f)
-        }
+    for (const f of walkFiles(srcDir)) {
+      const rel = path.relative(srcDir, f)
+      if (!rel.endsWith('.ts') && !rel.endsWith('.tsx')) continue
+      allFiles.push({ src: f, rel })
+
+      const content = fs.readFileSync(f, 'utf-8')
+      if (content.includes("from 'vscode'") || content.includes('from "vscode"') || content.includes('require("vscode")')) {
+        vscodeFiles.push(rel)
       }
     }
 
-    // Copy vscode files to output
-    const copiedFiles: string[] = []
-    for (const f of vscodeFiles) {
-      const rel = path.relative(srcDir, f)
+    // Copy all files to output
+    for (const { src, rel } of allFiles) {
       const dest = path.join(outputsDir, rel)
       fs.mkdirSync(path.dirname(dest), { recursive: true })
-      fs.copyFileSync(f, dest)
-      copiedFiles.push(rel)
-    }
-
-    // Ensure entry file is copied
-    if (ss.entry) {
-      const entrySrc = path.join(srcDir, ss.entry)
-      const entryDest = path.join(outputsDir, ss.entry)
-      if (fs.existsSync(entrySrc) && !copiedFiles.includes(ss.entry)) {
-        fs.mkdirSync(path.dirname(entryDest), { recursive: true })
-        fs.copyFileSync(entrySrc, entryDest)
-        copiedFiles.push(ss.entry)
-      }
+      fs.copyFileSync(src, dest)
     }
 
     if (verbose) {
-      console.log(`  source: copied ${copiedFiles.length} files`)
+      console.log(`  source: copied ${allFiles.length} files (${vscodeFiles.length} with vscode imports)`)
     }
 
-    // Apply transforms via ts-morph
-    const toTransform = copiedFiles
-      .map(f => path.join(outputsDir, f))
-      .filter(f => fs.existsSync(f))
-
-    for (const fp of toTransform) {
+    // Apply transforms via ts-morph (only to files with vscode imports)
+    for (const rel of vscodeFiles) {
+      const fp = path.join(outputsDir, rel)
+      if (!fs.existsSync(fp)) continue
       try { project.addSourceFileAtPath(fp) } catch {}
     }
 
     for (const sf of project.getSourceFiles()) {
-      const filePath = sf.getFilePath()
-      const relPath = path.relative(outputsDir, filePath)
-      // Only transform files that are in our output src dir
-      if (!copiedFiles.some(f => filePath.endsWith(f))) continue
+      const relPath = path.relative(outputsDir, sf.getFilePath())
+      if (!vscodeFiles.some(f => sf.getFilePath().endsWith(f))) continue
 
       for (const t of ss.transforms) {
         const fn = TRANSFORM_MAP[t]

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import * as fs from 'fs'
 import { Command } from 'commander'
 import { convert } from './convert.js'
 
@@ -15,10 +16,20 @@ program
   .argument('<input>', 'input directory (VS Code extension)')
   .option('-o, --output <dir>', 'output directory', './output')
   .option('--convert <json>', 'convert step configuration (JSON array)')
+  .option('--convert-file <path>', 'path to JSON file with convert step configuration')
   .option('-v, --verbose', 'verbose output')
   .action(async (input, opts) => {
     let steps: any[]
-    if (opts.convert) {
+    if (opts.convertFile) {
+      try {
+        const content = fs.readFileSync(opts.convertFile, 'utf-8')
+        steps = JSON.parse(content)
+        if (!Array.isArray(steps)) throw new Error('must be an array')
+      } catch (e: any) {
+        console.error(`invalid --convert-file: ${e.message}`)
+        process.exit(1)
+      }
+    } else if (opts.convert) {
       try {
         steps = JSON.parse(opts.convert)
         if (!Array.isArray(steps)) throw new Error('must be an array')
@@ -27,7 +38,7 @@ program
         process.exit(1)
       }
     } else {
-      console.error('--convert <JSON> is required')
+      console.error('--convert <JSON> or --convert-file <path> is required')
       process.exit(1)
     }
 

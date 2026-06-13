@@ -59,9 +59,12 @@ export async function convert(opts: ConvertOptions): Promise<void> {
     }
   }
 
-  // 2. Scan for summary
+  // 2. Scan for summary (try src/ first, fall back to input root)
   console.log('Scanning...')
-  const result = scan(path.join(input, 'src'))
+  let result = scan(path.join(input, 'src'))
+  if (result.files.length === 0) {
+    result = scan(input)
+  }
   console.log(result.summary)
 
   if (result.files.length === 0) {
@@ -158,14 +161,37 @@ export async function convert(opts: ConvertOptions): Promise<void> {
   for (const s of steps) {
     if (isLanguageClientStep(s) && s.server.kind === 'module') {
       const pkg = s.server.package
-      const ver = origPkg.dependencies?.[pkg] || origPkg.devDependencies?.[pkg] || '*'
-      serverDeps[pkg] = ver
+      const ver = origPkg.dependencies?.[pkg] || origPkg.devDependencies?.[pkg]
+      if (ver && ver.startsWith('workspace:')) {
+        serverDeps[pkg] = '*' // monorepo workspace → wildcard for npm
+      } else {
+        serverDeps[pkg] = ver || '*'
+      }
+    }
+  }
+
+  // Collect all runtime deps from origPkg (deps + devDeps, filtered)
+  const origDeps: Record<string, string> = {}
+  {
+    const allPkgDeps = { ...origPkg.dependencies, ...origPkg.devDependencies }
+    for (const [dep, ver] of Object.entries(allPkgDeps)) {
+      const v = ver as string
+      if (v.startsWith('workspace:')) continue
+      if (dep.startsWith('@types/')) continue
+      if (['typescript', 'mocha', 'c8', 'prettier', 'rollup', 'esbuild', '@vscode/'].some(p => dep.startsWith(p))) continue
+      origDeps[dep] = v
     }
   }
 
   const deps: Record<string, string> = {
     ...serverDeps,
+    ...origDeps,
     ...merged.keepDeps,
+    ...origDeps,
+  }
+  // Fix workspace: protocol deps (monorepo, invalid in npm) → wildcard
+  for (const k of Object.keys(deps)) {
+    if (typeof deps[k] === 'string' && deps[k].startsWith('workspace:')) deps[k] = '*'
   }
 
   const pkg = {
@@ -176,6 +202,9 @@ export async function convert(opts: ConvertOptions): Promise<void> {
     engines: { coc: '^0.0.82' },
     activationEvents,
     dependencies: deps,
+    devDependencies: {
+      esbuild: '^0.28.0',
+    },
     contributes: {
       configuration: origPkg.contributes?.configuration ? {
         type: 'object',
@@ -196,11 +225,12 @@ export async function convert(opts: ConvertOptions): Promise<void> {
 
   fs.writeFileSync(path.join(output, 'package.json'), JSON.stringify(pkg, null, 2))
 
-  // 10. Generate esbuild config
+  // 10. Generate esbuild config — externalize all runtime deps
   const externalMods = [
     'coc.nvim',
     ...Object.keys(serverDeps),
     ...Object.keys(merged.keepDeps),
+    ...Object.keys(origDeps),
   ].flatMap(n => {
     if (n.startsWith('@')) return n.split('/').slice(0, 2).join('/')
     return n.split('/')[0]

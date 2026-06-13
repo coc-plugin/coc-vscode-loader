@@ -27,8 +27,10 @@ function pluginDir(name: string): string {
 function converterCliPath(): string {
   const base = path.resolve(__dirname, '..')
   const candidates = [
-    path.join(base, 'converter', 'src', 'cli.ts'),
+    // In dev mode (symlink), the converter is at repo root
     path.join(base, '..', 'converter', 'src', 'cli.ts'),
+    // In npm install, the converter is bundled inside the package
+    path.join(base, 'converter', 'src', 'cli.ts'),
   ]
   for (const p of candidates) {
     if (fs.existsSync(p)) return p
@@ -111,11 +113,15 @@ async function convertSource(
   if (!info.convert || !Array.isArray(info.convert) || info.convert.length === 0) {
     throw new Error(`Registry entry "${name}" has no "convert" config. Please update the registry.`)
   }
-  const convertJson = JSON.stringify(info.convert)
+
+  // Write convert config to temp file to avoid shell escaping issues with JSON
+  const convertFile = path.join(cacheDir(name), 'convert-config.json')
+  fs.mkdirSync(path.dirname(convertFile), { recursive: true })
+  fs.writeFileSync(convertFile, JSON.stringify(info.convert))
 
   onProgress(2, 5, 'Converting...', `converter convert ${inputDir} -o ${build}`)
   const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
-  await run('npx', ['tsx', cli, 'convert', inputDir, '-o', build, '--convert', convertJson], cacheDir(name), log)
+  await run('npx', ['tsx', cli, 'convert', inputDir, '-o', build, '--convert-file', convertFile], cacheDir(name), log)
 }
 
 async function buildPackage(
