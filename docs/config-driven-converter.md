@@ -156,13 +156,30 @@ esbuild 将两者打包为一个 `lib/index.js`。
 
 从原始 package.json 保留的运行时依赖列表。用于保留非 server 的依赖（如 lodash、chokidar 等）。
 
-版本的解析规则：
+版本的解析规则（三步降级）：
 
 ```
 1. 在原始 package.json 的 dependencies 里找包名 → 找到则用
 2. 没找到 → 在 devDependencies 里找 → 找到则用
-3. 都没找到 → 报错，提示人工补全版本号
+3. 没找到 → 向上查找 workspace root（../package.json, ../../package.json...）的 dependencies/devDependencies → 找到则用（处理 monorepo 场景）
+4. 都没找到 → 报错，提示人工补全版本号
 ```
+
+如果自动解析均失败，可改用对象语法在 registry 中手动指定版本号：
+
+```json
+{
+  "type": "source",
+  "transforms": ["import-mapping"],
+  "entry": "src/extension.ts",
+  "keepDeps": {
+    "lodash": "^4.17.21",
+    "@vue/language-core": "workspace:*"
+  }
+}
+```
+
+数组语法（自动解析）和对象语法（手动指定）二选一，混用时报错。
 
 ---
 

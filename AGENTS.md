@@ -135,11 +135,33 @@ npm install coc-vscode-loader    # or
 | [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-10 | More transforms & bridge presets |
 | [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | Stable ecosystem: 10+ plugins, full transform coverage |
 
+## keepDeps 版本解析策略（Converter v2.0）
+
+`keepDeps` 的版本解析采用三步降级：
+
+1. 源插件 `package.json` 的 `dependencies` → 找到则用
+2. 源插件 `package.json` 的 `devDependencies` → 找到则用
+3. 向上查找 workspace root `package.json`（monorepo 场景）
+4. 全部失败 → 报错
+
+若自动解析无法满足，registry 配置可改用对象语法手动指定版本号：
+
+```json
+"keepDeps": {
+  "lodash": "^4.17.21",
+  "@vue/language-core": "workspace:*"
+}
+```
+
+数组语法（自动解析）和对象语法（手动指定）互斥。
+
 ## Pending
 
 - [ ] Add more plugins to registry
 - [ ] Add more transforms (uri-mapping, more provider signatures)
 - [ ] Add python-bridge / rust-bridge preset examples
+- [ ] Implement keepDeps workspace root lookup for monorepo (step 3)
+- [ ] Implement keepDeps object syntax fallback
 
 ## Type sync workflow
 
