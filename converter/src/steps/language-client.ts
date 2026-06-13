@@ -35,7 +35,7 @@ export const languageClientGenerator: StepGenerator = {
     if (!serverPath) {
       serverPath = require('path').join(__dirname, '..', 'server', '${escapeStr(binary.binaryPath || pkg)}')
     }`
-      serverOptionsCode = `{ command: serverPath, args: ${argsStr}, transport: ${transportExpr} }`
+      serverOptionsCode = `{ command: serverPath, args: ${argsStr} }`
       binaryDownloaded = true
     } else {
       const pkg = ls.server.package
