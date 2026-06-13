@@ -64,25 +64,25 @@
 }
 ```
 
-`id` 用于区分多个 LanguageClient 实例。默认值为 `"main-ls"`，当插件需要启动多个 server 时，每个 `language-client` 步骤应有不同的 `id`。
+`id` 用于区分多个 LanguageClient 实例。默认值为插件名（`origPkg.name`），当插件需要启动多个 server 时，每个 `language-client` 步骤应指定不同的 `id`。
 
 #### server.kind
 
 | kind | 说明 | 生成的 LanguageClient 参数 |
 |------|------|--------------------------|
 | `module` | Node.js 模块，require() 后 spawn | `{ module: serverPath, transport }` |
-| `binary` | 独立可执行文件 | `{ command: serverPath, args }`（binary 默认使用 stdio 通信） |
+| `binary` | 独立可执行文件 | `{ command: serverPath, args }`（不传 transport，LanguageClient 默认使用 stdio） |
 
-`transport` 与 `kind` 正交。`module` + `stdio` 生成 `{ module: serverPath, transport: TransportKind.stdio }`（这里的 `stdio` 是 transport 值，不是 kind）。
+`module` 支持 `transport` 参数（`ipc` 或 `stdio`），生成 `{ module: serverPath, transport: TransportKind.ipc }`。`binary` 不支持 `transport` 参数——`command` 模式默认使用 stdio，传 transport 会导致某些 server（如 Deno）收到意外的 `--stdio` 参数。
 
 #### server.entry
 
 | entry | 说明 |
 |-------|------|
 | `"main"`（默认） | `require.resolve(server.package)` → 用 package.json 的 main 字段 |
-| `"bin"` | 从 `require.resolve(server.package + '/package.json')` 读取 bin 字段 |
+| `"bin"` | 从 `require.resolve(server.package)` 的主入口路径反推 package.json，读取 bin 字段 |
 
-`entry: "bin"` 解决 Prisma 问题：包的 `main` 字段指向库入口（不可 spawn），`bin` 字段指向实际服务器入口。生成的代码在**运行时**解析 `bin` 字段，不是转换时。
+`entry: "bin"` 解决 Prisma 问题：包的 `main` 字段指向库入口（不可 spawn），`bin` 字段指向实际服务器入口。生成的代码在**运行时**通过主入口路径反向查找 package.json 来解析 `bin` 字段，而不是使用 `require.resolve('pkg/package.json')`——因为现代 npm 包的 `exports` 字段可能阻止 `package.json` 子路径的解析。
 
 #### server.binary（仅 binary kind）
 
@@ -156,14 +156,9 @@ transforms 在 `source` 步骤中声明，只对扫描器检测到的文件生�
 
 #### entry
 
-`source` 步骤对指定 entry 文件应用 transforms 后复制到输出目录，作为 esbuild 入口。
+`source` 步骤复制所有 `.ts/.tsx` 文件到输出目录，对含 `from 'vscode'` 的文件应用 transforms。`entry` 指定 esbuild 入口（仅在无 `language-client` 步骤时使用）。
 
-当 `language-client` 和 `source` 步骤同时存在时，`source` 的 entry 会被 `language-client` 生成的 `index.ts` import：
-
-```typescript
-// src/index.ts（由 language-client 步骤生成）
-import './extension'   // 由 source 步骤转换后的 entry
-```
+当 `language-client` 和 `source` 步骤同时存在时，`src/index.ts` 是自包含的入口，**不 import** `source` 步骤的文件。`source` 步骤的文件仅作为补充（被其他文件间接引用时才会被 esbuild 打包）。
 
 步骤只负责生成源码。pipeline 在步骤执行后调用 esbuild，将所有源码打包为 `lib/index.js`。
 
@@ -274,15 +269,16 @@ interface PresetGenerator {
 
 ## 输出 package.json 生成
 
-输出插件的 `package.json` 由 pipeline 在步骤执行后生成，而非由某个步骤负责。生成规则：
+输出插件的 `package.json` 由 converter 在步骤执行后生成（而非 pipeline）。生成规则：
 
 | 字段 | 来源 |
 |------|------|
-| `name` | registry 条目的 `name` + `"-vscode-loader"` 后缀 |
+| `name` | `origPkg.name` + `"coc-"` 前缀（如 `coc-prisma`） |
 | `main` | 固定为 `"lib/index.js"` |
 | `activationEvents` | 从各步骤收集：`language-client` 自动生成 `onLanguage:<lang>`；`source.activationEvents` 直接透传 |
-| `contributes` | 暂时为空，后续版本支持从原始插件 package.json 选择性透传 |
-| `dependencies` | `keepDeps` 解析结果 + `coc.nvim` |
+| `contributes` | 从原始插件 `package.json` 的 `contributes.configuration` 和 `contributes.commands` 透传；bridge 步骤额外生成 `typescriptServerPlugins` |
+| `dependencies` | server 依赖 + `keepDeps` 解析结果 + 原始 `dependencies`（过滤后） |
+| `devDependencies` | 固定 `esbuild: "^0.28.0"` |
 
 ---
 
@@ -325,10 +321,7 @@ interface PresetGenerator {
 // src/index.ts (generated entry)
 import { LanguageClient, TransportKind, services } from 'coc.nvim'
 // ... server resolution, client creation, registration ...
-
-// src/extension.ts (original, with transforms)
-// import { commands, window } from 'vscode' → import { commands, window } from 'coc.nvim'
-// Original command registrations and non-LSP code preserved
+// src/index.ts is self-contained — does NOT import extension.ts
 ```
 
 ### Deno
@@ -468,29 +461,29 @@ import { LanguageClient, TransportKind, services } from 'coc.nvim'
 
 ## 迁移计划
 
-### Phase 1: 基础设施（单次）
+### Phase 1: 基础设施（已完成 ✅）
 
-- [ ] 在 `converter/src/types.ts` 添加完整步骤类型定义
-- [ ] 更新 `cli.ts`：添加 `--convert <JSON>` 参数接收步骤配置
-- [ ] 更新 `pipeline.ts`：从 registry 读取 `convert`，传入 CLI
-- [ ] 重构 `convert.ts` 核心循环：按步骤执行，不做启发式扫描
-- [ ] 添加 `language-client` 代码生成器（module/binary）
-- [ ] 添加 `source` 代码生成器（copy + transforms + esbuild）
-- [ ] 添加 `bridge` 代码生成器（preset 系统）
-- [ ] 添加 `mark-unsupported` 代码生成器
-- [ ] 添加步骤验证逻辑
-- [ ] 删除 `detectServerModules` 等启发式函数
-- [ ] 删除 pipeline 中的正则后处理（documentSelector、activationEvents、bin-walking 等）
-- [ ] 保留 pipeline：npm install、esbuild、binary download、pip install
+- [x] 在 `converter/src/types.ts` 添加完整步骤类型定义
+- [x] 更新 `cli.ts`：添加 `--convert <JSON>` 参数接收步骤配置
+- [x] 更新 `pipeline.ts`：从 registry 读取 `convert`，传入 CLI
+- [x] 重构 `convert.ts` 核心循环：按步骤执行，不做启发式扫描
+- [x] 添加 `language-client` 代码生成器（module/binary）
+- [x] 添加 `source` 代码生成器（copy + transforms + esbuild）
+- [x] 添加 `bridge` 代码生成器（preset 系统）
+- [x] 添加 `mark-unsupported` 代码生成器
+- [x] 添加步骤验证逻辑
+- [x] 删除 `detectServerModules` 等启发式函数
+- [x] 删除 pipeline 中的正则后处理（documentSelector、activationEvents、bin-walking 等）
+- [x] 保留 pipeline：npm install、esbuild、binary download、pip install
 
-### Phase 2: Registry 迁移（单次）
+### Phase 2: Registry 迁移（已完成 ✅）
 
-- [ ] 为全部 7 个现有插件添加 `convert` 配置
-- [ ] 逐个验证生成的插件能正常工作
+- [x] 为全部 7 个现有插件添加 `convert` 配置
+- [x] 逐个验证生成的插件能正常工作（Prisma ✅ Volar ✅ Deno ✅ Taplo ✅ Lua ✅ Ansible ✅ HTML CSS ✅）
 
-### Phase 3: 测试（持续）
+### Phase 3: 测试（待办）
 
-- [ ] 创建 `scripts/test-regression.sh`
+- [ ] 创建 `scripts/test-regression.sh`（已有 `scripts/test-converter-v2.sh` 雏形）
 - [ ] 遍历 registry，对每个条目执行：
       clone → convert → npm install → esbuild → require 验证
 - [ ] CI：每次 PR 自动跑回归测试
