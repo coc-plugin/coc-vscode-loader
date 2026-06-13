@@ -4,6 +4,15 @@
 
 Reference documentation for migrating VS Code extensions to coc.nvim + **converter CLI** (`converter/`) that automatically converts VS Code extensions to coc plugins.
 
+## Platform
+
+**Supported OS**: Linux, macOS. **Windows not supported.**
+
+External commands required at runtime:
+- `git`, `node`/`npm`/`npx` (Node.js >= 18), `curl`, `unzip`, `tar`/`gunzip`
+- `python3` + `pip` (only if plugin has `pipPackages` in registry)
+- Plugin pipeline runs all commands via `spawn(cmd, args, { shell: true })`
+
 ## Repo map
 
 | File | Purpose |

@@ -101,6 +101,29 @@ npm run build          # build everything
 cd plugin && npm run build  # build plugin only
 ```
 
+## Requirements
+
+### OS
+- **Linux** ✅ Fully supported
+- **macOS** ✅ Fully supported
+- **Windows** ❌ Not supported (no planned support)
+
+### External commands
+These must be installed and available on `PATH`:
+
+| Command | Required by | Notes |
+|---------|-------------|-------|
+| `git` | Source download & update checks | |
+| `node` / `npm` / `npx` | Plugin build, converter runtime | Node.js >= 18 |
+| `curl` | Registry fetch fallback, binary server download | |
+| `unzip` | Binary server extraction | |
+| `tar` / `gunzip` | Binary server extraction | |
+| `python3` | Pip package installation (e.g. ansible-lint) | Only if plugin requires pip packages |
+| `pip` (via `python3 -m pip`) | Python dependency installation | Only if plugin requires pip packages |
+| `npx` | Runs converter CLI (`npx tsx`) | |
+
+All commands are pre-installed on typical macOS/Linux development machines or available via the system package manager (`apt`, `brew`, etc.).
+
 ## FAQ
 
 ### Plugin installed but not working?
