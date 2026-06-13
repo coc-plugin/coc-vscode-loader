@@ -27,6 +27,8 @@ export interface PackageInfo {
     args?: string[]     // CLI args to start the LSP, e.g. ["lsp"] for deno
   }
   pipPackages?: string[]  // Python packages to install via pip, e.g. ["ansible-lint"]
+  /** v2.0 config-driven conversion steps */
+  convert?: any[]          // Array of ConvertStep, passed as --convert JSON to CLI
 }
 
 function pluginVersion(): string {
@@ -78,9 +80,13 @@ async function fetchRegistryJSON(url: string): Promise<PackageInfo[]> {
     execFile('curl', ['-sL', url], { encoding: 'utf-8', maxBuffer: 5 * 1024 * 1024 }, (err, stdout) => {
       if (err) reject(new Error(`curl failed: ${err.message}`))
       else {
-        const data = JSON.parse(stdout)
-        if (!Array.isArray(data)) reject(new Error('Invalid registry format'))
-        else resolve(data)
+        try {
+          const data = JSON.parse(stdout)
+          if (!Array.isArray(data)) reject(new Error('Invalid registry format'))
+          else resolve(data)
+        } catch (e: any) {
+          reject(new Error(`Invalid JSON from registry: ${e.message}`))
+        }
       }
     })
   })

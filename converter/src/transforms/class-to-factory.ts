@@ -39,8 +39,7 @@ export const transformClassToFactory: Transform = (ctx) => {
     (match, type) => `${type}.create(`
   )
 
-  // CompletionItem.create(label) doesn't accept kind in coc.
-  // Convert `CompletionItem.create(label, kind)` to `item = CompletionItem.create(label); item.kind = kind`
+  // CompletionItem.create(label, kind) → item = CompletionItem.create(label); item.kind = kind
   text = text.replace(
     /const\s+(\w+)\s*=\s*CompletionItem\.create\(([^,]+),\s*([^)]+)\)/g,
     (_, varName, label, kind) => {

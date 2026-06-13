@@ -1,3 +1,4 @@
+import * as path from 'path'
 import { Transform } from '../types.js'
 
 /**
@@ -32,10 +33,15 @@ export const transformProviderRegister: Transform = (ctx) => {
   }
 
   // 2. registerCompletionItemProvider: insert name + shortcut at beginning
+  // Shortcut derived from source file name (first 2 uppercase letters)
+  const fileName = file.getFilePath() || 'plugin'
+  const baseName = path.basename(fileName, '.ts')
+  const shortcut = baseName.replace(/[^a-zA-Z]/g, '').substring(0, 2).toUpperCase() || 'PL'
   if (content.includes('registerCompletionItemProvider')) {
+    const pluginName = path.basename(path.dirname(path.dirname(fileName))) || 'plugin'
     content = content.replace(
       /registerCompletionItemProvider\(/g,
-      `registerCompletionItemProvider('plugin', 'PL', `
+      `registerCompletionItemProvider('${pluginName}', '${shortcut}', `
     )
     // Wrap the last argument in an array if it's a string (trigger chars)
     content = content.replace(
