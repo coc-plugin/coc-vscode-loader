@@ -275,16 +275,19 @@ if [ -f "$REGISTRY" ]; then
 import json
 with open('$REGISTRY') as f:
     entries = json.load(f)
-assert len(entries) == 7, f'Expected 7 entries, got {len(entries)}'
+assert len(entries) == 8, f'Expected 8 entries, got {len(entries)}'
 for e in entries:
     assert 'convert' in e, f'{e[\"name\"]} missing convert config'
     assert len(e['convert']) > 0, f'{e[\"name\"]} empty convert'
     for step in e['convert']:
         assert step['type'] in ('language-client','source','bridge','mark-unsupported'), f'{e[\"name\"]}: unknown step type {step[\"type\"]}'
         if step['type'] == 'language-client':
-            assert 'languages' in step, f'{e[\"name\"]}: language-client missing languages'
-            assert len(step['languages']) > 0, f'{e[\"name\"]}: empty languages'
-            assert step['server']['kind'] in ('module','binary'), f'{e[\"name\"]}: unknown server kind'
+            assert 'languages' in step, f'{e["name"]}: language-client missing languages'
+            assert len(step['languages']) > 0, f'{e["name"]}: empty languages'
+            assert step['server']['kind'] in ('module','binary'), f'{e["name"]}: unknown server kind'
+            if step['server']['kind'] == 'module' and step['server'].get('entry') == 'bin':
+                if 'binName' in step['server']:
+                    assert isinstance(step['server']['binName'], str) and len(step['server']['binName']) > 0, f'{e["name"]}: binName must be a non-empty string'
         if step['type'] == 'source':
             if 'transforms' in step:
                 for t in step['transforms']:
@@ -313,7 +316,39 @@ if command -v npm &>/dev/null; then
   npm view @vue/language-server version > /dev/null 2>&1 && green "npm: @vue/language-server exists" || red "npm: @vue/language-server not found"
   npm view @ansible/ansible-language-server version > /dev/null 2>&1 && green "npm: @ansible/ansible-language-server exists" || red "npm: @ansible/ansible-language-server not found"
   npm view @prisma/language-server bin --json > /dev/null 2>&1 && green "npm: @prisma/language-server has bin" || yellow "npm: @prisma/language-server bin not found (may have exports restriction)"
+  npm view @tailwindcss/language-server version > /dev/null 2>&1 && green "npm: @tailwindcss/language-server exists" || red "npm: @tailwindcss/language-server not found"
+  npm view @tailwindcss/language-server bin --json > /dev/null 2>&1 && green "npm: @tailwindcss/language-server has bin" || red "npm: @tailwindcss/language-server bin missing"
 fi
+
+# ============================================================
+echo "=== 9. Edge case: module server with bin entry + binName (Tailwind style) ==="
+cleanup
+mkdir -p "$WORKDIR/t9/src"
+cat > "$WORKDIR/t9/package.json" <<JSON
+{"name":"t9","version":"0.1.0","dependencies":{"@mock/bin-server":"*"}}
+JSON
+cat > "$WORKDIR/t9/src/extension.ts" <<TS
+import { commands } from 'vscode'
+export function activate(ctx: any) { ctx.subscriptions.push(commands.registerCommand('t9.hello', () => {})) }
+TS
+cat > "$WORKDIR/t9/convert.json" <<JSON
+[{"type":"language-client","server":{"kind":"module","package":"@mock/bin-server","entry":"bin","binName":"my-server"},"languages":["css"]},{"type":"source","transforms":["import-mapping"]}]
+JSON
+
+cd "$CONVERTER"
+npx tsx src/cli.ts convert "$WORKDIR/t9" -o "$WORKDIR/t9-out" --convert-file "$WORKDIR/t9/convert.json" > /dev/null 2>&1
+
+test -f "$WORKDIR/t9-out/src/index.ts" && green "index.ts generated" || red "index.ts missing"
+python3 -c "
+import json
+d = json.load(open('$WORKDIR/t9-out/package.json'))
+assert '@mock/bin-server' in d['dependencies'], f'server dep missing: {d[\"dependencies\"]}'
+assert 'onLanguage:css' in d['activationEvents'], f'activationEvents: {d[\"activationEvents\"]}'
+" && green "package.json correct" || red "package.json wrong"
+
+grep -q "package.json" "$WORKDIR/t9-out/src/index.ts" && green "package.json fallback present" || red "package.json fallback missing"
+grep -q "my-server" "$WORKDIR/t9-out/src/index.ts" && green "binName: my-server used" || red "binName: wrong binary selected"
+grep -q "LanguageClient" "$WORKDIR/t9-out/src/index.ts" && green "LanguageClient in code" || red "LanguageClient missing"
 
 # ============================================================
 echo ""

@@ -80,9 +80,26 @@
 | entry | 说明 |
 |-------|------|
 | `"main"`（默认） | `require.resolve(server.package)` → 用 package.json 的 main 字段 |
-| `"bin"` | 从 `require.resolve(server.package)` 的主入口路径反推 package.json，读取 bin 字段 |
+| `"bin"` | 从入口路径反推 package.json，读取 bin 字段。先尝试 `require.resolve(pkg)`，失败时自动回退到 `require.resolve(pkg/package.json)` |
 
 `entry: "bin"` 解决 Prisma 问题：包的 `main` 字段指向库入口（不可 spawn），`bin` 字段指向实际服务器入口。生成的代码在**运行时**通过主入口路径反向查找 package.json 来解析 `bin` 字段，而不是使用 `require.resolve('pkg/package.json')`——因为现代 npm 包的 `exports` 字段可能阻止 `package.json` 子路径的解析。
+
+`entry: "bin"` 也支持没有 `main` 字段的包（如 `@tailwindcss/language-server`），自动回退到 `require.resolve('pkg/package.json')`。
+
+#### server.binName
+
+当包的 `bin` 字段包含多个入口时，用 `binName` 指定具体使用哪一个。不指定时默认取第一个。
+
+```json
+{
+  "kind": "module",
+  "package": "@tailwindcss/language-server",
+  "entry": "bin",
+  "binName": "tailwindcss-language-server"
+}
+```
+
+`@tailwindcss/language-server` 的 `bin` 字段有两个入口：`css-language-server` 和 `tailwindcss-language-server`，通过 `binName` 选择功能完整的 `tailwindcss-language-server`。
 
 #### server.binary（仅 binary kind）
 
@@ -415,6 +432,45 @@ import { LanguageClient, TransportKind, services } from 'coc.nvim'
 }
 ```
 
+### Tailwind CSS IntelliSense
+
+```json
+{
+  "name": "tailwindcss",
+  "displayName": "Tailwind CSS IntelliSense",
+  "description": "Tailwind CSS class name completion, hover preview, and linting",
+  "type": "pure-lsp",
+  "source": {
+    "type": "github",
+    "repo": "tailwindlabs/tailwindcss-intellisense",
+    "subdir": "packages/vscode-tailwindcss"
+  },
+  "languages": ["css", "html", "javascript", "typescript", "vue", "svelte", "scss"],
+  "categories": ["LSP", "Completion"],
+  "minPluginVersion": "1.2.2",
+  "convert": [
+    {
+      "type": "language-client",
+      "server": {
+        "kind": "module",
+        "package": "@tailwindcss/language-server",
+        "entry": "bin",
+        "binName": "tailwindcss-language-server"
+      },
+      "languages": ["css", "html", "javascript", "typescript", "vue", "svelte", "scss"]
+    },
+    {
+      "type": "source",
+      "transforms": ["import-mapping"]
+    }
+  ]
+}
+```
+
+`@tailwindcss/language-server` 无 `main` 字段，仅通过 `bin` 暴露入口（`css-language-server` 和 `tailwindcss-language-server`）。取用 `binName` 指定完整版 `tailwindcss-language-server`。`entry: "bin"` 的 `require.resolve` 会回退到 `require.resolve('pkg/package.json')`。
+
+需要 `minPluginVersion: "1.2.2"`（因为 `binName` 和 `require.resolve` 回退逻辑在该版本才加入）。
+
 ### Haskell（新插件示例）
 
 ```json
@@ -456,6 +512,8 @@ import { LanguageClient, TransportKind, services } from 'coc.nvim'
 |------|----------|
 | `kind: "module"` + `package` | `npm view <package>` 存在 |
 | `entry: "bin"` | `npm view <package> --json` 有 bin 字段 |
+| `binName` | `npm view <package> --json` 的 bin 中包含该名称 |
+| `entry: "bin"` + 无 `main` 字段 | `npm view <package> --json` 无 main，自动回退 `require.resolve('pkg/package.json')` |
 | `kind: "binary"` + `binary.repo` | GitHub API `repos/<repo>/releases/latest` 可访问 |
 | `kind: "binary"` + `binary.asset` | asset 模板变量渲染后匹配已发布的 release |
 | `bridge.preset` | 预设已注册 |

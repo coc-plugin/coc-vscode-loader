@@ -13,6 +13,9 @@ export interface ServerModuleConfig {
   kind: 'module'
   package: string
   entry?: 'main' | 'bin'
+  /** When entry is 'bin', pick a specific bin entry by name (e.g. "tailwindcss-language-server").
+   *  Defaults to the first entry in the bin object. */
+  binName?: string
 }
 
 export interface ServerBinaryConfig {

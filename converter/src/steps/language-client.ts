@@ -42,21 +42,30 @@ export const languageClientGenerator: StepGenerator = {
       const entry = ls.server.entry || 'main'
 
       // Same resolution as old converter: resolve main entry first, then walk for bin
+      // Use require.resolve('pkg/package.json') as fallback for packages without main entry
+      const binName = ls.server.binName || ''
+      const binLookupCode = binName
+        ? `(_pkg.bin && _pkg.bin['${escapeStr(binName)}'] ? _pkg.bin['${escapeStr(binName)}'] : Object.values(_pkg.bin)[0])`
+        : `(typeof _pkg.bin === 'string' ? _pkg.bin : Object.values(_pkg.bin)[0])`
       serverPathCode = `\
     let serverPath: string | undefined
+    let _mainEntry: string | undefined
     try {
-      serverPath = require.resolve('${escapeStr(pkg)}')
+      _mainEntry = require.resolve('${escapeStr(pkg)}')
     } catch {}
+    if (!_mainEntry) {
+      try { _mainEntry = require.resolve('${escapeStr(pkg)}/package.json') } catch {}
+    }
     try {
       // Walk up from the resolved main entry to find the package's package.json
       // We can't use require.resolve('pkg/package.json') because exports field may block it
-      let _dir = require('path').dirname(require.resolve('${escapeStr(pkg)}'));
-      while (_dir !== require('path').dirname(_dir)) {
+      let _dir = _mainEntry ? require('path').dirname(_mainEntry) : undefined;
+      while (_dir && _dir !== require('path').dirname(_dir)) {
         const _pkgPath = require('path').join(_dir, 'package.json');
         if (require('fs').existsSync(_pkgPath)) {
           const _pkg = JSON.parse(require('fs').readFileSync(_pkgPath, 'utf-8'));
           if (_pkg.bin) {
-            const _entry = typeof _pkg.bin === 'string' ? _pkg.bin : Object.values(_pkg.bin)[0];
+            const _entry = ${binLookupCode};
             serverPath = require('path').join(_dir, _entry);
           }
           break;
@@ -65,7 +74,7 @@ export const languageClientGenerator: StepGenerator = {
       }
     } catch {}`
       // Use full require.resolve path (including bin walking) if available, else fallback to simple main entry
-      serverOptionsCode = `{ module: serverPath || require.resolve('${escapeStr(pkg)}'), transport: ${transportExpr} }`
+      serverOptionsCode = `{ module: serverPath || _mainEntry || require.resolve('${escapeStr(pkg)}/package.json'), transport: ${transportExpr} }`
     }
 
     const docSelectorCode = `[${languages.map(l => `{ scheme: 'file', language: '${l}' }`).join(', ')}]`

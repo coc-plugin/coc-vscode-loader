@@ -155,6 +155,27 @@ npm install coc-vscode-loader    # or
 
 数组语法（自动解析）和对象语法（手动指定）互斥。
 
+## Converter 关键模块
+
+### `binName` 字段（v1.2.0+）
+
+当 `server.kind === "module"` 且 `entry === "bin"` 时，可用 `binName` 指定 bin 字段的某个具体入口。适用于 `bin` 有多个值的包（如 `@tailwindcss/language-server` 有 `css-language-server` 和 `tailwindcss-language-server` 两个 bin）。
+
+```json
+{
+  "kind": "module",
+  "package": "@tailwindcss/language-server",
+  "entry": "bin",
+  "binName": "tailwindcss-language-server"
+}
+```
+
+### 无 main 字段回退（v1.2.2+）
+
+`entry: "bin"` 的解析逻辑：优先 `require.resolve(pkg)`，失败则回退到 `require.resolve(pkg/package.json)`。这对没有 `main` 字段只通过 `bin` 暴露入口的包（如 `@tailwindcss/language-server`）是必需的。
+
+> 注意：`binName` 本身在 v1.2.0 可用，但无 main 字段回退在 v1.2.2 才加入。需要同时使用两者的 registry 条目（如 tailwindcss）应设 `minPluginVersion: "1.2.2"`。
+
 ## Pending
 
 - [ ] Add more plugins to registry
