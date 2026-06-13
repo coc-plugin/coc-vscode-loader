@@ -216,7 +216,9 @@ npm install coc-vscode-loader    # or
 - [ ] Add python-bridge / rust-bridge preset examples
 - [ ] Implement keepDeps workspace root lookup for monorepo (step 3)
 - [ ] Implement keepDeps object syntax fallback
-- [ ] `serverBinary` raw binary download: handled for non-archive assets (e.g. Biome)
+- [x] `serverBinary` raw binary download: handled for non-archive assets (e.g. Biome)
+- [x] JavaScript extension support (`.js` file copy + text-level replacements, `require('vscode')` → `require('coc.nvim')`)
+- [x] Language-client step `initializationOptions` field (tsdk for Volar-based servers)
 
 ## Type sync workflow
 

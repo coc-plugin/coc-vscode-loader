@@ -176,7 +176,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
     if (fs.existsSync(outputSrc)) {
       for (const f of fs.readdirSync(outputSrc, { recursive: true })) {
         const fp = typeof f === 'string' ? path.join(outputSrc, f) : f
-        if (!fp.endsWith('.ts')) continue
+        if (!fp.endsWith('.ts') && !fp.endsWith('.js')) continue
         let content = fs.readFileSync(fp, 'utf-8')
         let changed = false
 

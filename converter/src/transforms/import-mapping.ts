@@ -5,8 +5,7 @@ import { Transform } from '../types.js'
  * and apply name remapping for known API differences.
  */
 const MAPPINGS: Record<string, string> = {
-  // namespace
-  'vscode': 'coc.nvim',
+  // namespace (module specifier is rewritten by AST, keep identifier as-is)
 
   // naming differences
   'EventEmitter': 'Emitter',
@@ -64,9 +63,15 @@ export const transformImportMapping: Transform = (ctx) => {
 
   // Text-level replacements for coc.nvim API differences
 
-  // Convert dynamic import() to require()
+  // Convert require('vscode') to require('coc.nvim') (JS-style imports)
   let content = file.getText()
   let newContent = content.replace(
+    /require\(['"]vscode['"]\)/g,
+    "require('coc.nvim')",
+  )
+
+  // Convert dynamic import() to require()
+  newContent = newContent.replace(
     /await\s+import\(/g,
     'require(',
   )
@@ -158,6 +163,9 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
     /authentication\.getSession\s*\([^)]*\)/g,
     'undefined as any'
   )
+
+  // editor.setDecorations → no-op (coc has different decoration API)
+  newContent = newContent.replace(/editor\.setDecorations\s*\([^)]+\)/g, '/* setDecorations */')
 
   // Guard workspace.workspaceFolders when accessed via index (coc.nvim may return undefined)
   newContent = newContent.replace(

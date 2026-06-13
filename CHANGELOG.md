@@ -6,11 +6,15 @@
 - Registry expansion: YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, gitignore (15 plugins total)
 - Language-client step: add `initializationOptions` support (tsdk path for Volar-based servers)
 - Import-mapping: add `authentication.getSession` → `undefined` polyfill (coc has no auth API)
+- Import-mapping: add `editor.setDecorations` → no-op polyfill (decoration API not available in coc)
 - Raw binary server download support for non-archive assets (e.g. Biome binary from GitHub releases)
 - `.tar.gz` / `.tgz` archive extraction support in serverBinary download pipeline
+- **JavaScript extension support**: source step now copies `.js` files and applies text-level replacements (`require('vscode')` → `require('coc.nvim')`, `.fileName`/`.uri.fsPath` polyfills, `window.activeTextEditor` polyfill, `window.onDidChangeActiveTextEditor` mapping)
+- Text-level replacements in `convert.ts` now also process `.js` files
 
 ### Fixed
 - Regenerated registry.json format consistency (all entries expanded to multiline)
+- `import-mapping` MAPPINGS: removed `'vscode': 'coc.nvim'` entry which incorrectly renamed the namespace identifier, causing `vscode2` runtime errors
 
 ## [1.1.7] - 2026-06-13
 

@@ -39,18 +39,19 @@ export const sourceGenerator: StepGenerator = {
     const outputsDir = path.join(output, 'src')
     fs.mkdirSync(outputsDir, { recursive: true })
 
-    // Copy ALL .ts/.tsx files from source directory (try src/ first, fall back to input root)
+    // Copy ALL .ts/.tsx/.js files from source directory (try src/ first, fall back to input root)
     let srcDir = path.join(input, 'src')
     if (!fs.existsSync(srcDir)) {
       srcDir = input
     }
     const hasStripVolar = ss.transforms.includes('strip-volar')
     const allFiles: Array<{ src: string; rel: string }> = []
+    const jsFiles: string[] = []
     const vscodeFiles: string[] = []
 
     for (const f of walkFiles(srcDir)) {
       const rel = path.relative(srcDir, f)
-      if (!rel.endsWith('.ts') && !rel.endsWith('.tsx')) continue
+      if (!rel.endsWith('.ts') && !rel.endsWith('.tsx') && !rel.endsWith('.js')) continue
 
       // Skip framework files that are replaced by generated code
       if (hasStripVolar) {
@@ -61,8 +62,10 @@ export const sourceGenerator: StepGenerator = {
       allFiles.push({ src: f, rel })
 
       const content = fs.readFileSync(f, 'utf-8')
-      if (content.includes("from 'vscode'") || content.includes('from "vscode"') || content.includes('require("vscode")')) {
+      const hasVscode = content.includes("from 'vscode'") || content.includes('from "vscode"') || content.includes('require("vscode")')
+      if (hasVscode) {
         vscodeFiles.push(rel)
+        if (rel.endsWith('.js')) jsFiles.push(rel)
       }
     }
 
@@ -74,13 +77,13 @@ export const sourceGenerator: StepGenerator = {
     }
 
     if (verbose) {
-      console.log(`  source: copied ${allFiles.length} files (${vscodeFiles.length} with vscode imports)`)
+      console.log(`  source: copied ${allFiles.length} files (${vscodeFiles.length} with vscode imports, ${jsFiles.length} .js)`)
     }
 
-    // Apply transforms via ts-morph (only to files with vscode imports)
+    // Apply transforms via ts-morph (only to TS files with vscode imports; .js files get text-level only)
     for (const rel of vscodeFiles) {
       const fp = path.join(outputsDir, rel)
-      if (!fs.existsSync(fp)) continue
+      if (!fs.existsSync(fp) || rel.endsWith('.js')) continue
       try { project.addSourceFileAtPath(fp) } catch {}
     }
 
@@ -102,6 +105,36 @@ export const sourceGenerator: StepGenerator = {
         }
       }
       sf.saveSync()
+    }
+
+    // Apply text-level replacements to .js files (ts-morph can't handle JS)
+    for (const rel of jsFiles) {
+      const fp = path.join(outputsDir, rel)
+      if (!fs.existsSync(fp)) continue
+      let code = fs.readFileSync(fp, 'utf-8')
+      const orig = code
+      code = code.replace(/require\(['"]vscode['"]\)/g, "require('coc.nvim')")
+      code = code.replace(/(\w+)\.fileName\b/g, "Uri.parse($1.uri).fsPath")
+      code = code.replace(/(\w+(?:\.\w+)*?)\.uri\.fsPath/g, 'Uri.parse($1.uri).fsPath')
+      if (code.includes('window.activeTextEditor')) {
+        code = `\
+if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
+  try {
+    Object.defineProperty(window, 'activeTextEditor', {
+      get() {
+        try {
+          var doc = typeof workspace !== 'undefined' ? workspace.getDocument() : undefined;
+          return doc ? { document: doc } : undefined;
+        } catch(e) { return undefined }
+      },
+      configurable: true,
+    });
+  } catch {}
+}
+` + code
+      }
+      code = code.replace(/window\.onDidChangeActiveTextEditor/g, 'workspace.onDidOpenTextDocument')
+      if (code !== orig) fs.writeFileSync(fp, code)
     }
 
     // Resolve keepDeps from origPkg (with workspace root fallback)
