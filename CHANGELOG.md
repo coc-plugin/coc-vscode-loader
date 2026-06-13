@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.3] - 2026-06-13
+## [1.1.4] - 2026-06-13
 
 ### Fixed
 - Prisma LSP stuck at "starting": converter no longer strips server module bin-walking code,
