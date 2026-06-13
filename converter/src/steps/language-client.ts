@@ -108,7 +108,7 @@ ${ls.verbose ? `    console.log('[${escapeStr(id)}] creating LanguageClient')\n`
         {
           documentSelector: ${docSelectorCode},
           outputChannelName: '${escapeStr(description)}',
-          ${ls.initializationOptions ? `initializationOptions: ${ls.initializationOptions}` : ''},
+          ${ls.initializationOptions ? `initializationOptions: ${ls.initializationOptions},` : ''}
         },
       )
       context.subscriptions.push({ dispose: () => c.stop() })
