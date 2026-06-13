@@ -98,6 +98,15 @@ async function convertSource(
   if (fs.existsSync(build)) fs.rmSync(build, { recursive: true })
 
   const cli = converterCliPath()
+  const converterDir = path.resolve(path.dirname(path.dirname(cli)))
+
+  // Install converter deps if missing (e.g. when installed from npm)
+  if (!fs.existsSync(path.join(converterDir, 'node_modules', 'commander'))) {
+    onProgress(2, 5, 'Installing converter dependencies...', '')
+    const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
+    await run('npm', ['install', '--legacy-peer-deps', '--production'], converterDir, log)
+  }
+
   onProgress(2, 5, 'Converting...', `converter convert ${inputDir} -o ${build}`)
   const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
   await run('npx', ['tsx', cli, 'convert', inputDir, '-o', build], cacheDir(name), log)
