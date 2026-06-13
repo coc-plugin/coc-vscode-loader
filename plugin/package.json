@@ -1,6 +1,6 @@
 {
   "name": "coc-vscode-loader",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Run VS Code extensions seamlessly in coc.nvim",
   "main": "lib/index.js",
   "keywords": [
@@ -21,8 +21,7 @@
   "homepage": "https://www.npmjs.com/package/coc-vscode-loader",
   "files": [
     "lib/",
-    "converter/src/",
-    "converter/package.json",
+    "converter/",
     "assets/"
   ],
   "license": "MIT",

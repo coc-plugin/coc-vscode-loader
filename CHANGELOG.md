@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.5] - 2026-06-13
+
+### Fixed
+- npm publish missing `converter/node_modules/`: `files` field now includes full `converter/` directory
+
 ## [1.2.4] - 2026-06-13
 
 ### Fixed
