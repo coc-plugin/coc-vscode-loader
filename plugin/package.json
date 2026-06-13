@@ -19,6 +19,12 @@
     "url": "https://github.com/coc-plugin/coc-vscode-loader/issues"
   },
   "homepage": "https://www.npmjs.com/package/coc-vscode-loader",
+  "files": [
+    "lib/",
+    "converter/src/",
+    "converter/package.json",
+    "assets/"
+  ],
   "license": "MIT",
   "engines": {
     "coc": ">= 0.0.80"
