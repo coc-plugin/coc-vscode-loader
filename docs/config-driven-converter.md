@@ -64,6 +64,8 @@
 }
 ```
 
+`id` 用于区分多个 LanguageClient 实例。默认值为 `"main-ls"`，当插件需要启动多个 server 时，每个 `language-client` 步骤应有不同的 `id`。
+
 #### server.kind
 
 | kind | 说明 | 生成的 LanguageClient 参数 |
@@ -93,6 +95,19 @@
 ```
 
 Pipeline 负责下载、解压、放置到 `build/server/`。
+
+##### 模板变量
+
+`asset` 和 `binaryPath` 支持以下模板变量，由 pipeline 在下载时替换：
+
+| 变量 | 说明 | 示例值 |
+|------|------|--------|
+| `{{version}}` | GitHub release 版本号（不含 v 前缀） | `1.45.0` |
+| `{{platform}}` | 当前操作系统平台 | `darwin` / `linux` / `win32` |
+| `{{arch}}` | CPU 架构 | `x64` / `arm64` |
+| `{{rust-target}}` | Rust 编译目标三元组 | `x86_64-apple-darwin` / `x86_64-unknown-linux-gnu` / `aarch64-apple-darwin` |
+
+`{{rust-target}}` 由 `{{platform}}` + `{{arch}}` 映射得出，适用于 Rust 项目发布的 binary assets。
 
 #### server.args
 
@@ -150,7 +165,22 @@ transforms 在 `source` 步骤中声明，只对扫描器检测到的文件生�
 import './extension'   // 由 source 步骤转换后的 entry
 ```
 
-esbuild 将两者打包为一个 `lib/index.js`。
+步骤只负责生成源码。pipeline 在步骤执行后调用 esbuild，将所有源码打包为 `lib/index.js`。
+
+#### activationEvents（可选）
+
+声明插件的激活事件，仅在无 `language-client` 步骤时使用。pipeline 读取此字段写入输出 `package.json` 的 `activationEvents`。
+
+```json
+{
+  "type": "source",
+  "transforms": ["import-mapping"],
+  "entry": "src/extension.ts",
+  "activationEvents": ["onLanguage:html", "onCommand:extension.sayHello"]
+}
+```
+
+当存在 `language-client` 步骤时，activationEvents 由该步骤自动生成。
 
 #### keepDeps
 
@@ -185,7 +215,15 @@ esbuild 将两者打包为一个 `lib/index.js`。
 
 ### `bridge`
 
-使用预设代码生成器生成桥接代码。当前只有一个预设 `ts-bridge`（Volar 用），架构支持扩展。
+使用预设代码生成器生成桥接代码。用于需要特殊适配的插件（如 Volar 需要 TypeScript 桥接）。
+
+当前只有一个预设：
+
+| 预设 | 适用插件 | 生成内容 |
+|------|----------|----------|
+| `ts-bridge` | Volar | TypeScript 插件桥接代码：`activate()` 入口、TS 语言服务中间件、命令转发层 |
+
+Bridge 步骤与其他步骤配合：`bridge` 生成核心桥接层，`source` 转换原始源码中的非桥接部分，两者通过 esbuild 合并打包。
 
 ```json
 {
@@ -231,6 +269,20 @@ interface PresetGenerator {
 | `webview` | "Webview API is not supported in coc.nvim" |
 | `tree-data-provider` | "Tree data provider is not supported" |
 | `open-external` | "env.openExternal has no equivalent" |
+
+---
+
+## 输出 package.json 生成
+
+输出插件的 `package.json` 由 pipeline 在步骤执行后生成，而非由某个步骤负责。生成规则：
+
+| 字段 | 来源 |
+|------|------|
+| `name` | registry 条目的 `name` + `"-vscode-loader"` 后缀 |
+| `main` | 固定为 `"lib/index.js"` |
+| `activationEvents` | 从各步骤收集：`language-client` 自动生成 `onLanguage:<lang>`；`source.activationEvents` 直接透传 |
+| `contributes` | 暂时为空，后续版本支持从原始插件 package.json 选择性透传 |
+| `dependencies` | `keepDeps` 解析结果 + `coc.nvim` |
 
 ---
 
@@ -407,8 +459,9 @@ import { LanguageClient, TransportKind, services } from 'coc.nvim'
 | `languages` | 非空数组 |
 | `source.entry` | 文件在源码目录存在 |
 | `transforms` | 每个 transform 已注册 |
-| `keepDeps` | 在源 package.json 能找到 |
-| 依赖版本号 | 在源 package.json 能找到，或手动指定 |
+| `keepDeps`（数组语法） | 每个包名在源 package.json 的 dependency/devDependency 能找到 |
+| `keepDeps`（对象语法） | 不验证版本号（手动指定，无自动解析） |
+| 依赖版本号（数组语法） | 在源 package.json 能找到 |
 | `bridge.preset` | 预设已注册 |
 
 ---
