@@ -1,6 +1,6 @@
 {
   "name": "coc-vscode-loader",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Run VS Code extensions seamlessly in coc.nvim",
   "main": "lib/index.js",
   "keywords": [
@@ -30,9 +30,9 @@
     "coc": ">= 0.0.80"
   },
   "scripts": {
-    "bundle-converter": "rm -rf converter && cp -r ../converter ./converter && cd converter && npm install --legacy-peer-deps",
+    "bundle-converter": "if [ -d ../converter ]; then rm -rf converter && cp -r ../converter ./converter && cd converter && npm install --legacy-peer-deps; fi",
     "build": "npm run bundle-converter && node esbuild.mjs",
-    "prepare": "node esbuild.mjs"
+    "prepare": "npm run bundle-converter && node esbuild.mjs"
   },
   "devDependencies": {
     "coc.nvim": "^0.0.83-next.18",

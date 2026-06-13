@@ -1,6 +1,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
+import { execFile } from 'child_process'
 
 export interface RegistrySource {
   type: 'github' | 'npm'
@@ -60,8 +61,33 @@ function loadCache(): PackageInfo[] | null {
   return null
 }
 
+/** Fetch JSON from URL, falling back to curl when Node.js fetch can't handle proxy env vars */
+async function fetchRegistryJSON(url: string): Promise<PackageInfo[]> {
+  try {
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), 10000)
+    const res = await fetch(url, { signal: ctrl.signal })
+    clearTimeout(t)
+    if (res.ok) {
+      const data: PackageInfo[] = await res.json()
+      if (Array.isArray(data)) return data
+    }
+  } catch { /* fall through to curl */ }
+  // curl respects lowercase http_proxy env vars that Node.js fetch ignores
+  return new Promise((resolve, reject) => {
+    execFile('curl', ['-sL', url], { encoding: 'utf-8', maxBuffer: 5 * 1024 * 1024 }, (err, stdout) => {
+      if (err) reject(new Error(`curl failed: ${err.message}`))
+      else {
+        const data = JSON.parse(stdout)
+        if (!Array.isArray(data)) reject(new Error('Invalid registry format'))
+        else resolve(data)
+      }
+    })
+  })
+}
+
 export async function updateRegistry(): Promise<number> {
-  // Support local registry via env var (for development)
+  // Local dev mode: read from local coc-vscode-registry/registry.json
   const localPath = process.env.COC_REGISTRY_PATH || getLocalRegistryPath()
   if (localPath) {
     if (!fs.existsSync(localPath)) throw new Error(`Local registry not found: ${localPath}`)
@@ -73,9 +99,8 @@ export async function updateRegistry(): Promise<number> {
     return data.length
   }
 
-  const res = await fetch(REMOTE_REGISTRY_URL)
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  const data: PackageInfo[] = await res.json()
+  // npm mode: fetch from remote (with curl fallback for proxy compatibility)
+  const data: PackageInfo[] = await fetchRegistryJSON(REMOTE_REGISTRY_URL)
   if (!Array.isArray(data)) throw new Error('Invalid registry format')
   fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true })
   fs.writeFileSync(CACHE_PATH, JSON.stringify(data, null, 2))

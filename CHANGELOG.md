@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.6] - 2026-06-13
+
+### Fixed
+- Registry fetch hanging with lowercase `http_proxy` env vars: fall back to `curl` when
+  Node.js `fetch` times out
+- Local dev mode now fetches remote registry first, falls back to local file (instead of
+  always reading local file)
+
 ## [1.1.5] - 2026-06-13
 
 ### Fixed
