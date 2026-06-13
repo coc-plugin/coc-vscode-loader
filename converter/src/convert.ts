@@ -182,23 +182,26 @@ export async function convert(opts: ConvertOptions): Promise<void> {
           // const range = document.getWordRangeAtPosition(pos, regex)
           content = content.replace(
             /const range = document\.getWordRangeAtPosition\(([^,]+),\s*([^)]+)\)/g,
-            'const line = document.getText().split("\\n")[$1.line]; const pre = line.slice(0, $1.character); const m = pre.match($2); const range = m ? Range.create($1.line, $1.character - m[0].length, $1.line, $1.character) : undefined'
+            'const line = document.getText().split("\\n")[$1.line]; const pre = line.slice(0, $1.character); const m = pre.match($2); const range = m ? { start: { line: $1.line, character: $1.character - m[0].length }, end: { line: $1.line, character: $1.character } } : undefined'
           )
           // const range = document.getWordRangeAtPosition(pos)
           content = content.replace(
             /const range = document\.getWordRangeAtPosition\(([^)]+)\)/g,
-            'const line = document.getText().split("\\n")[$1.line]; const pre = line.slice(0, $1.character); const m = pre.match(/[_a-zA-Z0-9-]+/); const range = m ? Range.create($1.line, $1.character - m[0].length, $1.line, $1.character) : undefined'
+            'const line = document.getText().split("\\n")[$1.line]; const pre = line.slice(0, $1.character); const m = pre.match(/[_a-zA-Z0-9-]+/); const range = m ? { start: { line: $1.line, character: $1.character - m[0].length }, end: { line: $1.line, character: $1.character } } : undefined'
           )
           // range = document.getWordRangeAtPosition(pos, regex) (without const)
           content = content.replace(
             /range = document\.getWordRangeAtPosition\(([^,]+),\s*([^)]+)\)/g,
-            '(() => { const ln = document.getText().split("\\n")[$1.line]; const pr = ln.slice(0, $1.character); const mt = pr.match($2); return mt ? Range.create($1.line, $1.character - mt[0].length, $1.line, $1.character) : undefined; })()'
+            '(() => { const ln = document.getText().split("\\n")[$1.line]; const pr = ln.slice(0, $1.character); const mt = pr.match($2); return mt ? { start: { line: $1.line, character: $1.character - mt[0].length }, end: { line: $1.line, character: $1.character } } : undefined; })()'
           )
           changed = true
         }
 
-        if (content.includes('.fileName')) {
-          content = content.replace(/\.fileName/g, '.uri')
+        if (content.includes('.fileName') || content.includes('.uri.fsPath')) {
+          // .fileName → .uri (coc's TextDocument#uri returns a string path, not a URI object)
+          content = content.replace(/(document|this\.document|textDocument|scope)\.fileName/g, '$1.uri')
+          // .uri.fsPath → .uri (coc's uri is already a string path, not a URI object)
+          content = content.replace(/\.uri\.fsPath/g, '.uri')
           changed = true
         }
 

@@ -38,7 +38,7 @@ export function getRegisteredBridgeTypes(): string[] {
 export const bridgeGenerator: StepGenerator = {
   type: 'bridge',
 
-  generate(ctx: StepContext, step: StepResult): StepResult {
+  generate(ctx: StepContext, step: any): StepResult {
     const bs = step as BridgeStep
 
     // Resolve preset config from registry

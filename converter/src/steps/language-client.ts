@@ -7,7 +7,7 @@ function escapeStr(s: string): string {
 export const languageClientGenerator: StepGenerator = {
   type: 'language-client',
 
-  generate(ctx: StepContext, step: StepResult): StepResult {
+  generate(ctx: StepContext, step: any): StepResult {
     const ls = step as LanguageClientStep
     const id = ls.id || (ctx.origPkg.name || 'language-client')
     const transport = ls.transport || (ls.server.kind === 'binary' ? 'stdio' : 'ipc')

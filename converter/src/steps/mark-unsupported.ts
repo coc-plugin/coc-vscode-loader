@@ -34,7 +34,7 @@ function walkFiles(dir: string): string[] {
 export const markUnsupportedGenerator: StepGenerator = {
   type: 'mark-unsupported',
 
-  generate(ctx: StepContext, step: StepResult): StepResult {
+  generate(ctx: StepContext, step: any): StepResult {
     const ms = step as MarkUnsupportedStep
     const { output, verbose } = ctx
     const srcDir = path.join(output, 'src')

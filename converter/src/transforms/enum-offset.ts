@@ -19,23 +19,6 @@ export const transformEnumOffset: Transform = (ctx) => {
   const { file } = ctx
   let content = file.getText()
 
-  // Detect hardcoded numbers used in enum position (e.g., CompletionItemKind.Xxx).
-  // This is hard to detect perfectly, so we log a note when numeric literals
-  // appear near enum-type names.
-  const enumPatterns = [
-    'CompletionItemKind', 'SymbolKind', 'DocumentHighlightKind', 'DiagnosticSeverity',
-    'CompletionTriggerKind', 'InlineCompletionTriggerKind',
-  ]
-
-  for (const enumName of enumPatterns) {
-    // Check if the enum is imported/used with a hardcoded number nearby
-    const enumRefs = content.match(new RegExp(`${enumName}\\.\\w+`, 'g'))
-    if (enumRefs) {
-      // Symbol references are fine - they resolve at runtime
-      // Only note if there are raw numbers being compared
-    }
-  }
-
   // Replace any numeric enum comparisons with comments
   // e.g., `severity === 0` → `severity === 0 /* DiagnosticSeverity.Error = 1 in coc */`
   content = content.replace(

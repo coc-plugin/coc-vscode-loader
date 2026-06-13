@@ -33,7 +33,7 @@ function walkFiles(dir: string): string[] {
 export const sourceGenerator: StepGenerator = {
   type: 'source',
 
-  generate(ctx: StepContext, step: StepResult): StepResult {
+  generate(ctx: StepContext, step: any): StepResult {
     const ss = step as SourceStep
     const { input, output, project, verbose } = ctx
     const outputsDir = path.join(output, 'src')
