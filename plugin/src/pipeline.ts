@@ -253,13 +253,17 @@ async function buildPackage(
 
       if (filename.endsWith('.zip')) {
         await run('unzip', ['-o', filename, '-d', serverDir], build)
+      } else if (filename.endsWith('.tar.gz') || filename.endsWith('.tgz')) {
+        await run('tar', ['xzf', filename, '-C', serverDir], build)
       } else if (filename.endsWith('.gz') && !filename.endsWith('.tar.gz')) {
         // Single-file gzip: decompress then move to server dir
         const outName = filename.replace(/\.gz$/, '')
         await run('gunzip', [filename], build)
         fs.renameSync(path.join(build, outName), path.join(serverDir, outName))
       } else {
-        await run('tar', ['xzf', filename, '-C', serverDir], build)
+        // Raw binary: just move to server dir
+        const binName = sb.binaryPath || filename
+        fs.renameSync(path.join(build, filename), path.join(serverDir, binName))
       }
       // Make server binary executable (run BEFORE rmSync in case it fails)
       try {

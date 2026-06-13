@@ -59,9 +59,9 @@ Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API
 
 | Milestone | Target | Focus |
 |-----------|--------|-------|
-| [v1.2.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-08 | Registry expansion: Angular, ESLint, YAML |
-| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-10 | More transforms + bridge presets |
-| [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | 10+ plugins, full coverage |
+| [v1.2.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-08 | Registry expansion: YAML, Tailwind CSS, Biome, Stylelint, Prettier |
+| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-10 | More transforms + bridge presets + ESLint, Angular |
+| [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | 15+ plugins, full coverage |
 
 ---
 
@@ -134,7 +134,7 @@ Close the TUI — it will auto-run `:CocRestart`. Or manually run `:CocRestart`.
 
 ### Which VS Code extensions are supported?
 
-Check the [registry](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json) for the full list. Currently includes Volar (Vue), Prisma, HTML CSS Support, Lua, and more being added.
+Check the [registry](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json) for the full list. Currently includes Volar (Vue), Prisma, HTML CSS Support, Lua, Deno, YAML, Tailwind CSS, Biome, Stylelint, Prettier, and more being added.
 
 ### How is this different from running the VS Code extension directly?
 

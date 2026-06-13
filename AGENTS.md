@@ -210,11 +210,13 @@ npm install coc-vscode-loader    # or
 
 ## Pending
 
-- [ ] Add more plugins to registry
+- [ ] Add more plugins to registry (ESLint, Svelte, Astro, Angular, Code Spell Checker)
+- [ ] Add `vscode-languageclient` import rewrite to `import-mapping` transform
 - [ ] Add more transforms (uri-mapping, more provider signatures)
 - [ ] Add python-bridge / rust-bridge preset examples
 - [ ] Implement keepDeps workspace root lookup for monorepo (step 3)
 - [ ] Implement keepDeps object syntax fallback
+- [ ] `serverBinary` raw binary download: handled for non-archive assets (e.g. Biome)
 
 ## Type sync workflow
 

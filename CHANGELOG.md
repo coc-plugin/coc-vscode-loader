@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.2] - 2026-06-13
+
+### Added
+- Registry expansion: YAML, Tailwind CSS, Biome, Stylelint, Prettier (12 plugins total)
+- Raw binary server download support for non-archive assets (e.g. Biome binary from GitHub releases)
+- `.tar.gz` / `.tgz` archive extraction support in serverBinary download pipeline
+
+### Fixed
+- Regenerated registry.json format consistency (all entries expanded to multiline)
+
 ## [1.1.7] - 2026-06-13
 
 ### Fixed
