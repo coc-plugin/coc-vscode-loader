@@ -210,7 +210,7 @@ npm install coc-vscode-loader    # or
 
 ## Pending
 
-- [ ] Add more plugins to registry (ESLint, Svelte, Astro, Angular, Code Spell Checker)
+- [ ] Add more plugins to registry (ESLint, Angular, Code Spell Checker)
 - [ ] Add `vscode-languageclient` import rewrite to `import-mapping` transform
 - [ ] Add more transforms (uri-mapping, more provider signatures)
 - [ ] Add python-bridge / rust-bridge preset examples

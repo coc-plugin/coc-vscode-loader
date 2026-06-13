@@ -40,6 +40,8 @@ export interface LanguageClientStep {
   multiRoot?: boolean
   /** Enable debug logging in generated code */
   verbose?: boolean
+  /** Extra options passed as initializationOptions to LanguageClient (JS object expression, inserted as-is) */
+  initializationOptions?: string
 }
 
 export interface SourceStep {
