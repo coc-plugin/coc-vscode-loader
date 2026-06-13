@@ -57,12 +57,12 @@ export const markUnsupportedGenerator: StepGenerator = {
         let content = fs.readFileSync(fp, 'utf-8')
         let changed = false
 
-        for (const re of patterns) {
-          content = content.replace(re, (match) => {
-            changed = true
-            return `// [converter] ${warning}\n      // ${match}`
-          })
-        }
+      for (const re of patterns) {
+        content = content.replace(re, (match) => {
+          changed = true
+          return `/* [converter] TODO: ${warning} — removed: ${match} */ void 0`
+        })
+      }
 
         if (changed) {
           fs.writeFileSync(fp, content)

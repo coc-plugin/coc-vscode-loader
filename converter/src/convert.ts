@@ -385,8 +385,12 @@ function walkTsFiles(dir: string): string[] {
     for (const entry of fs.readdirSync(dir)) {
       const full = path.join(dir, entry)
       const stat = fs.statSync(full)
-      if (stat.isDirectory()) files.push(...walkTsFiles(full))
-      else if (entry.endsWith('.ts') || entry.endsWith('.d.ts')) files.push(full)
+      if (stat.isDirectory()) {
+        if (entry.startsWith('.') || entry === 'node_modules') continue
+        files.push(...walkTsFiles(full))
+      } else if (entry.endsWith('.ts') || entry.endsWith('.d.ts')) {
+        files.push(full)
+      }
     }
   } catch {}
   return files

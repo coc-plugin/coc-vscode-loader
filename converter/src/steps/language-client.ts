@@ -1,7 +1,7 @@
 import { StepGenerator, StepContext, LanguageClientStep, StepResult } from '../types.js'
 
 function escapeStr(s: string): string {
-  return s.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')
+  return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/`/g, '\\`').replace(/\$/g, '\\$')
 }
 
 export const languageClientGenerator: StepGenerator = {
@@ -109,7 +109,7 @@ ${ls.verbose ? `    console.log('[${escapeStr(id)}] starting client')\n` : ''}\
     context.subscriptions.push(
       commands.registerCommand('${escapeStr(pluginName)}.restart', async () => {
         await client.stop()
-        client.start()
+    await client.start()
       }),
     )
   } catch (e: any) {

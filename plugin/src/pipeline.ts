@@ -49,7 +49,7 @@ async function run(
   onLine?: (line: string) => void,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: true })
+    const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: false })
     const timer = setTimeout(() => {
       child.kill('SIGTERM')
       reject(new Error(`Timed out after ${CMD_TIMEOUT / 1000}s: ${cmd} ${args.join(' ')}`))
@@ -291,7 +291,7 @@ async function installToCoc(
   fs.cpSync(src, dest, { recursive: true })
 
   const pkgPath = extensionsPkgPath()
-  const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+  const pkg = fs.existsSync(pkgPath) ? JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) : { dependencies: {} }
   pkg.dependencies = pkg.dependencies || {}
   const depName = `coc-${name}`
   if (!pkg.dependencies[depName]) {
@@ -450,7 +450,7 @@ function walkDir(dir: string): string[] {
 
 async function runWithOutput(cmd: string, args: string[], cwd: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: true })
+    const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: false })
     const timer = setTimeout(() => {
       child.kill('SIGTERM')
       reject(new Error(`Timed out after ${CMD_TIMEOUT / 1000}s: ${cmd} ${args.join(' ')}`))

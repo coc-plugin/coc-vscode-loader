@@ -80,9 +80,13 @@ async function fetchRegistryJSON(url: string): Promise<PackageInfo[]> {
     execFile('curl', ['-sL', url], { encoding: 'utf-8', maxBuffer: 5 * 1024 * 1024 }, (err, stdout) => {
       if (err) reject(new Error(`curl failed: ${err.message}`))
       else {
-        const data = JSON.parse(stdout)
-        if (!Array.isArray(data)) reject(new Error('Invalid registry format'))
-        else resolve(data)
+        try {
+          const data = JSON.parse(stdout)
+          if (!Array.isArray(data)) reject(new Error('Invalid registry format'))
+          else resolve(data)
+        } catch (e: any) {
+          reject(new Error(`Invalid JSON from registry: ${e.message}`))
+        }
       }
     })
   })
