@@ -104,13 +104,17 @@ export const sourceGenerator: StepGenerator = {
       sf.saveSync()
     }
 
-    // Resolve keepDeps from origPkg
+    // Resolve keepDeps from origPkg (with workspace root fallback)
     const keepDeps: Record<string, string> = {}
     if (ss.keepDeps) {
       if (Array.isArray(ss.keepDeps)) {
         for (const dep of ss.keepDeps) {
-          const ver = resolveDepVersion(ctx.origPkg, dep)
-          if (ver) keepDeps[dep] = ver
+          const ver = resolveDepVersion(ctx.origPkg, dep, input)
+          if (ver) {
+            keepDeps[dep] = ver
+          } else {
+            throw new Error(`keepDeps: cannot find version for "${dep}" in source package.json, devDependencies, or workspace root. Use object syntax in registry to specify version manually.`)
+          }
         }
       } else {
         Object.assign(keepDeps, ss.keepDeps)
@@ -126,8 +130,30 @@ export const sourceGenerator: StepGenerator = {
   },
 }
 
-function resolveDepVersion(pkg: Record<string, any>, name: string): string | undefined {
+function resolveDepVersion(pkg: Record<string, any>, name: string, inputDir?: string): string | undefined {
+  // 1. Check source package's dependencies
   if (pkg.dependencies?.[name]) return pkg.dependencies[name]
+  // 2. Check source package's devDependencies
   if (pkg.devDependencies?.[name]) return pkg.devDependencies[name]
+  // 3. Walk up for workspace root
+  if (inputDir) {
+    let dir = inputDir
+    const fs = require('fs') as typeof import('fs')
+    const path = require('path') as typeof import('path')
+    while (dir !== path.dirname(dir)) {
+      dir = path.dirname(dir)
+      const wsPkgPath = path.join(dir, 'package.json')
+      if (fs.existsSync(wsPkgPath)) {
+        try {
+          const wsPkg = JSON.parse(fs.readFileSync(wsPkgPath, 'utf-8'))
+          if (wsPkg.dependencies?.[name]) return wsPkg.dependencies[name]
+          if (wsPkg.devDependencies?.[name]) return wsPkg.devDependencies[name]
+        } catch {}
+      }
+      // Stop at filesystem root
+      if (dir === path.dirname(dir)) break
+    }
+  }
+  // 4. Not found
   return undefined
 }

@@ -12,6 +12,7 @@ TOTAL=0
 
 green() { PASS=$((PASS+1)); TOTAL=$((TOTAL+1)); echo "  ✓ $1"; }
 red() { FAIL=$((FAIL+1)); TOTAL=$((TOTAL+1)); echo "  ✗ $1"; }
+yellow() { echo "  ⚠ $1"; }
 
 mkdir -p "$WORKDIR"
 cleanup() { rm -rf "$WORKDIR"/*; }
@@ -263,6 +264,56 @@ d = json.load(open('$WORKDIR/t7-out/package.json'))
 assert 'lodash' in d['dependencies'], 'lodash missing'
 assert 'left-pad' in d['dependencies'], 'left-pad should be in auto-deps'
 " && green "keepDeps array + auto original deps" || red "keepDeps array failed"
+
+# ============================================================
+echo "=== 8. Registry validation (CI checks) ==="
+REGISTRY="$ROOT/coc-vscode-registry/registry.json"
+PRESETS="$ROOT/coc-vscode-registry/presets.json"
+
+if [ -f "$REGISTRY" ]; then
+  python3 -c "
+import json
+with open('$REGISTRY') as f:
+    entries = json.load(f)
+assert len(entries) == 7, f'Expected 7 entries, got {len(entries)}'
+for e in entries:
+    assert 'convert' in e, f'{e[\"name\"]} missing convert config'
+    assert len(e['convert']) > 0, f'{e[\"name\"]} empty convert'
+    for step in e['convert']:
+        assert step['type'] in ('language-client','source','bridge','mark-unsupported'), f'{e[\"name\"]}: unknown step type {step[\"type\"]}'
+        if step['type'] == 'language-client':
+            assert 'languages' in step, f'{e[\"name\"]}: language-client missing languages'
+            assert len(step['languages']) > 0, f'{e[\"name\"]}: empty languages'
+            assert step['server']['kind'] in ('module','binary'), f'{e[\"name\"]}: unknown server kind'
+        if step['type'] == 'source':
+            if 'transforms' in step:
+                for t in step['transforms']:
+                    assert t in ('import-mapping','class-to-factory','provider-register','enum-offset','strip-volar'), f'{e[\"name\"]}: unknown transform {t}'
+            if 'keepDeps' in step and isinstance(step['keepDeps'], list):
+                assert all(isinstance(d, str) for d in step['keepDeps']), f'{e[\"name\"]}: keepDeps array must be strings'
+        if step['type'] == 'bridge':
+            assert 'preset' in step, f'{e[\"name\"]}: bridge missing preset'
+" && green "registry.json structure valid" || red "registry.json invalid"
+fi
+
+if [ -f "$PRESETS" ]; then
+  python3 -c "
+import json
+with open('$PRESETS') as f:
+    presets = json.load(f)
+for name, p in presets.items():
+    assert 'type' in p, f'preset {name} missing type'
+    assert p['type'] in ('tsserver-forward',), f'preset {name}: unknown type {p[\"type\"]}'
+" && green "presets.json valid" || red "presets.json invalid"
+fi
+
+# Check known server packages exist on npm (skip if offline)
+if command -v npm &>/dev/null; then
+  npm view @prisma/language-server version > /dev/null 2>&1 && green "npm: @prisma/language-server exists" || red "npm: @prisma/language-server not found"
+  npm view @vue/language-server version > /dev/null 2>&1 && green "npm: @vue/language-server exists" || red "npm: @vue/language-server not found"
+  npm view @ansible/ansible-language-server version > /dev/null 2>&1 && green "npm: @ansible/ansible-language-server exists" || red "npm: @ansible/ansible-language-server not found"
+  npm view @prisma/language-server bin --json > /dev/null 2>&1 && green "npm: @prisma/language-server has bin" || yellow "npm: @prisma/language-server bin not found (may have exports restriction)"
+fi
 
 # ============================================================
 echo ""

@@ -124,9 +124,9 @@ Pipeline 负责下载、解压、放置到 `build/server/`。
 
 声明文档选择器。生成 `documentSelector: [{ scheme: "file", language: "prisma" }]`。
 
-#### multiRoot
+#### multiRoot（暂未实现）
 
-`true` 时：为每个 workspace folder 创建一个 LanguageClient 实例。
+`true` 时：为每个 workspace folder 创建一个 LanguageClient 实例。当前 `multiRoot` 在类型定义中存在但生成代码未使用该参数。
 
 ---
 
@@ -186,8 +186,8 @@ transforms 在 `source` 步骤中声明，只对扫描器检测到的文件生�
 ```
 1. 在原始 package.json 的 dependencies 里找包名 → 找到则用
 2. 没找到 → 在 devDependencies 里找 → 找到则用
-3. 没找到 → 向上查找 workspace root（../package.json, ../../package.json...）的 dependencies/devDependencies → 找到则用（处理 monorepo 场景）
-4. 都没找到 → 报错，提示人工补全版本号
+3. 没找到 → 向上查找 workspace root（../package.json, ../../package.json...）的 dependencies/devDependencies → 找到则用（处理 monorepo 场景，暂未实现）
+4. 都没找到 → 报错，提示人工补全版本号（暂未实现，当前静默返回 undefined）
 ```
 
 如果自动解析均失败，可改用对象语法在 registry 中手动指定版本号：
@@ -223,23 +223,38 @@ Bridge 步骤与其他步骤配合：`bridge` 生成核心桥接层，`source` �
 ```json
 {
   "type": "bridge",
-  "preset": "ts-bridge",
-  "options": {
-    "registerCommands": true
-  }
+  "preset": "ts-bridge"
 }
 ```
 
-添加新预设：
-1. 在 `converter/src/presets/` 下新建文件，导出 `PresetGenerator` 接口的实现
-2. 在 `converter/src/presets/index.ts` 注册
-3. registry 里直接通过 `preset` 名字引用
+Bridge 代码由 converter 内置的安全模板生成，不在 registry 中存放可执行代码。添加新预设需要两步：
+
+1. 在 `converter/src/steps/bridge.ts` 的 `BRIDGE_TEMPLATES` 中添加新类型（经审计的代码模板）
+2. 在 `coc-vscode-registry/presets.json` 中添加预设定义，引用该类型
 
 ```typescript
-// converter/src/presets/types.ts
-interface PresetGenerator {
-  name: string
-  generate(context: PresetContext): GeneratedCode
+// converter/src/steps/bridge.ts
+const BRIDGE_TEMPLATES = {
+  'custom-bridge': (opts) => ({
+    code: `...`,                      // 安全模板代码
+    injectExts: opts.extensions || [], // 需要激活的 coc 扩展
+    injectSvcs: opts.services || [],   // 需要启动的服务
+    callAfter: 'registerBridge(...)',  // client 启动后的回调
+    extraDeps: ['typescript'],         // 额外依赖
+  }),
+}
+```
+
+```json
+// coc-vscode-registry/presets.json
+{
+  "custom-bridge": {
+    "type": "custom-bridge",
+    "options": {
+      "extensions": ["coc-xxx"],
+      "services": ["xxx"]
+    }
+  }
 }
 ```
 
@@ -483,10 +498,17 @@ import { LanguageClient, TransportKind, services } from 'coc.nvim'
 
 ### Phase 3: 测试（待办）
 
-- [ ] 创建 `scripts/test-regression.sh`（已有 `scripts/test-converter-v2.sh` 雏形）
+- [x] 创建 `scripts/test-regression.sh`（36 项测试，覆盖全部步骤类型和 edge cases）
 - [ ] 遍历 registry，对每个条目执行：
       clone → convert → npm install → esbuild → require 验证
 - [ ] CI：每次 PR 自动跑回归测试
+
+### 待修复
+
+- [ ] `keepDeps` 第 3 步 workspace root 查找
+- [ ] `keepDeps` 解析失败时报错而非静默返回
+- [ ] `multiRoot` 支持多 workspace folder
+- [ ] CI 验证规则中 registry 条目的校验（`npm view` server 包存在性等）
 
 ---
 

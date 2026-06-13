@@ -91,25 +91,39 @@ ${ls.verbose ? `    console.log('[${escapeStr(id)}] serverPath undefined')\n` : 
     }
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] serverPath =', serverPath)\n` : ''}\
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] creating LanguageClient')\n` : ''}\
-    const client = new LanguageClient(
-      '${escapeStr(id)}',
-      '${escapeStr(description)}',
-      ${serverOptionsCode},
-      {
-        documentSelector: ${docSelectorCode},
-        outputChannelName: '${escapeStr(description)}',
-      },
-    )
-    context.subscriptions.push({ dispose: () => client.stop() })
+    const createClient = () => {
+      const c = new LanguageClient(
+        '${escapeStr(id)}',
+        '${escapeStr(description)}',
+        ${serverOptionsCode},
+        {
+          documentSelector: ${docSelectorCode},
+          outputChannelName: '${escapeStr(description)}',
+        },
+      )
+      context.subscriptions.push({ dispose: () => c.stop() })
+      context.subscriptions.push(services.registerLanguageClient(c))
+      return c
+    }
+
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] registering LanguageClient')\n` : ''}\
-    context.subscriptions.push(services.registerLanguageClient(client))
-${ls.verbose ? `    console.log('[${escapeStr(id)}] starting client')\n` : ''}\
-    client.start()
+    let client: LanguageClient
+    if (${multiRoot ? 'workspace.workspaceFolders && workspace.workspaceFolders.length > 1' : 'false'}) {
+${ls.verbose ? `      console.log('[${escapeStr(id)}] multiRoot mode')\n` : ''}\
+      for (const folder of workspace.workspaceFolders) {
+        client = createClient()
+        client.start()
+      }
+    } else {
+      client = createClient()
+${ls.verbose ? `      console.log('[${escapeStr(id)}] starting client')\n` : ''}\
+      client.start()
+    }
 
     context.subscriptions.push(
       commands.registerCommand('${escapeStr(pluginName)}.restart', async () => {
         await client.stop()
-    await client.start()
+        await client.start()
       }),
     )
   } catch (e: any) {
