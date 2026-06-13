@@ -106,7 +106,7 @@ async function convertSource(
   if (!fs.existsSync(path.join(converterDir, 'node_modules', 'commander'))) {
     onProgress(2, 5, 'Installing converter dependencies...', '')
     const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
-    await run('npm', ['install', '--legacy-peer-deps', '--production'], converterDir, log)
+    await run('npm', ['install', '--legacy-peer-deps', '--omit=dev'], converterDir, log)
   }
 
   // Build convert config from registry entry
@@ -119,12 +119,28 @@ async function convertSource(
   fs.mkdirSync(path.dirname(convertFile), { recursive: true })
   fs.writeFileSync(convertFile, JSON.stringify(info.convert))
 
-  // Write presets from local registry if available
+  // Fetch presets from remote registry (cached in cache dir)
   const presetsFile = path.join(cacheDir(name), 'presets-config.json')
   const registryDir = path.resolve(__dirname, '..', '..', 'coc-vscode-registry')
-  const presetsPath = path.join(registryDir, 'presets.json')
-  if (fs.existsSync(presetsPath)) {
-    fs.writeFileSync(presetsFile, fs.readFileSync(presetsPath))
+  const localPresets = path.join(registryDir, 'presets.json')
+  if (fs.existsSync(localPresets)) {
+    // Local dev mode: read from local coc-vscode-registry clone
+    fs.writeFileSync(presetsFile, fs.readFileSync(localPresets))
+  } else {
+    // npm mode: fetch from remote (cached globally)
+    const globalPresetsCache = path.join(os.homedir(), '.config', 'coc', 'converter-cache', 'presets.json')
+    if (!fs.existsSync(globalPresetsCache)) {
+      try {
+        const res = await fetch('https://raw.githubusercontent.com/coc-plugin/coc-vscode-registry/main/presets.json')
+        if (res.ok) {
+          fs.mkdirSync(path.dirname(globalPresetsCache), { recursive: true })
+          fs.writeFileSync(globalPresetsCache, await res.text())
+        }
+      } catch {}
+    }
+    if (fs.existsSync(globalPresetsCache)) {
+      fs.writeFileSync(presetsFile, fs.readFileSync(globalPresetsCache))
+    }
   }
 
   const args = ['tsx', cli, 'convert', inputDir, '-o', build, '--convert-file', convertFile]
