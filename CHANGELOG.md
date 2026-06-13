@@ -3,8 +3,9 @@
 ## [1.2.2] - 2026-06-13
 
 ### Added
-- Registry expansion: YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro (14 plugins total)
-- Language-client step: add `initializationOptions` support (jsdk path for Volar-based servers)
+- Registry expansion: YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, gitignore (15 plugins total)
+- Language-client step: add `initializationOptions` support (tsdk path for Volar-based servers)
+- Import-mapping: add `authentication.getSession` → `undefined` polyfill (coc has no auth API)
 - Raw binary server download support for non-archive assets (e.g. Biome binary from GitHub releases)
 - `.tar.gz` / `.tgz` archive extraction support in serverBinary download pipeline
 

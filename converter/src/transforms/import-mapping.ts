@@ -153,6 +153,12 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
     'registerDocumentRangeFormatProvider($1, $2, 1)'
   )
 
+  // authentication.getSession → undefined (coc.nvim has no auth API)
+  newContent = newContent.replace(
+    /authentication\.getSession\s*\([^)]*\)/g,
+    'undefined as any'
+  )
+
   // Guard workspace.workspaceFolders when accessed via index (coc.nvim may return undefined)
   newContent = newContent.replace(
     /workspace\.workspaceFolders(?=\[)/g,
