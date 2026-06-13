@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.1.3] - 2026-06-13
+
+### Fixed
+- Prisma LSP stuck at "starting": converter no longer strips server module bin-walking code,
+  allowing `@prisma/language-server` to resolve its `bin` entry (`dist/bin.js`) instead of
+  the library `main` entry
+- Prisma install failure: `detectServerModules` regex no longer false-matches `${serverUrl}`
+  template literal placeholders in webview HTML generation code
+- Ansible pip install failure on macOS 14.4+: `--break-system-packages` now applied on
+  macOS (darwin) with runtime Python >= 3.11 version check
+- TUI not refreshing after operations complete: added `pendingRender` flag to re-render
+  when state updates arrive during an in-progress render
+- Concurrent `uninstallPackage` calls no longer race on `extensions/package.json`
+  (added missing `await`s)
+- `pkg.dependencies` guard: `installToCoc` and `uninstallPackage` now handle missing
+  `dependencies` key in `extensions/package.json`
+- `satisfiesVersion` no longer breaks on pre-release version strings (e.g. `1.1.3-alpha`)
+- Error messages from failed CLI commands now include stderr output for easier debugging
+
+### Added
+- All registry packages now require `minPluginVersion: "1.1.3"`
+- Config-based server path replacement for binary servers in built packages
+
 ## [1.1.1] - 2026-06-12
 
 ### Added
