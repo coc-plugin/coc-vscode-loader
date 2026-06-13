@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.6] - 2026-06-13
+## [1.1.7] - 2026-06-13
 
 ### Fixed
 - Registry fetch hanging with lowercase `http_proxy` env vars: fall back to `curl` when
