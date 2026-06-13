@@ -296,10 +296,13 @@ export class TUI {
   }
 
   private rendering = false
+  private pendingRender = false
 
   private async render() {
-    if (!this.winid || this.rendering) return
+    if (!this.winid) return
+    if (this.rendering) { this.pendingRender = true; return }
     this.rendering = true
+    this.pendingRender = false
     try {
       const nvim = workspace.nvim
       const state = this.state.getState()
@@ -327,6 +330,7 @@ export class TUI {
       this.logLineSet = result.logLines
     } finally {
       this.rendering = false
+      if (this.pendingRender) this.render()
     }
   }
 
