@@ -5,11 +5,14 @@ CLI tool that automatically converts VS Code extensions to coc.nvim plugins.
 ## Usage
 
 ```bash
+# Create a convert config (describe how to transform the plugin)
+echo '[{"type":"source","transforms":["import-mapping"],"entry":"src/extension.ts"}]' > convert.json
+
 # Convert a VS Code extension directory
-npx tsx src/cli.ts convert ./vscode-ext/ -o ./coc-ext/
+npx tsx src/cli.ts convert ./vscode-ext/ -o ./coc-ext/ --convert-file convert.json
 
 # Build and install to coc
-cd ./coc-ext && npm install && npm run build
+cd ./coc-ext && npm install && node esbuild.mjs
 cd ~/.config/coc/extensions && npm install /path/to/coc-ext
 ```
 

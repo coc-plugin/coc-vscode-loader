@@ -24,8 +24,10 @@ This repo contains two parts:
 
 ```bash
 cd converter
-npx tsx src/cli.ts convert ../path/to/vscode-ext -o ./output
-cd ./output && npm install && npm run build
+# Create a convert config file for the plugin
+echo '[{"type":"source","transforms":["import-mapping"],"entry":"src/extension.ts"}]' > convert.json
+npx tsx src/cli.ts convert ../path/to/vscode-ext -o ./output --convert-file convert.json
+cd ./output && npm install && node esbuild.mjs
 ```
 
 **Quick conversion script:**
