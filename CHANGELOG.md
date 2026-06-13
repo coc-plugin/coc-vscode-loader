@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.2.2] - 2026-06-13
+## [1.2.3] - 2026-06-13
 
 ### Added
 - Registry expansion: YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, gitignore (15 plugins total)
@@ -13,8 +13,12 @@
 - Text-level replacements in `convert.ts` now also process `.js` files
 
 ### Fixed
-- Regenerated registry.json format consistency (all entries expanded to multiline)
 - `import-mapping` MAPPINGS: removed `'vscode': 'coc.nvim'` entry which incorrectly renamed the namespace identifier, causing `vscode2` runtime errors
+- Language-client step: trailing comma when `initializationOptions` is not set (broke all LSP clients)
+- ServerBinary download: `rustTarget` variable scope bug causing silent download failures
+- ServerBinary download: fall back to `curl` for GitHub API when `fetch` fails (proxy compatibility)
+- ServerBinary download: template variable resolution runs after esbuild creates `lib/index.js`
+- Performance: replaced all `fs.rmSync`/`fs.cpSync` with async system commands (`rm -rf`/`cp -r`) for install/uninstall operations
 
 ## [1.1.7] - 2026-06-13
 
