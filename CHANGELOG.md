@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.5] - 2026-06-13
+
+### Fixed
+- TUI showing zero packages indefinitely after opening: explicitly call `render()` after
+  background registry fetch completes, instead of relying on `notify()` → `render()` chain
+
 ## [1.1.4] - 2026-06-13
 
 ### Fixed
