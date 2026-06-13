@@ -1,6 +1,6 @@
 {
   "name": "converter",
-  "version": "0.1.0",
+  "version": "1.2.2",
   "private": true,
   "description": "vscode → coc.nvim converter prototype",
   "type": "module",
