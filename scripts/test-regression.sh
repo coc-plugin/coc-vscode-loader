@@ -275,7 +275,13 @@ if [ -f "$REGISTRY" ]; then
 import json
 with open('$REGISTRY') as f:
     entries = json.load(f)
-assert len(entries) == 9, f'Expected 9 entries, got {len(entries)}'
+    assert len(entries) == 11, f'Expected 11 entries, got {len(entries)}'
+for e in entries:
+    if e['name'] == 'prettier-vscode':
+        assert e['type'] == 'direct-api', f'{e[\"name\"]} should be direct-api'
+        assert len(e['convert']) == 1, f'{e[\"name\"]} should have 1 convert step'
+        assert e['convert'][0]['type'] == 'source', f'{e[\"name\"]} should use source step'
+        assert 'import-mapping' in e['convert'][0].get('transforms', []), f'{e[\"name\"]} should have import-mapping transform'
 for e in entries:
     assert 'convert' in e, f'{e[\"name\"]} missing convert config'
     assert len(e['convert']) > 0, f'{e[\"name\"]} empty convert'
@@ -306,7 +312,7 @@ with open('$PRESETS') as f:
     presets = json.load(f)
 for name, p in presets.items():
     assert 'type' in p, f'preset {name} missing type'
-    assert p['type'] in ('tsserver-forward',), f'preset {name}: unknown type {p[\"type\"]}'
+    assert p['type'] in ('tsserver-forward', 'prettier'), f'preset {name}: unknown type {p[\"type\"]}'
 " && green "presets.json valid" || red "presets.json invalid"
 fi
 
@@ -394,6 +400,39 @@ if (p.version.startsWith('8.')) { process.exit(0) }
 else { console.error('ajv version:', p.version); process.exit(1) }
 " && green "ajv v8 installed at top level" || red "ajv version wrong"
 
+node esbuild.mjs > /dev/null 2>&1 && green "esbuild build" || red "esbuild build"
+
+# ============================================================
+echo "=== 11. Bridge preset: prettier standalone formatter ==="
+cleanup
+mkdir -p "$WORKDIR/t11"
+cat > "$WORKDIR/t11/package.json" <<JSON
+{"name":"t11","version":"0.1.0","dependencies":{"prettier":"*"}}
+JSON
+cat > "$WORKDIR/t11/presets.json" <<JSON
+{"prettier":{"type":"prettier","options":{"languages":["javascript","css"]}}}
+JSON
+cat > "$WORKDIR/t11/convert.json" <<JSON
+[{"type":"bridge","preset":"prettier"}]
+JSON
+
+cd "$CONVERTER"
+npx tsx src/cli.ts convert "$WORKDIR/t11" -o "$WORKDIR/t11-out" --convert-file "$WORKDIR/t11/convert.json" --presets-file "$WORKDIR/t11/presets.json" > /dev/null 2>&1
+
+test -f "$WORKDIR/t11-out/src/index.ts" && green "index.ts generated" || red "index.ts missing"
+grep -q "require('prettier')" "$WORKDIR/t11-out/src/index.ts" && green "prettier required" || red "prettier require missing"
+grep -q "registerDocumentFormatProvider" "$WORKDIR/t11-out/src/index.ts" && green "formatter registered" || red "formatter missing"
+grep -q "prettier.format" "$WORKDIR/t11-out/src/index.ts" && green "prettier.format called" || red "format call missing"
+grep -q "prettier.resolveConfigFile" "$WORKDIR/t11-out/src/index.ts" && green "config file resolution" || red "config resolution missing"
+python3 -c "
+import json
+d = json.load(open('$WORKDIR/t11-out/package.json'))
+assert 'prettier' in d['dependencies'], f'dep missing: {d[\"dependencies\"]}'
+assert 'coc-prettier' not in d['name'], f'bad name: {d[\"name\"]}'
+" && green "package.json correct" || red "package.json wrong"
+
+cd "$WORKDIR/t11-out"
+npm install --legacy-peer-deps > /dev/null 2>&1 && green "npm install" || red "npm install"
 node esbuild.mjs > /dev/null 2>&1 && green "esbuild build" || red "esbuild build"
 
 # ============================================================

@@ -40,7 +40,7 @@
 |------|------|
 | `language-client` | 生成 LanguageClient 代码 |
 | `source` | 复制源文件 + 应用 transforms |
-| `bridge` | 生成桥接代码（Volar 类） |
+| `bridge` | 生成桥接代码（仅用于有不可移植 API 的插件，如 Volar） |
 | `mark-unsupported` | 标记不支持的功能 |
 
 ---
@@ -171,6 +171,16 @@ transforms 在 `source` 步骤中声明，只对扫描器检测到的文件生�
 | `class-to-factory` | `new SomeClass()` → `SomeClass.create()` |
 | `provider-register` | 适配 provider 注册签名 |
 
+#### 文本后处理（convert.ts）
+
+步骤执行后，convert.ts 对所有输出源文件执行以下文本替换：
+- `.fileName` → `Uri.parse($1.uri).fsPath`（coc 的 TextDocument 无 fileName 属性）
+- `const { fileName, ...rest } = doc` 解构 → 拆分为 `{ ...rest } = doc; const fileName = Uri.parse(doc.uri).fsPath`
+- `.uri.fsPath` → `Uri.parse($1.uri).fsPath`
+- `getWordRangeAtPosition` → 内联词边界计算
+
+引入 `Uri.parse()` 后自动将 `Uri` 补入 `from 'coc.nvim'` import。
+
 #### entry
 
 `source` 步骤复制所有 `.ts/.tsx` 文件到输出目录，对含 `from 'vscode'` 的文件应用 transforms。`entry` 指定 esbuild 入口（仅在无 `language-client` 步骤时使用）。
@@ -227,9 +237,11 @@ transforms 在 `source` 步骤中声明，只对扫描器检测到的文件生�
 
 ### `bridge`
 
-使用预设代码生成器生成桥接代码。用于需要特殊适配的插件（如 Volar 需要 TypeScript 桥接）。
+使用预设代码生成器生成独立入口代码。用于 **有大量不可移植 API 的插件**，这些插件的源码无法通过 `import-mapping` 完整转换。
 
-当前只有一个预设：
+原则：能用 `source` 优先用 `source`。`bridge` 是兜底策略，仅在 `import-mapping` 无法处理时使用。
+
+当前预设：
 
 | 预设 | 适用插件 | 生成内容 |
 |------|----------|----------|
@@ -431,6 +443,37 @@ import { LanguageClient, TransportKind, services } from 'coc.nvim'
   ]
 }
 ```
+
+### Prettier
+
+```json
+{
+  "name": "prettier-vscode",
+  "displayName": "Prettier",
+  "description": "Code formatter using Prettier",
+  "type": "direct-api",
+  "languages": ["javascript", "typescript", "css", "html", "json", "yaml", "markdown", "scss", "less"],
+  "categories": ["Formatter"],
+  "minPluginVersion": "1.2.2",
+  "convert": [
+    {
+      "type": "source",
+      "transforms": ["import-mapping", "class-to-factory", "provider-register", "enum-offset"],
+      "entry": "src/extension.ts",
+      "activationEvents": ["*"],
+      "keepDeps": ["prettier"]
+    }
+  ]
+}
+```
+
+Prettier 使用 `source` 步骤直接转换 prettier-vscode 的源码（而非 bridge 生成器）。`import-mapping` 的文本替换层处理了其特有的 API：
+- `window.activeTextEditor` → runtime polyfill
+- `languages.createLanguageStatusItem` → no-op
+- `registerDocumentFormatProvider(sel, provider, 1)` → priority=1 避免被 tsserver 覆盖
+- `{ fileName } = doc` 解构拆分 → convert.ts 通用处理
+
+`keepDeps: ["prettier"]` 保留 prettier 运行时依赖（原始 package.json 过滤掉了 prettier）。
 
 ### Tailwind CSS IntelliSense
 

@@ -68,7 +68,9 @@ export async function convert(opts: ConvertOptions): Promise<void> {
   }
   console.log(result.summary)
 
-  if (result.files.length === 0) {
+  // Source-only steps need source files; bridge/language-client steps can generate code
+  const hasNonSourceStep = steps.some(s => s.type !== 'source' && s.type !== 'mark-unsupported')
+  if (result.files.length === 0 && !hasNonSourceStep) {
     console.log('No VS Code API usage found, nothing to convert.')
     return
   }
@@ -198,13 +200,38 @@ export async function convert(opts: ConvertOptions): Promise<void> {
         }
 
         if (content.includes('.fileName') || content.includes('.uri.fsPath')) {
-          // .fileName → .uri (coc's TextDocument#uri returns a string path, not a URI object)
-          content = content.replace(/(document|this\.document|textDocument|scope)\.fileName/g, '$1.uri')
-          // .uri.fsPath → .uri (coc's uri is already a string path, not a URI object)
-          content = content.replace(/\.uri\.fsPath/g, '.uri')
+          // .fileName → Uri.parse($1.uri).fsPath (coc's TextDocument#uri returns a file:// URI string)
+          content = content.replace(/(document|this\.document|textDocument|scope|doc)\.fileName/g, 'Uri.parse($1.uri).fsPath')
+          // Handle destructuring: const { fileName, ...rest } = document/doc/textDocument
+          content = content.replace(
+            /^(\s*)(const|let|var)\s*\{([^}]*)\}\s*=\s*(document|doc|textDocument)\s*;?\s*$/gm,
+            (m: string, indent: string, kw: string, props: string, varName: string) => {
+              const parts = props.split(',').map((p: string) => p.trim())
+              if (!parts.some((p: string) => p === 'fileName')) return m
+              const rest = parts.filter((p: string) => p !== 'fileName' && p !== '')
+              return rest.length > 0
+                ? `${indent}${kw} {${rest.join(', ')}} = ${varName};\n${indent}const fileName = Uri.parse(${varName}.uri).fsPath`
+                : `${indent}const fileName = Uri.parse(${varName}.uri).fsPath`
+            }
+          )
+          // .uri.fsPath → Uri.parse(...).fsPath (coc's uri is a file:// URI string, not a path)
+          content = content.replace(/(\w+(?:\.\w+)*?)\.uri\.fsPath/g, 'Uri.parse($1.uri).fsPath')
           changed = true
         }
 
+        // Ensure Uri is imported when introduced by Uri.parse() replacements
+        if (content.includes('Uri.parse(') && content.match(/from\s+['"]coc\.nvim['"]/)) {
+          content = content.replace(
+            /(import\s*\{\s*)([^}]*?)(\s*\}\s*from\s*['"]coc\.nvim['"])/g,
+            (_m: string, prefix: string, existing: string, suffix: string) => {
+              if (!existing.includes('Uri')) {
+                const sep = existing.trim() ? ', ' : ''
+                return `${prefix}${existing.trim()}${sep}Uri${suffix}`
+              }
+              return _m
+            }
+          )
+        }
         if (changed) fs.writeFileSync(fp, content)
       }
     }

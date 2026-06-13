@@ -30,16 +30,48 @@ External commands required at runtime:
 
 | Transform | What it does |
 |-----------|-------------|
-| `import-mapping` | `from 'vscode'` → `from 'coc.nvim'` |
+| `import-mapping` | `from 'vscode'` → `from 'coc.nvim'` + text-level API polyfills |
 | `class-to-factory` | `new Xxx()` → `Xxx.create()` |
 | `provider-register` | Adapt provider registration signatures |
 | `enum-offset` | Comment on enum value differences |
 | `language-client` | LanguageClient signature adaptation |
 
+### `import-mapping` 文本级替换（text-level polyfills）
+
+`import-mapping` 除了 AST 层的导入重写，还会对源码做文本替换来适配 coc.nvim 的 API 差异：
+
+| 替换 | 原因 |
+|------|------|
+| `await import(...)` → `require(...)` | coc 扩展运行在 CJS 沙箱 |
+| `createStatusBarItem(name, alignment, priority)` → `createStatusBarItem(priority)` | coc API 参数不同 |
+| `LanguageStatusSeverity.xxx` → `2` | coc 无此类型 |
+| `new StatusBar()` → no-op mock | VS Code status bar 接口差异 |
+| `workspace.isTrusted` → `true` | coc 无工作区信任概念 |
+| `new CodeAction()` → try-catch safe | coc 的 CodeAction 构造器可能不可用 |
+| `CodeActionKind.SourceFixAll.append(...)` → string literal | coc 的 CodeActionKind 是 string 别名 |
+| `window.activeTextEditor` → polyfill | coc 无此属性，注入运行时兼容层 |
+| `window.onDidChangeActiveTextEditor` → `workspace.onDidOpenTextDocument` | coc 使用不同事件名 |
+| `languages.createLanguageStatusItem(...)` → no-op | coc 无此 API |
+| `window.showOpenDialog(...)` → `void 0` | coc 无文件选择对话框 |
+| `registerDocumentFormatProvider(sel, provider)` → `(sel, provider, 1)` | 默认 priority=1 避免被 LanguageClient 覆盖 |
+| `workspace.workspaceFolders[` → `(workspace.workspaceFolders \|\| [])[` | coc 可能返回 undefined |
+| 自动补 `workspace`/`Uri` import | 引入新 API 后自动补全 import |
+
+### `convert.ts` 通用文本替换
+
+converter 主流程在步骤执行后还会对所有输出源文件做一轮通用文本替换：
+
+| 替换 | 原因 |
+|------|------|
+| `.fileName` → `Uri.parse($1.uri).fsPath` | coc 的 TextDocument 无 fileName 属性 |
+| `{ fileName } = doc` 解构拆分 | 同上，处理解构写法 |
+| `.uri.fsPath` → `Uri.parse($1.uri).fsPath` | coc 的 uri 是 file:// URI 字符串 |
+| `getWordRangeAtPosition` → 内联实现 | coc 无此 API |
+
 **Bridge preset system** (`converter/src/presets.ts`):
-- Bridge logic is preset-driven, not hardcoded in convert.ts
-- Currently only `ts-bridge` preset exists
-- Adding a new bridge type: edit presets.ts + scanner.ts
+- Bridge logic is not used for source-based plugins
+- Currently only `ts-bridge` preset exists for TypeScript bridge plugins (Volar)
+- Adding a new bridge type: edit `converter/src/steps/bridge.ts` `BRIDGE_TEMPLATES`
 
 ## coc-tsserver PR
 

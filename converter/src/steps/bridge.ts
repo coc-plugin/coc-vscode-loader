@@ -72,7 +72,32 @@ export const bridgeGenerator: StepGenerator = {
 ${code}`
     }
 
-    // Generate the bridge module
+    const extIds = generated.injectExts || []
+    const svcIds = generated.injectSvcs || []
+    const callAfter = generated.callAfter
+    const isStandalone = !callAfter && extIds.length === 0 && svcIds.length === 0
+
+    if (isStandalone) {
+      // Standalone preset (e.g. prettier): generate entry point directly
+      const moduleContent = `\
+import { ExtensionContext, languages, Range, TextEdit, Uri, window, workspace } from 'coc.nvim'
+
+export async function activate(context: ExtensionContext): Promise<void> {
+${code}
+}
+`
+      return {
+        generatedFiles: [{ path: 'src/index.ts', content: moduleContent }],
+        entryPoint: 'src/index.ts',
+        keepDeps: Object.fromEntries((generated.extraDeps || []).map((d: string) => {
+          const ver = ctx.origPkg.dependencies?.[d] || ctx.origPkg.devDependencies?.[d]
+          return [d, ver || '*']
+        })),
+        activationEvents: ['*'],
+      }
+    }
+
+    // Generate the bridge module (for tsserver-forward etc)
     const moduleContent = `\
 import { commands, ExtensionContext } from 'coc.nvim'
 
@@ -83,9 +108,6 @@ ${code}
 
     // Build code injections
     const codeInjections: StepResult['codeInjections'] = []
-    const extIds = generated.injectExts || []
-    const svcIds = generated.injectSvcs || []
-    const callAfter = generated.callAfter
 
     if (callAfter) {
       codeInjections.push({
