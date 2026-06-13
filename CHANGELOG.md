@@ -1,10 +1,15 @@
 # Changelog
 
-## [1.2.3] - 2026-06-13
+## [1.2.4] - 2026-06-13
 
-### Added
-- Registry expansion: YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, gitignore (15 plugins total)
-- Language-client step: add `initializationOptions` support (tsdk path for Volar-based servers)
+### Fixed
+- Performance: replaced all `fs.rmSync`/`fs.cpSync` with async system `rm -rf`/`cp -r` for fast install/uninstall
+- Presets fetch: fallback to `curl` when `fetch` fails (lowercase `http_proxy` compatibility)
+- Import `execFile` at top level instead of inline `require` calls
+- `import-mapping` MAPPINGS: namespace identifier incorrectly renamed causing `vscode2` errors
+- Regression from [1.1.7]: `vscode` MAPPINGS entry retained despite module specifier rewrite
+
+## [1.2.3] - 2026-06-13
 - Import-mapping: add `authentication.getSession` → `undefined` polyfill (coc has no auth API)
 - Import-mapping: add `editor.setDecorations` → no-op polyfill (decoration API not available in coc)
 - Raw binary server download support for non-archive assets (e.g. Biome binary from GitHub releases)

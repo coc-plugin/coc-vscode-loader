@@ -1,6 +1,6 @@
 import { StateManager } from './state'
 import { getPackage, PackageInfo } from './registry'
-import { spawn } from 'child_process'
+import { spawn, execFile } from 'child_process'
 import { window as cocWindow } from 'coc.nvim'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -130,13 +130,25 @@ async function convertSource(
     // npm mode: fetch from remote (cached globally)
     const globalPresetsCache = path.join(os.homedir(), '.config', 'coc', 'converter-cache', 'presets.json')
     if (!fs.existsSync(globalPresetsCache)) {
+      const presetsUrl = 'https://raw.githubusercontent.com/coc-plugin/coc-vscode-registry/main/presets.json'
       try {
-        const res = await fetch('https://raw.githubusercontent.com/coc-plugin/coc-vscode-registry/main/presets.json')
+        const res = await fetch(presetsUrl)
         if (res.ok) {
           fs.mkdirSync(path.dirname(globalPresetsCache), { recursive: true })
           fs.writeFileSync(globalPresetsCache, await res.text())
         }
-      } catch {}
+      } catch {
+        // fetch may fail with lowercase http_proxy - fallback to curl
+        try {
+          const out = await new Promise<string>((resolve, reject) => {
+            execFile('curl', ['-sL', presetsUrl], { encoding: 'utf-8', maxBuffer: 1024 * 1024 }, (err, stdout) => err ? reject(err) : resolve(stdout))
+          })
+          if (out) {
+            fs.mkdirSync(path.dirname(globalPresetsCache), { recursive: true })
+            fs.writeFileSync(globalPresetsCache, out)
+          }
+        } catch {}
+      }
     }
     if (fs.existsSync(globalPresetsCache)) {
       fs.writeFileSync(presetsFile, fs.readFileSync(globalPresetsCache))
@@ -248,7 +260,6 @@ async function buildPackage(
         if (!tagRes.ok) throw new Error(`HTTP ${tagRes.status}`)
         tagData = await tagRes.json()
       } catch {
-        const { execFile } = require('child_process') as typeof import('child_process')
         const out = await new Promise<string>((resolve, reject) => {
           execFile('curl', ['-sL', `https://api.github.com/repos/${sb.repo}/releases/latest`], { encoding: 'utf-8', maxBuffer: 1024 * 1024 }, (err, stdout) => err ? reject(err) : resolve(stdout))
         })
