@@ -104,7 +104,7 @@ export class TUI {
     await nvim.call('nvim_win_set_option', [this.winid, 'foldenable', false])
 
     this.unsubscribe = this.state.subscribe(() => {
-      this.render()
+      this.render().catch(() => {})
     })
 
     this.disposables.push(
@@ -207,7 +207,7 @@ export class TUI {
       }
       const ok = await cocWindow.showPrompt(`Uninstall ${removed.length} orphaned package(s)?`)
       if (ok) {
-        for (const p of removed) uninstallPackage(this.state, p.info.name)
+        for (const p of removed) await uninstallPackage(this.state, p.info.name)
       }
       return
     }
@@ -225,7 +225,7 @@ export class TUI {
       if (installed.length === 0) return
       const ok = await cocWindow.showPrompt(`Uninstall all ${installed.length} packages?`)
       if (ok) {
-        for (const pkg of installed) uninstallPackage(this.state, pkg.info.name)
+        for (const pkg of installed) await uninstallPackage(this.state, pkg.info.name)
       }
       return
     }

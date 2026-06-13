@@ -58,10 +58,12 @@ async function run(
     }
     child.stdout.on('data', handler)
     child.stderr.on('data', handler)
+    let stderrBuf = ''
+    child.stderr.on('data', (d: Buffer) => { stderrBuf += d.toString() })
     child.on('close', code => {
       clearTimeout(timer)
       if (code === 0) resolve()
-      else reject(new Error(`${cmd} ${args.join(' ')} exited with code ${code}`))
+      else reject(new Error(`${cmd} ${args.join(' ')} exited with code ${code}\n${stderrBuf.trim()}`))
     })
     child.on('error', (e) => { clearTimeout(timer); reject(e) })
   })
@@ -134,8 +136,17 @@ async function buildPackage(
     }
     if (!pythonBin) throw new Error('python3 not found, cannot install pip packages: ' + info.pipPackages.join(', '))
     const pipArgs = ['-m', 'pip', 'install']
-    // --break-system-packages needed on Linux and macOS (PEP 668); not supported on older pip
-    if (process.platform === 'linux' || process.platform === 'darwin') pipArgs.push('--break-system-packages')
+    // --break-system-packages needed on Linux and macOS (PEP 668); check Python version for support
+    if (process.platform === 'linux' || process.platform === 'darwin') {
+      try {
+        const verOut = await runWithOutput(pythonBin, ['--version'], build)
+        const m = verOut.match(/^Python\s+(\d+)\.(\d+)/)
+        if (m) {
+          const pyMajor = parseInt(m[1]), pyMinor = parseInt(m[2])
+          if (pyMajor > 3 || (pyMajor === 3 && pyMinor >= 11)) pipArgs.push('--break-system-packages')
+        }
+      } catch {}
+    }
     onProgress(3, 5, 'Installing pip packages...', `${pythonBin} -m pip install ${info.pipPackages.join(' ')}`)
     await run(pythonBin, pipArgs.concat(...info.pipPackages), build, pipLog)
   }
@@ -313,6 +324,7 @@ async function installToCoc(
 
   const pkgPath = extensionsPkgPath()
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+  pkg.dependencies = pkg.dependencies || {}
   const depName = `coc-${name}`
   if (!pkg.dependencies[depName]) {
     pkg.dependencies[depName] = `file:${dest}`
@@ -390,6 +402,7 @@ export async function uninstallPackage(state: StateManager, name: string): Promi
 
     const pkgPath = extensionsPkgPath()
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+    pkg.dependencies = pkg.dependencies || {}
     const depName = `coc-${name}`
     if (pkg.dependencies[depName]) {
       delete pkg.dependencies[depName]

@@ -86,7 +86,7 @@ export async function activate(context: ExtensionContext) {
       const ok = await cocWindow.showPrompt(`Uninstall all ${installed.length} packages?`)
       if (ok) {
         for (const pkg of installed) {
-          uninstallPackage(state, pkg.info.name)
+          await uninstallPackage(state, pkg.info.name)
         }
       }
     })

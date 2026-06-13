@@ -84,8 +84,8 @@ export async function updateRegistry(): Promise<number> {
 }
 
 function satisfiesVersion(required: string): boolean {
-  const a = pluginVersion().split('.').map(Number)
-  const b = required.split('.').map(Number)
+  const a = pluginVersion().replace(/-.*$/, '').split('.').map(Number)
+  const b = required.replace(/-.*$/, '').split('.').map(Number)
   for (let i = 0; i < Math.max(a.length, b.length); i++) {
     const va = a[i] || 0, vb = b[i] || 0
     if (va > vb) return true
