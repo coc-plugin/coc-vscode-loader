@@ -97,7 +97,7 @@ async function convertSource(
   onProgress: (step: number, total: number, msg: string, cmd: string) => void,
 ): Promise<void> {
   const build = buildDir(name)
-  if (fs.existsSync(build)) fs.rmSync(build, { recursive: true })
+  await rimraf(build)
 
   const cli = converterCliPath()
   const converterDir = path.resolve(path.dirname(path.dirname(cli)))
@@ -205,8 +205,8 @@ async function buildPackage(
     onProgress(3, 5, 'Installing server dependencies...', `npm install in ${serverDir}`)
     await run('npm', ['install', '--legacy-peer-deps'], serverDir, npmLog)
     const destServer = path.join(build, 'server')
-    if (fs.existsSync(destServer)) fs.rmSync(destServer, { recursive: true })
-    fs.cpSync(serverDir, destServer, { recursive: true })
+    await rimraf(destServer)
+    await cpdir(serverDir, destServer)
   }
 
   onProgress(4, 5, 'Building...', 'node esbuild.mjs')
@@ -303,7 +303,7 @@ async function buildPackage(
       }
       if (sb.binaryPath || filename.match(/\.(zip|gz)$/)) {
         const archivePath = path.join(build, filename)
-        if (fs.existsSync(archivePath)) fs.rmSync(archivePath)
+        if (fs.existsSync(archivePath)) await rimraf(archivePath)
       }
     } catch (e: any) {
       onProgress(4, 5, `Warning: serverBinary setup failed (${e.message})`, 'install server binary manually')
@@ -324,9 +324,9 @@ async function installToCoc(
 
   onProgress(5, 5, 'Installing to coc...', `copy to ${dest} + register in extensions/package.json`)
 
-  if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true })
+  await rimraf(dest)
   fs.mkdirSync(path.dirname(dest), { recursive: true })
-  fs.cpSync(src, dest, { recursive: true })
+  await cpdir(src, dest)
 
   const pkgPath = extensionsPkgPath()
   const pkg = fs.existsSync(pkgPath) ? JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) : { dependencies: {} }
@@ -395,18 +395,26 @@ export async function installPackage(state: StateManager, name: string): Promise
   }
 }
 
-function rimraf(dir: string): void {
-  if (!fs.existsSync(dir)) return
-  // Use OS rm -rf which is much faster than fs.rmSync on deep node_modules trees
-  const child = spawn('rm', ['-rf', dir], { stdio: 'ignore' })
-  child.unref()
+function rimraf(dir: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(dir)) return resolve()
+    spawn('rm', ['-rf', dir], { stdio: 'ignore' }).on('close', code => code === 0 ? resolve() : reject(new Error(`rm -rf exited ${code}`)))
+  })
+}
+
+function cpdir(src: string, dest: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const parent = path.dirname(dest)
+    if (!fs.existsSync(parent)) fs.mkdirSync(parent, { recursive: true })
+    spawn('cp', ['-r', src, dest], { stdio: 'ignore' }).on('close', code => code === 0 ? resolve() : reject(new Error(`cp -r exited ${code}`)))
+  })
 }
 
 export async function uninstallPackage(state: StateManager, name: string): Promise<void> {
   state.setPackageStatus(name, 'uninstalling', { progress: '[1/3] Removing from coc...' })
 
   try {
-    rimraf(pluginDir(name))
+    await rimraf(pluginDir(name))
 
     state.setPackageStatus(name, 'uninstalling', { progress: '[2/3] Removing from package.json...' })
 
@@ -422,7 +430,7 @@ export async function uninstallPackage(state: StateManager, name: string): Promi
 
     state.setPackageStatus(name, 'uninstalling', { progress: '[3/3] Removing cache...' })
 
-    rimraf(cacheDir(name))
+    await rimraf(cacheDir(name))
 
     state.setPackageStatus(name, 'not-installed')
     state.setDirty()
