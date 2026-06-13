@@ -119,9 +119,20 @@ async function convertSource(
   fs.mkdirSync(path.dirname(convertFile), { recursive: true })
   fs.writeFileSync(convertFile, JSON.stringify(info.convert))
 
+  // Write presets from local registry if available
+  const presetsFile = path.join(cacheDir(name), 'presets-config.json')
+  const registryDir = path.resolve(__dirname, '..', '..', 'coc-vscode-registry')
+  const presetsPath = path.join(registryDir, 'presets.json')
+  if (fs.existsSync(presetsPath)) {
+    fs.writeFileSync(presetsFile, fs.readFileSync(presetsPath))
+  }
+
+  const args = ['tsx', cli, 'convert', inputDir, '-o', build, '--convert-file', convertFile]
+  if (fs.existsSync(presetsFile)) args.push('--presets-file', presetsFile)
+
   onProgress(2, 5, 'Converting...', `converter convert ${inputDir} -o ${build}`)
   const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
-  await run('npx', ['tsx', cli, 'convert', inputDir, '-o', build, '--convert-file', convertFile], cacheDir(name), log)
+  await run('npx', args, cacheDir(name), log)
 }
 
 async function buildPackage(

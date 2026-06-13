@@ -1,0 +1,278 @@
+#!/usr/bin/env bash
+# Regression test suite for converter v2.0
+# Tests all step types, CLI, esbuild bundling, and edge cases
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+CONVERTER="$ROOT/converter"
+WORKDIR="/tmp/test-regression"
+PASS=0
+FAIL=0
+TOTAL=0
+
+green() { PASS=$((PASS+1)); TOTAL=$((TOTAL+1)); echo "  ✓ $1"; }
+red() { FAIL=$((FAIL+1)); TOTAL=$((TOTAL+1)); echo "  ✗ $1"; }
+
+mkdir -p "$WORKDIR"
+cleanup() { rm -rf "$WORKDIR"/*; }
+
+# ============================================================
+echo "=== 1. Step type: source-only (HTML CSS Support style) ==="
+cleanup
+mkdir -p "$WORKDIR/t1/src"
+cat > "$WORKDIR/t1/package.json" <<JSON
+{"name":"t1","version":"0.1.0","dependencies":{"line-column":"^1.0.0"}}
+JSON
+cat > "$WORKDIR/t1/src/extension.ts" <<TS
+import * as vscode from 'vscode'
+export function activate(ctx: vscode.ExtensionContext) {
+  ctx.subscriptions.push(vscode.commands.registerCommand('t1.hello', () => vscode.window.showInformationMessage('hi')))
+}
+TS
+cat > "$WORKDIR/t1/src/helper.ts" <<TS
+import lineColumn from 'line-column'
+export function parse(s: string) { return lineColumn(s, 0) }
+TS
+cat > "$WORKDIR/t1/convert.json" <<JSON
+[{"type":"source","transforms":["import-mapping","class-to-factory","provider-register"],"entry":"src/extension.ts","activationEvents":["onLanguage:test"]}]
+JSON
+
+cd "$CONVERTER"
+npx tsx src/cli.ts convert "$WORKDIR/t1" -o "$WORKDIR/t1-out" --convert-file "$WORKDIR/t1/convert.json" > /dev/null 2>&1
+
+python3 -c "
+import json
+d = json.load(open('$WORKDIR/t1-out/package.json'))
+assert d['name'] == 'coc-t1', f'name: {d[\"name\"]}'
+assert 'line-column' in d['dependencies'], 'deps missing'
+assert d['devDependencies']['esbuild'], 'esbuild missing'
+assert d['activationEvents'] == ['onLanguage:test'], f'activationEvents: {d[\"activationEvents\"]}'
+" && green "package.json" || red "package.json"
+
+test -f "$WORKDIR/t1-out/src/extension.ts" && green "extension.ts exists" || red "extension.ts missing"
+test -f "$WORKDIR/t1-out/src/helper.ts" && green "helper.ts exists" || red "helper.ts missing"
+grep -q "coc.nvim" "$WORKDIR/t1-out/src/extension.ts" && green "import-mapping applied" || red "import-mapping failed"
+grep -q "line-column" "$WORKDIR/t1-out/esbuild.mjs" && green "line-column externalized" || red "external missing"
+grep -q "lib/index.js" "$WORKDIR/t1-out/esbuild.mjs" && green "esbuild entry OK" || red "esbuild entry bad"
+
+cd "$WORKDIR/t1-out"
+npm install --legacy-peer-deps > /dev/null 2>&1 && green "npm install" || red "npm install"
+node esbuild.mjs > /dev/null 2>&1 && green "esbuild build" || red "esbuild build"
+test -f lib/index.js && green "lib/index.js generated" || red "lib/index.js missing"
+
+# ============================================================
+echo "=== 2. Step type: language-client + source (Prisma style) ==="
+cleanup
+mkdir -p "$WORKDIR/t2/src/sub"
+cat > "$WORKDIR/t2/package.json" <<JSON
+{"name":"t2","version":"0.1.0","description":"T2","dependencies":{"lodash":"*","execa":"^9.0.0"}}
+JSON
+cat > "$WORKDIR/t2/src/extension.ts" <<TS
+import { commands, window } from 'vscode'
+export function activate(ctx: any) { ctx.subscriptions.push(commands.registerCommand('t2.hello', () => window.showInformationMessage('hi'))) }
+TS
+touch "$WORKDIR/t2/src/sub/extra.ts"
+cat > "$WORKDIR/t2/convert.json" <<JSON
+[{"type":"language-client","server":{"kind":"module","package":"lodash","entry":"main"},"languages":["testlang"]},{"type":"source","transforms":["import-mapping","enum-offset"],"entry":"src/extension.ts"}]
+JSON
+
+cd "$CONVERTER"
+npx tsx src/cli.ts convert "$WORKDIR/t2" -o "$WORKDIR/t2-out" --convert-file "$WORKDIR/t2/convert.json" > /dev/null 2>&1
+
+python3 -c "
+import json
+d = json.load(open('$WORKDIR/t2-out/package.json'))
+assert 'lodash' in d['dependencies'], 'server dep missing'
+assert 'execa' in d['dependencies'], 'execa missing'
+assert 'onLanguage:testlang' in d['activationEvents'], f'activationEvents: {d[\"activationEvents\"]}'
+" && green "package.json" || red "package.json"
+
+test -f "$WORKDIR/t2-out/src/index.ts" && green "index.ts generated" || red "index.ts missing"
+grep -q "LanguageClient" "$WORKDIR/t2-out/src/index.ts" && green "LanguageClient in code" || red "LanguageClient missing"
+grep -q "lodash" "$WORKDIR/t2-out/src/index.ts" && green "server ref in code" || red "server ref missing"
+# Source entry should NOT be imported (old code didn't do it)
+if grep -q "import.*extension" "$WORKDIR/t2-out/src/index.ts" 2>/dev/null; then
+  red "source entry should NOT be imported"
+else
+  green "source entry not imported (as expected)"
+fi
+test -f "$WORKDIR/t2-out/src/sub/extra.ts" && green "nested file copied" || red "nested file missing"
+
+cd "$WORKDIR/t2-out"
+npm install --legacy-peer-deps > /dev/null 2>&1 && green "npm install" || red "npm install"
+
+# ============================================================
+echo "=== 3. Step type: binary language-client (Deno style) ==="
+cleanup
+mkdir -p "$WORKDIR/t3"
+cat > "$WORKDIR/t3/package.json" <<JSON
+{"name":"t3","version":"0.1.0","description":"T3"}
+JSON
+cat > "$WORKDIR/t3/extension.ts" <<TS
+import { commands } from 'vscode'
+export function activate(ctx: any) { ctx.subscriptions.push(commands.registerCommand('t3.hello', () => {})) }
+TS
+cat > "$WORKDIR/t3/convert.json" <<JSON
+[{"type":"language-client","server":{"kind":"binary","package":"deno","binary":{"repo":"denoland/deno","asset":"deno-{{rust-target}}.zip","binaryPath":"deno"},"args":["lsp"]},"languages":["typescript"]},{"type":"source","transforms":["import-mapping"],"entry":"extension.ts"}]
+JSON
+
+cd "$CONVERTER"
+npx tsx src/cli.ts convert "$WORKDIR/t3" -o "$WORKDIR/t3-out" --convert-file "$WORKDIR/t3/convert.json" > /dev/null 2>&1
+
+python3 -c "
+import json
+d = json.load(open('$WORKDIR/t3-out/package.json'))
+assert 'onLanguage:typescript' in d['activationEvents'], f'activationEvents: {d[\"activationEvents\"]}'
+" && green "package.json" || red "package.json"
+
+grep -q "command: serverPath" "$WORKDIR/t3-out/src/index.ts" && green "binary server (command mode)" || red "command mode missing"
+# Binary should NOT have transport field
+if grep -q "transport.*TransportKind" "$WORKDIR/t3-out/src/index.ts"; then
+  red "binary should NOT have transport field"
+else
+  green "binary has no transport (correct)"
+fi
+
+cd "$WORKDIR/t3-out"
+npm install --legacy-peer-deps > /dev/null 2>&1 && green "npm install" || red "npm install"
+node esbuild.mjs > /dev/null 2>&1 && green "esbuild build" || red "esbuild build"
+
+# ============================================================
+echo "=== 4. Step type: bridge + language-client (Volar style) ==="
+cleanup
+mkdir -p "$WORKDIR/t4"
+cat > "$WORKDIR/t4/package.json" <<JSON
+{"name":"t4","version":"0.1.0","dependencies":{"@vue/language-server":"*"}}
+JSON
+cat > "$WORKDIR/t4/extension.ts" <<TS
+import * as vscode from 'vscode'
+import { defineExtension } from 'reactive-vscode'
+export = defineExtension(() => { vscode.commands.registerCommand('t4.hello', () => {}) })
+TS
+cat > "$WORKDIR/t4/config.ts" <<TS
+import * as vscode from 'vscode'
+export function getCfg() { return vscode.workspace.getConfiguration('t4') }
+TS
+cat > "$WORKDIR/t4/convert.json" <<JSON
+[{"type":"bridge","preset":"ts-bridge"},{"type":"language-client","server":{"kind":"module","package":"@vue/language-server","entry":"main"},"languages":["vue"]},{"type":"source","transforms":["import-mapping","strip-volar"]}]
+JSON
+cat > "$WORKDIR/t4/presets.json" <<JSON
+{"ts-bridge":{"type":"tsserver-forward","options":{"extensions":["coc-tsserver"],"services":["tsserver"],"command":"typescript.tsserverRequest"}}}
+JSON
+
+cd "$CONVERTER"
+npx tsx src/cli.ts convert "$WORKDIR/t4" -o "$WORKDIR/t4-out" --convert-file "$WORKDIR/t4/convert.json" --presets-file "$WORKDIR/t4/presets.json" > /dev/null 2>&1
+
+test -f "$WORKDIR/t4-out/src/index.ts" && green "index.ts generated" || red "index.ts missing"
+test -f "$WORKDIR/t4-out/src/bridge.ts" && green "bridge.ts generated" || red "bridge.ts missing"
+test -f "$WORKDIR/t4-out/src/config.ts" && green "config.ts copied (non-framework)" || red "config.ts missing"
+
+# Framework files should be skipped
+if test -f "$WORKDIR/t4-out/src/extension.ts"; then
+  red "extension.ts should NOT be copied (reactive-vscode)"
+else
+  green "extension.ts skipped (correct)"
+fi
+
+grep -q "registerBridge" "$WORKDIR/t4-out/src/index.ts" && green "bridge imported" || red "bridge missing"
+grep -q "coc-tsserver" "$WORKDIR/t4-out/src/index.ts" && green "tsserver activation" || red "tsserver activation missing"
+grep -q "extensions" "$WORKDIR/t4-out/src/index.ts" && green "extensions imported" || red "extensions import missing"
+
+cd "$WORKDIR/t4-out"
+npm install --legacy-peer-deps > /dev/null 2>&1 && green "npm install" || red "npm install"
+
+# ============================================================
+echo "=== 5. Edge case: no src/ directory ==="
+cleanup
+mkdir -p "$WORKDIR/t5"
+cat > "$WORKDIR/t5/package.json" <<JSON
+{"name":"t5","version":"0.1.0","dependencies":{"lodash":"^4.17.21"}}
+JSON
+cat > "$WORKDIR/t5/index.ts" <<TS
+import { commands } from 'vscode'
+export function activate(ctx: any) { ctx.subscriptions.push(commands.registerCommand('t5.hello', () => {})) }
+TS
+cat > "$WORKDIR/t5/convert.json" <<JSON
+[{"type":"source","transforms":["import-mapping"],"entry":"index.ts"}]
+JSON
+
+cd "$CONVERTER"
+npx tsx src/cli.ts convert "$WORKDIR/t5" -o "$WORKDIR/t5-out" --convert-file "$WORKDIR/t5/convert.json" > /dev/null 2>&1
+
+test -f "$WORKDIR/t5-out/src/index.ts" && green "file copied (from root)" || red "file not copied"
+grep -q "coc.nvim" "$WORKDIR/t5-out/src/index.ts" && green "import-mapping OK" || red "import-mapping wrong"
+
+cd "$WORKDIR/t5-out"
+npm install --legacy-peer-deps > /dev/null 2>&1 && green "npm install" || red "npm install"
+node esbuild.mjs > /dev/null 2>&1 && green "esbuild build" || red "esbuild build"
+
+# ============================================================
+echo "=== 6. Edge case: verbose logging toggle ==="
+cleanup
+mkdir -p "$WORKDIR/t6"
+cat > "$WORKDIR/t6/package.json" <<JSON
+{"name":"t6","version":"0.1.0"}
+JSON
+cat > "$WORKDIR/t6/extension.ts" <<TS
+import { commands } from 'vscode'
+export function activate(ctx: any) { ctx.subscriptions.push(commands.registerCommand('t6.hello', () => {})) }
+TS
+# Without verbose
+cat > "$WORKDIR/t6/convert-quiet.json" <<JSON
+[{"type":"language-client","server":{"kind":"module","package":"lodash","entry":"main"},"languages":["test"]},{"type":"source","transforms":["import-mapping"]}]
+JSON
+cd "$CONVERTER"
+npx tsx src/cli.ts convert "$WORKDIR/t6" -o "$WORKDIR/t6-quiet" --convert-file "$WORKDIR/t6/convert-quiet.json" > /dev/null 2>&1
+if grep -q "console.log" "$WORKDIR/t6-quiet/src/index.ts"; then
+  red "verbose=false should not have console.log"
+else
+  green "verbose=false: no console.log"
+fi
+
+# With verbose
+cat > "$WORKDIR/t6/convert-verbose.json" <<JSON
+[{"type":"language-client","server":{"kind":"module","package":"lodash","entry":"main"},"languages":["test"],"verbose":true},{"type":"source","transforms":["import-mapping"]}]
+JSON
+npx tsx src/cli.ts convert "$WORKDIR/t6" -o "$WORKDIR/t6-verbose" --convert-file "$WORKDIR/t6/convert-verbose.json" > /dev/null 2>&1
+if grep -q "console.log" "$WORKDIR/t6-verbose/src/index.ts"; then
+  green "verbose=true: has console.log"
+else
+  red "verbose=true should have console.log"
+fi
+
+# ============================================================
+echo "=== 7. Edge case: keepDeps array vs object ==="
+cleanup
+mkdir -p "$WORKDIR/t7"
+cat > "$WORKDIR/t7/package.json" <<JSON
+{"name":"t7","version":"0.1.0","dependencies":{"lodash":"^4.17.21","left-pad":"^1.3.0"}}
+JSON
+cat > "$WORKDIR/t7/extension.ts" <<TS
+import { commands } from 'vscode'
+export function activate(ctx: any) { ctx.subscriptions.push(commands.registerCommand('t7.hello', () => {})) }
+TS
+# Array syntax
+cat > "$WORKDIR/t7/convert.json" <<JSON
+[{"type":"source","transforms":["import-mapping"],"entry":"extension.ts","keepDeps":["lodash"]}]
+JSON
+cd "$CONVERTER"
+npx tsx src/cli.ts convert "$WORKDIR/t7" -o "$WORKDIR/t7-out" --convert-file "$WORKDIR/t7/convert.json" > /dev/null 2>&1
+python3 -c "
+import json
+d = json.load(open('$WORKDIR/t7-out/package.json'))
+assert 'lodash' in d['dependencies'], 'lodash missing'
+assert 'left-pad' in d['dependencies'], 'left-pad should be in auto-deps'
+" && green "keepDeps array + auto original deps" || red "keepDeps array failed"
+
+# ============================================================
+echo ""
+echo "=== Results ==="
+echo "  Pass: $PASS / $TOTAL"
+echo "  Fail: $FAIL / $TOTAL"
+
+if [ "$FAIL" -gt 0 ]; then
+  echo "  ❌ Some tests failed"
+  exit 1
+else
+  echo "  ✅ All tests passed"
+fi

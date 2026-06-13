@@ -51,8 +51,12 @@ export interface SourceStep {
 
 export interface BridgeStep {
   type: 'bridge'
-  preset: string
-  options?: Record<string, any>
+  preset?: string
+  /** Override preset options (extensions, services, etc.) */
+  options?: {
+    extensions?: string[]
+    services?: string[]
+  }
   /** Enable debug logging in generated bridge code */
   verbose?: boolean
 }
@@ -79,6 +83,14 @@ export interface StepResult {
     binaryPath?: string
     args?: string[]
   }
+  /** Code to inject into previously generated files (target path, code to insert, insertion point) */
+  codeInjections?: Array<{
+    target: string        // file to modify (e.g. 'src/index.ts')
+    importCode?: string   // import line to add at top
+    insertBefore?: string // regex pattern to insert code before
+    insertAfter?: string  // regex pattern to insert code after
+    code: string          // code to insert
+  }>
 }
 
 export interface StepContext {
@@ -87,6 +99,8 @@ export interface StepContext {
   project: Project
   origPkg: Record<string, any>
   verbose?: boolean
+  /** Preset definitions from registry (e.g. bridge presets) */
+  presets?: Record<string, any>
 }
 
 export interface StepGenerator {

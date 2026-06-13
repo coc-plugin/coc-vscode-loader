@@ -17,9 +17,14 @@ program
   .option('-o, --output <dir>', 'output directory', './output')
   .option('--convert <json>', 'convert step configuration (JSON array)')
   .option('--convert-file <path>', 'path to JSON file with convert step configuration')
+  .option('--presets-file <path>', 'path to JSON file with preset definitions (e.g. bridge presets)')
   .option('-v, --verbose', 'verbose output')
   .action(async (input, opts) => {
     let steps: any[]
+    let presets: any
+    if (opts.presetsFile) {
+      try { presets = JSON.parse(fs.readFileSync(opts.presetsFile, 'utf-8')) } catch {}
+    }
     if (opts.convertFile) {
       try {
         const content = fs.readFileSync(opts.convertFile, 'utf-8')
@@ -46,6 +51,7 @@ program
       input,
       output: opts.output,
       convert: steps,
+      presets,
       verbose: opts.verbose,
     })
   })

@@ -69,8 +69,6 @@ export const languageClientGenerator: StepGenerator = {
     }
 
     const docSelectorCode = `[${languages.map(l => `{ scheme: 'file', language: '${l}' }`).join(', ')}]`
-    const verboseLog = (msg: string) => `console.log('[${escapeStr(id)}] ${msg}')`
-
     const code = `\
 import {
   LanguageClient,
@@ -85,14 +83,14 @@ import * as path from 'path'
 
 export async function activate(context: ExtensionContext): Promise<void> {
   try {
-${ls.verbose ? `    ${verboseLog('activate() called')}\n` : ''}${serverPathCode}
+${ls.verbose ? `    console.log('[${escapeStr(id)}] activate() called')\n` : ''}${serverPathCode}
     if (!serverPath) {
-${ls.verbose ? `    ${verboseLog('serverPath undefined' )}\n` : ''}\
+${ls.verbose ? `    console.log('[${escapeStr(id)}] serverPath undefined')\n` : ''}\
       window.showErrorMessage('Cannot find language server.')
       return
     }
-${ls.verbose ? `    ${verboseLog('serverPath = ' + serverPath)}\n` : ''}\
-${ls.verbose ? `    ${verboseLog('creating LanguageClient')}\n` : ''}\
+${ls.verbose ? `    console.log('[${escapeStr(id)}] serverPath =', serverPath)\n` : ''}\
+${ls.verbose ? `    console.log('[${escapeStr(id)}] creating LanguageClient')\n` : ''}\
     const client = new LanguageClient(
       '${escapeStr(id)}',
       '${escapeStr(description)}',
@@ -103,9 +101,9 @@ ${ls.verbose ? `    ${verboseLog('creating LanguageClient')}\n` : ''}\
       },
     )
     context.subscriptions.push({ dispose: () => client.stop() })
-${ls.verbose ? `    ${verboseLog('registering LanguageClient')}\n` : ''}\
+${ls.verbose ? `    console.log('[${escapeStr(id)}] registering LanguageClient')\n` : ''}\
     context.subscriptions.push(services.registerLanguageClient(client))
-${ls.verbose ? `    ${verboseLog('starting client')}\n` : ''}\
+${ls.verbose ? `    console.log('[${escapeStr(id)}] starting client')\n` : ''}\
     client.start()
 
     context.subscriptions.push(
