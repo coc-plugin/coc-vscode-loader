@@ -35,6 +35,8 @@ export interface LanguageClientStep {
   transport?: 'ipc' | 'stdio'
   languages: string[]
   multiRoot?: boolean
+  /** Enable debug logging in generated code */
+  verbose?: boolean
 }
 
 export interface SourceStep {
@@ -43,17 +45,23 @@ export interface SourceStep {
   entry?: string
   keepDeps?: string[] | Record<string, string>
   activationEvents?: string[]
+  /** Enable debug logging in generated/transformed code */
+  verbose?: boolean
 }
 
 export interface BridgeStep {
   type: 'bridge'
   preset: string
   options?: Record<string, any>
+  /** Enable debug logging in generated bridge code */
+  verbose?: boolean
 }
 
 export interface MarkUnsupportedStep {
   type: 'mark-unsupported'
   features: string[]
+  /** Enable detailed output during conversion */
+  verbose?: boolean
 }
 
 export type ConvertStep = LanguageClientStep | SourceStep | BridgeStep | MarkUnsupportedStep

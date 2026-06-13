@@ -42,7 +42,13 @@ export const bridgeGenerator: StepGenerator = {
       throw new Error(`Unknown bridge preset: "${bs.preset}". Available: ${Object.keys(PRESETS).join(', ')}`)
     }
 
-    const code = preset.code
+    let code = preset.code
+    if (bs.verbose) {
+      code = `
+    console.log('[bridge] registerBridge called')
+    client.onReady().then(() => console.log('[bridge] client ready')).catch(e => console.log('[bridge] client error:', e.message))
+${code.replace("client.onNotification('tsserver/request'", "console.log('[bridge] waiting for tsserver/request'); client.onNotification('tsserver/request'")}`
+    }
 
     // Generate a bridge module that exports the code to be injected
     const content = `\

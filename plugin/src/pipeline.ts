@@ -245,6 +245,17 @@ async function buildPackage(
         if (fs.existsSync(archivePath)) fs.rmSync(archivePath)
       }
 
+      // Resolve template variables in generated code (binaryPath, etc.)
+      const indexPath = path.join(build, 'lib', 'index.js')
+      if (fs.existsSync(indexPath)) {
+        let code = fs.readFileSync(indexPath, 'utf-8')
+        code = code.replace(/\{\{version}}/g, version)
+        code = code.replace(/\{\{platform}}/g, platform)
+        code = code.replace(/\{\{arch}}/g, arch)
+        code = code.replace(/\{\{raw-arch}}/g, rawArch)
+        code = code.replace(/\{\{rust-target}}/g, rustTarget)
+        fs.writeFileSync(indexPath, code)
+      }
     } catch (e: any) {
       onProgress(4, 5, `Warning: serverBinary setup failed (${e.message})`, 'install server binary manually')
     }

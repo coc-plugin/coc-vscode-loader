@@ -98,8 +98,10 @@ export async function convert(opts: ConvertOptions): Promise<void> {
   }
 
   for (const step of steps) {
-    if (verbose) console.log(`  step: ${step.type}`)
-    const stepResult: StepResult = executeStep(ctx, step)
+    const stepVerbose = verbose || (step as any).verbose
+    if (stepVerbose) console.log(`  step: ${step.type}`)
+    const stepCtx = { ...ctx, verbose: stepVerbose }
+    const stepResult: StepResult = executeStep(stepCtx, step)
 
     // Merge
     merged.generatedFiles.push(...stepResult.generatedFiles)
@@ -108,22 +110,6 @@ export async function convert(opts: ConvertOptions): Promise<void> {
     merged.activationEvents.push(...stepResult.activationEvents)
     if (stepResult.serverBinary) {
       merged.serverBinary = stepResult.serverBinary
-    }
-  }
-
-  // 7. Inject source entry import into language-client entry
-  {
-    const lcStep = steps.some(s => s.type === 'language-client')
-    const srcStep = steps.find(s => s.type === 'source') as any
-    if (lcStep && srcStep?.entry) {
-      const entryFile = merged.generatedFiles.find(f => f.path === 'src/index.ts')
-      if (entryFile) {
-        const relPath = srcStep.entry.replace(/^src\//, '').replace(/\.ts$/, '')
-        if (!entryFile.content.includes(`'./${relPath}'`)) {
-          entryFile.content = `import './${relPath}'\n` + entryFile.content
-          if (verbose) console.log(`  injected import for ${srcStep.entry} into src/index.ts`)
-        }
-      }
     }
   }
 

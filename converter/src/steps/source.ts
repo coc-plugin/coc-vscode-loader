@@ -5,12 +5,14 @@ import { transformImportMapping } from '../transforms/import-mapping.js'
 import { transformClassToFactory } from '../transforms/class-to-factory.js'
 import { transformProviderRegister } from '../transforms/provider-register.js'
 import { transformEnumOffset } from '../transforms/enum-offset.js'
+import { transformStripVolar } from '../transforms/strip-volar.js'
 
 const TRANSFORM_MAP: Record<string, (ctx: any) => void> = {
   'import-mapping': transformImportMapping,
   'class-to-factory': transformClassToFactory,
   'provider-register': transformProviderRegister,
   'enum-offset': transformEnumOffset,
+  'strip-volar': transformStripVolar,
 }
 
 function walkFiles(dir: string): string[] {
@@ -42,12 +44,20 @@ export const sourceGenerator: StepGenerator = {
     if (!fs.existsSync(srcDir)) {
       srcDir = input
     }
+    const hasStripVolar = ss.transforms.includes('strip-volar')
     const allFiles: Array<{ src: string; rel: string }> = []
     const vscodeFiles: string[] = []
 
     for (const f of walkFiles(srcDir)) {
       const rel = path.relative(srcDir, f)
       if (!rel.endsWith('.ts') && !rel.endsWith('.tsx')) continue
+
+      // Skip framework files that are replaced by generated code
+      if (hasStripVolar) {
+        const content = fs.readFileSync(f, 'utf-8')
+        if (content.includes('@volar/vscode') || content.includes('reactive-vscode')) continue
+      }
+
       allFiles.push({ src: f, rel })
 
       const content = fs.readFileSync(f, 'utf-8')

@@ -9,7 +9,7 @@ export const languageClientGenerator: StepGenerator = {
 
   generate(ctx: StepContext, step: StepResult): StepResult {
     const ls = step as LanguageClientStep
-    const id = ls.id || 'main-ls'
+    const id = ls.id || (ctx.origPkg.name || 'language-client')
     const transport = ls.transport || (ls.server.kind === 'binary' ? 'stdio' : 'ipc')
     const transportExpr = transport === 'stdio' ? 'TransportKind.stdio' : 'TransportKind.ipc'
     const languages = ls.languages
@@ -41,29 +41,35 @@ export const languageClientGenerator: StepGenerator = {
       const pkg = ls.server.package
       const entry = ls.server.entry || 'main'
 
+      // Same resolution as old converter: resolve main entry first, then walk for bin
       serverPathCode = `\
     let serverPath: string | undefined
     try {
       serverPath = require.resolve('${escapeStr(pkg)}')
     } catch {}
-    if (serverPath && ${entry === 'bin' ? 'true' : 'false'}) {
-      try {
-        const pkgJson = require(require.resolve('${escapeStr(pkg)}/package.json'))
-        if (pkgJson.bin) {
-          const binEntry = typeof pkgJson.bin === 'string' ? pkgJson.bin : Object.values(pkgJson.bin)[0]
-          serverPath = require('path').join(require('path').dirname(require.resolve('${escapeStr(pkg)}/package.json')), binEntry)
+    try {
+      // Walk up from the resolved main entry to find the package's package.json
+      // We can't use require.resolve('pkg/package.json') because exports field may block it
+      let _dir = require('path').dirname(require.resolve('${escapeStr(pkg)}'));
+      while (_dir !== require('path').dirname(_dir)) {
+        const _pkgPath = require('path').join(_dir, 'package.json');
+        if (require('fs').existsSync(_pkgPath)) {
+          const _pkg = JSON.parse(require('fs').readFileSync(_pkgPath, 'utf-8'));
+          if (_pkg.bin) {
+            const _entry = typeof _pkg.bin === 'string' ? _pkg.bin : Object.values(_pkg.bin)[0];
+            serverPath = require('path').join(_dir, _entry);
+          }
+          break;
         }
-      } catch {}
-    }`
-
-      if (entry === 'bin') {
-        serverOptionsCode = `{ module: serverPath || require.resolve('${escapeStr(pkg)}'), transport: ${transportExpr} }`
-      } else {
-        serverOptionsCode = `{ module: serverPath || require.resolve('${escapeStr(pkg)}'), transport: ${transportExpr} }`
+        _dir = require('path').dirname(_dir);
       }
+    } catch {}`
+      // Use full require.resolve path (including bin walking) if available, else fallback to simple main entry
+      serverOptionsCode = `{ module: serverPath || require.resolve('${escapeStr(pkg)}'), transport: ${transportExpr} }`
     }
 
     const docSelectorCode = `[${languages.map(l => `{ scheme: 'file', language: '${l}' }`).join(', ')}]`
+    const verboseLog = (msg: string) => `console.log('[${escapeStr(id)}] ${msg}')`
 
     const code = `\
 import {
@@ -79,12 +85,14 @@ import * as path from 'path'
 
 export async function activate(context: ExtensionContext): Promise<void> {
   try {
-${serverPathCode}
+${ls.verbose ? `    ${verboseLog('activate() called')}\n` : ''}${serverPathCode}
     if (!serverPath) {
+${ls.verbose ? `    ${verboseLog('serverPath undefined' )}\n` : ''}\
       window.showErrorMessage('Cannot find language server.')
       return
     }
-
+${ls.verbose ? `    ${verboseLog('serverPath = ' + serverPath)}\n` : ''}\
+${ls.verbose ? `    ${verboseLog('creating LanguageClient')}\n` : ''}\
     const client = new LanguageClient(
       '${escapeStr(id)}',
       '${escapeStr(description)}',
@@ -95,8 +103,10 @@ ${serverPathCode}
       },
     )
     context.subscriptions.push({ dispose: () => client.stop() })
+${ls.verbose ? `    ${verboseLog('registering LanguageClient')}\n` : ''}\
     context.subscriptions.push(services.registerLanguageClient(client))
-    client.start().catch(() => {/* init may complete async */})
+${ls.verbose ? `    ${verboseLog('starting client')}\n` : ''}\
+    client.start()
 
     context.subscriptions.push(
       commands.registerCommand('${escapeStr(pluginName)}.restart', async () => {
