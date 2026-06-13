@@ -14,13 +14,27 @@ program
   .description('convert a VS Code extension to coc.nvim')
   .argument('<input>', 'input directory (VS Code extension)')
   .option('-o, --output <dir>', 'output directory', './output')
-  .option('--bridge', 'generate ts-bridge code')
+  .option('--convert <json>', 'convert step configuration (JSON array)')
   .option('-v, --verbose', 'verbose output')
   .action(async (input, opts) => {
+    let steps: any[]
+    if (opts.convert) {
+      try {
+        steps = JSON.parse(opts.convert)
+        if (!Array.isArray(steps)) throw new Error('must be an array')
+      } catch (e: any) {
+        console.error(`invalid --convert JSON: ${e.message}`)
+        process.exit(1)
+      }
+    } else {
+      console.error('--convert <JSON> is required')
+      process.exit(1)
+    }
+
     await convert({
       input,
       output: opts.output,
-      bridge: opts.bridge,
+      convert: steps,
       verbose: opts.verbose,
     })
   })

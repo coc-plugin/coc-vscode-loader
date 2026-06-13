@@ -27,6 +27,8 @@ export interface PackageInfo {
     args?: string[]     // CLI args to start the LSP, e.g. ["lsp"] for deno
   }
   pipPackages?: string[]  // Python packages to install via pip, e.g. ["ansible-lint"]
+  /** v2.0 config-driven conversion steps */
+  convert?: any[]          // Array of ConvertStep, passed as --convert JSON to CLI
 }
 
 function pluginVersion(): string {

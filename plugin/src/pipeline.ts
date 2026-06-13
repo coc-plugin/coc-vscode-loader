@@ -91,7 +91,7 @@ async function downloadSource(
 }
 
 async function convertSource(
-  inputDir: string, name: string,
+  inputDir: string, name: string, info: PackageInfo,
   onProgress: (step: number, total: number, msg: string, cmd: string) => void,
 ): Promise<void> {
   const build = buildDir(name)
@@ -107,9 +107,15 @@ async function convertSource(
     await run('npm', ['install', '--legacy-peer-deps', '--production'], converterDir, log)
   }
 
+  // Build convert config from registry entry
+  if (!info.convert || !Array.isArray(info.convert) || info.convert.length === 0) {
+    throw new Error(`Registry entry "${name}" has no "convert" config. Please update the registry.`)
+  }
+  const convertJson = JSON.stringify(info.convert)
+
   onProgress(2, 5, 'Converting...', `converter convert ${inputDir} -o ${build}`)
   const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
-  await run('npx', ['tsx', cli, 'convert', inputDir, '-o', build], cacheDir(name), log)
+  await run('npx', ['tsx', cli, 'convert', inputDir, '-o', build, '--convert', convertJson], cacheDir(name), log)
 }
 
 async function buildPackage(
@@ -233,84 +239,9 @@ async function buildPackage(
         if (fs.existsSync(archivePath)) fs.rmSync(archivePath)
       }
 
-      // Wire server binary path into generated lib/index.js
-      const indexPath = path.join(build, 'lib', 'index.js')
-      if (fs.existsSync(indexPath)) {
-        const binPath = (sb.binaryPath || sb.asset.split(/-?\{\{/)[0])
-          .replace(/\{\{version}}/g, version)
-          .replace(/\{\{platform}}/g, platform)
-          .replace(/\{\{arch}}/g, arch)
-          .replace(/\{\{raw-arch}}/g, rawArch)
-          .replace(/\{\{rust-target}}/g, rustTarget)
-        let code = fs.readFileSync(indexPath, 'utf-8')
-
-        // Replace module-based LanguageClient with command-based for binary servers
-        const svrArgs = sb.args?.length ? JSON.stringify(sb.args) : '[]'
-        code = code.replace(
-          /\{ module:\s*serverModule,\s*transport:\s*\w+\.TransportKind\.\w+\s*\}/,
-          `{ command: serverModule, args: ${svrArgs} }`,
-        )
-
-        // Replace require.resolve calls with direct binary path
-        const serverPath = `require('path').join(__dirname, '..', 'server', '${binPath}')`
-        code = code.replace(
-          /try\s*\{[^}]*?require\.resolve\([^)]+\)\s*;?\s*\}\s*catch\s*\{\s*\}/g,
-          `try { serverModule = ${serverPath} } catch {}`,
-        )
-
-        // Replace config-based server path resolution with direct binary path
-        // Converter generates: let serverModule = config.get("server.path", "");
-        // We need: let serverModule = require('path').join(...server/deno);
-        code = code.replace(
-          /let\s+serverModule\s*=\s*config\.get\([^)]+\)\s*;?\s*/g,
-          `let serverModule = ${serverPath};`,
-        )
-
-        fs.writeFileSync(indexPath, code)
-      }
     } catch (e: any) {
       onProgress(4, 5, `Warning: serverBinary setup failed (${e.message})`, 'install server binary manually')
     }
-  }
-
-  // Fix documentSelector for ALL extensions (not just serverBinary):
-  // generated code uses config namespace (e.g. "evenBetterToml") but coc needs
-  // the actual language ID (e.g. "toml"). The languages come from registry entry.
-  const docSelPath = path.join(build, 'lib', 'index.js')
-  if (fs.existsSync(docSelPath)) {
-    let code = fs.readFileSync(docSelPath, 'utf-8')
-
-    // Fix documentSelector: generated code uses config namespace (e.g. "evenBetterToml")
-    const langSelector = info.languages.map(l => `{ scheme: "file", language: "${l}" }`).join(', ')
-    code = code.replace(
-      /documentSelector:\s*\[\s*\{[^}]*?language:\s*['"][^'"]*['"][^}]*\}\s*\]/,
-      `documentSelector: [${langSelector}]`,
-    )
-
-    // Wrap client.start() in a guard to prevent disposed connection errors
-    // when the server and client initialize asynchronously
-    code = code.replace(
-      /client\.start\(\);/g,
-      "client.start().catch(() => {/* init may complete async */});",
-    )
-
-    fs.writeFileSync(docSelPath, code)
-  }
-
-  // Fix activationEvents in package.json: use actual language IDs instead of whatever
-  // converter picked up (e.g. "cargoLock" → "toml")
-  const pkgPath = path.join(build, 'package.json')
-  if (fs.existsSync(pkgPath)) {
-    try {
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
-      const events = pkg.activationEvents || []
-      const langEvents = info.languages.map(l => `onLanguage:${l}`)
-      const newEvents = events.filter((e: string) => !e.startsWith('onLanguage:')).concat(langEvents)
-      if (newEvents.length > 0 && JSON.stringify(newEvents) !== JSON.stringify(events)) {
-        pkg.activationEvents = newEvents
-        fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
-      }
-    } catch {}
   }
 }
 
@@ -371,7 +302,7 @@ export async function installPackage(state: StateManager, name: string): Promise
 
   try {
     const input = await downloadSource(info, name, prog)
-    await convertSource(input, name, prog)
+    await convertSource(input, name, info, prog)
     await buildPackage(name, input, info, prog)
     await installToCoc(name, prog)
     await saveMeta(name)
@@ -450,13 +381,13 @@ export async function updatePackage(state: StateManager, name: string): Promise<
 
   try {
     const input = await downloadSource(info, name, prog)
-    await convertSource(input, name, prog)
+    await convertSource(input, name, info, prog)
     await buildPackage(name, input, info, prog)
     await installToCoc(name, prog)
     await saveMeta(name)
     state.setDirty()
     state.setPackageStatus(name, 'installed')
-    cocWindow.showInformationMessage(`coc-${name} installed`)
+    cocWindow.showInformationMessage(`coc-${name} updated`)
     // Update commit in state
     try {
       const meta = JSON.parse(fs.readFileSync(metaPath(name), 'utf-8'))
