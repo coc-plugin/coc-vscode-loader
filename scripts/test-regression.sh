@@ -275,7 +275,7 @@ if [ -f "$REGISTRY" ]; then
 import json
 with open('$REGISTRY') as f:
     entries = json.load(f)
-assert len(entries) == 8, f'Expected 8 entries, got {len(entries)}'
+assert len(entries) == 9, f'Expected 9 entries, got {len(entries)}'
 for e in entries:
     assert 'convert' in e, f'{e[\"name\"]} missing convert config'
     assert len(e['convert']) > 0, f'{e[\"name\"]} empty convert'
@@ -349,6 +349,52 @@ assert 'onLanguage:css' in d['activationEvents'], f'activationEvents: {d[\"activ
 grep -q "package.json" "$WORKDIR/t9-out/src/index.ts" && green "package.json fallback present" || red "package.json fallback missing"
 grep -q "my-server" "$WORKDIR/t9-out/src/index.ts" && green "binName: my-server used" || red "binName: wrong binary selected"
 grep -q "LanguageClient" "$WORKDIR/t9-out/src/index.ts" && green "LanguageClient in code" || red "LanguageClient missing"
+
+# ============================================================
+echo "=== 10. keepDeps object syntax + module server with entry:bin (YAML style) ==="
+cleanup
+mkdir -p "$WORKDIR/t10/src"
+cat > "$WORKDIR/t10/package.json" <<JSON
+{"name":"t10","version":"0.1.0","dependencies":{"yaml-language-server":"*"}}
+JSON
+cat > "$WORKDIR/t10/src/extension.ts" <<TS
+import { commands } from 'vscode'
+export function activate(ctx: any) { ctx.subscriptions.push(commands.registerCommand('t10.hello', () => {})) }
+TS
+cat > "$WORKDIR/t10/convert.json" <<JSON
+[{"type":"language-client","server":{"kind":"module","package":"yaml-language-server","entry":"bin"},"languages":["yaml"]},{"type":"source","transforms":["import-mapping"],"keepDeps":{"ajv":"^8.17.1"}}]
+JSON
+
+cd "$CONVERTER"
+npx tsx src/cli.ts convert "$WORKDIR/t10" -o "$WORKDIR/t10-out" --convert-file "$WORKDIR/t10/convert.json" > /dev/null 2>&1
+
+test -f "$WORKDIR/t10-out/src/index.ts" && green "index.ts generated" || red "index.ts missing"
+python3 -c "
+import json
+d = json.load(open('$WORKDIR/t10-out/package.json'))
+assert 'yaml-language-server' in d['dependencies'], f'server dep missing: {d[\"dependencies\"]}'
+assert 'ajv' in d['dependencies'], f'keepDeps ajv missing: {d[\"dependencies\"]}'
+assert d['dependencies']['ajv'] == '^8.17.1', f'ajv version wrong: {d[\"dependencies\"][\"ajv\"]}'
+assert 'onLanguage:yaml' in d['activationEvents'], f'activationEvents: {d[\"activationEvents\"]}'
+" && green "package.json correct (server dep + keepDeps ajv)" || red "package.json wrong"
+
+grep -q "yaml-language-server" "$WORKDIR/t10-out/src/index.ts" && green "server ref in code" || red "server ref missing"
+grep -q "entry:bin resolution" "$WORKDIR/t10-out/src/index.ts" 2>/dev/null && echo "  ⚠ unexpected comment" || grep -q "require.resolve.*yaml-language-server" "$WORKDIR/t10-out/src/index.ts" && green "require.resolve present" || red "require.resolve missing"
+grep -q "LanguageClient" "$WORKDIR/t10-out/src/index.ts" && green "LanguageClient in code" || red "LanguageClient missing"
+# Verify bin walking path (not main entry)
+grep -q "bin" "$WORKDIR/t10-out/src/index.ts" && green "bin walking code present" || red "bin walking missing"
+
+cd "$WORKDIR/t10-out"
+npm install --legacy-peer-deps > /dev/null 2>&1 && green "npm install" || red "npm install"
+
+# Verify ajv is installed at top level with correct version
+node -e "
+const p = require('ajv/package.json')
+if (p.version.startsWith('8.')) { process.exit(0) }
+else { console.error('ajv version:', p.version); process.exit(1) }
+" && green "ajv v8 installed at top level" || red "ajv version wrong"
+
+node esbuild.mjs > /dev/null 2>&1 && green "esbuild build" || red "esbuild build"
 
 # ============================================================
 echo ""
