@@ -248,7 +248,7 @@ export class TUI {
     if (id === 'x') { this.state.toggleMark(pkgName); return }
     if (id === 'i' && entry.status === 'not-installed') { await installPackage(this.state, pkgName); return }
     if (id === 'u' && entry.status === 'installed') { await updatePackage(this.state, pkgName); return }
-    if (id === 'X' && entry.status === 'installed') { uninstallPackage(this.state, pkgName); return }
+    if (id === 'X' && entry.status === 'installed') { await uninstallPackage(this.state, pkgName); return }
     if (id === 'R' && entry.status === 'installed') {
       await uninstallPackage(this.state, pkgName)
       await installPackage(this.state, pkgName)
