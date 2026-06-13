@@ -134,8 +134,8 @@ async function buildPackage(
     }
     if (!pythonBin) throw new Error('python3 not found, cannot install pip packages: ' + info.pipPackages.join(', '))
     const pipArgs = ['-m', 'pip', 'install']
-    // --break-system-packages only needed on Linux (PEP 668); not supported on older pip
-    if (process.platform === 'linux') pipArgs.push('--break-system-packages')
+    // --break-system-packages needed on Linux and macOS (PEP 668); not supported on older pip
+    if (process.platform === 'linux' || process.platform === 'darwin') pipArgs.push('--break-system-packages')
     onProgress(3, 5, 'Installing pip packages...', `${pythonBin} -m pip install ${info.pipPackages.join(' ')}`)
     await run(pythonBin, pipArgs.concat(...info.pipPackages), build, pipLog)
   }
@@ -266,10 +266,6 @@ async function buildPackage(
       /documentSelector:\s*\[\s*\{[^}]*?language:\s*['"][^'"]*['"][^}]*\}\s*\]/,
       `documentSelector: [${langSelector}]`,
     )
-
-    // Remove bin-walking serverModule override: the main entry from
-    // require.resolve is usually the correct server module, not the bin script.
-    code = code.replace(/serverModule\s*=\s*require\("path"\)\.join\(_dir,\s*_entry\);\s*/g, '')
 
     // Wrap client.start() in a guard to prevent disposed connection errors
     // when the server and client initialize asynchronously

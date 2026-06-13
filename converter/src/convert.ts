@@ -492,7 +492,7 @@ function detectServerModules(input: string, _result: any): string[] {
       for (const re of [/(?:require\s*(?:\.\s*resolve)?\s*\(|from\s+)['"]([^'"]+(?:language-server|server|Server|lsp)[^'"]*)['"]\s*\)?/g]) {
         for (const m of content.matchAll(re)) {
           const name = sanitizeServerPath(m[1])
-          if (name && !seen.has(name)) { seen.add(name); serverModules.push(name) }
+          if (name && !seen.has(name) && !name.includes('${')) { seen.add(name); serverModules.push(name) }
         }
       }
     }
