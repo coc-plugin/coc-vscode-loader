@@ -75,44 +75,25 @@ export const snippetsGenerator: StepGenerator = {
     if (copiedCount === 0 && ss.build) {
       // Run build script to generate snippet files (e.g. node merge.js)
       if (verbose) console.log(`  snippets: running build: ${ss.build}`)
-      // Install devDeps so build tools (glob, etc.) are available
-      try {
-        execFileSync('npm', ['install', '--legacy-peer-deps'], { cwd: input, stdio: verbose ? 'inherit' : 'pipe' })
-      } catch {}
-      try {
-        const [cmd, ...args] = ss.build.split(' ')
-        execFileSync(cmd, args, { cwd: input, stdio: verbose ? 'inherit' : 'pipe' })
-        // Retry copying
-        for (const [sourceRelPath, languages] of fileToLanguages) {
-          const sourceFile = path.join(input, sourceRelPath)
-          if (fs.existsSync(sourceFile)) {
-            const dest = path.join(output, sourceRelPath)
-            fs.mkdirSync(path.dirname(dest), { recursive: true })
-            fs.copyFileSync(sourceFile, dest)
-            copiedCount++
-            allLanguages.push(...languages)
-            if (verbose) console.log(`  snippets: copied ${sourceRelPath} (${languages.join(', ')})`)
-          }
+      execFileSync('npm', ['install', '--legacy-peer-deps'], { cwd: input, stdio: verbose ? 'inherit' : 'pipe' })
+      const [cmd, ...args] = ss.build.split(' ')
+      execFileSync(cmd, args, { cwd: input, stdio: verbose ? 'inherit' : 'pipe' })
+      // Retry copying
+      for (const [sourceRelPath, languages] of fileToLanguages) {
+        const sourceFile = path.join(input, sourceRelPath)
+        if (fs.existsSync(sourceFile)) {
+          const dest = path.join(output, sourceRelPath)
+          fs.mkdirSync(path.dirname(dest), { recursive: true })
+          fs.copyFileSync(sourceFile, dest)
+          copiedCount++
+          allLanguages.push(...languages)
+          if (verbose) console.log(`  snippets: copied ${sourceRelPath} (${languages.join(', ')})`)
         }
-      } catch (e: any) {
-        if (verbose) console.warn(`  snippets: build failed: ${e.message}`)
       }
     }
 
     if (copiedCount === 0) {
-      // No source files found — generate empty snippet files from registry/contributes info
-      const fallbackLangs: string[] = ss.languages
-        ? [...ss.languages]
-        : (origPkg.contributes?.snippets || []).map((s: any) => s.language).filter(Boolean)
-      const unique = [...new Set(fallbackLangs)]
-      for (const lang of unique) {
-        const dest = path.join(output, 'snippets', `${lang}.json`)
-        fs.mkdirSync(path.dirname(dest), { recursive: true })
-        fs.writeFileSync(dest, JSON.stringify({}), 'utf-8')
-      }
-      copiedCount = unique.length
-      allLanguages.push(...unique)
-      if (verbose) console.warn(`  snippets: no source files found, generated ${unique.length} empty snippet files`)
+      throw new Error('snippets step: no snippet files were copied')
     }
 
     // Generate empty src/index.ts
