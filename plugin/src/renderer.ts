@@ -37,6 +37,14 @@ export class LineBuffer {
     return this.li
   }
 
+  currentByteLen(): number {
+    let len = 0
+    for (const seg of this.lines[this.li]) {
+      len += byteLen(seg.text)
+    }
+    return len
+  }
+
   highlight(pattern: RegExp, hlGroup: string) {
     const segs = this.lines[this.li]
     let full = ''
