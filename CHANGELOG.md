@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.8] - 2026-06-15
+
+### Fixed
+- **Snippets converter fallback** — when snippet source files don't exist in the cloned repo, generate empty `{}` JSON files at the expected paths instead of throwing a hard error. Three-tier fallback: try copy → try build → generate empty.
+
 ## [1.2.7] - 2026-06-15
 
 ### Added
