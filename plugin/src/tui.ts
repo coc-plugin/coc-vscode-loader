@@ -389,8 +389,18 @@ export class TUI {
       // Truncate lines that exceed window width
       if (this.windowWidth > 0) {
         for (let i = 0; i < result.lines.length; i++) {
-          if (result.lines[i].length > this.windowWidth) {
-            result.lines[i] = result.lines[i].slice(0, this.windowWidth)
+          const line = result.lines[i]
+          if (line.length > this.windowWidth) {
+            // Try to preserve commit hash + date by truncating commitMsg in the middle
+            const m = line.match(/^(.{0,120}?\b[0-9a-f]{7}\b\s)(.+?)(\s\([^)]+\)\s*)$/)
+            if (m) {
+              const available = this.windowWidth - m[1].length - m[3].length - 2
+              if (available > 0 && m[2].length > available) {
+                result.lines[i] = m[1] + m[2].slice(0, Math.max(available, 0)) + '..' + m[3]
+                continue
+              }
+            }
+            result.lines[i] = line.slice(0, this.windowWidth)
           }
         }
         result.highlights = result.highlights.filter(h => h.colStart < this.windowWidth)
