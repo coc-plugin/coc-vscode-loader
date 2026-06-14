@@ -660,7 +660,7 @@ export class TUI {
       }
     }
     if (this.detailMode === 'log') {
-      await nvim.call('nvim_win_set_cursor', [this.detailWinid, [Math.min(lines.length, 20), 0]])
+      await nvim.call('nvim_win_set_cursor', [this.detailWinid, [lines.length, 0]])
     }
   }
 
