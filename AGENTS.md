@@ -71,7 +71,7 @@ converter 主流程在步骤执行后还会对所有输出源文件做一轮通�
 **Bridge preset system** (`converter/src/presets.ts` + `converter/src/steps/bridge.ts` + `coc-vscode-registry/presets.json`):
 - Bridge logic is not used for source-based plugins
 - Currently only `ts-bridge` preset exists for TypeScript bridge plugins (Volar)
-- Adding a new bridge type: add preset definition in `converter/src/presets.ts`, code template in `converter/src/steps/bridge.ts` `BRIDGE_TEMPLATES`, and entry in `coc-vscode-registry/presets.json`
+- Adding a new bridge type: add preset definition in `converter/src/presets.ts`, code template in `converter/src/steps/bridge.ts` `BRIDGE_TEMPLATES`, and entry in [`coc-vscode-registry/presets.json`](https://github.com/coc-plugin/coc-vscode-registry/blob/main/presets.json)
 
 ## coc-tsserver PR
 

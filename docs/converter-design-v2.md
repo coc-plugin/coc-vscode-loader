@@ -105,7 +105,7 @@ interface BridgePreset {
 
 ### 当前内置 preset
 
-`coc-vscode-registry/presets.json` 中定义了 `type` 字段，映射到 `converter/src/steps/bridge.ts` 的 `BRIDGE_TEMPLATES`：
+[`coc-vscode-registry/presets.json`](https://github.com/coc-plugin/coc-vscode-registry/blob/main/presets.json) 中定义了 `type` 字段，映射到 `converter/src/steps/bridge.ts` 的 `BRIDGE_TEMPLATES`：
 
 | 预设 | type | 用途 |
 |------|------|------|
