@@ -77,7 +77,7 @@ const PRESETS = {
 `convert.ts` only calls `getActivePresets()` + `generateBridgeCode()`, it never touches bridge logic directly.
 Adding a new bridge type = add a new preset in `presets.ts`, no changes to main flow.
 
-See [coc-vscode-registry/docs/converter-design-v2.md](https://github.com/coc-plugin/coc-vscode-registry/blob/main/docs/converter-design-v2.md).
+See [../docs/converter-design-v2.md](../docs/converter-design-v2.md).
 
 ## File structure
 

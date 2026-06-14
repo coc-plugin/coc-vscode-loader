@@ -18,7 +18,7 @@ This repo contains two parts:
 1. **Converter CLI** ([`converter/`](./converter/)) — automatically converts VS Code extensions to coc plugins
 2. **Loader plugin** ([`plugin/`](./plugin/)) — coc.nvim plugin with a TUI to install/update/uninstall converted plugins
 
-> 📖 API mapping docs and registry have been moved to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry).
+> 📖 API mapping docs are in [`docs/`](./docs/). Registry data is in [`coc-vscode-registry/`](./coc-vscode-registry/).
 
 ## Converter CLI
 
@@ -53,7 +53,7 @@ Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API
       → Output coc plugin directory + migration report
 ```
 
-> See [coc-vscode-registry/docs](https://github.com/coc-plugin/coc-vscode-registry/tree/main/docs) for full API mapping docs.
+> See [`docs/`](./docs/) for full API mapping docs.
 
 ## Roadmap
 
@@ -65,7 +65,7 @@ Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API
 
 ---
 
-> 📖 API docs & registry — [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)
+> 📖 API docs — [`docs/`](./docs/) · Registry — [`coc-vscode-registry/`](./coc-vscode-registry/)
 >
 > 📦 npm — [coc-vscode-loader](https://www.npmjs.com/package/coc-vscode-loader)
 
@@ -148,5 +148,5 @@ Yes! Fork the [registry repo](https://github.com/coc-plugin/coc-vscode-registry)
 
 - 💬 [Discussions](https://github.com/coc-plugin/coc-vscode-loader/discussions)
 - 🐛 [Issues](https://github.com/coc-plugin/coc-vscode-loader/issues)
-- 📖 [Documentation](https://github.com/coc-plugin/coc-vscode-registry)
+- 📖 [API mapping docs](./docs/import-mapping.md) · [Converter design](./docs/converter-design-v2.md)
 - ⭐ Star the repo if you find it useful!
