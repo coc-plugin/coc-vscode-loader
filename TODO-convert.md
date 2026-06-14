@@ -3,10 +3,20 @@
 > 基于 210 款 VS Code 扩展可行性分析
 > 更新：2026-06-15
 > 源码分析基底：`converter/src/`（14 个 .ts 文件）、`coc-vscode-registry/registry.json`（98 个条目）
->
-> **关键发现：** 大量插件因源码中直接 `import from 'vscode-languageclient'` 而无法被当前 converter 处理。
-> 这是 converter 的一个已知 TODO（AGENTS.md 中的 `vscode-languageclient import rewrite`），并非 bug。
-> 需要先在 `import-mapping.ts` 中加入 `vscode-languageclient` → `coc.nvim` 的模块重写才能支持这些插件。
+
+## 🔴 首要阻塞任务：`vscode-languageclient` import 重写
+
+大量插件（SCSS IntelliSense、Less IntelliSense、UnoCSS、HTMLHint、Black Formatter、Dart 等）
+因源码中直接 `import from 'vscode-languageclient'` 而无法被当前 converter 处理。
+
+**当前状态：** `AGENTS.md` 中已标记 TODO，`import-mapping.ts` 未实现
+**工作量：** 小（AST import 重写 + 文本级替换 + `RevealOutputChannelOn`/`window.withProgress` polyfill）
+**完成后可加：** SCSS IntelliSense、Less IntelliSense、UnoCSS、HTMLHint、Black Formatter、Dart 等 6+ 款
+
+- [ ] **`import-mapping.ts`**: AST 层加 `vscode-languageclient` → `coc.nvim` 模块重写
+- [ ] **`import-mapping.ts`**: 文本级 `require('vscode-languageclient')` → `require('coc.nvim')`
+- [ ] **`import-mapping.ts`**: `RevealOutputChannelOn` polyfill（strip import + 替换用法为 `0`）
+- [ ] **`import-mapping.ts`**: `window.withProgress` polyfill（注入 polyfill 代码）
 
 ---
 
