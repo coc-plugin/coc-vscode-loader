@@ -18,7 +18,7 @@ This repo contains two parts:
 1. **Converter CLI** ([`converter/`](./converter/)) — automatically converts VS Code extensions to coc plugins
 2. **Loader plugin** ([`plugin/`](./plugin/)) — coc.nvim plugin with a TUI to install/update/uninstall converted plugins
 
-> 📖 API mapping docs are in [`docs/`](./docs/). Registry data is in [`coc-vscode-registry/`](./coc-vscode-registry/).
+> 📖 API mapping docs are in [`docs/`](./docs/). Registry data is at [coc-plugin/coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry).
 
 ## Converter CLI
 
@@ -65,7 +65,7 @@ Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API
 
 ---
 
-> 📖 API docs — [`docs/`](./docs/) · Registry — [`coc-vscode-registry/`](./coc-vscode-registry/)
+> 📖 API docs — [`docs/`](./docs/) · Registry — [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)
 >
 > 📦 npm — [coc-vscode-loader](https://www.npmjs.com/package/coc-vscode-loader)
 

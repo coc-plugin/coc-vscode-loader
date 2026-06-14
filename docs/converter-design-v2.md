@@ -137,7 +137,7 @@ scanner 从源码检测 `tsserver/request`、`_vue:`、`typescript.tsserverReque
 
 ## 四、注册表（coc-vscode-registry）
 
-注册表已独立为 [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) 仓库，位于 [`coc-vscode-registry/registry.json`](../coc-vscode-registry/registry.json)。条目格式：
+注册表已独立为 [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) 仓库，[`registry.json`](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json)。条目格式：
 
 ```typescript
 {

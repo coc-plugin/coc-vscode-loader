@@ -259,7 +259,7 @@ Bridge 步骤与其他步骤配合：`bridge` 生成核心桥接层，`source` �
 Bridge 代码由 converter 内置的安全模板生成，不在 registry 中存放可执行代码。添加新预设需要两步：
 
 1. 在 `converter/src/steps/bridge.ts` 的 `BRIDGE_TEMPLATES` 中添加新类型（经审计的代码模板）
-2. 在 `coc-vscode-registry/presets.json` 中添加预设定义，引用该类型
+2. 在 [coc-vscode-registry/presets.json](https://github.com/coc-plugin/coc-vscode-registry/blob/main/presets.json) 中添加预设定义，引用该类型
 
 ```typescript
 // converter/src/steps/bridge.ts
@@ -275,7 +275,7 @@ const BRIDGE_TEMPLATES = {
 ```
 
 ```json
-// coc-vscode-registry/presets.json
+// https://github.com/coc-plugin/coc-vscode-registry/blob/main/presets.json
 {
   "custom-bridge": {
     "type": "custom-bridge",

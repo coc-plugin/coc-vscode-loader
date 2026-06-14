@@ -22,7 +22,7 @@ External commands required at runtime:
 | `plugin/` | **coc-vscode-loader plugin** |
 | `plugin/README.md` | Plugin docs and usage |
 | `AGENTS.md` | Dev instructions for AI agents |
-| `coc-vscode-registry/` | Local data directory — registry.json, presets.json |
+| `coc-vscode-registry/` | Local clone of [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) — registry.json, presets.json (for dev mode) |
 | `docs/` | API mapping docs, converter design, migration guides |
 | `docs/types/` | Type definitions (vscode.d.ts, coc.d.ts) for reference |
 
