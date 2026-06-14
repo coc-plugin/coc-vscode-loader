@@ -6,42 +6,69 @@
 [![last commit](https://img.shields.io/github/last-commit/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader)
 [![open issues](https://img.shields.io/github/issues/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader/issues)
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png" alt="TUI preview" width="49%">
+  <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png" alt="Registry preview" width="49%">
+</p>
+
 在 coc.nvim 中无缝运行 VS Code 扩展。
 
-![TUI preview](https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png)
+[![Browse Registry](https://img.shields.io/badge/🌐_Browse_Available_Extensions-coc--plugin.github.io-blue?style=for-the-badge)](https://coc-plugin.github.io/coc-vscode-registry/)
+
+---
+
+## Quick Start
+
+Install the loader plugin:
+
+```vim
+:CocInstall coc-vscode-loader
+```
+
+Then open the TUI to browse and install available extensions:
+
+```vim
+:CocCommand loader.open
+```
+
+Or browse all available extensions online: [coc-plugin.github.io/coc-vscode-registry](https://coc-plugin.github.io/coc-vscode-registry/)
+
+---
+
+## Convert Your Own Plugin
+
+Use the one-step conversion script:
+
+```bash
+bash scripts/convert-plugin.sh <name> <github-repo> [subdir]
+# Examples:
+bash scripts/convert-plugin.sh eslint microsoft/vscode-eslint
+bash scripts/convert-plugin.sh volar vuejs/language-tools extensions/vscode
+```
+
+For manual conversion:
+
+```bash
+cd converter
+echo '[{"type":"source","transforms":["import-mapping"],"entry":"src/extension.ts"}]' > convert.json
+npx tsx src/cli.ts convert ../path/to/vscode-ext -o ./output --convert-file convert.json
+cd ./output && npm install && node esbuild.mjs
+```
+
+> 📖 See [`docs/`](./docs/) for full API mapping docs and converter design.
+
+---
 
 ## Background
 
 [coc.nvim](https://github.com/neoclide/coc.nvim)'s API is heavily influenced by the VS Code extension API — both use the same LSP protocol, similar provider systems, and comparable namespace structures. This makes it possible to mechanically convert VS Code extensions to run as coc.nvim plugins.
 
 This repo contains two parts:
+
 1. **Converter CLI** ([`converter/`](./converter/)) — automatically converts VS Code extensions to coc plugins
 2. **Loader plugin** ([`plugin/`](./plugin/)) — coc.nvim plugin with a TUI to install/update/uninstall converted plugins
 
-> 📖 API mapping docs are in [`docs/`](./docs/). Browse the registry at [coc-plugin.github.io/coc-vscode-registry](https://coc-plugin.github.io/coc-vscode-registry/) or see [registry.json](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json).
-
-## Converter CLI
-
-```bash
-cd converter
-# Create a convert config file for the plugin
-echo '[{"type":"source","transforms":["import-mapping"],"entry":"src/extension.ts"}]' > convert.json
-npx tsx src/cli.ts convert ../path/to/vscode-ext -o ./output --convert-file convert.json
-cd ./output && npm install && node esbuild.mjs
-```
-
-**Quick conversion script:**
-
-Use [`scripts/convert-plugin.sh`](./scripts/convert-plugin.sh) for one-step convert & install:
-
-```bash
-bash scripts/convert-plugin.sh <name> <github-repo> [subdir]
-# Example:
-bash scripts/convert-plugin.sh eslint microsoft/vscode-eslint
-bash scripts/convert-plugin.sh volar vuejs/language-tools extensions/vscode
-```
-
-**Converter architecture:**
+### Converter architecture
 
 ```
 Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API)
@@ -53,21 +80,7 @@ Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API
       → Output coc plugin directory + migration report
 ```
 
-> See [`docs/`](./docs/) for full API mapping docs.
-
-## Roadmap
-
-| Milestone | Target | Focus |
-|-----------|--------|-------|
-| [v1.2.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-08 | Registry expansion: Angular, ESLint, Code Spell Checker |
-| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-10 | More transforms + bridge presets + python-bridge, rust-bridge |
-| [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | 20+ plugins, full transform coverage |
-
 ---
-
-> 📖 API docs — [`docs/`](./docs/) · Registry — [website](https://coc-plugin.github.io/coc-vscode-registry/) / [GitHub](https://github.com/coc-plugin/coc-vscode-registry)
->
-> 📦 npm — [coc-vscode-loader](https://www.npmjs.com/package/coc-vscode-loader)
 
 ## Development
 
@@ -111,6 +124,7 @@ cd plugin && npm run build  # build plugin only
 - **Windows** ❌ Not supported (no planned support)
 
 ### External commands
+
 These must be installed and available on `PATH`:
 
 | Command | Required by | Notes |
@@ -126,6 +140,8 @@ These must be installed and available on `PATH`:
 
 All commands are pre-installed on typical macOS/Linux development machines or available via the system package manager (`apt`, `brew`, etc.).
 
+---
+
 ## FAQ
 
 ### Plugin installed but not working?
@@ -134,7 +150,7 @@ Close the TUI — it will auto-run `:CocRestart`. Or manually run `:CocRestart`.
 
 ### Which VS Code extensions are supported?
 
-Check the [registry](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json) for the full list, or browse visually at [coc-plugin.github.io/coc-vscode-registry](https://coc-plugin.github.io/coc-vscode-registry/). Currently 15 plugins: Volar (Vue), Prisma, HTML CSS Support, Lua, Deno, TOML (Taplo), Ansible, YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, gitignore, and more being added.
+Browse the [registry website](https://coc-plugin.github.io/coc-vscode-registry/) or check [registry.json](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json). Currently 15 plugins: Volar (Vue), Prisma, HTML CSS Support, Lua, Deno, TOML (Taplo), Ansible, YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, gitignore, and more being added.
 
 ### How is this different from running the VS Code extension directly?
 
@@ -143,6 +159,18 @@ The converter rewrites VS Code API calls to coc.nvim equivalents. You get the sa
 ### Can I add my own extension?
 
 Yes! Fork the [registry repo](https://github.com/coc-plugin/coc-vscode-registry), add an entry to `registry.json`, and submit a PR.
+
+---
+
+## Roadmap
+
+| Milestone | Target | Focus |
+|-----------|--------|-------|
+| [v1.2.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-08 | Registry expansion: Angular, ESLint, Code Spell Checker |
+| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-10 | More transforms + bridge presets + python-bridge, rust-bridge |
+| [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | 20+ plugins, full transform coverage |
+
+---
 
 ## Community & Support
 
