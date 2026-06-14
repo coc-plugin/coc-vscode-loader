@@ -54,6 +54,7 @@ export class TUI {
   private detailWinid: number = 0
   private detailBufnr: number = 0
   private detailPkgName: string = ''
+  private detailMode: 'log' | 'info' = 'info'
   private windowHeight: number = 0
   private static readonly HEADER_LINES = 6
   private static readonly FOOTER_LINES = 3
@@ -561,35 +562,33 @@ export class TUI {
     buf.nl()
   }
 
-  private buildDetailLines(entry: PackageEntry): string[] {
-    const lines: string[] = [
-      `  ${entry.info.displayName}  (${entry.info.name})`,
-      `  ${entry.info.description}`,
-      '',
-      `  type:        ${entry.info.type}`,
-      `  status:      ${entry.status}`,
-    ]
-    if (entry.progress) lines.push(`  progress:    ${entry.progress}`)
-    if (entry.commit) lines.push(`  commit:      ${entry.commit}`)
-    lines.push(
-      `  source:      ${sourceStr(entry.info.source)}`,
-      `  languages:   ${entry.info.languages.join(', ')}`,
-      `  categories:  ${entry.info.categories.join(', ')}`,
-      `  homepage:    ${entry.info.url}`,
-    )
-    if (entry.info.serverBinary) {
-      lines.push(`  server:      ${entry.info.serverBinary.repo} (binary release)`)
-    }
-    if (entry.error) {
-      lines.push('', `  ✗ ${entry.error}`)
-    }
-    if (entry.progressLog.length > 0) {
-      lines.push('', '  Install log:')
+  private buildDetailLines(entry: PackageEntry, mode: 'log' | 'info' = 'info'): string[] {
+    const lines: string[] = []
+    // Log mode (snapshot from popup open): show only log + error
+    if (mode === 'log') {
       for (const log of entry.progressLog) {
         for (const l of log.split('\n')) {
-          lines.push(`    ${l}`)
+          lines.push(`  ${l}`)
         }
       }
+      if (entry.error) lines.push('', `  ✗ ${entry.error}`)
+      return lines
+    }
+    // Not-installed / installed: show package info only
+    lines.push(
+      `  desc     ${entry.info.description}`,
+      `  type     ${entry.info.type}`,
+      `  status   ${entry.status}`,
+    )
+    if (entry.commit) lines.push(`  commit   ${entry.commit}`)
+    lines.push(
+      `  source   ${sourceStr(entry.info.source)}`,
+      `  langs    ${entry.info.languages.join(', ')}`,
+      `  cats     ${entry.info.categories.join(', ')}`,
+      `  link     ${entry.info.url}`,
+    )
+    if (entry.info.serverBinary) {
+      lines.push(`  server   ${entry.info.serverBinary.repo}`)
     }
     return lines
   }
@@ -600,15 +599,25 @@ export class TUI {
     const nvim = workspace.nvim
     const entry = this.state.getPackage(name)
     if (!entry) return
+    // Snapshot mode: show log for active/failed, info for stable states
+    this.detailMode = ['installing', 'updating', 'uninstalling', 'failed'].includes(entry.status) ? 'log' : 'info'
 
-    const col = Math.max(2, Math.floor((await nvim.call('nvim_get_option', ['columns']) as number) - 74) / 2)
+    const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
+    const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
+    const lines = this.buildDetailLines(entry, this.detailMode)
+    const height = this.detailMode === 'log' ? 20 : Math.min(lines.length + 2, 20)
+    const row = Math.max(0, Math.floor((editorLines - height - 2) / 2))
+    const col = Math.max(0, Math.floor((editorCols - 82) / 2))
     const buf = await nvim.createNewBuffer(false, true)
     this.detailBufnr = buf.id
     const win = await nvim.openFloatWindow(buf, true, {
-      relative: 'editor', width: 70, height: 8, row: 2, col,
+      relative: 'editor', width: 78, height, row, col,
       border: 'rounded', style: 'minimal', zindex: 100,
+      title: this.detailMode === 'log' ? `${entry.info.displayName}  ·  Log` : entry.info.displayName,
+      title_pos: 'left',
     })
     this.detailWinid = win.id
+    await nvim.call('nvim_win_set_option', [this.detailWinid, 'wrap', true])
     await nvim.call('nvim_buf_set_option', [this.detailBufnr, 'bufhidden', 'wipe'])
     await nvim.call('nvim_buf_set_option', [this.detailBufnr, 'buftype', 'nofile'])
     const keyBuf = nvim.createBuffer(this.detailBufnr)
@@ -620,15 +629,39 @@ export class TUI {
   private async updateDetailPopup() {
     if (!this.detailWinid || !this.detailPkgName) return
     const entry = this.state.getPackage(this.detailPkgName)
-    if (!entry) { this.closeDetailPopup(); return }
-    const lines = this.buildDetailLines(entry)
-    const height = Math.min(lines.length + 2, 20)
+    if (!entry) return
+    const lines = this.buildDetailLines(entry, this.detailMode)
     const nvim = workspace.nvim
-    if (this.detailWinConfig) {
-      this.detailWinConfig.height = height
-      await nvim.call('nvim_win_set_config', [this.detailWinid, this.detailWinConfig])
+    await nvim.call('nvim_buf_set_lines', [this.detailBufnr, 0, -1, false, lines])
+    await nvim.call('nvim_buf_clear_namespace', [this.detailBufnr, this.ns, 0, -1])
+    // Highlights
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      if (line.startsWith('  [')) {
+        const endBracket = line.indexOf(']')
+        if (endBracket > 0) {
+          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: endBracket + 1, hl_group: 'CocConverterKey' }])
+          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, endBracket + 1, { end_col: line.length, hl_group: 'Comment' }])
+        }
+      } else if (line.startsWith('  $ ')) {
+        nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'Comment' }])
+      } else if (line.includes('✗') || line.includes('Error:')) {
+        nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'ErrorMsg' }])
+      } else if (line.match(/^\s{4}at\s/) || line.match(/^\s{4}Node\.js/)) {
+        nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'Comment' }])
+      } else if (line.match(/^\s{2}\w+\s{3,}/)) {
+        // Info mode: label/value pairs
+        const parts = line.substring(2).split(/\s{2,}/)
+        if (parts.length >= 2 && ['desc', 'type', 'status', 'source', 'langs', 'cats', 'link', 'commit', 'server'].includes(parts[0])) {
+          const labelEnd = 2 + parts[0].length + line.substring(2 + parts[0].length).match(/^\s*/)![0].length
+          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: labelEnd, hl_group: 'CocConverterKey' }])
+          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, labelEnd, { end_col: line.length, hl_group: 'Comment' }])
+        }
+      }
     }
-    await nvim.call('nvim_buf_set_lines', [this.detailBufnr, 0, -1, false, [...lines, '', '  q close']])
+    if (this.detailMode === 'log') {
+      await nvim.call('nvim_win_set_cursor', [this.detailWinid, [Math.min(lines.length, 20), 0]])
+    }
   }
 
   private closeDetailPopup() {
@@ -637,6 +670,7 @@ export class TUI {
     this.detailWinid = 0
     this.detailBufnr = 0
     this.detailPkgName = ''
+    this.detailMode = 'info'
     this.render().catch(() => {})
   }
 
