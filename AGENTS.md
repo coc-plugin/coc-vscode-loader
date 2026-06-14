@@ -247,6 +247,8 @@ Registry 条目示例：
 - [x] `serverBinary` raw binary download: handled for non-archive assets (e.g. Biome)
 - [x] JavaScript extension support (`.js` file copy + text-level replacements, `require('vscode')` → `require('coc.nvim')`)
 - [x] Language-client step `initializationOptions` field (tsdk for Volar-based servers)
+- [x] `snippets` step type — 纯 snippets 扩展自动转换
+- [x] 20 snippet extensions 已录入 registry
 
 ## Type sync workflow
 

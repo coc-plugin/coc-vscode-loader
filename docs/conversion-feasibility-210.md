@@ -384,7 +384,7 @@ P3（Level 2 扩展转换器，~28 款）
 ### 建议
 
 1. **优先修复 converter bug**（entry 硬编码、vscode external、文件拷贝）— 修复后可释放 ~15 款 LSP 插件的转换能力
-2. **Snippets 插件通过 `snippets` step 入 registry** — 33 款纯 snippets 扩展加 `snippets` step type 后自动转换，每个独立 registry 条目，用户按需安装（参见 `TODO-convert.md` Snip 章节）
+2. **Snippets 插件通过 `snippets` step 入 registry** — 20 款纯 snippets 扩展已通过 `snippets` step type 转换入 registry，用户按需安装（参见 `TODO-convert.md` Snip 章节）
 3. **不可转的 decoration/webview 插件** — 建议在文档中指引用户使用 Neovim 原生替代方案（~61 款）
 4. **Registry 扩展计划** — 按 P0→P1→P2 顺序逐步添加，每个新条目需经过 `converter convert → esbuild → npm install` 全链路验证
 

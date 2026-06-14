@@ -271,29 +271,26 @@ Interface SnippetsStep {
 
 ### 插件列表
 
-#### 已入 registry（6 个）
+#### 已入 registry（20 个）
 - [x] **JavaScript ES6 Snippets** — `xabikos/vscode-javascript`
 - [x] **Reactjs code snippets** — `xabikos/vscode-react`
 - [x] **Typescript React code snippets** — `infeng/vscode-react-typescript`
 - [x] **ES7+ React/Redux/React-Native snippets** — `r5n-labs/vscode-react-javascript-snippets`
 - [x] **Vue VSCode Snippets** — `sdras/vue-vscode-snippets`
 - [x] **Vue 3 Snippets** — `hollowtree/vscode-vue-snippets`
-
-#### 等待加（14 个）
-- [ ] **React Native Snippets** — `jundat95/react-native-snippet`
-- [ ] **React Redux Snippets** — `rodrigovallades/vscode-es7-javascript-react-snippets`
-- [ ] **Chai snippets** — `nwhatt/vs-chai-snippets`
-- [ ] **Cypress Snippets** — `ijsto/cypress-snippets`
-- [ ] **Playwright Snippets** — `nitayneeman/vscode-playwright-snippets`
-- [ ] **PostgreSQL Snippets** — `Manuel7806/postgresql-snippets`
-- [ ] **MySQL Snippets** — `zendobk/vscode-mysql`
-- [ ] **Nuxt Snippets** — `praburangki/nuxt-vscode-snippets`
-- [ ] **Next.js Snippets** — `ijsto/reactnextjssnippets`
-- [ ] **Svelte Snippets** — `ryanyang52/vscode-svelte-snippets`
-- [ ] **SolidJS Snippets** — `solidjs-community/solid-snippets`
-- [ ] **Unity Snippets** — `YclepticStudios/vscode-unity-snippets`
-- [ ] **NestJS Snippets** — `ManuelGil/vscode-nestjs-snippets`
-- [ ] **FastAPI Snippets** — `damildrizzy/fastapi-snippets`
+- [x] **React Native Snippets** — `jundat95/react-native-snippet`
+- [x] **Chai snippets** — `nwhatt/vs-chai-snippets`
+- [x] **Cypress Snippets** — `ijsto/cypress-snippets`
+- [x] **Playwright Snippets** — `nitayneeman/vscode-playwright-snippets`
+- [x] **PostgreSQL Snippets** — `Manuel7806/postgresql-snippets`
+- [x] **MySQL Snippets** — `zendobk/vscode-mysql`
+- [x] **Nuxt Snippets** — `praburangki/nuxt-vscode-snippets`
+- [x] **Next.js Snippets** — `ijsto/reactnextjssnippets`
+- [x] **Svelte Snippets** — `ryanyang52/vscode-svelte-snippets`
+- [x] **SolidJS Snippets** — `solidjs-community/solid-snippets`
+- [x] **Unity Snippets** — `YclepticStudios/vscode-unity-snippets`
+- [x] **NestJS Snippets** — `ManuelGil/vscode-nestjs-snippets`
+- [x] **FastAPI Snippets** — `damildrizzy/fastapi-snippets`
 
 #### 无独立 repo（不是纯 snippets 扩展或无独立仓库）
 - ❌ **TypeScript Snippets** — VS Code 内置，tsserver 自带
@@ -314,6 +311,6 @@ Interface SnippetsStep {
 | P1 | 修 bug 后可转 | ~30 | ~46 |
 | P2 | 少量适配 | ~28 | ~74 |
 | P3 | 需扩展 converter | ~28 | ~102 |
-| Snip | 加 snippets step 后入 registry | ~33 | ~135 |
+| Snip | 已通过 snippets step 入 registry | 20 | ~122 |
 
 **不可转（不在 TODO 中）：** ~75 款（decoration/webview/GUI 依赖）

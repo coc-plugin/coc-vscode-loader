@@ -233,5 +233,5 @@ convert <input-vscode-ext> -o <output-dir>
 
 - [ ] 更多 provider 签名适配
 - [ ] python-bridge / rust-bridge preset 示例
-- [ ] `snippets` step type — 纯 snippets 扩展自动转换（参见 `AGENTS.md`）
-- [ ] 30+ snippet extensions 分批录入 registry
+- [x] `snippets` step type — 纯 snippets 扩展自动转换（参见 `AGENTS.md`）
+- [x] 20+ snippet extensions 已录入 registry
