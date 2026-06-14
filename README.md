@@ -18,7 +18,7 @@ This repo contains two parts:
 1. **Converter CLI** ([`converter/`](./converter/)) — automatically converts VS Code extensions to coc plugins
 2. **Loader plugin** ([`plugin/`](./plugin/)) — coc.nvim plugin with a TUI to install/update/uninstall converted plugins
 
-> 📖 API mapping docs are in [`docs/`](./docs/). Registry data is at [coc-plugin/coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry).
+> 📖 API mapping docs are in [`docs/`](./docs/). Browse the registry at [coc-plugin.github.io/coc-vscode-registry](https://coc-plugin.github.io/coc-vscode-registry/) or see [registry.json](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json).
 
 ## Converter CLI
 
@@ -65,7 +65,7 @@ Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API
 
 ---
 
-> 📖 API docs — [`docs/`](./docs/) · Registry — [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)
+> 📖 API docs — [`docs/`](./docs/) · Registry — [website](https://coc-plugin.github.io/coc-vscode-registry/) / [GitHub](https://github.com/coc-plugin/coc-vscode-registry)
 >
 > 📦 npm — [coc-vscode-loader](https://www.npmjs.com/package/coc-vscode-loader)
 
@@ -134,7 +134,7 @@ Close the TUI — it will auto-run `:CocRestart`. Or manually run `:CocRestart`.
 
 ### Which VS Code extensions are supported?
 
-Check the [registry](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json) for the full list. Currently 15 plugins: Volar (Vue), Prisma, HTML CSS Support, Lua, Deno, TOML (Taplo), Ansible, YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, gitignore, and more being added.
+Check the [registry](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json) for the full list, or browse visually at [coc-plugin.github.io/coc-vscode-registry](https://coc-plugin.github.io/coc-vscode-registry/). Currently 15 plugins: Volar (Vue), Prisma, HTML CSS Support, Lua, Deno, TOML (Taplo), Ansible, YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, gitignore, and more being added.
 
 ### How is this different from running the VS Code extension directly?
 
@@ -148,5 +148,5 @@ Yes! Fork the [registry repo](https://github.com/coc-plugin/coc-vscode-registry)
 
 - 💬 [Discussions](https://github.com/coc-plugin/coc-vscode-loader/discussions)
 - 🐛 [Issues](https://github.com/coc-plugin/coc-vscode-loader/issues)
-- 📖 [API mapping docs](./docs/import-mapping.md) · [Converter design](./docs/converter-design-v2.md)
+- 📖 [API mapping docs](./docs/import-mapping.md) · [Converter design](./docs/converter-design-v2.md) · [Registry website](https://coc-plugin.github.io/coc-vscode-registry/)
 - ⭐ Star the repo if you find it useful!
