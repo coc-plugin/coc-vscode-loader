@@ -605,7 +605,7 @@ export class TUI {
     const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
     const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
     const lines = this.buildDetailLines(entry, this.detailMode)
-    const height = this.detailMode === 'log' ? 20 : Math.min(lines.length + 2, 20)
+    const height = Math.min(lines.length, 20)
     const row = Math.max(0, Math.floor((editorLines - height - 2) / 2))
     const col = Math.max(0, Math.floor((editorCols - 82) / 2))
     const buf = await nvim.createNewBuffer(false, true)
