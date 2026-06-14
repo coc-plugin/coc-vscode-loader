@@ -6,9 +6,9 @@
 
 ```
 :CocInstall coc-vscode-loader
-:CocCommand loader.install volar     ← 下载 VS Code 插件 → 转换 → 安装
+:CocCommand loader.install vscode-volar     ← 下载 VS Code 插件 → 转换 → 安装
 :CocCommand loader.open              ← TUI 管理界面
-:CocCommand loader.uninstall volar   ← 卸载
+:CocCommand loader.uninstall vscode-volar   ← 卸载
 ```
 
 ---

@@ -202,7 +202,7 @@ npm install coc-vscode-loader    # or
 Registry 条目示例：
 ```json
 {
-  "name": "javascript-snippets",
+  "name": "vscode-javascript-snippets",
   "displayName": "JavaScript ES6 Snippets",
   "type": "snippets",
   "source": { "type": "github", "repo": "xabikos/vscode-javascript" },
