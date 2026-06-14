@@ -47,19 +47,7 @@ export const snippetsGenerator: StepGenerator = {
     }
 
     if (fileToLanguages.size === 0) {
-      if (ss.languages) {
-        // No paths resolved. Generate default paths from languages list so empty file
-        // fallback can create them later.
-        if (verbose) console.warn('  snippets: no paths resolved from contributedSnippets, using defaults')
-        for (const lang of ss.languages) {
-          const defaultPath = `./snippets/${lang}.json`
-          const langs = fileToLanguages.get(defaultPath) || []
-          langs.push(lang)
-          fileToLanguages.set(defaultPath, langs)
-        }
-      } else {
-        throw new Error('snippets step: no snippet files found to copy')
-      }
+      throw new Error('snippets step: no snippet files found to copy')
     }
 
     // Create output directories and copy files to original relative paths
@@ -73,7 +61,7 @@ export const snippetsGenerator: StepGenerator = {
     for (const [sourceRelPath, languages] of fileToLanguages) {
       const sourceFile = path.join(input, sourceRelPath)
       if (!fs.existsSync(sourceFile)) {
-        if (verbose) console.warn(`  snippets: source file not found: ${sourceFile}, skipping`)
+        console.warn(`  snippets: source file not found: ${sourceFile}, skipping`)
         continue
       }
       const dest = path.join(output, sourceRelPath)
@@ -105,21 +93,7 @@ export const snippetsGenerator: StepGenerator = {
     }
 
     if (copiedCount === 0) {
-      // No snippet files found in source. Generate empty files at the original source paths
-      // so contributes.snippets references resolve correctly in the output package.json.
-      if (verbose) console.warn('  snippets: no snippet files found, generating empty files')
-      for (const [sourceRelPath, languages] of fileToLanguages) {
-        const dest = path.join(output, sourceRelPath)
-        if (fs.existsSync(dest)) continue
-        fs.mkdirSync(path.dirname(dest), { recursive: true })
-        fs.writeFileSync(dest, '{}')
-        copiedCount++
-        allLanguages.push(...languages)
-        if (verbose) console.log(`  snippets: generated empty ${sourceRelPath}`)
-      }
-      if (copiedCount === 0) {
-        throw new Error('snippets step: no snippet files were copied and no languages configured')
-      }
+      throw new Error('snippets step: no snippet files were copied')
     }
 
     // Generate empty src/index.ts
