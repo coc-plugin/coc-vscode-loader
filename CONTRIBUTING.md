@@ -49,7 +49,7 @@ You want to run a VS Code extension on coc.nvim
 
 | Type | Description | Example | Converter ready? |
 |------|-------------|---------|-----------------|
-| `pure-lsp` | Pure LSP via LanguageClient | Prisma, ESLint, YAML | Yes (`language-client` step) |
+| `pure-lsp` | Pure LSP via LanguageClient | Prisma, YAML | Yes (`language-client` step) |
 | `ts-bridge` | Depends on TS language server | Volar, Angular | Yes (`ts-bridge` preset) |
 | `direct-api` | Direct coc.nvim API calls, no language server | HTML CSS Support | Check if APIs are covered |
 | New type | None of the above | — | Need new bridge preset or transform |
@@ -103,7 +103,8 @@ When the converter doesn't cover the APIs or patterns your plugin uses, extend i
 
 **Case A: Missing AST transform**
 - Add a new transform in `converter/src/transforms/`
-- Register it in `converter/src/transforms/index.ts`
+- Add the transform to the transforms array in `converter/src/types.ts`
+- Register the new transform case in the main flow (`converter/src/convert.ts`)
 - Reference the new transform name in the registry's `convert` field
 
 **Case B: Missing provider adapter**

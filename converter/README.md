@@ -18,11 +18,25 @@ cd ~/.config/coc/extensions && npm install /path/to/coc-ext
 
 ## Verified conversions
 
-| Plugin | Type | Auto-detected | Build | Working | Notes |
-|--------|------|---------------|-------|---------|-------|
-| Volar (Vue) | TS bridge | `@vue/language-server` + `typescript` | ✅ | ✅ | Requires modified coc-tsserver |
-| Prisma | Pure LSP | `@prisma/language-server` | ✅ | ✅ | Auto-detects bin entry |
-| HTML CSS Support | Direct API | — | ✅ | ✅ | Handles API differences |
+| Plugin | Type | Notes |
+|--------|------|-------|
+| Volar (Vue) | TS bridge | Requires modified coc-tsserver |
+| Prisma | Pure LSP | Auto-detects bin entry |
+| HTML CSS Support | Direct API | Handles API differences |
+| Deno | Pure LSP | Binary server download |
+| TOML (Taplo) | Pure LSP | Binary server download |
+| Ansible | Pure LSP | npm package server + pip install |
+| YAML | Pure LSP | npm package server |
+| Tailwind CSS | Pure LSP | npm package server, bin entry |
+| Biome | Pure LSP | Binary server download |
+| Stylelint | Pure LSP | npm package server |
+| Prettier | Direct API | Source transforms |
+| Svelte | Pure LSP | npm package server |
+| Astro | Pure LSP | npm package server |
+| Lua | Pure LSP | npm package server |
+| gitignore | Direct API | Source transforms |
+
+See the [registry](https://github.com/coc-plugin/coc-vscode-registry) for the full list and latest status.
 
 ### Plugin types
 
@@ -83,15 +97,15 @@ See [../docs/converter-design-v2.md](../docs/converter-design-v2.md).
 
 | File | Lines | Description |
 |------|-------|-------------|
-| `src/cli.ts` | 28 | CLI entry |
-| `src/convert.ts` | 484 | Main flow + template generation + API replacement |
-| `src/scanner.ts` | 136 | API scanner + plugin classification |
-| `src/transforms/import-mapping.ts` | 47 | Import replacement |
+| `src/cli.ts` | 59 | CLI entry |
+| `src/convert.ts` | 461 | Main flow + template generation + API replacement |
+| `src/scanner.ts` | 52 | API scanner + plugin classification |
+| `src/transforms/import-mapping.ts` | 193 | Import replacement |
 | `src/transforms/language-client.ts` | 48 | LanguageClient adaptation |
-| `src/transforms/class-to-factory.ts` | 54 | new Xxx() → Xxx.create() |
-| `src/transforms/provider-register.ts` | 55 | Provider registration signature fixes |
-| `src/transforms/enum-offset.ts` | 49 | Enum value offset annotations |
-| **Total** | **~870** | |
+| `src/transforms/class-to-factory.ts` | 53 | new Xxx() → Xxx.create() |
+| `src/transforms/provider-register.ts` | 61 | Provider registration signature fixes |
+| `src/transforms/enum-offset.ts` | 32 | Enum value offset annotations |
+| **Total** | **~959** | |
 
 ## Handled API differences
 

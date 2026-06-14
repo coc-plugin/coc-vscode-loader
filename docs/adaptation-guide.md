@@ -14,7 +14,7 @@
 
 ---
 
-## 一、已端到端验证（3 个）
+## 一、已端到端验证（4 个）
 
 **2026-06-13 从 TUI 安装到 Ansible LSP 在 coc.nvim 中运行，全链路验证通过。**
 
@@ -23,15 +23,15 @@
 | **Deno** | `denoland/vscode_deno` | 🟢 LSP 运行中 | Converter 转换 → pipeline 下载二进制 → patch → Deno LSP 正常启动 |
 | **TOML (Taplo)** | `tamasfe/taplo` | 🟢 LSP 运行中 | Rust 原生二进制 + JS wrapper，需 serverBinary + .gz 解压 + raw-arch 模板 |
 | **Ansible** | `ansible/vscode-ansible` | 🟢 LSP 运行中 | npm 包服务器 + pip 安装 ansible-lint，python3 + pip 自动检测 |
+| **Tailwind CSS IntelliSense** | `tailwindlabs/tailwindcss-intellisense` | 🟢 已收录进 registry | 纯 LSP，npm 包服务器，bin 入口 |
 
-## 二、构建成功、运行时未验证（3 个）
+## 二、构建成功、运行时未验证（2 个）
 
 **Converter 转换 + esbuild 构建成功，但未在 coc 中测试实际 LSP 功能。**
 
 | 扩展 | 仓库 | 说明 |
 |------|------|------|
 | **ESLint** | `microsoft/vscode-eslint` | 纯 LSP，npm 包服务器自动安装。需 ESLint 环境 |
-| **Tailwind CSS IntelliSense** | `tailwindlabs/tailwindcss-intellisense` | 纯 LSP，npm 包服务器 |
 | **PowerShell** | `PowerShell/vscode-powershell` | 系统需装 PowerShell 7+ |
 
 > ~~Metals (#31)~~ — 需要 Coursier + Maven 下载流程，pipeline 不支持，已移除 registry

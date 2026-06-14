@@ -59,9 +59,9 @@ Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API
 
 | Milestone | Target | Focus |
 |-----------|--------|-------|
-| [v1.2.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-08 | Registry expansion: YAML, Tailwind CSS, Biome, Stylelint, Prettier |
-| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-10 | More transforms + bridge presets + ESLint, Angular |
-| [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | 20+ plugins, full coverage |
+| [v1.2.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-08 | Registry expansion: Angular, ESLint, Code Spell Checker |
+| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-10 | More transforms + bridge presets + python-bridge, rust-bridge |
+| [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | 20+ plugins, full transform coverage |
 
 ---
 

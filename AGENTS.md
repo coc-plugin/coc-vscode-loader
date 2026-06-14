@@ -68,10 +68,10 @@ converter 主流程在步骤执行后还会对所有输出源文件做一轮通�
 | `.uri.fsPath` → `Uri.parse($1.uri).fsPath` | coc 的 uri 是 file:// URI 字符串 |
 | `getWordRangeAtPosition` → 内联实现 | coc 无此 API |
 
-**Bridge preset system** (`converter/src/presets.ts`):
+**Bridge preset system** (`converter/src/presets.ts` + `converter/src/steps/bridge.ts` + `coc-vscode-registry/presets.json`):
 - Bridge logic is not used for source-based plugins
 - Currently only `ts-bridge` preset exists for TypeScript bridge plugins (Volar)
-- Adding a new bridge type: edit `converter/src/steps/bridge.ts` `BRIDGE_TEMPLATES`
+- Adding a new bridge type: add preset definition in `converter/src/presets.ts`, code template in `converter/src/steps/bridge.ts` `BRIDGE_TEMPLATES`, and entry in `coc-vscode-registry/presets.json`
 
 ## coc-tsserver PR
 
