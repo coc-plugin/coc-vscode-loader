@@ -271,39 +271,37 @@ Interface SnippetsStep {
 
 ### 插件列表
 
-- [ ] **JavaScript ES6 Snippets** — `xabikos/vscode-javascript`。语言: js, ts, jsx, tsx, html
-- [ ] **TypeScript Snippets** — `xabikos/vscode-typescript`。语言: typescript
-- [ ] **TypeScript React code snippets** — `etsivanovs/typescript-react-code-snippets`。语言: tsx, ts
-- [ ] **ES7+ React Snippets** — `dsznajder/vscode-es7-javascript-react-snippets`。语言: js, ts, jsx, tsx
-- [ ] **React Redux Snippets** — 语言: js, ts, jsx, tsx
-- [ ] **React Native Snippets** — 语言: js, ts, jsx, tsx
-- [ ] **Vue VSCode Snippets** — `sdras/vue-vscode-snippets`。语言: vue, js, ts
-- [ ] **Vue 3 Snippets** — 语言: vue
-- [ ] **Node.js Snippets** — 语言: javascript
-- [ ] **Express Snippets** — 语言: javascript
-- [ ] **Koa Snippets** — 语言: javascript
-- [ ] **NestJS Snippets** — 语言: typescript
-- [ ] **Python Snippets** — 语言: python
-- [ ] **Django Snippets** — 语言: python
-- [ ] **Flask Snippets** — 语言: python
-- [ ] **FastAPI Snippets** — 语言: python
-- [ ] **Go Snippets** — 语言: go
-- [ ] **PHP Snippets** — 语言: php
-- [ ] **Ruby Snippets** — 语言: ruby
-- [ ] **Chai** — 语言: js, ts
-- [ ] **Cypress Snippets** — 语言: js, ts
-- [ ] **Playwright Snippets** — 语言: js, ts
-- [ ] **HTTP Snippets** — 语言: http
-- [ ] **PostgreSQL Snippets** — 语言: sql
-- [ ] **MySQL Snippets** — 语言: sql
-- [ ] **Flutter Snippets** — 语言: dart
-- [ ] **Lua Snippets** — 语言: lua
-- [ ] **Nuxt Snippets** — 语言: vue, ts
-- [ ] **Next.js Snippets** — 语言: js, ts, jsx, tsx
-- [ ] **Svelte Snippets** — 语言: svelte
-- [ ] **SolidJS Snippets** — 语言: js, ts, jsx, tsx
-- [ ] **Unity Snippets** — 语言: csharp
-- [ ] **Miniprogram API Snippets** — 语言: wxml, js
+#### 已入 registry（6 个）
+- [x] **JavaScript ES6 Snippets** — `xabikos/vscode-javascript`
+- [x] **Reactjs code snippets** — `xabikos/vscode-react`
+- [x] **Typescript React code snippets** — `infeng/vscode-react-typescript`
+- [x] **ES7+ React/Redux/React-Native snippets** — `r5n-labs/vscode-react-javascript-snippets`
+- [x] **Vue VSCode Snippets** — `sdras/vue-vscode-snippets`
+- [x] **Vue 3 Snippets** — `hollowtree/vscode-vue-snippets`
+
+#### 等待加（14 个）
+- [ ] **React Native Snippets** — `jundat95/react-native-snippet`
+- [ ] **React Redux Snippets** — `rodrigovallades/vscode-es7-javascript-react-snippets`
+- [ ] **Chai snippets** — `nwhatt/vs-chai-snippets`
+- [ ] **Cypress Snippets** — `ijsto/cypress-snippets`
+- [ ] **Playwright Snippets** — `nitayneeman/vscode-playwright-snippets`
+- [ ] **PostgreSQL Snippets** — `Manuel7806/postgresql-snippets`
+- [ ] **MySQL Snippets** — `zendobk/vscode-mysql`
+- [ ] **Nuxt Snippets** — `praburangki/nuxt-vscode-snippets`
+- [ ] **Next.js Snippets** — `ijsto/reactnextjssnippets`
+- [ ] **Svelte Snippets** — `ryanyang52/vscode-svelte-snippets`
+- [ ] **SolidJS Snippets** — `solidjs-community/solid-snippets`
+- [ ] **Unity Snippets** — `YclepticStudios/vscode-unity-snippets`
+- [ ] **NestJS Snippets** — `ManuelGil/vscode-nestjs-snippets`
+- [ ] **FastAPI Snippets** — `damildrizzy/fastapi-snippets`
+
+#### 无独立 repo（不是纯 snippets 扩展或无独立仓库）
+- ❌ **TypeScript Snippets** — VS Code 内置，tsserver 自带
+- ❌ **Node.js / Express / Koa Snippets** — 无独立 marketplace 扩展
+- ❌ **Python / Django / Flask Snippets** — 绑在 MS Python 扩展里
+- ❌ **Go / PHP / Ruby / Lua Snippets** — 绑在各自 LSP 扩展里
+- ❌ **Flutter Snippets** — 绑在 Flutter 扩展里
+- ❌ **HTTP Snippets / Koa Snippets** — 无独立扩展
 
 ---
 
