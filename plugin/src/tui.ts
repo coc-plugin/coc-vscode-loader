@@ -211,6 +211,19 @@ export class TUI {
       return
     }
     if (id === 'j') {
+      const nvim = workspace.nvim
+      const [row, col] = await nvim.call('nvim_win_get_cursor', [this.winid]) as [number, number]
+      // Try moving within the same package first (detail/log lines)
+      const pkgName = this.pkgLineMap.get(row)
+      if (pkgName) {
+        const lines = [...this.pkgLineMap.keys()].filter(l => this.pkgLineMap.get(l) === pkgName).sort((a, b) => a - b)
+        const idx = lines.indexOf(row)
+        if (idx >= 0 && idx < lines.length - 1) {
+          await nvim.call('nvim_win_set_cursor', [this.winid, [lines[idx + 1] + 1, col]])
+          return
+        }
+      }
+      // At last line of current package, move to next package
       const filtered = this.state.getFilteredPackages()
       const s = this.state.getState()
       const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
@@ -225,6 +238,19 @@ export class TUI {
       return
     }
     if (id === 'k') {
+      const nvim = workspace.nvim
+      const [row, col] = await nvim.call('nvim_win_get_cursor', [this.winid]) as [number, number]
+      // Try moving within the same package first (detail/log lines)
+      const pkgName = this.pkgLineMap.get(row)
+      if (pkgName) {
+        const lines = [...this.pkgLineMap.keys()].filter(l => this.pkgLineMap.get(l) === pkgName).sort((a, b) => a - b)
+        const idx = lines.indexOf(row)
+        if (idx > 0) {
+          await nvim.call('nvim_win_set_cursor', [this.winid, [lines[idx - 1] + 1, col]])
+          return
+        }
+      }
+      // At first line of current package, move to previous package
       const s = this.state.getState()
       if (s.focusIndex > 0) {
         const newFocus = s.focusIndex - 1
