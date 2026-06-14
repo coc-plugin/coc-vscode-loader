@@ -56,6 +56,7 @@ export class TUI {
   private detailPkgName: string = ''
   private detailMode: 'log' | 'info' = 'info'
   private windowHeight: number = 0
+  private windowWidth: number = 0
   private static readonly HEADER_LINES = 6
   private static readonly FOOTER_LINES = 3
 
@@ -85,6 +86,7 @@ export class TUI {
     const height = Math.min(Math.floor(editorLines * 0.85), 40)
     this.windowHeight = height - 2 // content area (border takes 2 rows)
     const width = Math.min(Math.floor(editorCols * 0.85), 120)
+    this.windowWidth = width - 2 // content area (border takes 2 cols)
     const row = Math.max(Math.floor((editorLines - height) / 2), 0)
     const col = Math.max(Math.floor((editorCols - width) / 2), 0)
 
@@ -383,6 +385,19 @@ export class TUI {
       const result = state.showHelp
         ? this.renderHelp()
         : this.renderPackageList(state, filtered)
+
+      // Truncate lines that exceed window width
+      if (this.windowWidth > 0) {
+        for (let i = 0; i < result.lines.length; i++) {
+          if (result.lines[i].length > this.windowWidth) {
+            result.lines[i] = result.lines[i].slice(0, this.windowWidth)
+          }
+        }
+        result.highlights = result.highlights.filter(h => h.colStart < this.windowWidth)
+        for (const h of result.highlights) {
+          if (h.colEnd > this.windowWidth) h.colEnd = this.windowWidth
+        }
+      }
 
       nvim.pauseNotification()
       try {
