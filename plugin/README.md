@@ -37,7 +37,7 @@ npm install coc-vscode-loader
 | `x` | Toggle mark package for batch operations |
 | `f` | Cycle filter: all → installed → available |
 | `s` | Cycle sort: default → name → status → type |
-| `[` / `]` | Previous / next page |
+| `j` / `k` | Scroll through packages (virtual scroll) |
 | `gg` | Jump to first page |
 | `G` | Jump to last page |
 | `<CR>` | Toggle details (commit / type / source) or install log |

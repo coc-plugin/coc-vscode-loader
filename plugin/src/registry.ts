@@ -63,23 +63,47 @@ function loadCache(): PackageInfo[] | null {
   return null
 }
 
+export type ProgressCallback = (msg: string) => void
+
 /** Fetch JSON from URL, falling back to curl when Node.js fetch can't handle proxy env vars */
-async function fetchRegistryJSON(url: string): Promise<PackageInfo[]> {
+async function fetchRegistryJSON(url: string, onProgress?: ProgressCallback): Promise<PackageInfo[]> {
   try {
     const ctrl = new AbortController()
     const t = setTimeout(() => ctrl.abort(), 10000)
     const res = await fetch(url, { signal: ctrl.signal })
     clearTimeout(t)
     if (res.ok) {
-      const data: PackageInfo[] = await res.json()
+      const total = parseInt(res.headers.get('content-length') || '0')
+      const reader = res.body!.getReader()
+      const chunks: Uint8Array[] = []
+      let received = 0
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        if (value) {
+          chunks.push(value)
+          received += value.length
+          if (total && onProgress) {
+            onProgress(`Downloading registry... ${Math.round((received / total) * 100)}%`)
+          }
+        }
+      }
+      if (onProgress) onProgress('Parsing registry entries...')
+      const buf = new Uint8Array(received)
+      let pos = 0
+      for (const c of chunks) { buf.set(c, pos); pos += c.length }
+      const text = new TextDecoder().decode(buf)
+      const data: PackageInfo[] = JSON.parse(text)
       if (Array.isArray(data)) return data
     }
   } catch { /* fall through to curl */ }
   // curl respects lowercase http_proxy env vars that Node.js fetch ignores
   return new Promise((resolve, reject) => {
+    if (onProgress) onProgress('Downloading registry (curl)...')
     execFile('curl', ['-sL', '--compressed', url], { encoding: 'utf-8', maxBuffer: 20 * 1024 * 1024 }, (err, stdout) => {
       if (err) reject(new Error(`curl failed: ${err.message}`))
       else {
+        if (onProgress) onProgress('Parsing registry entries...')
         try {
           const data = JSON.parse(stdout)
           if (!Array.isArray(data)) reject(new Error('Invalid registry format'))
@@ -92,11 +116,12 @@ async function fetchRegistryJSON(url: string): Promise<PackageInfo[]> {
   })
 }
 
-export async function updateRegistry(): Promise<number> {
+export async function updateRegistry(onProgress?: ProgressCallback): Promise<number> {
   // Local dev mode: read from local coc-vscode-registry/registry.json
   const localPath = process.env.COC_REGISTRY_PATH || getLocalRegistryPath()
   if (localPath) {
     if (!fs.existsSync(localPath)) throw new Error(`Local registry not found: ${localPath}`)
+    if (onProgress) onProgress('Reading local registry...')
     const data: PackageInfo[] = JSON.parse(fs.readFileSync(localPath, 'utf-8'))
     if (!Array.isArray(data)) throw new Error('Invalid registry format')
     fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true })
@@ -106,11 +131,12 @@ export async function updateRegistry(): Promise<number> {
   }
 
   // npm mode: fetch from remote (with curl fallback for proxy compatibility)
-  const data: PackageInfo[] = await fetchRegistryJSON(REMOTE_REGISTRY_URL)
+  const data: PackageInfo[] = await fetchRegistryJSON(REMOTE_REGISTRY_URL, onProgress)
   if (!Array.isArray(data)) throw new Error('Invalid registry format')
   fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true })
   fs.writeFileSync(CACHE_PATH, JSON.stringify(data, null, 2))
   cached = data
+  if (onProgress) onProgress(`Registry updated: ${data.length} packages`)
   return data.length
 }
 

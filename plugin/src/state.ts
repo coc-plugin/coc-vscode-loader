@@ -3,8 +3,15 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
 
-function isInstalled(name: string): boolean {
-  return fs.existsSync(path.join(os.homedir(), '.config', 'coc', 'extensions', 'node_modules', `coc-${name}`))
+const EXT_DIR = path.join(os.homedir(), '.config', 'coc', 'extensions', 'node_modules')
+
+function getInstalledSet(): Set<string> {
+  try {
+    const entries = fs.readdirSync(EXT_DIR)
+    return new Set(entries.filter(n => n.startsWith('coc-')).map(n => n.slice(4)))
+  } catch {
+    return new Set()
+  }
 }
 
 export type Status = 'not-installed' | 'installing' | 'installed' | 'updating' | 'uninstalling' | 'failed'
@@ -27,7 +34,6 @@ export interface PackageEntry {
 
 export type ViewFilter = 'all' | 'installed' | 'not-installed'
 export type SortBy = 'default' | 'name' | 'status' | 'type'
-export const PAGE_SIZE = 50
 
 export interface AppState {
   packages: PackageEntry[]
@@ -38,14 +44,16 @@ export interface AppState {
   statusMessage?: string
   viewFilter: ViewFilter
   sortBy: SortBy
-  currentPage: number
+  scrollOffset: number
+  focusIndex: number
 }
 
 type Listener = (state: AppState) => void
 
 export function createInitialState(): AppState {
+  const installedSet = getInstalledSet()
   const packages = getAllPackages().map(info => {
-    const installed = isInstalled(info.name)
+    const installed = installedSet.has(info.name)
     let commit: string | undefined
     let commitMsg: string | undefined
     let commitDate: string | undefined
@@ -71,13 +79,15 @@ export function createInitialState(): AppState {
       marked: false,
     }
   })
-  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default', currentPage: 0 }
+  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default', scrollOffset: 0, focusIndex: 0 }
 }
 
 export class StateManager {
   private state: AppState
   private listeners: Set<Listener> = new Set()
   private scheduled = false
+  private cachedFiltered: PackageEntry[] | null = null
+  private cachedFilterKey: string = ''
 
   constructor(initial: AppState) {
     this.state = initial
@@ -85,6 +95,10 @@ export class StateManager {
 
   getState(): AppState {
     return this.state
+  }
+
+  private filterKey(): string {
+    return `${this.state.viewFilter}|${this.state.searchQuery}|${this.state.sortBy}`
   }
 
   subscribe(fn: Listener) {
@@ -109,7 +123,12 @@ export class StateManager {
     })
   }
 
+  private invalidateFilterCache() {
+    this.cachedFilterKey = ''
+  }
+
   setPackageStatus(name: string, status: Status, extra?: { progress?: string; error?: string; appendLog?: boolean; logEntry?: string }) {
+    this.invalidateFilterCache()
     this.mutate(s => {
       const pkg = s.packages.find(p => p.info.name === name)
       if (pkg) {
@@ -150,24 +169,26 @@ export class StateManager {
   }
 
   setViewFilter(filter: ViewFilter) {
-    this.mutate(s => { s.viewFilter = filter; s.currentPage = 0 })
+    this.mutate(s => { s.viewFilter = filter; s.scrollOffset = 0; s.focusIndex = 0 })
   }
 
   cycleViewFilter() {
     this.mutate(s => {
       s.viewFilter = s.viewFilter === 'all' ? 'installed' : s.viewFilter === 'installed' ? 'not-installed' : 'all'
-      s.currentPage = 0
+      s.scrollOffset = 0
+      s.focusIndex = 0
     })
   }
 
   setSortBy(sortBy: SortBy) {
-    this.mutate(s => { s.sortBy = sortBy; s.currentPage = 0 })
+    this.mutate(s => { s.sortBy = sortBy; s.scrollOffset = 0; s.focusIndex = 0 })
   }
 
   cycleSortBy() {
     this.mutate(s => {
       s.sortBy = s.sortBy === 'default' ? 'name' : s.sortBy === 'name' ? 'status' : s.sortBy === 'status' ? 'type' : 'default'
-      s.currentPage = 0
+      s.scrollOffset = 0
+      s.focusIndex = 0
     })
   }
 
@@ -184,14 +205,22 @@ export class StateManager {
   }
 
   setSearchQuery(query: string) {
-    this.mutate(s => { s.searchQuery = query; s.currentPage = 0 })
+    this.mutate(s => { s.searchQuery = query; s.scrollOffset = 0; s.focusIndex = 0 })
   }
 
-  setPage(n: number) {
-    this.mutate(s => { s.currentPage = n })
+  setScrollOffset(n: number) {
+    this.mutate(s => { s.scrollOffset = n })
+  }
+
+  setFocusIndex(n: number) {
+    this.mutate(s => { s.focusIndex = n })
   }
 
   getFilteredPackages(): PackageEntry[] {
+    const key = this.filterKey()
+    if (this.cachedFiltered && this.cachedFilterKey === key) {
+      return this.cachedFiltered
+    }
     let pkgs = this.state.packages
     if (this.state.viewFilter === 'not-installed') {
       pkgs = pkgs.filter(p => p.status === 'not-installed')
@@ -215,6 +244,8 @@ export class StateManager {
     } else if (sortBy === 'type') {
       pkgs = [...pkgs].sort((a, b) => a.info.type.localeCompare(b.info.type))
     }
+    this.cachedFiltered = pkgs
+    this.cachedFilterKey = key
     return pkgs
   }
 
@@ -238,6 +269,8 @@ export class StateManager {
   }
 
   refreshPackages() {
+    this.invalidateFilterCache()
+    const installedSet = getInstalledSet()
     this.mutate(s => {
       const updated = getAllPackages()
       const oldMap = new Map(s.packages.map(p => [p.info.name, p]))
@@ -249,7 +282,7 @@ export class StateManager {
         }
         return {
           info,
-          status: isInstalled(info.name) ? 'installed' : 'not-installed',
+          status: installedSet.has(info.name) ? 'installed' : 'not-installed',
           progressLog: [],
           expanded: false,
           logExpanded: false,

@@ -1,7 +1,7 @@
 import { workspace, window as cocWindow, Disposable } from 'coc.nvim'
-import { StateManager, PackageEntry, AppState, ViewFilter, SortBy, PAGE_SIZE } from './state'
+import { StateManager, PackageEntry, AppState, ViewFilter, SortBy } from './state'
 import { installPackage, uninstallPackage, updatePackage, checkUpdates, runConcurrent } from './pipeline'
-import { updateRegistry, getPackage } from './registry'
+import { updateRegistry, getPackage, ProgressCallback } from './registry'
 import { LineBuffer, RenderResult } from './renderer'
 
 const VERSION: string = (() => {
@@ -26,11 +26,11 @@ const HELP_TEXT = [
   '    x          Toggle mark',
   '    f          Cycle filter: all → installed → not-installed',
   '    s          Cycle sort: default → name → status → type',
-  '    [/]        Previous/next page',
+  '    j/k        Scroll through packages',
+  '    /          Search filter (then j/k to scroll)',
   '    gg         Jump to first page',
   '    G          Jump to last page',
   '    <Enter>    Toggle expand/collapse details',
-  '    /          Search filter',
   '    q          Close window',
   '    <Esc>      Help→Search→Marks→Busy guard→Close',
   '',
@@ -51,6 +51,9 @@ export class TUI {
   private unsubscribe: (() => void) | null = null
   private pkgLineMap: Map<number, string> = new Map()
   private logLineSet: Set<number> = new Set()
+  private windowHeight: number = 0
+  private static readonly HEADER_LINES = 6
+  private static readonly FOOTER_LINES = 3
 
   constructor(state: StateManager) {
     this.state = state
@@ -76,6 +79,7 @@ export class TUI {
     const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
     const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
     const height = Math.min(Math.floor(editorLines * 0.85), 40)
+    this.windowHeight = height - 2 // content area (border takes 2 rows)
     const width = Math.min(Math.floor(editorCols * 0.85), 120)
     const row = Math.max(Math.floor((editorLines - height) / 2), 0)
     const col = Math.max(Math.floor((editorCols - width) / 2), 0)
@@ -86,7 +90,7 @@ export class TUI {
       height,
       row,
       col,
-      border: 'none',
+      border: 'rounded',
       style: 'minimal',
     })
     this.winid = win.id
@@ -139,8 +143,13 @@ export class TUI {
     // Initial render with current state (may be empty if no cache)
     await this.render()
 
-    // Fetch remote registry in background, re-render when done
-    updateRegistry().then(() => {
+    // Fetch remote registry in background with progress, re-render when done
+    this.state.setStatusMessage('Fetching registry...')
+    const onProgress: ProgressCallback = (msg) => {
+      this.state.setStatusMessage(msg)
+    }
+    updateRegistry(onProgress).then(() => {
+      this.state.setStatusMessage()
       this.state.refreshPackages()
       this.render()
     }).catch(() => {
@@ -190,29 +199,39 @@ export class TUI {
     if (id === 'f') { this.state.cycleViewFilter(); return }
     if (id === 's') { this.state.cycleSortBy(); return }
     if (id === 'gg') {
-      this.state.setPage(0)
-      this.scrollToFirst = true
+      this.state.setScrollOffset(0)
+      this.state.setFocusIndex(0)
       return
     }
     if (id === 'G') {
       const filtered = this.state.getFilteredPackages()
-      const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1
-      this.state.setPage(totalPages - 1)
+      const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
+      this.state.setScrollOffset(Math.max(0, filtered.length - visibleCount))
+      this.state.setFocusIndex(Math.max(0, filtered.length - 1))
       return
     }
-    if (id === 'pagedown') {
+    if (id === 'j') {
       const filtered = this.state.getFilteredPackages()
-      const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1
       const s = this.state.getState()
-      if (s.currentPage < totalPages - 1) {
-        this.state.setPage(s.currentPage + 1)
+      const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
+      if (s.focusIndex < filtered.length - 1) {
+        const newFocus = s.focusIndex + 1
+        if (newFocus >= s.scrollOffset + visibleCount) {
+          const maxOffset = Math.max(0, filtered.length - visibleCount)
+          this.state.setScrollOffset(Math.min(maxOffset, s.scrollOffset + 1))
+        }
+        this.state.setFocusIndex(newFocus)
       }
       return
     }
-    if (id === 'pageup') {
+    if (id === 'k') {
       const s = this.state.getState()
-      if (s.currentPage > 0) {
-        this.state.setPage(s.currentPage - 1)
+      if (s.focusIndex > 0) {
+        const newFocus = s.focusIndex - 1
+        if (newFocus < s.scrollOffset) {
+          this.state.setScrollOffset(Math.max(0, s.scrollOffset - 1))
+        }
+        this.state.setFocusIndex(newFocus)
       }
       return
     }
@@ -279,10 +298,9 @@ export class TUI {
   }
 
   private keyMap: Record<string, string> = {
-    q: 'q', esc: '<Esc>', question: '?', slash: '/',
+    q: 'q', esc: '<Esc>', question: '?', slash: '/', j: 'j', k: 'k',
     U: 'U', Z: 'Z', i: 'i', u: 'u', X: 'X', R: 'R', cr: '<CR>',
     f: 'f', s: 's', x: 'x', D: 'D', gg: 'gg', G: 'G',
-    '[': 'pageup', ']': 'pagedown',
   }
 
   private async setupKeymaps() {
@@ -292,8 +310,8 @@ export class TUI {
       ['U', 'U'], ['Z', 'Z'], ['C', 'C'], ['i', 'i'], ['I', 'I'], ['H', 'H'],
       ['u', 'u'], ['X', 'X'], ['R', 'R'],
       ['f', 'f'], ['s', 's'], ['x', 'x'], ['D', 'D'],
+      ['j', 'j'], ['k', 'k'],
       ['gg', 'gg'], ['G', 'G'],
-      ['[', 'pageup'], [']', 'pagedown'],
       ['<CR>', 'cr'],
     ]
     for (const [vimKey, id] of entries) {
@@ -317,8 +335,6 @@ export class TUI {
 
   private rendering = false
   private pendingRender = false
-  private lastPage: number = -1
-  private scrollToFirst = false
 
   private async render() {
     if (!this.winid) return
@@ -348,14 +364,26 @@ export class TUI {
     }
     await nvim.resumeNotification()
 
-    // Auto-scroll to first package on page change or gg
-    const shouldScroll = this.scrollToFirst || state.currentPage !== this.lastPage
-    this.scrollToFirst = false
-    this.lastPage = state.currentPage
-    if (!state.showHelp && shouldScroll) {
-      const firstPkgLine = Math.min(...result.pkgLineMap.keys())
-      if (isFinite(firstPkgLine)) {
-        await nvim.call('nvim_win_set_cursor', [this.winid, [firstPkgLine + 1, 0]])
+    // Position cursor on focused package
+    if (!state.showHelp && result.pkgLineMap.size > 0) {
+      const visible = this.state.getFilteredPackages()
+      const idx = Math.min(state.focusIndex, visible.length - 1)
+      const focused = visible[idx]
+      let cursorSet = false
+      if (focused) {
+        for (const [line, name] of result.pkgLineMap) {
+          if (name === focused.info.name) {
+            await nvim.call('nvim_win_set_cursor', [this.winid, [line + 1, 0]])
+            cursorSet = true
+            break
+          }
+        }
+      }
+      if (!cursorSet) {
+        const firstPkgLine = Math.min(...result.pkgLineMap.keys())
+        if (isFinite(firstPkgLine)) {
+          await nvim.call('nvim_win_set_cursor', [this.winid, [firstPkgLine + 1, 0]])
+        }
       }
     }
 
@@ -426,24 +454,23 @@ export class TUI {
     buf.nl()
     buf.nl()
 
-    // Pagination
-    const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1
-    const page = Math.min(state.currentPage, totalPages - 1)
-    const start = page * PAGE_SIZE
-    const pageItems = filtered.slice(start, start + PAGE_SIZE)
+    // Virtual scroll: visible window
+    const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
+    const maxOffset = Math.max(0, filtered.length - visibleCount)
+    const start = Math.min(state.scrollOffset, maxOffset)
+    const end = Math.min(start + visibleCount, filtered.length)
+    const visible = filtered.slice(start, end)
 
-    // Page indicator
-    const end = Math.min(start + PAGE_SIZE, filtered.length)
-    if (totalPages > 1) {
-      buf.append(`Page ${page + 1}/${totalPages} · ${start + 1}–${end} of ${filtered.length}`, 'CocConverterTotal')
-    } else {
-      buf.append(`${filtered.length} packages`, 'CocConverterTotal')
-    }
+    // Indicator
+    const indicator = filtered.length > visibleCount
+      ? `${start + 1}–${end} of ${filtered.length}`
+      : `${filtered.length} packages`
+    buf.append(indicator, 'CocConverterTotal')
     buf.nl()
     buf.nl()
 
-    // Render packages (flat, no section split)
-    for (const e of pageItems) {
+    // Render visible items (virtual list)
+    for (const e of visible) {
       this.renderEntry(buf, pkgLineMap, logSet, e)
     }
 
@@ -451,12 +478,13 @@ export class TUI {
       buf.nl('no matching packages')
     }
 
-    // Footer
+    // Footer (in main buffer, always visible)
     buf.nl()
     buf.append(' ' + '─'.repeat(50), 'Comment')
     buf.nl()
-    const pageNav = totalPages > 1 ? `  [  prev  ] next` : ''
-    buf.append(` ${filtered.length} packages · ${filterLabel} · ${sortLabel}${pageNav}`, 'Comment')
+    const filterLabel2 = state.viewFilter === 'all' ? 'All' : state.viewFilter === 'installed' ? 'Installed' : 'Available'
+    const sortLabel2 = state.sortBy === 'default' ? 'Default' : state.sortBy === 'name' ? 'Name' : state.sortBy === 'status' ? 'Status' : 'Type'
+    buf.append(` ${filtered.length} packages · ${filterLabel2} · ${sortLabel2}`, 'Comment')
 
     const result = buf.render(2)
     return { lines: result.lines, pkgLineMap, logLines: logSet, highlights: result.highlights }
