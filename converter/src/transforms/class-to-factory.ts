@@ -20,16 +20,14 @@ export const transformClassToFactory: Transform = (ctx) => {
 
   // AST approach: try to replace via ts-morph
   const nodes = file.getDescendantsOfKind(SyntaxKind.NewExpression)
-  const astReplacements: Array<{ node: any, text: string }> = []
+  // Sort by position descending so inner nodes are processed first
+  nodes.sort((a, b) => b.getPos() - a.getPos())
   for (const expr of nodes) {
     const text = expr.getText()
     const m = text.match(/^new\s+(\w+)\(/)
     if (!m || !FACTORY_TYPES.has(m[1])) continue
     const args = text.slice(m[0].length, -1)
-    astReplacements.push({ node: expr, text: `${m[1]}.create(${args})` })
-  }
-  for (const { node, text } of astReplacements) {
-    try { node.replaceWithText(text) } catch {}
+    try { expr.replaceWithText(`${m[1]}.create(${args})`) } catch {}
   }
 
   // Text fallback: catch remaining new Xxx() that AST might have missed

@@ -176,6 +176,14 @@ export class TUI {
     if (id === 'q') { await this.close(); return }
     if (id === 'I') {
       this.state.setActivePill('I')
+      const marked = this.state.getMarkedNames()
+      if (marked.length === 0) {
+        cocWindow.showInformationMessage('No packages marked. Use x to mark packages.')
+        this.state.setActivePill(null)
+        return
+      }
+      await runConcurrent(marked, name => installPackage(this.state, name))
+      this.state.setActivePill(null)
       return
     }
     if (id === 'H') {
@@ -376,38 +384,46 @@ export class TUI {
         ? this.renderHelp()
         : this.renderPackageList(state, filtered)
 
-    nvim.pauseNotification()
-    nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', true], true)
-    nvim.call('nvim_buf_clear_namespace', [this.bufnr, this.ns, 0, -1], true)
-    nvim.call('nvim_buf_set_lines', [this.bufnr, 0, -1, false, result.lines], true)
-    nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', false], true)
-    for (const h of result.highlights) {
-      nvim.call('nvim_buf_set_extmark', [this.bufnr, this.ns, h.line, h.colStart, {
-        end_col: h.colEnd,
-        hl_group: h.hlGroup,
-        hl_mode: 'combine',
-      }], true)
-    }
-    await nvim.resumeNotification()
+      nvim.pauseNotification()
+      try {
+        nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', true], true)
+        nvim.call('nvim_buf_clear_namespace', [this.bufnr, this.ns, 0, -1], true)
+        nvim.call('nvim_buf_set_lines', [this.bufnr, 0, -1, false, result.lines], true)
+        nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', false], true)
+        for (const h of result.highlights) {
+          nvim.call('nvim_buf_set_extmark', [this.bufnr, this.ns, h.line, h.colStart, {
+            end_col: h.colEnd,
+            hl_group: h.hlGroup,
+            hl_mode: 'combine',
+          }], true)
+        }
+      } finally {
+        await nvim.resumeNotification()
+      }
 
-    // Refresh detail popup content if open
-    if (this.detailWinid) {
-      this.updateDetailPopup().catch(() => {})
-    }
+      // Refresh detail popup content if open
+      if (this.detailWinid) {
+        this.updateDetailPopup().catch(() => {})
+      }
 
-    // Ensure focusIndex points to a visible package
-    if (!state.showHelp && result.pkgLineMap.size > 0) {
-      this.focusIndex = Math.max(this.focusIndex, state.scrollOffset)
-      const visible = this.state.getFilteredPackages()
-      const idx = Math.min(this.focusIndex, visible.length - 1)
-      const focused = visible[idx]
-      if (focused) {
-        const targetLine = [...result.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
-        if (targetLine !== undefined) {
-          await nvim.call('nvim_win_set_cursor', [this.winid, [targetLine + 1, 0]])
+      // Ensure focusIndex points to a visible package
+      if (!state.showHelp && result.pkgLineMap.size > 0) {
+        const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
+        if (this.focusIndex < state.scrollOffset) {
+          state.scrollOffset = this.focusIndex
+        } else if (this.focusIndex >= state.scrollOffset + visibleCount) {
+          state.scrollOffset = Math.max(0, this.focusIndex - visibleCount + 1)
+        }
+        const visible = this.state.getFilteredPackages()
+        const idx = Math.min(this.focusIndex, visible.length - 1)
+        const focused = visible[idx]
+        if (focused) {
+          const targetLine = [...result.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
+          if (targetLine !== undefined) {
+            await nvim.call('nvim_win_set_cursor', [this.winid, [targetLine + 1, 0]])
+          }
         }
       }
-    }
 
       this.pkgLineMap = result.pkgLineMap
       this.logLineSet = result.logLines
@@ -538,9 +554,6 @@ export class TUI {
     if (entry.progress) {
       statusText = `  ${entry.progress}`
       statusHl = 'Comment'
-    } else if (entry.status === 'installed') {
-      statusText = '  [installed]'
-      statusHl = 'CocConverterInstalled'
     } else if (entry.status === 'failed' && entry.error) {
       statusText = `  ✗ ${entry.error}`
       statusHl = 'ErrorMsg'
@@ -553,8 +566,8 @@ export class TUI {
     if (entry.hasUpdate) {
       buf.append('  ↑', 'CocConverterKey')
     }
-    // Commit info for just-updated packages (single line)
-    if (entry.updated && entry.commit && entry.commitMsg) {
+    // Commit info (only when stable, not during install/update/uninstall)
+    if (entry.commit && entry.commitMsg && entry.status === 'installed') {
       const cr = entry.commitDate ? ` (${entry.commitDate})` : ''
       buf.append(`  ${entry.commit} ${entry.commitMsg}${cr}`, 'Comment')
     }

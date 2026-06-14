@@ -53,7 +53,7 @@ export async function activate(context: ExtensionContext) {
         cocWindow.showInformationMessage(`${name} is not installed`)
         return
       }
-      uninstallPackage(state, name)
+      await uninstallPackage(state, name)
     })
   )
 

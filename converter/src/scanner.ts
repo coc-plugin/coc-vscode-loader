@@ -23,7 +23,7 @@ export function scan(dir: string): ScanResult {
     const apis: string[] = []
     const relative = path.relative(dir, filePath)
 
-    if (content.includes("from 'vscode'") || content.includes('from "vscode"') || content.includes('require("vscode")')) {
+    if (content.includes("from 'vscode'") || content.includes('from "vscode"') || content.includes('require("vscode")') || content.includes("require('vscode')")) {
       apis.push('vscode')
     }
 

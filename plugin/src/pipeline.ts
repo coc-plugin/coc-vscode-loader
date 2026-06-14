@@ -74,22 +74,29 @@ async function run(
 async function downloadSource(
   info: PackageInfo, name: string,
   onProgress: (step: number, total: number, msg: string, cmd: string) => void,
-): Promise<string> {
+): Promise<{ dir: string; updated: boolean }> {
   const srcDir = sourceDir(name)
   const cache = cacheDir(name)
   const repoUrl = `https://github.com/${info.source.repo}.git`
+  let output = ''
 
-  const log = (chunk: string) => onProgress(1, 5, chunk.trim(), '')
   if (fs.existsSync(srcDir)) {
     onProgress(1, 5, 'Updating source...', `git -C ${srcDir} pull`)
+    const log = (chunk: string) => {
+      output += chunk
+      onProgress(1, 5, 'Updating source...', chunk.trim())
+    }
     await run('git', ['-C', srcDir, 'pull'], cache, log)
   } else {
     onProgress(1, 5, 'Cloning repository...', `git clone --depth=1 ${repoUrl}`)
     fs.mkdirSync(cache, { recursive: true })
+    const log = (chunk: string) => onProgress(1, 5, 'Cloning repository...', chunk.trim())
     await run('git', ['clone', '--depth=1', repoUrl, srcDir], cache, log)
   }
 
-  return info.source.subdir ? path.join(srcDir, info.source.subdir) : srcDir
+  const dir = info.source.subdir ? path.join(srcDir, info.source.subdir) : srcDir
+  const updated = !output.includes('Already up to date.')
+  return { dir, updated }
 }
 
 async function convertSource(
@@ -175,7 +182,11 @@ async function buildPackage(
 
   // Run postinstall if present (some extensions download servers here)
   onProgress(3, 5, 'Running postinstall...', 'npm run postinstall')
-  await run('npm', ['run', 'postinstall', '--if-present'], build, npmLog).catch(() => {})
+  try {
+    await run('npm', ['run', 'postinstall', '--if-present'], build, npmLog)
+  } catch (e: any) {
+    onProgress(3, 5, `Warning: postinstall failed (${e.message})`, 'may affect plugin functionality')
+  }
   // Install pip packages if configured in registry
   if (info.pipPackages?.length) {
     const pipLog = (chunk: string) => onProgress(3, 5, chunk.trim(), '')
@@ -345,9 +356,9 @@ async function installToCoc(
   const depName = `coc-${name}`
   if (!pkg.dependencies[depName]) {
     pkg.dependencies[depName] = `file:${dest}`
-    pkg.lastUpdate = Date.now()
-    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
   }
+  pkg.lastUpdate = Date.now()
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
 }
 
 function metaPath(name: string): string {
@@ -371,14 +382,13 @@ export async function installPackage(state: StateManager, name: string): Promise
     state.setPackageStatus(name, 'installing', {
       progress: `[${step}/${total}] ${msg}`,
       logEntry: `[${step}/${total}] ${msg}\n  $ ${cmd}`,
-      appendLog: true,
     })
   }
 
   state.setPackageStatus(name, 'installing', { progress: 'Starting...' })
 
   try {
-    const input = await downloadSource(info, name, prog)
+    const { dir: input } = await downloadSource(info, name, prog)
     await convertSource(input, name, info, prog)
     await buildPackage(name, input, info, prog)
     await installToCoc(name, prog)
@@ -459,14 +469,18 @@ export async function updatePackage(state: StateManager, name: string): Promise<
     state.setPackageStatus(name, 'updating', {
       progress: `[${step}/${total}] ${msg}`,
       logEntry: `[${step}/${total}] ${msg}\n  $ ${cmd}`,
-      appendLog: true,
     })
   }
 
   state.setPackageStatus(name, 'updating', { progress: 'Starting...' })
 
   try {
-    const input = await downloadSource(info, name, prog)
+    const { dir: input, updated } = await downloadSource(info, name, prog)
+    if (!updated) {
+      state.setPackageStatus(name, 'installed')
+      cocWindow.showInformationMessage(`coc-${name} is already up to date`)
+      return
+    }
     await convertSource(input, name, info, prog)
     await buildPackage(name, input, info, prog)
     await installToCoc(name, prog)
@@ -528,44 +542,54 @@ export async function runConcurrent<T>(
 ): Promise<void> {
   const pool = new Set<Promise<void>>()
   for (const item of items) {
-    const p = fn(item).finally(() => pool.delete(p))
+    const p = fn(item).catch(() => {}).finally(() => pool.delete(p))
     pool.add(p)
     if (pool.size >= concurrency) {
       await Promise.race(pool)
     }
   }
-  await Promise.all(pool)
+  await Promise.allSettled(pool)
 }
 
+let checkUpdatesBusy = false
+
 export async function checkUpdates(state: StateManager): Promise<void> {
-  const s = state.getState()
-  const results: Record<string, boolean> = {}
+  if (checkUpdatesBusy) return
+  checkUpdatesBusy = true
+  try {
+    const s = state.getState()
+    const results: Record<string, boolean> = {}
 
-  state.setStatusMessage('Checking for updates...')
+    state.setStatusMessage('Checking for updates...')
 
-  for (const pkg of s.packages) {
-    if (pkg.status !== 'installed' || !pkg.commit) continue
-    state.setStatusMessage(`Checking ${pkg.info.displayName}...`)
-    try {
-      const out = await runWithOutput('git', ['ls-remote', `https://github.com/${pkg.info.source.repo}.git`, 'HEAD'], os.homedir())
-      const remote = out.split('\t')[0]
-      if (remote) results[pkg.info.name] = remote.substring(0, 7) !== pkg.commit
-    } catch { /* non-critical: git ls-remote may fail offline */ }
-  }
-
-  const updateCount = Object.values(results).filter(Boolean).length
-  state.mutate(s => {
-    for (const p of s.packages) {
-      if (results[p.info.name] !== undefined) p.hasUpdate = results[p.info.name]
+    for (const pkg of s.packages) {
+      if (pkg.status !== 'installed' || !pkg.commit) continue
+      const live = state.getPackage(pkg.info.name)
+      if (!live || live.status !== 'installed' || !live.commit) continue
+      state.setStatusMessage(`Checking ${pkg.info.displayName}...`)
+      try {
+        const out = await runWithOutput('git', ['ls-remote', `https://github.com/${pkg.info.source.repo}.git`, 'HEAD'], os.homedir())
+        const remote = out.split('\t')[0]
+        if (remote) results[pkg.info.name] = remote.substring(0, 7) !== live.commit
+      } catch { /* non-critical: git ls-remote may fail offline */ }
     }
-    s.statusMessage = undefined
-  })
 
-  if (updateCount > 0) {
-    state.setStatusMessage(`Found ${updateCount} package(s) with updates. Use 'u' to update.`)
-    setTimeout(() => state.setStatusMessage(), 5000)
-  } else {
-    state.setStatusMessage('All packages up to date.')
-    setTimeout(() => state.setStatusMessage(), 3000)
+    const updateCount = Object.values(results).filter(Boolean).length
+    state.mutate(s => {
+      for (const p of s.packages) {
+        if (results[p.info.name] !== undefined) p.hasUpdate = results[p.info.name]
+      }
+      s.statusMessage = undefined
+    })
+
+    if (updateCount > 0) {
+      state.setStatusMessage(`Found ${updateCount} package(s) with updates. Use 'u' to update.`)
+      setTimeout(() => state.setStatusMessage(), 5000)
+    } else {
+      state.setStatusMessage('All packages up to date.')
+      setTimeout(() => state.setStatusMessage(), 3000)
+    }
+  } finally {
+    checkUpdatesBusy = false
   }
 }

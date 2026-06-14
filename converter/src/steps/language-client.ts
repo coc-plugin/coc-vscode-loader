@@ -108,7 +108,7 @@ ${ls.verbose ? `    console.log('[${escapeStr(id)}] creating LanguageClient')\n`
         {
           documentSelector: ${docSelectorCode},
           outputChannelName: '${escapeStr(description)}',
-          ${ls.initializationOptions ? `initializationOptions: ${ls.initializationOptions},` : ''}
+          ${ls.initializationOptions ? `initializationOptions: ${ls.initializationOptions.replace(/`/g, '\\`').replace(/\$\{/g, '\\${')},` : ''}
         },
       )
       context.subscriptions.push({ dispose: () => c.stop() })
@@ -117,23 +117,27 @@ ${ls.verbose ? `    console.log('[${escapeStr(id)}] creating LanguageClient')\n`
     }
 
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] registering LanguageClient')\n` : ''}\
-    let client: LanguageClient
+    let clients: LanguageClient[]
     if (${multiRoot ? 'workspace.workspaceFolders && workspace.workspaceFolders.length > 1' : 'false'}) {
 ${ls.verbose ? `      console.log('[${escapeStr(id)}] multiRoot mode')\n` : ''}\
-      for (const folder of workspace.workspaceFolders) {
-        client = createClient()
-        client.start()
-      }
+      clients = workspace.workspaceFolders.map(folder => {
+        const c = createClient()
+        c.start()
+        return c
+      })
     } else {
-      client = createClient()
+      const c = createClient()
 ${ls.verbose ? `      console.log('[${escapeStr(id)}] starting client')\n` : ''}\
-      client.start()
+      c.start()
+      clients = [c]
     }
 
     context.subscriptions.push(
       commands.registerCommand('${escapeStr(pluginName)}.restart', async () => {
-        await client.stop()
-        await client.start()
+        for (const c of clients) {
+          await c.stop()
+          await c.start()
+        }
       }),
     )
   } catch (e: any) {

@@ -126,7 +126,7 @@ export class StateManager {
     this.cachedFilterKey = ''
   }
 
-  setPackageStatus(name: string, status: Status, extra?: { progress?: string; error?: string; appendLog?: boolean; logEntry?: string }) {
+  setPackageStatus(name: string, status: Status, extra?: { progress?: string; error?: string; logEntry?: string }) {
     this.invalidateFilterCache()
     this.mutate(s => {
       const pkg = s.packages.find(p => p.info.name === name)

@@ -44,14 +44,36 @@ export const transformProviderRegister: Transform = (ctx) => {
       `registerCompletionItemProvider('${pluginName}', '${shortcut}', `
     )
     // Wrap the last argument in an array if it's a string (trigger chars)
-    content = content.replace(
-      /(registerCompletionItemProvider\([^)]+),\s*'([^']+)'\)/g,
-      '$1, ["$2"])'
-    )
-    content = content.replace(
-      /(registerCompletionItemProvider\([^)]+),\s*"([^"]+)"\)/g,
-      '$1, ["$2"])'
-    )
+    // Use paren-balancing to handle nested parentheses in arguments
+    // Build result by iterating over all matches, replacing each full call
+    const providerRe = /registerCompletionItemProvider\(/g
+    let result = ''
+    let lastIdx = 0
+    let m: RegExpExecArray | null
+    while ((m = providerRe.exec(content)) !== null) {
+      const start = m.index
+      let depth = 1
+      let i = start + m[0].length
+      while (i < content.length && depth > 0) {
+        if (content[i] === '(') depth++
+        else if (content[i] === ')') depth--
+        i++
+      }
+      const end = i
+      const fullCall = content.slice(start, end)
+      const lastStrMatch = fullCall.match(/,?\s*'([^']+)'\s*\)$/)
+      const lastDblMatch = fullCall.match(/,?\s*"([^"]+)"\s*\)$/)
+      let replacement = fullCall
+      if (lastStrMatch) {
+        replacement = fullCall.slice(0, fullCall.length - lastStrMatch[0].length) + ', ["' + lastStrMatch[1] + '"])'
+      } else if (lastDblMatch) {
+        replacement = fullCall.slice(0, fullCall.length - lastDblMatch[0].length) + ', ["' + lastDblMatch[1] + '"])'
+      }
+      result += content.slice(lastIdx, start) + replacement
+      lastIdx = end
+    }
+    result += content.slice(lastIdx)
+    content = result
     changed = true
   }
 
