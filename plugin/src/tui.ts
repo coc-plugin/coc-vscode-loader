@@ -196,44 +196,52 @@ export class TUI {
       } catch {}
       return
     }
-    if (id === 'f') { this.state.cycleViewFilter(); return }
-    if (id === 's') { this.state.cycleSortBy(); return }
+    if (id === 'f') { this.state.cycleViewFilter(); this.focusIndex = 0; return }
+    if (id === 's') { this.state.cycleSortBy(); this.focusIndex = 0; return }
     if (id === 'gg') {
       this.state.setScrollOffset(0)
-      this.state.setFocusIndex(0)
+      this.focusIndex = 0
       return
     }
     if (id === 'G') {
       const filtered = this.state.getFilteredPackages()
       const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
       this.state.setScrollOffset(Math.max(0, filtered.length - visibleCount))
-      this.state.setFocusIndex(Math.max(0, filtered.length - 1))
+      this.focusIndex = Math.max(0, filtered.length - 1)
       return
     }
     if (id === 'j') {
       const nvim = workspace.nvim
       const [row, col] = await nvim.call('nvim_win_get_cursor', [this.winid]) as [number, number]
       // Try moving within the same package first (detail/log lines)
-      const pkgName = this.pkgLineMap.get(row)
+      const pkgName = this.pkgLineMap.get(row - 1) // nvim row is 1-based, pkgLineMap is 0-based
       if (pkgName) {
         const lines = [...this.pkgLineMap.keys()].filter(l => this.pkgLineMap.get(l) === pkgName).sort((a, b) => a - b)
-        const idx = lines.indexOf(row)
+        const idx = lines.indexOf(row - 1) // convert to 0-based
         if (idx >= 0 && idx < lines.length - 1) {
           await nvim.call('nvim_win_set_cursor', [this.winid, [lines[idx + 1] + 1, col]])
+          this.focusLineOffset = idx + 1
           return
         }
       }
       // At last line of current package, move to next package
+      this.focusLineOffset = 0
       const filtered = this.state.getFilteredPackages()
       const s = this.state.getState()
       const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
-      if (s.focusIndex < filtered.length - 1) {
-        const newFocus = s.focusIndex + 1
-        if (newFocus >= s.scrollOffset + visibleCount) {
+      if (this.focusIndex < filtered.length - 1) {
+        this.focusIndex++
+        if (this.focusIndex >= s.scrollOffset + visibleCount) {
           const maxOffset = Math.max(0, filtered.length - visibleCount)
           this.state.setScrollOffset(Math.min(maxOffset, s.scrollOffset + 1))
+          return // render handles cursor
         }
-        this.state.setFocusIndex(newFocus)
+        // No scroll change — just move cursor in buffer
+        const focused = filtered[this.focusIndex]
+        const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
+        if (pkgLine !== undefined) {
+          await nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, col]])
+        }
       }
       return
     }
@@ -241,23 +249,32 @@ export class TUI {
       const nvim = workspace.nvim
       const [row, col] = await nvim.call('nvim_win_get_cursor', [this.winid]) as [number, number]
       // Try moving within the same package first (detail/log lines)
-      const pkgName = this.pkgLineMap.get(row)
+      const pkgName = this.pkgLineMap.get(row - 1)
       if (pkgName) {
         const lines = [...this.pkgLineMap.keys()].filter(l => this.pkgLineMap.get(l) === pkgName).sort((a, b) => a - b)
-        const idx = lines.indexOf(row)
+        const idx = lines.indexOf(row - 1) // convert to 0-based
         if (idx > 0) {
           await nvim.call('nvim_win_set_cursor', [this.winid, [lines[idx - 1] + 1, col]])
+          this.focusLineOffset = idx - 1
           return
         }
       }
       // At first line of current package, move to previous package
+      this.focusLineOffset = 0
       const s = this.state.getState()
-      if (s.focusIndex > 0) {
-        const newFocus = s.focusIndex - 1
-        if (newFocus < s.scrollOffset) {
+      if (this.focusIndex > 0) {
+        this.focusIndex--
+        if (this.focusIndex < s.scrollOffset) {
           this.state.setScrollOffset(Math.max(0, s.scrollOffset - 1))
+          return // render handles cursor
         }
-        this.state.setFocusIndex(newFocus)
+        // No scroll change — just move cursor in buffer
+        const filtered = this.state.getFilteredPackages()
+        const focused = filtered[this.focusIndex]
+        const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
+        if (pkgLine !== undefined) {
+          await nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, col]])
+        }
       }
       return
     }
@@ -361,6 +378,8 @@ export class TUI {
 
   private rendering = false
   private pendingRender = false
+  private focusIndex = 0
+  private focusLineOffset = 0
 
   private async render() {
     if (!this.winid) return
@@ -390,25 +409,18 @@ export class TUI {
     }
     await nvim.resumeNotification()
 
-    // Position cursor on focused package
-    if (!state.showHelp && result.pkgLineMap.size > 0) {
+    // Position cursor on package main line (only when user hasn't entered details/logs)
+    if (!state.showHelp && result.pkgLineMap.size > 0 && this.focusLineOffset === 0) {
       const visible = this.state.getFilteredPackages()
-      const idx = Math.min(state.focusIndex, visible.length - 1)
+      const idx = Math.min(this.focusIndex, visible.length - 1)
       const focused = visible[idx]
-      let cursorSet = false
       if (focused) {
-        for (const [line, name] of result.pkgLineMap) {
-          if (name === focused.info.name) {
-            await nvim.call('nvim_win_set_cursor', [this.winid, [line + 1, 0]])
-            cursorSet = true
-            break
-          }
-        }
-      }
-      if (!cursorSet) {
-        const firstPkgLine = Math.min(...result.pkgLineMap.keys())
-        if (isFinite(firstPkgLine)) {
-          await nvim.call('nvim_win_set_cursor', [this.winid, [firstPkgLine + 1, 0]])
+        const pkgLines = [...result.pkgLineMap.entries()]
+          .filter(([l, n]) => n === focused.info.name)
+          .map(([l]) => l)
+          .sort((a, b) => a - b)
+        if (pkgLines.length > 0) {
+          await nvim.call('nvim_win_set_cursor', [this.winid, [pkgLines[0] + 1, 0]])
         }
       }
     }

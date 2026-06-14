@@ -45,7 +45,6 @@ export interface AppState {
   viewFilter: ViewFilter
   sortBy: SortBy
   scrollOffset: number
-  focusIndex: number
 }
 
 type Listener = (state: AppState) => void
@@ -79,7 +78,7 @@ export function createInitialState(): AppState {
       marked: false,
     }
   })
-  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default', scrollOffset: 0, focusIndex: 0 }
+  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default', scrollOffset: 0 }
 }
 
 export class StateManager {
@@ -169,26 +168,24 @@ export class StateManager {
   }
 
   setViewFilter(filter: ViewFilter) {
-    this.mutate(s => { s.viewFilter = filter; s.scrollOffset = 0; s.focusIndex = 0 })
+    this.mutate(s => { s.viewFilter = filter; s.scrollOffset = 0 })
   }
 
   cycleViewFilter() {
     this.mutate(s => {
       s.viewFilter = s.viewFilter === 'all' ? 'installed' : s.viewFilter === 'installed' ? 'not-installed' : 'all'
       s.scrollOffset = 0
-      s.focusIndex = 0
     })
   }
 
   setSortBy(sortBy: SortBy) {
-    this.mutate(s => { s.sortBy = sortBy; s.scrollOffset = 0; s.focusIndex = 0 })
+    this.mutate(s => { s.sortBy = sortBy; s.scrollOffset = 0 })
   }
 
   cycleSortBy() {
     this.mutate(s => {
       s.sortBy = s.sortBy === 'default' ? 'name' : s.sortBy === 'name' ? 'status' : s.sortBy === 'status' ? 'type' : 'default'
       s.scrollOffset = 0
-      s.focusIndex = 0
     })
   }
 
@@ -205,15 +202,11 @@ export class StateManager {
   }
 
   setSearchQuery(query: string) {
-    this.mutate(s => { s.searchQuery = query; s.scrollOffset = 0; s.focusIndex = 0 })
+    this.mutate(s => { s.searchQuery = query; s.scrollOffset = 0 })
   }
 
   setScrollOffset(n: number) {
     this.mutate(s => { s.scrollOffset = n })
-  }
-
-  setFocusIndex(n: number) {
-    this.mutate(s => { s.focusIndex = n })
   }
 
   getFilteredPackages(): PackageEntry[] {
