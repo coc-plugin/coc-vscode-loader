@@ -27,6 +27,7 @@ export interface PackageEntry {
 
 export type ViewFilter = 'all' | 'installed' | 'not-installed'
 export type SortBy = 'default' | 'name' | 'status' | 'type'
+export const PAGE_SIZE = 50
 
 export interface AppState {
   packages: PackageEntry[]
@@ -37,6 +38,7 @@ export interface AppState {
   statusMessage?: string
   viewFilter: ViewFilter
   sortBy: SortBy
+  currentPage: number
 }
 
 type Listener = (state: AppState) => void
@@ -69,7 +71,7 @@ export function createInitialState(): AppState {
       marked: false,
     }
   })
-  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default' }
+  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default', currentPage: 0 }
 }
 
 export class StateManager {
@@ -148,22 +150,24 @@ export class StateManager {
   }
 
   setViewFilter(filter: ViewFilter) {
-    this.mutate(s => { s.viewFilter = filter })
+    this.mutate(s => { s.viewFilter = filter; s.currentPage = 0 })
   }
 
   cycleViewFilter() {
     this.mutate(s => {
       s.viewFilter = s.viewFilter === 'all' ? 'installed' : s.viewFilter === 'installed' ? 'not-installed' : 'all'
+      s.currentPage = 0
     })
   }
 
   setSortBy(sortBy: SortBy) {
-    this.mutate(s => { s.sortBy = sortBy })
+    this.mutate(s => { s.sortBy = sortBy; s.currentPage = 0 })
   }
 
   cycleSortBy() {
     this.mutate(s => {
       s.sortBy = s.sortBy === 'default' ? 'name' : s.sortBy === 'name' ? 'status' : s.sortBy === 'status' ? 'type' : 'default'
+      s.currentPage = 0
     })
   }
 
@@ -180,7 +184,11 @@ export class StateManager {
   }
 
   setSearchQuery(query: string) {
-    this.mutate(s => { s.searchQuery = query })
+    this.mutate(s => { s.searchQuery = query; s.currentPage = 0 })
+  }
+
+  setPage(n: number) {
+    this.mutate(s => { s.currentPage = n })
   }
 
   getFilteredPackages(): PackageEntry[] {

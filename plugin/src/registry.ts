@@ -77,7 +77,7 @@ async function fetchRegistryJSON(url: string): Promise<PackageInfo[]> {
   } catch { /* fall through to curl */ }
   // curl respects lowercase http_proxy env vars that Node.js fetch ignores
   return new Promise((resolve, reject) => {
-    execFile('curl', ['-sL', url], { encoding: 'utf-8', maxBuffer: 5 * 1024 * 1024 }, (err, stdout) => {
+    execFile('curl', ['-sL', '--compressed', url], { encoding: 'utf-8', maxBuffer: 20 * 1024 * 1024 }, (err, stdout) => {
       if (err) reject(new Error(`curl failed: ${err.message}`))
       else {
         try {
