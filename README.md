@@ -134,7 +134,7 @@ Close the TUI — it will auto-run `:CocRestart`. Or manually run `:CocRestart`.
 
 ### Which VS Code extensions are supported?
 
-Check the [registry](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json) for the full list. Currently 14 plugins: Volar (Vue), Prisma, HTML CSS Support, Lua, Deno, TOML (Taplo), Ansible, YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, and more being added.
+Check the [registry](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json) for the full list. Currently 15 plugins: Volar (Vue), Prisma, HTML CSS Support, Lua, Deno, TOML (Taplo), Ansible, YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, gitignore, and more being added.
 
 ### How is this different from running the VS Code extension directly?
 

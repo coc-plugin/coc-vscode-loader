@@ -5,10 +5,10 @@
 **一个 coc 插件作为包管理器。** 用户只装一次，之后跟 mason 一样操作：
 
 ```
-:CocInstall coc-converter
-:CocCommand converter.install volar     ← 下载 VS Code 插件 → 转换 → 安装
-:CocCommand converter.open              ← TUI 管理界面
-:CocCommand converter.uninstall volar   ← 卸载
+:CocInstall coc-vscode-loader
+:CocCommand loader.install volar     ← 下载 VS Code 插件 → 转换 → 安装
+:CocCommand loader.open              ← TUI 管理界面
+:CocCommand loader.uninstall volar   ← 卸载
 ```
 
 ---
@@ -105,7 +105,7 @@ interface BridgePreset {
 
 ### 当前内置 preset
 
-`presets.json` 中定义了 `type` 字段，映射到 `converter/src/steps/bridge.ts` 的 `BRIDGE_TEMPLATES`：
+`coc-vscode-registry/presets.json` 中定义了 `type` 字段，映射到 `converter/src/steps/bridge.ts` 的 `BRIDGE_TEMPLATES`：
 
 | 预设 | type | 用途 |
 |------|------|------|
@@ -135,28 +135,25 @@ scanner 从源码检测 `tsserver/request`、`_vue:`、`typescript.tsserverReque
 
 ---
 
-## 四、注册表（coc-converter）
+## 四、注册表（coc-vscode-registry）
 
-内置在 `coc-converter/src/registry.ts` 中，定义为一个 `PackageInfo[]` 数组：
+注册表已独立为 [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) 仓库，位于 [`coc-vscode-registry/registry.json`](../coc-vscode-registry/registry.json)。条目格式：
 
 ```typescript
-interface PackageInfo {
+{
   name: string
   displayName: string
   description: string
   type: 'ts-bridge' | 'pure-lsp' | 'direct-api'
-  source: { type: 'github' | 'npm'; repo?: string; package?: string; subdir?: string }
+  source: { type: 'github'; repo: string; subdir?: string }
   url: string
   languages: string[]
   categories: string[]
+  convert: Step[]  // 转换步骤，见下文
 }
 ```
 
-当前 3 个内置包：Volar、Prisma、HTML CSS Support。
-
-> 均已对接验证：Volar（ts-bridge）、Prisma（pure-lsp）、HTML CSS Support（direct-api）。
-
-扫描和转换逻辑内置在 `converter/` 中，不依赖 registry 配置（自动检测 server 模块、自动分类）。
+注册表的数据由 `plugin/src/registry.ts` 在运行时拉取，converter 不再内置固定列表。
 
 ---
 
@@ -227,12 +224,10 @@ convert <input-vscode-ext> -o <output-dir>
 | esbuild 配置生成 | `converter/src/convert.ts` | external 自动注入 |
 | 桥接 preset 系统 | `converter/src/presets.ts` | ts-bridge preset |
 | CLI | `converter/src/cli.ts` | `convert <input> -o <output>` |
-| coc-converter TUI | `coc-converter/` | TUI 管理界面，3 个内置包 |
+| coc-vscode-loader TUI | `plugin/` | TUI 管理界面，从 registry 拉取列表 |
 | 验证案例 | 3 个 | Volar、Prisma、HTML CSS Support |
 
 ### Pending
 
-- [ ] `--bridge` CLI 选项实现（强制 bridge 模式）
-- [ ] 添加更多插件到注册表
 - [ ] 更多 provider 签名适配
 - [ ] python-bridge / rust-bridge preset 示例
