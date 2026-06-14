@@ -38,9 +38,9 @@ npm install coc-vscode-loader
 | `f` | Cycle filter: all → installed → available |
 | `s` | Cycle sort: default → name → status → type |
 | `j` / `k` | Scroll through packages (virtual scroll) |
-| `gg` | Jump to first page |
-| `G` | Jump to last page |
-| `<CR>` | Open detail popup (description, source, log, error) |
+| `gg` | Jump to first package |
+| `G` | Jump to last package |
+| `<CR>` | Open detail popup (info / install log with syntax highlights) |
 | `/` | Search filter |
 | `q` | Close (auto `:CocRestart` if changes detected) |
 | `<Esc>` | Help→Search→Clear marks→Cancel|Close |
@@ -61,13 +61,13 @@ npm install coc-vscode-loader
 
 - **Real conversion pipeline** — git clone → converter → npm install → esbuild → register to coc
 - **Auto-fetch registry** — remote registry fetched in background when TUI opens, no manual refresh needed
-- **Pagination** — `[`/`]` prev/next page, 50 packages per page, handles 5000+ registry entries
+- **Virtual scrolling** — `j`/`k` smooth scroll through packages, handles 100k+ registry entries
 - **Incremental cache** — source/ keeps git repo, updates via git pull only
 - **Commit tracking** — records commit SHA after install, visible in detail view
 - **Update check** — `C` key compares against remote HEAD, shows `↑` when outdated
 - **Auto restart** — `:CocRestart` triggered automatically on close when changes detected
 - **Manual registry update** — `:CocCommand loader.updateRegistry` also available for re-fetch
-- **Install logs** — real command output per step, expandable
+- **Detail popup** — `<CR>` opens centered float window with package info or live install log (syntax highlighted, auto-scroll to latest)
 - **Mark & batch** — `x` toggle mark, visual indicator, `D` clean orphaned packages
 - **Filter & sort** — `f` cycle view filter, `s` cycle sort order (name/status/type)
 - **Concurrency limit** — max 3 parallel operations for `U` (Update All)

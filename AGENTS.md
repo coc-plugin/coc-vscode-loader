@@ -108,15 +108,14 @@ Registry entries can specify `minPluginVersion` (e.g. `"1.1.2"`) to require a mi
 - lazy.nvim-inspired render engine: per-segment `append(text, hl)` + extmark highlights
 - 9 custom `CocConverter*` highlight groups linked to theme standard groups
 - **Top buttons**: `coc-loader(H)` (Home)  `Install(I)`  `Update(U)`  `Check(C)`  `Help(?)`
-- **Package operations**: `i` install `u` update `X` uninstall `R` reinstall `<CR>` toggle details/logs
+- **Package operations**: `i` install `u` update `X` uninstall `R` reinstall `<CR>` detail popup
 - **Mark & filter**: `x` toggle mark `f` cycle filter `s` cycle sort
-- **Navigation**: `j`/`k` scroll through packages (virtual scrolling), `gg`/`G` first/last, `/` search
+- **Navigation**: `j`/`k` virtual scroll, `gg`/`G` first/last, `/` search
 - **Batch**: `U` update all (max 3 concurrent) `Z` uninstall all `D` cleanup orphaned
 - **Update check**: `C` git ls-remote compares commits, shows `↑` when outdated
-- **Other**: `/` search `q` close / `<Esc>` step-by-step cancel (help→search→marks→busy guard→close)
-- **Detail view**: description / type / commit / source / languages / categories / homepage / serverBinary
-- **Install logs**: `▶` compact line → `<CR>` expand full log with commands
-- **Progress**: `[step/total]` + status text
+- **Other**: `q` close / `<Esc>` step-by-step cancel (help→search→marks→busy guard→close)
+- **Detail popup**: centered float window with syntax highlights — shows package info (installed/available) or live install log with full command output (active/failed)
+- **Progress**: inline `[step/total]` status on package line
 - **Registry auto-fetch**: remote registry fetched in background when TUI opens
 - **Binary server support**: auto-download + extract (.zip, .gz, .tar.gz) server binaries from GitHub Releases, patch generated code for command-mode startup, fix documentSelector and activationEvents
 - **Pip packages**: auto-install Python dependencies via pip (e.g. ansible-lint), only uses `--break-system-packages` on Linux
