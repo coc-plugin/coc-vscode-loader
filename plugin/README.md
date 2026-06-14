@@ -37,8 +37,9 @@ npm install coc-vscode-loader
 | `x` | Toggle mark package for batch operations |
 | `f` | Cycle filter: all → installed → available |
 | `s` | Cycle sort: default → name → status → type |
-| `gg` | Jump to first package |
-| `G` | Jump to last package |
+| `[` / `]` | Previous / next page |
+| `gg` | Jump to first page |
+| `G` | Jump to last page |
 | `<CR>` | Toggle details (commit / type / source) or install log |
 | `/` | Search filter |
 | `q` | Close (auto `:CocRestart` if changes detected) |
@@ -60,6 +61,7 @@ npm install coc-vscode-loader
 
 - **Real conversion pipeline** — git clone → converter → npm install → esbuild → register to coc
 - **Auto-fetch registry** — remote registry fetched in background when TUI opens, no manual refresh needed
+- **Pagination** — `[`/`]` prev/next page, 50 packages per page, handles 5000+ registry entries
 - **Incremental cache** — source/ keeps git repo, updates via git pull only
 - **Commit tracking** — records commit SHA after install, visible in detail view
 - **Update check** — `C` key compares against remote HEAD, shows `↑` when outdated

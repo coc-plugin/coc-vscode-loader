@@ -110,7 +110,7 @@ Registry entries can specify `minPluginVersion` (e.g. `"1.1.2"`) to require a mi
 - **Top buttons**: `coc-loader(H)` (Home)  `Install(I)`  `Update(U)`  `Check(C)`  `Help(?)`
 - **Package operations**: `i` install `u` update `X` uninstall `R` reinstall `<CR>` toggle details/logs
 - **Mark & filter**: `x` toggle mark `f` cycle filter `s` cycle sort
-- **Navigation**: `gg` / `G` jump to first / last package
+- **Navigation**: `j`/`k` move within page, `[`/`]` prev/next page (50/page), `gg`/`G` first/last page
 - **Batch**: `U` update all (max 3 concurrent) `Z` uninstall all `D` cleanup orphaned
 - **Update check**: `C` git ls-remote compares commits, shows `↑` when outdated
 - **Other**: `/` search `q` close / `<Esc>` step-by-step cancel (help→search→marks→busy guard→close)

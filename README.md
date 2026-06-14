@@ -162,14 +162,6 @@ Yes! Fork the [registry repo](https://github.com/coc-plugin/coc-vscode-registry)
 
 ---
 
-## Roadmap
-
-| Milestone | Target | Focus |
-|-----------|--------|-------|
-| [v1.2.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-08 | Registry expansion: Angular, ESLint, Code Spell Checker |
-| [v1.2.6](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-08 | Snippets step type, more transforms + bridge presets |
-| [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | 30+ plugins, full transform coverage, 30+ snippet extensions |
-
 ---
 
 ## Community & Support

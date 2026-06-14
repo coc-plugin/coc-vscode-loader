@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.2.6] - 2026-06-14
+
+### Added
+- **Registry expansion: 114 packages** — 99 snippet extensions added (JavaScript, React, Vue, Angular, Bootstrap, Flutter, Django, Laravel, Svelte, etc.)
+- TUI pagination: `[`/`]` prev/next page, `gg`/`G` first/last page (PAGE_SIZE=50)
+- TUI flat package list (removed Installed/Available sections, use `f` to filter)
+- Registry download: `--compressed` curl flag + 20MB maxBuffer for 5000+ entries
+
+### Fixed
+- Web registry: broken "Load more" buttons due to missing event listeners on dynamic DOM
+
 ## [1.2.5] - 2026-06-13
 
 ### Fixed
