@@ -2,68 +2,66 @@
 
 Thanks for your interest in contributing to coc-vscode-loader!
 
-## 理解两个仓库的关系
+## How the two repos work together
 
-将一个 VS Code 扩展运行在 coc.nvim 上需要两部分配合：
+Running a VS Code extension on coc.nvim requires two parts:
 
 ```
-coc-vscode-loader          ← 解析器（converter）：负责转换 VS Code 扩展的代码
-  └─ converter/               AST 变换、LanguageClient 生成、入口注入等
+coc-vscode-loader          ← Parser (converter): transforms VS Code extension source code
+  └─ converter/               AST transforms, LanguageClient generation, entry injection
   
-coc-vscode-registry        ← 注册表（registry）：记录哪些插件可装、如何转换
-  └─ registry.json            每个插件的 source 地址 + convert 配置
+coc-vscode-registry        ← Registry: defines which plugins are available and how to convert them
+  └─ registry.json            Each plugin's source address + convert configuration
 ```
 
-**添加一个新插件时，永远需要问：解析器已经能处理它了吗？**
+**When adding a new plugin, the first question is: can the converter already handle it?**
 
 ---
 
-## 添加新插件的工作流
+## Workflow for adding a new plugin
 
 ```
-你想把某个 VS Code 扩展跑在 coc.nvim 上
+You want to run a VS Code extension on coc.nvim
                   │
                   ▼
-     检查该扩展用了哪些 VS Code API
+     Check what VS Code APIs the extension uses
                   │
         ┌─────────┴──────────┐
         ▼                    ▼
-  现有转换器能处理         转换器不能完全处理
-  （纯 LSP、标准          （用了未覆盖的 API、
-   API 调用）              新的 provider 类型等）
+  Converter can handle    Converter CANNOT handle
+  (pure LSP, standard     (uses uncovered APIs,
+   API calls)              new provider types, etc.)
         │                    │
-        │                    ├─ 1. 在 converter/ 加新 transform
-        │                    ├─ 2. 在 converter/ 加新 provider 适配
-        │                    └─ 3. 可能需加新 bridge preset
+        │                    ├─ 1. Add new transform in converter/
+        │                    ├─ 2. Add new provider adapter in converter/
+        │                    └─ 3. Possibly add new bridge preset
         │                    │
         ▼                    ▼
-  只需 registry 条目     registry 条目 + converter PR
-  （下面步骤 1-3）       （两个仓库都要改）
+  Registry entry only    Registry entry + converter PR
+  (steps 1-3 below)     (both repos must change)
 ```
 
 ---
 
-## 步骤详解
+## Step-by-step
 
-### 1. 分析插件类型
+### 1. Classify the plugin type
 
-确定插件属于哪一类：
+| Type | Description | Example | Converter ready? |
+|------|-------------|---------|-----------------|
+| `pure-lsp` | Pure LSP via LanguageClient | Prisma, ESLint, YAML | Yes (`language-client` step) |
+| `ts-bridge` | Depends on TS language server | Volar, Angular | Yes (`ts-bridge` preset) |
+| `direct-api` | Direct coc.nvim API calls, no language server | HTML CSS Support | Check if APIs are covered |
+| New type | None of the above | — | Need new bridge preset or transform |
 
-| 类型 | 特点 | 示例 | 解析器需处理？ |
-|------|------|------|--------------|
-| `pure-lsp` | 纯 LSP，通过 LanguageClient 启动语言服务 | Prisma, ESLint, YAML | 已有 `language-client` 步骤 |
-| `ts-bridge` | 依赖 TS 语言服务器通信 | Volar, Angular | 已有 `ts-bridge` preset |
-| `direct-api` | 直接调用 coc.nvim API，无语言服务 | HTML CSS Support | 需检查是否覆盖所用 API |
-| 新类型 | 以上都不符合 | — | 需加新 bridge preset 或 transform |
+### 2. Configure the `convert` field
 
-### 2. 配置 convert 字段
-
-`registry.json` 的 `convert` 数组告诉解析器如何转换：
+The `convert` array in `registry.json` tells the converter what to do:
 
 ```jsonc
 {
   "name": "my-plugin",
-  "type": "pure-lsp",   // ← 仅用于 TUI 分类显示，不影响转换行为
+  "type": "pure-lsp",   // ← only used for TUI display, does NOT affect conversion
   "source": {
     "type": "github",
     "repo": "owner/repo",
@@ -71,27 +69,27 @@ coc-vscode-registry        ← 注册表（registry）：记录哪些插件可�
   },
   "languages": ["mylang"],
   "convert": [
-    // 类型 1: 生成 LanguageClient 入口，启动一个 LSP 服务器
+    // Step type 1: Generate LanguageClient entry to launch an LSP server
     {
       "type": "language-client",
       "server": {
-        "kind": "module",         // "module" → npm 包, "binary" → 下载二进制
+        "kind": "module",         // "module" → npm package, "binary" → download binary
         "package": "some-lsp-server",
-        "entry": "bin"            // "main" 或 "bin"，多 bin 可用 binName
+        "entry": "bin"            // "main" or "bin"; use binName for multi-bin packages
       },
       "languages": ["mylang"]
     },
-    // 类型 2: 对源码做 AST 变换
+    // Step type 2: Apply AST transforms to source files
     {
       "type": "source",
       "transforms": ["import-mapping", "class-to-factory", "provider-register"]
     },
-    // 类型 3: 桥接代码（ts-bridge 等）
+    // Step type 3: Bridge code (ts-bridge, etc.)
     {
       "type": "bridge",
       "preset": "ts-bridge"
     },
-    // 类型 4: 标记不支持 API
+    // Step type 4: Mark unsupported APIs
     {
       "type": "mark-unsupported"
     }
@@ -99,39 +97,39 @@ coc-vscode-registry        ← 注册表（registry）：记录哪些插件可�
 }
 ```
 
-### 3. 如果解析器不满足需求
+### 3. If the converter doesn't meet your needs
 
-当遇到解析器未覆盖的 API 或模式时，需要在 `coc-vscode-loader` 中扩展，然后才能在 registry 中配置：
+When the converter doesn't cover the APIs or patterns your plugin uses, extend it first — then configure the registry:
 
-**场景 A：缺某种 AST 变换**
-- 在 `converter/src/transforms/` 下新增 transform
-- 在 `converter/src/transforms/index.ts` 注册
-- 然后在 registry 的 `convert` 中引用新 transform 名
+**Case A: Missing AST transform**
+- Add a new transform in `converter/src/transforms/`
+- Register it in `converter/src/transforms/index.ts`
+- Reference the new transform name in the registry's `convert` field
 
-**场景 B：缺某个 provider 适配**
-- 扩展 `converter/src/transforms/provider-register.ts`，添加新的签名适配
+**Case B: Missing provider adapter**
+- Extend `converter/src/transforms/provider-register.ts` with the new signature
 
-**场景 C：需要新的 bridge preset**
-- 在 `converter/src/steps/bridge.ts` 添加新 preset
+**Case C: Need a new bridge preset**
+- Add a new preset in `converter/src/steps/bridge.ts`
 
-### 4. 验证
+### 4. Verify
 
 ```bash
-# 验证 registry JSON 格式
+# Validate registry JSON format
 python3 -c "import json; json.load(open('path/to/registry.json'))"
 
-# 本地测试转换
+# Test conversion locally
 cd converter
 npx tsx src/cli.ts convert ../path/to/vscode-ext -o ./output \
   --convert-file <(echo '[{"type":"source","transforms":["import-mapping"]}]')
 cd ./output && npm install && node esbuild.mjs
 ```
 
-### 5. 提交 PR
+### 5. Submit a PR
 
-- **只改 registry** → 向 [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) 提 PR
-- **registry + converter 都改** → 向本仓库（coc-vscode-loader）提 PR，包含 registry 条目
-  - 两个变更必须在同一个 PR 中，否则插件无法运行
+- **Registry entry only** → PR to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)
+- **Both registry and converter changes** → PR to this repo (coc-vscode-loader), including the registry entry
+  - Both changes must be in the same PR — otherwise the plugin won't work
 
 ---
 
