@@ -187,6 +187,34 @@ npm install coc-vscode-loader    # or
 
 数组语法（自动解析）和对象语法（手动指定）互斥。
 
+### `snippets` step type（v1.2.6+）
+
+用于纯 VS Code Snippets 扩展（无代码、无 LSP，只有 `contributes.snippets` JSON 文件）。
+
+**核心原则**：coc-snippets 通过 **`package.json` 的 `contributes.snippets`** 发现片段文件（读取 `textmateProvider.ts:loadSnippetDefinition()`），不是通过目录名匹配。所以必须保留原始 `contributes.snippets` 声明和文件相对路径。
+
+转换逻辑：
+1. 读源 `package.json` 的 `contributes.snippets` → 得到 `{language → path}` 映射
+2. 把每个 snippet JSON 文件复制到输出的**相同相对路径**（如 `./snippets/snippets.json` → `output/snippets/snippets.json`）
+3. 生成空壳 `src/index.ts`（`export function activate() {}`）
+4. `convert.ts` 保留 `origPkg.contributes.snippets` 到输出 `package.json`
+
+Registry 条目示例：
+```json
+{
+  "name": "javascript-snippets",
+  "displayName": "JavaScript ES6 Snippets",
+  "type": "snippets",
+  "source": { "type": "github", "repo": "xabikos/vscode-javascript" },
+  "languages": ["javascript"],
+  "categories": ["Snippets"],
+  "convert": [{ "type": "snippets" }]
+}
+```
+
+实现文件：`converter/src/steps/snippets.ts`，在 `steps/index.ts` 注册。
+`convert.ts` 中新增 `contributes.snippets` 的透传（在 package.json 生成阶段保留原声明）。
+
 ## Converter 关键模块
 
 ### `binName` 字段（v1.2.0+）

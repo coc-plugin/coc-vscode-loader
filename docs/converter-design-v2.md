@@ -67,8 +67,9 @@ VS Code 的实现依赖 `typescript.tsserverRequest` 内置命令，coc 没有�
           │   ├ class-to-factory             │
           │   ├ provider-register            │
           │   ├ language-client              │
-          │   ├ enum-offset                  │
-          │   └ mark-unsupported (文本替换)   │
+          │   ├ enum-offset  (注释提醒)      │
+          │   ├ mark-unsupported (文本替换)   │
+          │   └ snippets (JSON 复制)        │
           └────────┬─────────────────────────┘
                    ▼
           ┌──────────────────────────────────┐
@@ -144,7 +145,7 @@ scanner 从源码检测 `tsserver/request`、`_vue:`、`typescript.tsserverReque
   name: string
   displayName: string
   description: string
-  type: 'ts-bridge' | 'pure-lsp' | 'direct-api'
+  type: 'ts-bridge' | 'pure-lsp' | 'direct-api' | 'snippets'
   source: { type: 'github'; repo: string; subdir?: string }
   url: string
   languages: string[]
@@ -181,7 +182,8 @@ convert <input-vscode-ext> -o <output-dir>
   ├─ 5. 生成入口文件
   │     ├─ direct-api → 保留原 extension.ts
   │     ├─ 纯 LSP → 生成 LanguageClient 入口（自动检测 server 模块）
-  │     └─ ts-bridge → 同上 + tsserver/request 桥接代码（来自 preset）
+  │     ├─ ts-bridge → 同上 + tsserver/request 桥接代码（来自 preset）
+  │     └─ snippets → 生成空壳 activate 函数
   │
   ├─ 6. 生成 package.json + esbuild.mjs
   │     ├─ dependencies（仅 LSP 相关）
@@ -231,3 +233,5 @@ convert <input-vscode-ext> -o <output-dir>
 
 - [ ] 更多 provider 签名适配
 - [ ] python-bridge / rust-bridge preset 示例
+- [ ] `snippets` step type — 纯 snippets 扩展自动转换（参见 `AGENTS.md`）
+- [ ] 30+ snippet extensions 分批录入 registry

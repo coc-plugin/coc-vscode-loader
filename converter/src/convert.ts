@@ -326,6 +326,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
         command: c.command,
         title: c.title,
       })) || undefined,
+      snippets: origPkg.contributes?.snippets || undefined,
       ...(tsPlugins.length > 0 ? {
         typescriptServerPlugins: tsPlugins.map(p => ({
           ...p,
@@ -338,6 +339,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
   // Clean null fields
   if (!pkg.contributes?.configuration) delete (pkg.contributes as any).configuration
   if (!pkg.contributes?.commands) delete (pkg.contributes as any).commands
+  if (!pkg.contributes?.snippets) delete (pkg.contributes as any).snippets
   if (Object.keys(pkg.contributes).length === 0) delete (pkg as any).contributes
 
   fs.writeFileSync(path.join(output, 'package.json'), JSON.stringify(pkg, null, 2))

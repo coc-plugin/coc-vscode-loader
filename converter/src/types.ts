@@ -73,7 +73,13 @@ export interface MarkUnsupportedStep {
   verbose?: boolean
 }
 
-export type ConvertStep = LanguageClientStep | SourceStep | BridgeStep | MarkUnsupportedStep
+export interface SnippetsStep {
+  type: 'snippets'
+  /** Optional: override languages to generate (default: read from source package.json's contributes.snippets) */
+  languages?: string[]
+}
+
+export type ConvertStep = LanguageClientStep | SourceStep | BridgeStep | MarkUnsupportedStep | SnippetsStep
 
 // ---- Step execution ----
 

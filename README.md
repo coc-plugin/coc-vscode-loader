@@ -150,7 +150,7 @@ Close the TUI — it will auto-run `:CocRestart`. Or manually run `:CocRestart`.
 
 ### Which VS Code extensions are supported?
 
-Browse the [registry website](https://coc-plugin.github.io/coc-vscode-registry/) or check [registry.json](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json). Currently 15 plugins: Volar (Vue), Prisma, HTML CSS Support, Lua, Deno, TOML (Taplo), Ansible, YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, gitignore, and more being added.
+Browse the [registry website](https://coc-plugin.github.io/coc-vscode-registry/) or check [registry.json](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json). Currently 14 plugins: Volar (Vue), Prisma, HTML CSS Support, Lua, Deno, TOML (Taplo), Ansible, YAML, Tailwind CSS, Biome, Stylelint, Prettier, Svelte, Astro, gitignore, and more being added. Pure snippet extensions (JavaScript/TypeScript/Vue/React etc.) are also supported — see [`docs/conversion-feasibility-210.md`](./docs/conversion-feasibility-210.md) for the full 210-plugin analysis.
 
 ### How is this different from running the VS Code extension directly?
 
@@ -167,8 +167,8 @@ Yes! Fork the [registry repo](https://github.com/coc-plugin/coc-vscode-registry)
 | Milestone | Target | Focus |
 |-----------|--------|-------|
 | [v1.2.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-08 | Registry expansion: Angular, ESLint, Code Spell Checker |
-| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-10 | More transforms + bridge presets + python-bridge, rust-bridge |
-| [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | 20+ plugins, full transform coverage |
+| [v1.2.6](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-08 | Snippets step type, more transforms + bridge presets |
+| [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | 30+ plugins, full transform coverage, 30+ snippet extensions |
 
 ---
 

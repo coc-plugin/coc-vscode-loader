@@ -3,6 +3,7 @@ import { languageClientGenerator } from './language-client.js'
 import { sourceGenerator } from './source.js'
 import { bridgeGenerator } from './bridge.js'
 import { markUnsupportedGenerator } from './mark-unsupported.js'
+import { snippetsGenerator } from './snippets.js'
 
 const REGISTRY: Record<string, StepGenerator> = {}
 
@@ -27,3 +28,4 @@ registerGenerator(languageClientGenerator)
 registerGenerator(sourceGenerator)
 registerGenerator(bridgeGenerator)
 registerGenerator(markUnsupportedGenerator)
+registerGenerator(snippetsGenerator)

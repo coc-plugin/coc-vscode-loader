@@ -42,6 +42,7 @@
 | `source` | 复制源文件 + 应用 transforms |
 | `bridge` | 生成桥接代码（仅用于有不可移植 API 的插件，如 Volar） |
 | `mark-unsupported` | 标记不支持的功能 |
+| `snippets` | 转换纯 Snippets 扩展（v1.2.6+，参见 AGENTS.md） |
 
 ---
 
@@ -311,6 +312,24 @@ const BRIDGE_TEMPLATES = {
 
 ---
 
+### `snippets`
+
+纯 Snippets 扩展转换（v1.2.6+）。自动读取源 `package.json` 的 `contributes.snippets`，复制 JSON 文件并生成空入口。
+
+```json
+{
+  "type": "snippets"
+}
+```
+
+输出：
+- `./snippets/*.json` — 从源扩展按原始相对路径复制
+- `src/index.ts` — 空壳入口（仅 `export function activate() {}`）
+
+> coc-snippets 通过 `package.json` 的 `contributes.snippets` 发现片段文件，因此 `convert.ts` 会保留原始声明，snippet JSON 文件必须放在**原相对路径**。
+
+---
+
 ## 输出 package.json 生成
 
 输出插件的 `package.json` 由 converter 在步骤执行后生成（而非 pipeline）。生成规则：
@@ -558,6 +577,7 @@ Prettier 使用 `source` 步骤直接转换 prettier-vscode 的源码（而非 b
 | `binName` | `npm view <package> --json` 的 bin 中包含该名称 |
 | `entry: "bin"` + 无 `main` 字段 | `npm view <package> --json` 无 main，自动回退 `require.resolve('pkg/package.json')` |
 | `kind: "binary"` + `binary.repo` | GitHub API `repos/<repo>/releases/latest` 可访问 |
+| `type: "snippets"` 或 `convert` 含 `snippets` | 源 `package.json` 的 `contributes.snippets` 存在且非空 |
 | `kind: "binary"` + `binary.asset` | asset 模板变量渲染后匹配已发布的 release |
 | `bridge.preset` | 预设已注册 |
 
@@ -587,6 +607,7 @@ Prettier 使用 `source` 步骤直接转换 prettier-vscode 的源码（而非 b
 - [x] 添加 `source` 代码生成器（copy + transforms + esbuild）
 - [x] 添加 `bridge` 代码生成器（preset 系统）
 - [x] 添加 `mark-unsupported` 代码生成器
+- [ ] 添加 `snippets` 代码生成器（v1.2.6+）
 - [x] 添加步骤验证逻辑
 - [x] 删除 `detectServerModules` 等启发式函数
 - [x] 删除 pipeline 中的正则后处理（documentSelector、activationEvents、bin-walking 等）
@@ -637,4 +658,4 @@ Prettier 使用 `source` 步骤直接转换 prettier-vscode 的源码（而非 b
 | 可靠性 | 猜对就能用，猜错就炸 | 声明的就是确定的 |
 | 混合类型 | 不支持（pure-lsp vs direct-api 二选一） | 步骤数组可以组合 |
 | 测试 | 手动测试 | 配置即测试用例 |
-| 学习成本 | 需要理解 500 行正则逻辑 | 理解 5 个 JSON 字段即可 |
+| 学习成本 | 需要理解 500 行正则逻辑 | 理解 6 个 JSON 字段即可 |
