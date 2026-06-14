@@ -80,7 +80,12 @@ export const snippetsGenerator: StepGenerator = {
         const [cmd, ...args] = ss.build.split(' ')
         execFileSync(cmd, args, { cwd: input, stdio: verbose ? 'inherit' : 'pipe' })
       } catch (e: any) {
-        console.warn(`  snippets: build failed (${e.message}), skipping`)
+        if (e.code === 'ENOENT') {
+          const cmd = ss.build.split(' ')[0]
+          console.warn(`  snippets: build tool "${cmd}" not found. Install it and try again, or remove the "build" field from the registry entry.`)
+        } else {
+          console.warn(`  snippets: build failed (${e.message}), skipping`)
+        }
       }
       // Retry copying
       for (const [sourceRelPath, languages] of fileToLanguages) {
