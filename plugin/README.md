@@ -40,7 +40,7 @@ npm install coc-vscode-loader
 | `j` / `k` | Scroll through packages (virtual scroll) |
 | `gg` | Jump to first page |
 | `G` | Jump to last page |
-| `<CR>` | Toggle details (commit / type / source) or install log |
+| `<CR>` | Open detail popup (description, source, log, error) |
 | `/` | Search filter |
 | `q` | Close (auto `:CocRestart` if changes detected) |
 | `<Esc>` | Help→Search→Clear marks→Cancel|Close |

@@ -30,7 +30,7 @@ const HELP_TEXT = [
   '    /          Search filter (then j/k to scroll)',
   '    gg         Jump to first page',
   '    G          Jump to last page',
-  '    <Enter>    Toggle expand/collapse details',
+  '    <Enter>    Open detail popup (description, source, log)',
   '    q          Close window',
   '    <Esc>      Help→Search→Marks→Busy guard→Close',
   '',
@@ -51,6 +51,9 @@ export class TUI {
   private unsubscribe: (() => void) | null = null
   private pkgLineMap: Map<number, string> = new Map()
   private logLineSet: Set<number> = new Set()
+  private detailWinid: number = 0
+  private detailBufnr: number = 0
+  private detailPkgName: string = ''
   private windowHeight: number = 0
   private static readonly HEADER_LINES = 6
   private static readonly FOOTER_LINES = 3
@@ -123,7 +126,7 @@ export class TUI {
           const curBuf = await nvim.call('winbufnr', [curWin]) as number
           const bt = await nvim.call('getbufvar', [curBuf, '&buftype']) as string
           if (bt !== 'nofile' && bt !== 'prompt') {
-            this.close()
+            await this.close()
           }
         }
       })
@@ -165,10 +168,11 @@ export class TUI {
   }
 
   async handleKey(id: string) {
+    if (!this.winid) return
     const line0 = await this.getCursorLine0()
     const s = this.state.getState()
 
-    if (id === 'q') { this.close(); return }
+    if (id === 'q') { await this.close(); return }
     if (id === 'I') {
       this.state.setActivePill('I')
       return
@@ -186,7 +190,7 @@ export class TUI {
       if (hasMarks) { this.state.clearMarks(); return }
       const busy = s.packages.some(p => ['installing', 'updating', 'uninstalling'].includes(p.status))
       if (busy) { cocWindow.showInformationMessage('Operation in progress, wait for it to finish'); return }
-      this.close(); return
+      await this.close(); return
     }
     if (id === 'question') { this.state.toggleHelp(); return }
     if (id === 'slash') {
@@ -211,69 +215,40 @@ export class TUI {
       return
     }
     if (id === 'j') {
-      const nvim = workspace.nvim
-      const [row, col] = await nvim.call('nvim_win_get_cursor', [this.winid]) as [number, number]
-      // Try moving within the same package first (detail/log lines)
-      const pkgName = this.pkgLineMap.get(row - 1) // nvim row is 1-based, pkgLineMap is 0-based
-      if (pkgName) {
-        const lines = [...this.pkgLineMap.keys()].filter(l => this.pkgLineMap.get(l) === pkgName).sort((a, b) => a - b)
-        const idx = lines.indexOf(row - 1) // convert to 0-based
-        if (idx >= 0 && idx < lines.length - 1) {
-          await nvim.call('nvim_win_set_cursor', [this.winid, [lines[idx + 1] + 1, col]])
-          this.focusLineOffset = idx + 1
-          return
-        }
-      }
-      // At last line of current package, move to next package
-      this.focusLineOffset = 0
       const filtered = this.state.getFilteredPackages()
-      const s = this.state.getState()
-      const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
       if (this.focusIndex < filtered.length - 1) {
         this.focusIndex++
+        this.focusLineOffset = 0
+        const s = this.state.getState()
+        const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
         if (this.focusIndex >= s.scrollOffset + visibleCount) {
-          const maxOffset = Math.max(0, filtered.length - visibleCount)
-          this.state.setScrollOffset(Math.min(maxOffset, s.scrollOffset + 1))
-          return // render handles cursor
+          s.scrollOffset = Math.min(Math.max(0, filtered.length - visibleCount), s.scrollOffset + 1)
+          await this.render()
+          return
         }
-        // No scroll change — just move cursor in buffer
         const focused = filtered[this.focusIndex]
         const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
         if (pkgLine !== undefined) {
-          await nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, col]])
+          await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, 0]])
         }
       }
       return
     }
     if (id === 'k') {
-      const nvim = workspace.nvim
-      const [row, col] = await nvim.call('nvim_win_get_cursor', [this.winid]) as [number, number]
-      // Try moving within the same package first (detail/log lines)
-      const pkgName = this.pkgLineMap.get(row - 1)
-      if (pkgName) {
-        const lines = [...this.pkgLineMap.keys()].filter(l => this.pkgLineMap.get(l) === pkgName).sort((a, b) => a - b)
-        const idx = lines.indexOf(row - 1) // convert to 0-based
-        if (idx > 0) {
-          await nvim.call('nvim_win_set_cursor', [this.winid, [lines[idx - 1] + 1, col]])
-          this.focusLineOffset = idx - 1
-          return
-        }
-      }
-      // At first line of current package, move to previous package
-      this.focusLineOffset = 0
-      const s = this.state.getState()
       if (this.focusIndex > 0) {
         this.focusIndex--
+        this.focusLineOffset = 0
+        const s = this.state.getState()
         if (this.focusIndex < s.scrollOffset) {
-          this.state.setScrollOffset(Math.max(0, s.scrollOffset - 1))
-          return // render handles cursor
+          s.scrollOffset = Math.max(0, s.scrollOffset - 1)
+          await this.render()
+          return
         }
-        // No scroll change — just move cursor in buffer
         const filtered = this.state.getFilteredPackages()
         const focused = filtered[this.focusIndex]
         const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
         if (pkgLine !== undefined) {
-          await nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, col]])
+          await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, 0]])
         }
       }
       return
@@ -330,18 +305,18 @@ export class TUI {
       await installPackage(this.state, pkgName)
       return
     }
+    if (id === 'close-detail') {
+      this.closeDetailPopup()
+      return
+    }
     if (id === 'cr') {
-      if (this.logLineSet.has(line0)) {
-        this.state.toggleLog(pkgName)
-      } else {
-        this.state.toggleExpand(pkgName)
-      }
+      if (pkgName) await this.showDetailPopup(pkgName)
       return
     }
   }
 
   private keyMap: Record<string, string> = {
-    q: 'q', esc: '<Esc>', question: '?', slash: '/', j: 'j', k: 'k',
+    q: 'q', esc: '<Esc>', question: '?', slash: '/', j: 'j', k: 'k', 'close-detail': 'close-detail',
     U: 'U', Z: 'Z', i: 'i', u: 'u', X: 'X', R: 'R', cr: '<CR>',
     f: 'f', s: 's', x: 'x', D: 'D', gg: 'gg', G: 'G',
   }
@@ -367,6 +342,11 @@ export class TUI {
     if (this.unsubscribe) { this.unsubscribe(); this.unsubscribe = null }
     for (const d of this.disposables) { d.dispose() }
     this.disposables = []
+    // Destroy hidden detail popup on TUI close
+    if (this.detailWinid) {
+      try { workspace.nvim.call('nvim_win_close', [this.detailWinid, true]) } catch {}
+      this.detailWinid = 0
+    }
     if (this.winid) {
       try { await workspace.nvim.call('nvim_win_close', [this.winid, true]) } catch {}
       this.winid = 0
@@ -409,18 +389,21 @@ export class TUI {
     }
     await nvim.resumeNotification()
 
-    // Position cursor on package main line (only when user hasn't entered details/logs)
-    if (!state.showHelp && result.pkgLineMap.size > 0 && this.focusLineOffset === 0) {
+    // Refresh detail popup content if open
+    if (this.detailWinid) {
+      this.updateDetailPopup().catch(() => {})
+    }
+
+    // Ensure focusIndex points to a visible package
+    if (!state.showHelp && result.pkgLineMap.size > 0) {
+      this.focusIndex = Math.max(this.focusIndex, state.scrollOffset)
       const visible = this.state.getFilteredPackages()
       const idx = Math.min(this.focusIndex, visible.length - 1)
       const focused = visible[idx]
       if (focused) {
-        const pkgLines = [...result.pkgLineMap.entries()]
-          .filter(([l, n]) => n === focused.info.name)
-          .map(([l]) => l)
-          .sort((a, b) => a - b)
-        if (pkgLines.length > 0) {
-          await nvim.call('nvim_win_set_cursor', [this.winid, [pkgLines[0] + 1, 0]])
+        const targetLine = [...result.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
+        if (targetLine !== undefined) {
+          await nvim.call('nvim_win_set_cursor', [this.winid, [targetLine + 1, 0]])
         }
       }
     }
@@ -529,7 +512,7 @@ export class TUI {
   }
 
   private renderEntry(
-    buf: LineBuffer, pkgLineMap: Map<number, string>, logSet: Set<number>,
+    buf: LineBuffer, pkgLineMap: Map<number, string>, _logSet: Set<number>,
     entry: PackageEntry,
   ) {
     const icon = entry.status === 'installed' ? '●' : entry.status === 'failed' ? '✗' : '○'
@@ -548,72 +531,113 @@ export class TUI {
     buf.append(icon, iconHl)
     buf.append(' ')
     buf.append(entry.info.displayName)
+    // Status/progress inline
+    let statusText = ''
+    let statusHl = ''
+    if (entry.progress) {
+      statusText = `  ${entry.progress}`
+      statusHl = 'Comment'
+    } else if (entry.status === 'installed') {
+      statusText = '  [installed]'
+      statusHl = 'CocConverterInstalled'
+    } else if (entry.status === 'failed' && entry.error) {
+      statusText = `  ✗ ${entry.error}`
+      statusHl = 'ErrorMsg'
+    }
     buf.append(' ')
     buf.append(entry.info.type, 'CocConverterType')
+    if (statusText) {
+      buf.append(statusText, statusHl)
+    }
     if (entry.hasUpdate) {
       buf.append('  ↑', 'CocConverterKey')
     }
-    // lazy.nvim style: only show commit info for just-updated packages
+    // Commit info for just-updated packages (single line)
     if (entry.updated && entry.commit && entry.commitMsg) {
-      buf.nl()
-      const ln = buf.currentLine()
-      buf.append(`     ${entry.commit} ${entry.commitMsg}`, 'Comment')
-      if (entry.commitDate) {
-        buf.append(` (${entry.commitDate})`, 'Comment')
-      }
-      pkgLineMap.set(ln, entry.info.name)
-    }
-
-    if (entry.expanded) {
-      buf.nl()
-      const extras: (string | null)[] = [
-        entry.info.description,
-        `type        ${entry.info.type}`,
-        entry.commit ? `commit      ${entry.commit}` : null,
-        `source      ${sourceStr(entry.info.source)}`,
-        `languages   ${entry.info.languages.join(', ')}`,
-        `categories  ${entry.info.categories.join(', ')}`,
-        `homepage    ${entry.info.url}`,
-        entry.info.serverBinary ? `server      ${entry.info.serverBinary.repo} (binary release)` : null,
-      ]
-      for (const text of extras.filter(Boolean) as string[]) {
-        const ln = buf.currentLine()
-        buf.nl(`     ${text}`)
-        pkgLineMap.set(ln, entry.info.name)
-      }
-    }
-
-    if (entry.progress) {
-      buf.nl()
-      if (entry.logExpanded) {
-        const ln = buf.currentLine()
-        buf.nl(`     ▼ Install log:`)
-        logSet.add(ln)
-        pkgLineMap.set(ln, entry.info.name)
-        for (const log of entry.progressLog) {
-          for (const l of log.split('\n')) {
-            const ln2 = buf.currentLine()
-            buf.nl(`       ${l}`)
-            logSet.add(ln2)
-            pkgLineMap.set(ln2, entry.info.name)
-          }
-        }
-      } else {
-        const ln = buf.currentLine()
-        buf.nl(`     ▶ ${entry.progress}`)
-        logSet.add(ln)
-        pkgLineMap.set(ln, entry.info.name)
-      }
-    }
-
-    if (entry.error) {
-      buf.nl()
-      const ln = buf.currentLine()
-      buf.nl(`     ✗ ${entry.error}`)
-      pkgLineMap.set(ln, entry.info.name)
+      const cr = entry.commitDate ? ` (${entry.commitDate})` : ''
+      buf.append(`  ${entry.commit} ${entry.commitMsg}${cr}`, 'Comment')
     }
 
     buf.nl()
+  }
+
+  private buildDetailLines(entry: PackageEntry): string[] {
+    const lines: string[] = [
+      `  ${entry.info.displayName}  (${entry.info.name})`,
+      `  ${entry.info.description}`,
+      '',
+      `  type:        ${entry.info.type}`,
+      `  status:      ${entry.status}`,
+    ]
+    if (entry.progress) lines.push(`  progress:    ${entry.progress}`)
+    if (entry.commit) lines.push(`  commit:      ${entry.commit}`)
+    lines.push(
+      `  source:      ${sourceStr(entry.info.source)}`,
+      `  languages:   ${entry.info.languages.join(', ')}`,
+      `  categories:  ${entry.info.categories.join(', ')}`,
+      `  homepage:    ${entry.info.url}`,
+    )
+    if (entry.info.serverBinary) {
+      lines.push(`  server:      ${entry.info.serverBinary.repo} (binary release)`)
+    }
+    if (entry.error) {
+      lines.push('', `  ✗ ${entry.error}`)
+    }
+    if (entry.progressLog.length > 0) {
+      lines.push('', '  Install log:')
+      for (const log of entry.progressLog) {
+        for (const l of log.split('\n')) {
+          lines.push(`    ${l}`)
+        }
+      }
+    }
+    return lines
+  }
+
+  private async showDetailPopup(name: string) {
+    if (this.detailWinid) this.closeDetailPopup()
+    this.detailPkgName = name
+    const nvim = workspace.nvim
+    const entry = this.state.getPackage(name)
+    if (!entry) return
+
+    const col = Math.max(2, Math.floor((await nvim.call('nvim_get_option', ['columns']) as number) - 74) / 2)
+    const buf = await nvim.createNewBuffer(false, true)
+    this.detailBufnr = buf.id
+    const win = await nvim.openFloatWindow(buf, true, {
+      relative: 'editor', width: 70, height: 8, row: 2, col,
+      border: 'rounded', style: 'minimal', zindex: 100,
+    })
+    this.detailWinid = win.id
+    await nvim.call('nvim_buf_set_option', [this.detailBufnr, 'bufhidden', 'wipe'])
+    await nvim.call('nvim_buf_set_option', [this.detailBufnr, 'buftype', 'nofile'])
+    const keyBuf = nvim.createBuffer(this.detailBufnr)
+    keyBuf.setKeymap('n', 'q', '<Cmd>call CocConverterDispatch("close-detail")<CR>', { silent: true, nowait: true })
+    keyBuf.setKeymap('n', '<Esc>', '<Cmd>call CocConverterDispatch("close-detail")<CR>', { silent: true, nowait: true })
+    await this.updateDetailPopup()
+  }
+
+  private async updateDetailPopup() {
+    if (!this.detailWinid || !this.detailPkgName) return
+    const entry = this.state.getPackage(this.detailPkgName)
+    if (!entry) { this.closeDetailPopup(); return }
+    const lines = this.buildDetailLines(entry)
+    const height = Math.min(lines.length + 2, 20)
+    const nvim = workspace.nvim
+    if (this.detailWinConfig) {
+      this.detailWinConfig.height = height
+      await nvim.call('nvim_win_set_config', [this.detailWinid, this.detailWinConfig])
+    }
+    await nvim.call('nvim_buf_set_lines', [this.detailBufnr, 0, -1, false, [...lines, '', '  q close']])
+  }
+
+  private closeDetailPopup() {
+    if (!this.detailWinid) return
+    try { workspace.nvim.call('nvim_win_close', [this.detailWinid, true]) } catch {}
+    this.detailWinid = 0
+    this.detailBufnr = 0
+    this.detailPkgName = ''
+    this.render().catch(() => {})
   }
 
   isOpen(): boolean {
