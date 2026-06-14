@@ -77,6 +77,8 @@ export interface SnippetsStep {
   type: 'snippets'
   /** Optional: override languages to generate (default: read from source package.json's contributes.snippets) */
   languages?: string[]
+  /** Optional: build command to run in source dir before collecting snippet files (e.g. "node merge.js") */
+  build?: string
 }
 
 export type ConvertStep = LanguageClientStep | SourceStep | BridgeStep | MarkUnsupportedStep | SnippetsStep
