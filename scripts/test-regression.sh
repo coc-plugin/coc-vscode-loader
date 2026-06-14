@@ -275,7 +275,7 @@ if [ -f "$REGISTRY" ]; then
 import json
 with open('$REGISTRY') as f:
     entries = json.load(f)
-    assert len(entries) == 114, f'Expected 114 entries, got {len(entries)}'
+    assert len(entries) == 110, f'Expected 110 entries, got {len(entries)}'
 for e in entries:
     if e['name'] == 'prettier-vscode':
         assert e['type'] == 'direct-api', f'{e[\"name\"]} should be direct-api'

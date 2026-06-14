@@ -1,9 +1,11 @@
 # Changelog
 
-## [1.2.8] - 2026-06-15
+## [1.2.9] - 2026-06-15
 
 ### Fixed
-- **Snippets converter fallback** — when snippet source files don't exist in the cloned repo, generate empty `{}` JSON files at the expected paths instead of throwing a hard error. Three-tier fallback: try copy → try build → generate empty.
+- **Snippets converter** — when snippet source files don't exist at expected paths, warn with clear message instead of crashing; add `build` field support for repos that generate snippets via compile step (e.g. `vscode-es7-react-snippets` needs `npm run compile`)
+- **Registry data quality** — corrected repo URLs for `vscode-jquery-snippets` and `vscode-java-imports-snippets`; added `subdir` for `vscode-bootstrap-v4`; removed 4 broken entries (`vscode-tensorflow`, `vscode-asp-net-core`, `vscode-bootstrap4`, `vscode-material2`)
+- **Snippets path fallback** — when `ss.languages` resolves no paths from `contributes.snippets`, populate with default `./snippets/{lang}.json` paths instead of throwing
 
 ## [1.2.7] - 2026-06-15
 

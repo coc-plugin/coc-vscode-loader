@@ -75,9 +75,13 @@ export const snippetsGenerator: StepGenerator = {
     if (copiedCount === 0 && ss.build) {
       // Run build script to generate snippet files (e.g. node merge.js)
       if (verbose) console.log(`  snippets: running build: ${ss.build}`)
-      execFileSync('npm', ['install', '--legacy-peer-deps'], { cwd: input, stdio: verbose ? 'inherit' : 'pipe' })
-      const [cmd, ...args] = ss.build.split(' ')
-      execFileSync(cmd, args, { cwd: input, stdio: verbose ? 'inherit' : 'pipe' })
+      try {
+        execFileSync('npm', ['install', '--legacy-peer-deps'], { cwd: input, stdio: verbose ? 'inherit' : 'pipe' })
+        const [cmd, ...args] = ss.build.split(' ')
+        execFileSync(cmd, args, { cwd: input, stdio: verbose ? 'inherit' : 'pipe' })
+      } catch (e: any) {
+        console.warn(`  snippets: build failed (${e.message}), skipping`)
+      }
       // Retry copying
       for (const [sourceRelPath, languages] of fileToLanguages) {
         const sourceFile = path.join(input, sourceRelPath)
