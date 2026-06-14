@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.2.7] - 2026-06-15
+
+### Added
+- **Virtual scrolling** — replaced page-based navigation (`[`/`]`) with `j`/`k` per-package scroll; `scrollOffset` + `focusIndex` replace `currentPage` + `PAGE_SIZE`; only visible packages rendered based on window height (supports 100k+ entries)
+- **Detail popup** — floating window with dual-mode (log/info) and syntax highlighting via extmarks; auto-refresh during install/update; scroll to end in log mode
+- **Focus management** — cursor tracking moved from reactive `AppState` to local `TUI` fields; direct `nvim_win_set_cursor` positioning skips unnecessary re-renders
+- **Byte-aware commit message truncation** — long commit msgs clipped in middle (preserving hash + date) with `…` ellipsis, `Buffer.from` byte-length for correct CJK/emoji rendering
+- `LineBuffer.currentByteLen()` for measuring rendered line byte lengths
+- `I` key batch install for marked packages
+- Filter cache in `StateManager` — avoids redundant sort/filter on every render
+- `getInstalledSet()` — single `readdirSync` replaces N `existsSync` calls
+- **Snippets converter** — build script support (`build` field in config); fail fast on missing snippet files with clear error messages
+- **Intra-package `j`/`k` navigation** — scroll through detail/log lines within same package before moving to next/previous
+- **Detail popup height** — log mode uses fixed 20 lines for full command output visibility; info mode uses content-based sizing capped at 20
+
+### Fixed
+- `pauseNotification`/`resumeNotification` imbalance — wrapped in try/finally to prevent Neovim RPC deadlock
+- `runConcurrent` aborting all remaining work on single failure — per-item `.catch(() => {})` + `Promise.allSettled`
+- `uninstallPackage` missing `await` in command handler
+- `checkUpdates` concurrency race (added `checkUpdatesBusy` lock) + stale snapshot iteration
+- Focus index jumping on scroll — scrollOffset now follows focusIndex instead of clamping forward
+- Removed redundant `[installed]` status text (icon already indicates status)
+- Removed unused `appendLog` parameter from `setPackageStatus`
+- `lastUpdate` not refreshed on reinstall
+- Postinstall failures silently swallowed — now reported as warning
+- `downloadSource` no longer overwrites progress with raw git output
+- Update short-circuits on "Already up to date." — skips convert/build/install
+- Converter: nested `NewExpression` replacement order (inner before outer)
+- Converter: paren-balancing for `registerCompletionItemProvider` trigger chars
+- Converter: multi-root `LanguageClient` leak — track all clients in array
+- Converter: template injection in `initializationOptions` (escape backticks/`${}`)
+- Converter: missing `require('vscode')` single-quote variant in scanner
+
 ## [1.2.6] - 2026-06-14
 
 ### Added
