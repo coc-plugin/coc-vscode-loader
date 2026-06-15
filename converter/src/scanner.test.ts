@@ -32,12 +32,13 @@ describe('scanner', () => {
     fs.rmSync(tmpdir, { recursive: true, force: true })
   })
 
-  it('ignores .js files', async () => {
+  it('detects vscode imports in .js files', async () => {
     const tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'scanner-test-'))
     fs.writeFileSync(path.join(tmpdir, 'ext.js'), "const vscode = require('vscode')")
     const { scan } = await import('./scanner.js')
     const result = scan(tmpdir)
-    expect(result.files).toHaveLength(0)
+    expect(result.files).toHaveLength(1)
+    expect(result.files[0].apis).toContain('vscode')
     fs.rmSync(tmpdir, { recursive: true, force: true })
   })
 

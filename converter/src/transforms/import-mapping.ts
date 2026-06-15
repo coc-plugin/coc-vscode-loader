@@ -1,6 +1,34 @@
 import { Transform } from '../types.js'
 
 /**
+ * Replace a function call and its arguments, handling balanced parentheses.
+ * Calls fn(name) with the full match text up to the closing paren, returns replacement.
+ */
+function replaceBalanced(
+  content: string,
+  prefix: RegExp,
+  fn: (fullCall: string) => string,
+): string {
+  const re = new RegExp(prefix.source, 'g')
+  let result = ''
+  let lastIdx = 0
+  let m: RegExpExecArray | null
+  while ((m = re.exec(content)) !== null) {
+    let depth = 1
+    let i = m.index + m[0].length
+    while (i < content.length && depth > 0) {
+      if (content[i] === '(') depth++
+      else if (content[i] === ')') depth--
+      i++
+    }
+    const fullCall = content.slice(m.index, i)
+    result += content.slice(lastIdx, m.index) + fn(fullCall)
+    lastIdx = i
+  }
+  return result + content.slice(lastIdx)
+}
+
+/**
  * Replace `from 'vscode'` with `from 'coc.nvim'`,
  * and apply name remapping for known API differences.
  */
@@ -137,16 +165,12 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   newContent = newContent.replace(/window\.onDidChangeActiveTextEditor/g, 'workspace.onDidOpenTextDocument')
 
   // languages.createLanguageStatusItem → no-op (coc.nvim doesn't have this)
-  newContent = newContent.replace(
-    /languages\.createLanguageStatusItem\([^)]+\)/g,
+  newContent = replaceBalanced(newContent, /languages\.createLanguageStatusItem\(/, () =>
     '({ dispose(){}, text: "", command: void 0, name: "", accessibilityInformation: void 0, severity: void 0 }) as any'
   )
 
   // window.showOpenDialog → not available in coc, return undefined
-  newContent = newContent.replace(
-    /window\.showOpenDialog\([^)]*\)/g,
-    'void 0 as any'
-  )
+  newContent = replaceBalanced(newContent, /window\.showOpenDialog\(/, () => 'void 0 as any')
 
   // Add priority 1 to document format providers (default 0 gets overridden by LanguageClient)
   newContent = newContent.replace(
@@ -159,13 +183,10 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   )
 
   // authentication.getSession → undefined (coc.nvim has no auth API)
-  newContent = newContent.replace(
-    /authentication\.getSession\s*\([^)]*\)/g,
-    'undefined as any'
-  )
+  newContent = replaceBalanced(newContent, /authentication\.getSession\s*\(/, () => 'undefined as any')
 
   // editor.setDecorations → no-op (coc has different decoration API)
-  newContent = newContent.replace(/editor\.setDecorations\s*\([^)]+\)/g, '/* setDecorations */')
+  newContent = replaceBalanced(newContent, /editor\.setDecorations\s*\(/, () => '/* setDecorations */')
 
   // Guard workspace.workspaceFolders when accessed via index (coc.nvim may return undefined)
   newContent = newContent.replace(

@@ -16,7 +16,7 @@ export function scan(dir: string): ScanResult {
   if (!fs.existsSync(dir)) {
     return { files, summary: 'no source directory found' }
   }
-  const tsFiles = walk(dir).filter(f => f.endsWith('.ts') || f.endsWith('.tsx'))
+  const tsFiles = walk(dir).filter(f => f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.js'))
 
   for (const filePath of tsFiles) {
     const content = fs.readFileSync(filePath, 'utf-8')

@@ -38,7 +38,7 @@ export const transformProviderRegister: Transform = (ctx) => {
   const baseName = path.basename(fileName, '.ts')
   const shortcut = baseName.replace(/[^a-zA-Z]/g, '').substring(0, 2).toUpperCase() || 'PL'
   if (content.includes('registerCompletionItemProvider')) {
-    const pluginName = path.basename(path.dirname(path.dirname(fileName))) || 'plugin'
+    const pluginName = ctx.pluginName || path.basename(path.dirname(path.dirname(fileName))) || 'plugin'
     content = content.replace(
       /registerCompletionItemProvider\(/g,
       `registerCompletionItemProvider('${pluginName}', '${shortcut}', `

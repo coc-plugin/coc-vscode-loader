@@ -23,7 +23,10 @@ program
     let steps: any[]
     let presets: any
     if (opts.presetsFile) {
-      try { presets = JSON.parse(fs.readFileSync(opts.presetsFile, 'utf-8')) } catch {}
+      try { presets = JSON.parse(fs.readFileSync(opts.presetsFile, 'utf-8')) } catch (e: any) {
+        console.error(`invalid --presets-file: ${e.message}`)
+        process.exit(1)
+      }
     }
     if (opts.convertFile) {
       try {

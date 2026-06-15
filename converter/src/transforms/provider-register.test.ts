@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import { Project, ScriptKind } from 'ts-morph'
 
-async function applyProviderRegister(source: string, filePath?: string): Promise<string> {
+async function applyProviderRegister(source: string, filePath?: string, pluginName?: string): Promise<string> {
   const project = new Project({ useInMemoryFileSystem: true })
   const fp = filePath || '/project/src/extension.ts'
   const file = project.createSourceFile(fp, source, { scriptKind: ScriptKind.TS })
   const { transformProviderRegister } = await import('./provider-register.js')
-  transformProviderRegister({ file, project })
+  transformProviderRegister({ file, project, pluginName })
   return file.getText()
 }
 
@@ -47,6 +47,15 @@ describe('provider-register transform', () => {
     )
     expect(result).toContain(', ["abc"])')
     expect(result).not.toContain(", 'abc')")
+  })
+
+  it('uses pluginName from context when provided', async () => {
+    const result = await applyProviderRegister(
+      "registerCompletionItemProvider(sel, provider, 'ab')",
+      undefined,
+      'my-plugin',
+    )
+    expect(result).toContain("registerCompletionItemProvider('my-plugin'")
   })
 
   it('handles no transformation needed', async () => {

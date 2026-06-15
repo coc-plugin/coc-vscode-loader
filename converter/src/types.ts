@@ -3,6 +3,8 @@ import { Project, SourceFile } from 'ts-morph'
 export interface TransformContext {
   file: SourceFile
   project: Project
+  /** Plugin name from origPkg (for transforms that need it) */
+  pluginName?: string
 }
 
 export type Transform = (ctx: TransformContext) => void

@@ -62,7 +62,7 @@ export const sourceGenerator: StepGenerator = {
       allFiles.push({ src: f, rel })
 
       const content = fs.readFileSync(f, 'utf-8')
-      const hasVscode = content.includes("from 'vscode'") || content.includes('from "vscode"') || content.includes('require("vscode")')
+      const hasVscode = content.includes("from 'vscode'") || content.includes('from "vscode"') || content.includes('require("vscode")') || content.includes("require('vscode')")
       if (hasVscode) {
         vscodeFiles.push(rel)
         if (rel.endsWith('.js')) jsFiles.push(rel)
@@ -98,7 +98,7 @@ export const sourceGenerator: StepGenerator = {
           continue
         }
         try {
-          fn({ file: sf, project })
+          fn({ file: sf, project, pluginName: ctx.origPkg.name })
           if (verbose) console.log(`  ${t}: ${relPath}`)
         } catch (e: any) {
           if (verbose) console.warn(`  ${t} error on ${relPath}: ${e.message}`)
@@ -171,8 +171,6 @@ function resolveDepVersion(pkg: Record<string, any>, name: string, inputDir?: st
   // 3. Walk up for workspace root
   if (inputDir) {
     let dir = inputDir
-    const fs = require('fs') as typeof import('fs')
-    const path = require('path') as typeof import('path')
     while (dir !== path.dirname(dir)) {
       dir = path.dirname(dir)
       const wsPkgPath = path.join(dir, 'package.json')

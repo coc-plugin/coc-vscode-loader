@@ -287,12 +287,12 @@ export async function convert(opts: ConvertOptions): Promise<void> {
   // Collect all runtime deps from origPkg (deps + devDeps, filtered)
   const origDeps: Record<string, string> = {}
   {
-    const allPkgDeps = { ...origPkg.dependencies, ...origPkg.devDependencies }
+    const allPkgDeps = { ...origPkg.devDependencies, ...origPkg.dependencies }
     for (const [dep, ver] of Object.entries(allPkgDeps)) {
       const v = ver as string
       if (v.startsWith('workspace:')) continue
       if (dep.startsWith('@types/')) continue
-      if (['typescript', 'mocha', 'c8', 'prettier', 'rollup', 'esbuild', '@vscode/'].some(p => dep.startsWith(p))) continue
+      if (['typescript', 'mocha', 'c8', 'prettier', 'rollup', 'esbuild', '@vscode/test-electron'].some(p => dep.startsWith(p))) continue
       origDeps[dep] = v
     }
   }
