@@ -60,6 +60,7 @@ npm install coc-vscode-loader
 ## Features
 
 - **Real conversion pipeline** — git clone → converter → npm install → esbuild → register to coc
+- **Local server build** — auto-copies `server/` directory from source, installs deps, compiles TypeScript during build
 - **Auto-fetch registry** — remote registry fetched in background when TUI opens, no manual refresh needed
 - **Virtual scrolling** — `j`/`k` smooth scroll through packages, handles 100k+ registry entries
 - **Incremental cache** — source/ keeps git repo, updates via git pull only
@@ -81,7 +82,7 @@ npm install coc-vscode-loader
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache |
-| `src/pipeline.ts` | Real install/update/uninstall flow (git + npx tsx + npm + node + cp) |
+| `src/pipeline.ts` | Real install/update/uninstall flow (git + npx tsx + npm + node + cp). Handles local servers (copies `server/` dir, installs deps). |
 | `src/renderer.ts` | LineBuffer render engine (inspired by lazy.nvim) |
 
 ## Build

@@ -91,7 +91,7 @@ Two test suites must pass before pushing:
 
 ```bash
 npm test                    # Unit tests (115 tests) + test coverage check
-npm run test:smoke          # Registry smoke test (converts all 112 entries)
+npm run test:smoke          # Registry smoke test (converts all 113 entries)
 ```
 
 **Pre-push hook** — `git push` automatically runs both suites. Configure once:

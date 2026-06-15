@@ -35,6 +35,7 @@ cd ~/.config/coc/extensions && npm install /path/to/coc-ext
 | Astro | Pure LSP | npm package server |
 | Lua | Pure LSP | npm package server |
 | gitignore | Direct API | Source transforms |
+| CSS Peek | Pure LSP | Local server (TypeScript source in `server/`) |
 
 See the [registry](https://github.com/coc-plugin/coc-vscode-registry) for the full list and latest status.
 
@@ -53,6 +54,22 @@ cd ~/.config/coc/extensions
 npm install ChuYanLon/coc-tsserver --legacy-peer-deps
 ```
 
+## Local server support
+
+当 language server 是源码中本地子目录（非 npm 包），可在 `server.package` 使用相对路径：
+
+```json
+{ "kind": "module", "package": "../server/out/server" }
+```
+
+自动处理：
+- 简化代码生成（无 bin walking）
+- esbuild.mjs 自动安装 `@types/node` + 编译 server TypeScript
+- pipeline 自动拷贝 server 目录
+- 注册 hover fallback provider
+
+详见 [AGENTS.md](../AGENTS.md#local-server-%E6%94%AF%E6%8C%81v142).
+
 ## Architecture
 
 ```
@@ -68,7 +85,8 @@ Input: VS Code extension directory
   ├─ mark-unsupported  Replace/mark missing APIs (getWordRangeAtPosition, fileName, etc.)
   ├─ generate src/index.ts   Main entry (bridge / LanguageClient / direct templates)
   ├─ generate package.json   Dependencies / esbuild external config
-  └─ generate esbuild.mjs    Build config
+  ├─ generate esbuild.mjs    Build config + server TypeScript compilation
+  └─ local server hover fallback  (only for relative-path servers)
 ```
 
 ## Bridge preset system
@@ -97,7 +115,7 @@ See [../docs/converter-design-v2.md](../docs/converter-design-v2.md).
 
 ```bash
 npm test                    # Unit tests (115 tests, 15 files) + coverage check
-npm run test:smoke          # Registry smoke test — converts all 112 entries
+npm run test:smoke          # Registry smoke test — converts all 113 entries
 npm run test:watch          # Watch mode for development
 npm run check:tests         # Verify every source file has a matching test
 ```
@@ -117,12 +135,12 @@ npm run check:tests         # Verify every source file has a matching test
 | `steps/bridge.test.ts` | 4 | Bridge preset resolution and code injection |
 | `steps/mark-unsupported.test.ts` | 7 | Unsupported API marking |
 | `convert.test.ts` | 15 | Full conversion pipeline (text replacements, output generation, step orchestration) |
-| `registry-validation.test.ts` | 12 | Registry.json schema (112 entries) |
+| `registry-validation.test.ts` | 12 | Registry.json schema (113 entries) |
 | `scanner.test.ts` | 6 | API scanner detection |
 | `presets.test.ts` | 5 | Bridge preset definitions |
 | `transforms/language-client.test.ts` | 5 | LanguageClient AST adaptation |
 
-**Smoke test** — `npm run test:smoke` clones all 112 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
+**Smoke test** — `npm run test:smoke` clones all 113 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
 
 ```bash
 # Force re-clone all repos
@@ -156,7 +174,7 @@ src/
     ├── strip-volar.ts      Volar framework stripping
     └── enum-offset.ts      Enum value offset annotations
 scripts/
-├── smoke-test.ts           Registry smoke test (112 entries)
+├── smoke-test.ts           Registry smoke test (113 entries)
 └── check-tests.ts          Test coverage enforcement
 ```
 
