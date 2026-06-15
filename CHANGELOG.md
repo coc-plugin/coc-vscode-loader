@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.4.2] - 2026-06-15
+
+### Added
+- **Registry website** — redesigned with dark/light theme toggle (persisted to localStorage); mobile-responsive layout with three breakpoints; new card fields: `minPluginVersion`, `pipPackages`, `serverBinary` labels; card animations, search icon, gradient accent colors
+
+### Changed
+- **converter**: bump to v1.4.2
+- **plugin**: ensure converter/plugin version parity
+- **README**: preview images now stacked vertically at 100% width
+
+### Fixed
+- **converter/presets**: removed dead bridge preset system (`presets.ts`, `presets.test.ts`)
+- **plugin/pipeline**: `git fetch + reset --hard origin/HEAD` instead of `git pull` for safer shallow-clone updates
+- **plugin/registry**: atomic cache writes via temp + rename; deduplicate concurrent registry fetch; filter pre-release versions in `satisfiesVersion`
+- **plugin/state**: preserve busy status (`installing`/`updating`/`uninstalling`) during registry reconcile; cap progressLog at 500 entries
+- **plugin/tui**: reorder keymap setup before render; add render failure and `showDetailPopupBusy` guards; remove unused `keyMap`/`focusLineOffset`
+- **converter/transforms**: balanced paren matching for `CompletionItem.create` and `createStatusBarItem`; guarded `CodeAction` try-catch; handle bare `import()`, `import type`, and shebang/`use strict` header
+- **converter/steps/snippets**: `parseShellCommand` for quoted build args; fix indentation
+- **converter/steps/source**: warn on syntax errors in `.js` files; auto-inject Uri/workspace imports
+- **converter/steps/language-client**: handle string `bin` field; isolate restart failures per client
+
 ## [1.4.1] - 2026-06-15
 
 ### Fixed
