@@ -22,7 +22,8 @@
 | 类型 | 特点 | 代表 | 自动化程度 |
 |------|------|------|-----------|
 | 纯 LSP | 无外部依赖，LanguageClient 直连 | ESLint、JSON、HTML、YAML | **~95%** |
-| TS 桥接型 | 需要与 TypeScript 语言服务器通信 | Volar、Angular | **~85%** + 桥接配置 |
+| TS 桥接型 | 需要与 TypeScript 语言服务器通信 | Volar | **~85%** + 桥接配置 |
+| 纯 LSP (ng) | 独立 LSP 服务器，通过 LanguageClient 连接 | Angular Language Service | **~95%** |
 | 其他语言桥接型 | 需要与其他语言服务器通信 | Python/Rust 分析工具 | 需用户自定义桥接 |
 
 ### TS 桥接型插件的特殊处理
@@ -235,3 +236,5 @@ convert <input-vscode-ext> -o <output-dir>
 - [ ] python-bridge / rust-bridge preset 示例
 - [x] `snippets` step type — 纯 snippets 扩展自动转换（参见 `AGENTS.md`）
 - [x] 20+ snippet extensions 已录入 registry
+- [x] `args` field for module-kind servers — supports `{dir}` and `{pluginDir}` placeholders
+- [x] Angular Language Service (`vscode-ng-language-service`) — added to registry

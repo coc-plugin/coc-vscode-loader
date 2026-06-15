@@ -36,6 +36,7 @@ cd ~/.config/coc/extensions && npm install /path/to/coc-ext
 | Lua | Pure LSP | npm package server |
 | gitignore | Direct API | Source transforms |
 | CSS Peek | Pure LSP | Local server (TypeScript source in `server/`) |
+| Angular Language Service | Pure LSP | npm package server (`@angular/language-server`), `binName` + `args` with `{pluginDir}` |
 
 See the [registry](https://github.com/coc-plugin/coc-vscode-registry) for the full list and latest status.
 
@@ -114,8 +115,8 @@ See [../docs/converter-design-v2.md](../docs/converter-design-v2.md).
 ## Testing
 
 ```bash
-npm test                    # Unit tests (114 tests, 14 files) + coverage check
-npm run test:smoke          # Registry smoke test — converts all 113 entries
+npm test                    # Unit tests (115 tests, 14 files) + coverage check
+npm run test:smoke          # Registry smoke test — converts all 114 entries
 npm run test:watch          # Watch mode for development
 npm run check:tests         # Verify every source file has a matching test
 ```
@@ -127,12 +128,12 @@ npm run check:tests         # Verify every source file has a matching test
 | `transforms/import-mapping.test.ts` | 22 | All text-level replacements + real transform Uri injection |
 | `transforms/class-to-factory.test.ts` | 7 | `new Xxx()` → `Xxx.create()` / `TextEdit.replace()` |
 | `convert.test.ts` | 17 | Full conversion pipeline (text replacements, output generation, step orchestration, patches) |
-| `registry-validation.test.ts` | 12 | Registry.json schema (113 entries) |
+| `registry-validation.test.ts` | 12 | Registry.json schema (114 entries) |
 | `scanner.test.ts` | 6 | API scanner detection |
 | `presets.test.ts` | 5 | Bridge preset definitions |
 | `transforms/language-client.test.ts` | 5 | LanguageClient AST adaptation |
 
-**Smoke test** — `npm run test:smoke` clones all 113 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
+**Smoke test** — `npm run test:smoke` clones all 114 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
 
 ```bash
 # Force re-clone all repos
@@ -166,7 +167,7 @@ src/
     ├── strip-volar.ts      Volar framework stripping
     └── enum-offset.ts      Enum value offset annotations
 scripts/
-├── smoke-test.ts           Registry smoke test (113 entries)
+├── smoke-test.ts           Registry smoke test (114 entries)
 └── check-tests.ts          Test coverage enforcement
 ```
 

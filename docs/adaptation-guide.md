@@ -7,7 +7,7 @@
 | `switch.sh local` | 自动写入 `extensions/package.json` dependencies，coc 可发现插件 |
 | `registry.ts` | 自动检测本地开发模式，使用 `coc-vscode-registry/registry.json` |
 | `minPluginVersion` | registry 扩展支持 `minPluginVersion` 字段，未发布版本对老用户不可见 |
-| `serverBinary.args` | 新增 `args` 字段支持二进制 LSP 启动参数（如 `deno lsp`）|
+| `server.args` (module kind) | 新增 `args` 字段支持 module kind LSP 启动参数（v1.4.3+），支持 `{dir}` 和 `{pluginDir}` 占位符 |
 | `binaryPath` 自动推导 | 未指定时从 asset 模板名提取（`deno-{{rust-target}}.zip` → `deno`）|
 
 ### 版本兼容机制
@@ -28,5 +28,5 @@ registry.json 条目                    coc-vscode-loader 版本
 
 ---
 
-> 最后更新: 2026-06-13
+> 最后更新: 2026-06-16
 > 分析方法: 逐扩展阅读 GitHub 源码 + 实际运行 `converter convert` → `npm install` → `node esbuild.mjs` 全链路验证

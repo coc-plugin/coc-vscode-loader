@@ -260,7 +260,7 @@ npm install coc-vscode-loader    # or
 
 | Milestone | Target | Description |
 |-----------|--------|-------------|
-| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-06 | Registry expansion: PHP Intelephense, Rust Analyzer, Angular, ESLint |
+| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-06 | Registry expansion: PHP Intelephense, Rust Analyzer, ESLint |
 | [v1.4.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-08 | More transforms, bridge presets, registry expansion |
 | [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | Stable ecosystem: 10+ plugins, full transform coverage |
 
@@ -356,9 +356,43 @@ Registry 条目示例：
 
 > 注意：`binName` 本身在 v1.2.0 可用，但无 main 字段回退在 v1.2.2 才加入。需要同时使用两者的 registry 条目（如 tailwindcss）应设 `minPluginVersion: "1.2.2"`。
 
+### `args` 字段（v1.4.3+）
+
+当 `server.kind === "module"` 时，可用 `args` 指定启动 language server 时传入的 CLI 参数（之前仅 `binary` kind 支持）。
+
+```json
+{
+  "kind": "module",
+  "package": "@angular/language-server",
+  "entry": "bin",
+  "binName": "ngserver",
+  "args": [
+    "--ngProbeLocations",
+    "{pluginDir}",
+    "--tsProbeLocations",
+    "{pluginDir}",
+    "--logToConsole"
+  ]
+}
+```
+
+支持以下占位符，会在代码生成时替换为运行时表达式：
+
+| 占位符 | 运行时值 |
+|--------|----------|
+| `{dir}` | `__dirname`（编译输出目录） |
+| `{pluginDir}` | `require('path').resolve(__dirname, '..')`（插件根目录） |
+
+生成的 serverOptions 包含 `args` 数组：
+```typescript
+{ module: serverPath, transport: TransportKind.ipc, args: ['--ngProbeLocations', require('path').resolve(__dirname, '..'), ...] }
+```
+
 ## Pending
 
-- [ ] Add more plugins to registry (ESLint, Angular, Code Spell Checker)
+- [x] Angular Language Service (`vscode-ng-language-service`) — added to registry
+- [x] `args` field for module-kind language servers — supports `{dir}` and `{pluginDir}` placeholders
+- [ ] Add more plugins to registry (ESLint, Code Spell Checker)
 - [ ] Add `vscode-languageclient` import rewrite to `import-mapping` transform
 - [ ] Add more transforms (uri-mapping, more provider signatures)
 - [ ] Add python-bridge / rust-bridge preset examples
@@ -376,8 +410,8 @@ Registry 条目示例：
 Every source file must have a corresponding `.test.ts` file. Run before pushing:
 
 ```bash
-npm test                    # Unit tests (114) + check-tests (no missing/empty tests)
-npm run test:smoke          # Registry smoke test (converts all 113 entries, validates output)
+npm test                    # Unit tests (115) + check-tests (no missing/empty tests)
+npm run test:smoke          # Registry smoke test (converts all 114 entries, validates output)
 ```
 
 **Pre-push hook** runs both. CI runs unit tests on push/PR (Node 20/22) and smoke test after.

@@ -22,6 +22,15 @@ export const languageClientGenerator: StepGenerator = {
     let serverPathCode: string
     let serverOptionsCode: string
 
+    // Compute runtime args expression (for both binary and module servers)
+    function buildArgsExpr(args: string[]): string {
+      return args.map(a => {
+        if (a === '{dir}') return '__dirname'
+        if (a === '{pluginDir}') return "require('path').resolve(__dirname, '..')"
+        return `'${escapeStr(a)}'`
+      }).join(', ')
+    }
+
     if (ls.server.kind === 'binary') {
       const pkg = ls.server.package
       const binary = ls.server.binary
@@ -52,7 +61,9 @@ export const languageClientGenerator: StepGenerator = {
     if (!_mainEntry) {
       _mainEntry = require('path').join(__dirname, '${escapeStr(pkg)}')
     }`
-        serverOptionsCode = `{ module: _mainEntry, transport: ${transportExpr} }`
+        const args = ls.server.args
+        const argsClause = args?.length ? `, args: [${buildArgsExpr(args)}]` : ''
+        serverOptionsCode = `{ module: _mainEntry, transport: ${transportExpr}${argsClause} }`
       } else {
         // npm package server — resolve main entry, then walk for bin
         const entry = ls.server.entry || 'main'
@@ -87,7 +98,9 @@ export const languageClientGenerator: StepGenerator = {
       }
     } catch {}`
         // Use full require.resolve path (including bin walking) if available, else fallback to simple main entry
-        serverOptionsCode = `{ module: serverPath || _mainEntry || require.resolve('${escapeStr(pkg)}/package.json'), transport: ${transportExpr} }`
+        const args = ls.server.args
+        const argsClause = args?.length ? `, args: [${buildArgsExpr(args)}]` : ''
+        serverOptionsCode = `{ module: serverPath || _mainEntry || require.resolve('${escapeStr(pkg)}/package.json'), transport: ${transportExpr}${argsClause} }`
       }
     }
 

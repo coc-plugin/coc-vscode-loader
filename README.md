@@ -92,8 +92,8 @@ Input → Steps pipeline (source → language-client → bridge → snippets)
 Two test suites must pass before pushing:
 
 ```bash
-npm test                    # Unit tests (115 tests) + test coverage check
-npm run test:smoke          # Registry smoke test (converts all 113 entries)
+npm test                    # Unit tests (116 tests) + test coverage check
+npm run test:smoke          # Registry smoke test (converts all 114 entries)
 ```
 
 **Pre-push hook** — `git push` automatically runs both suites. Configure once:

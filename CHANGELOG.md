@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.3] - 2026-06-16
+
+### Added
+- **Angular Language Service** — `vscode-ng-language-service` (via `@angular/language-server`), pure-lsp type with `binName` + `args` support
+- **`args` field for module-kind servers** — `language-client` step now supports `args` on `kind: "module"` server config. Supports `{dir}` and `{pluginDir}` placeholders resolved at codegen time
+
+### Changed
+- **converter**: bump to v1.4.3
+- **plugin**: ensure converter/plugin version parity
+
 ## [1.4.2] - 2026-06-15
 
 ### Added

@@ -18,6 +18,9 @@ export interface ServerModuleConfig {
   /** When entry is 'bin', pick a specific bin entry by name (e.g. "tailwindcss-language-server").
    *  Defaults to the first entry in the bin object. */
   binName?: string
+  /** Arguments to pass to the server process.
+   *  Use `{dir}` placeholder for the compiled output directory (__dirname at runtime). */
+  args?: string[]
 }
 
 export interface ServerBinaryConfig {

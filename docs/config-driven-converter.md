@@ -71,7 +71,7 @@
 
 | kind | 说明 | 生成的 LanguageClient 参数 |
 |------|------|--------------------------|
-| `module` | Node.js 模块，require() 后 spawn | `{ module: serverPath, transport }` |
+| `module` | Node.js 模块，require() 后 spawn | `{ module: serverPath, transport }`，支持 `args`（v1.4.3+）生成 `{ module: serverPath, transport, args }` |
 | `binary` | 独立可执行文件 | `{ command: serverPath, args }`（不传 transport，LanguageClient 默认使用 stdio） |
 
 `module` 支持 `transport` 参数（`ipc` 或 `stdio`），生成 `{ module: serverPath, transport: TransportKind.ipc }`。`binary` 不支持 `transport` 参数——`command` 模式默认使用 stdio，传 transport 会导致某些 server（如 Deno）收到意外的 `--stdio` 参数。
@@ -129,7 +129,19 @@ Pipeline 负责下载、解压、放置到 `build/server/`。
 
 #### server.args
 
-传给 server 的 CLI 参数。仅 binary kind 使用。例如 Deno: `["lsp"]`、Taplo: `["lsp", "stdio"]`。
+传给 server 的 CLI 参数。用于 binary kind（默认）和 module kind（v1.4.3+）。例如 Deno: `["lsp"]`、Taplo: `["lsp", "stdio"]`、Angular: `["--ngProbeLocations", "{pluginDir}"]`。
+
+##### 占位符（module kind 专用，v1.4.3+）
+
+| 占位符 | 运行时值 | 说明 |
+|--------|----------|------|
+| `{dir}` | `__dirname` | 编译后的输出目录 |
+| `{pluginDir}` | `require('path').resolve(__dirname, '..')` | 插件根目录 |
+
+module kind 的 `args` 在生成的 serverOptions 中以数组形式传入：
+```typescript
+{ module: serverPath, transport: TransportKind.ipc, args: ['--flag', require('path').resolve(__dirname, '..')] }
+```
 
 #### transport
 
@@ -377,6 +389,45 @@ const BRIDGE_TEMPLATES = {
 ```
 
 `keepDeps` 保留了 server 外的原始依赖。converter 自动从源 `package.json` 读取版本号。
+
+### Angular Language Service
+
+```json
+{
+  "name": "ng-language-service",
+  "displayName": "Angular Language Service",
+  "type": "pure-lsp",
+  "languages": ["html", "typescript"],
+  "categories": ["LSP"],
+  "convert": [
+    {
+      "type": "language-client",
+      "server": {
+        "kind": "module",
+        "package": "@angular/language-server",
+        "entry": "bin",
+        "binName": "ngserver",
+        "args": [
+          "--ngProbeLocations",
+          "{pluginDir}",
+          "--tsProbeLocations",
+          "{pluginDir}",
+          "--logToConsole"
+        ]
+      },
+      "languages": ["html", "typescript"]
+    },
+    {
+      "type": "source",
+      "transforms": ["import-mapping"]
+    }
+  ]
+}
+```
+
+`@angular/language-server` 的 `requireOverride` 会拦截 `require('typescript/lib/tsserverlibrary')`，通过 `--tsProbeLocations` 参数找到 TypeScript。`{pluginDir}` 在生成代码时展开为 `require('path').resolve(__dirname, '..')`（插件根目录），使 server 能发现 `node_modules/typescript` 和 `node_modules/@angular/language-service`。
+
+需要 `minPluginVersion: "1.4.3"`（module kind 的 `args` 支持在该版本加入）。
 
 生成的代码结构：
 

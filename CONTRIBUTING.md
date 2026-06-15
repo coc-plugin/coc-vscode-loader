@@ -75,7 +75,8 @@ The `convert` array in `registry.json` tells the converter what to do:
       "server": {
         "kind": "module",         // "module" → npm package, "binary" → download binary
         "package": "some-lsp-server",
-        "entry": "bin"            // "main" or "bin"; use binName for multi-bin packages
+        "entry": "bin",           // "main" or "bin"; use binName for multi-bin packages
+        "args": ["--flag", "{pluginDir}"]  // CLI arguments (v1.4.3+); supports {dir} and {pluginDir} placeholders
       },
       "languages": ["mylang"]
     },
@@ -122,10 +123,10 @@ If your change adds or modifies a converter feature, update:
 ### 5. Verify
 
 ```bash
-# Run all unit tests (115 tests, 15 test files)
+# Run all unit tests (116 tests, 15 test files)
 npm test
 
-# Run registry smoke test (converts all 112 entries)
+# Run registry smoke test (converts all 114 entries)
 npm run test:smoke
 
 # Validate registry JSON format
