@@ -12,16 +12,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18, 20, 22]
+        node-version: [20, 22]
 
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: converter/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
         working-directory: converter
 
       - name: Check test coverage
