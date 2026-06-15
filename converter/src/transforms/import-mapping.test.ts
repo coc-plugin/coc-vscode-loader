@@ -225,3 +225,25 @@ return [action];`
     expect(result).toContain('}catch(e){action={title:"",kind:""}};return [action];')
   })
 })
+
+describe('import-mapping real transform', () => {
+  it('adds Uri to multi-line import with trailing comma without double comma', async () => {
+    const source = `\
+import {
+  CompletionItemProvider,
+  TextDocument,
+  Position,
+  CompletionItem,
+  CompletionItemKind,
+} from "vscode";
+const p = Uri.parse('file:///foo').fsPath`
+    const project = new Project({ useInMemoryFileSystem: true })
+    const file = project.createSourceFile('test.ts', source, { scriptKind: ScriptKind.TS })
+    const { transformImportMapping } = await import('./import-mapping.js')
+    transformImportMapping({ file, options: {} } as any)
+    const result = file.getText()
+    expect(result).toContain('from "coc.nvim"')
+    expect(result).toContain('Uri')
+    expect(result).not.toContain(',,')
+  })
+})

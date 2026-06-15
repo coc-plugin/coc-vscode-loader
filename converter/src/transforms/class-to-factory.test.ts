@@ -7,8 +7,13 @@ function applyClassToFactory(source: string): string {
   let content = file.getText()
 
   content = content.replace(
-    /\bnew\s+(Position|Range|Location|Diagnostic|TextEdit)\s*\(/g,
+    /\bnew\s+(Position|Range|Location|Diagnostic)\s*\(/g,
     (match, type) => `${type}.create(`,
+  )
+
+  content = content.replace(
+    /\bnew\s+TextEdit\s*\(/g,
+    'TextEdit.replace(',
   )
 
   content = content.replace(
@@ -38,9 +43,9 @@ describe('class-to-factory transform', () => {
     expect(result).toContain('Diagnostic.create(range, "msg")')
   })
 
-  it('converts new TextEdit() to TextEdit.create()', () => {
+  it('converts new TextEdit() to TextEdit.replace()', () => {
     const result = applyClassToFactory('const edit = new TextEdit(range, "text")')
-    expect(result).toContain('TextEdit.create(range, "text")')
+    expect(result).toContain('TextEdit.replace(range, "text")')
   })
 
   it('converts CompletionItem.create(label, kind) with split', () => {

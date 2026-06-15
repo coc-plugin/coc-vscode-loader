@@ -222,28 +222,55 @@ export async function convert(opts: ConvertOptions): Promise<void> {
           changed = true
         }
 
-        // Ensure Uri is imported when introduced by Uri.parse() replacements
-        if (content.includes('Uri.parse(')) {
+        // Ensure Uri/Range is imported from coc.nvim when introduced by replacements
+        function injectCocImport(name: string, triggerPattern: string) {
+          if (!content.includes(triggerPattern)) return
           if (content.match(/from\s+['"]coc\.nvim['"]/)) {
             content = content.replace(
               /(import\s(?:type\s+)?\{\s*)([^}]*?)(\s*\}\s*from\s*['"]coc\.nvim['"])/g,
               (_m: string, prefix: string, existing: string, suffix: string) => {
-                if (!existing.includes('Uri')) {
-                  const sep = existing.trim() ? ', ' : ''
-                  return `${prefix}${existing.trim()}${sep}Uri${suffix}`
+                if (!existing.includes(name)) {
+                  const trimmed = existing.trim().replace(/,\s*$/, '')
+                  const sep = trimmed ? ', ' : ''
+                  return `${prefix}${trimmed}${sep}${name}${suffix}`
                 }
                 return _m
               }
             )
+            if (!content.match(new RegExp(`\\b${name}\\b[\\s\\S]*from\\s*['"]coc\\.nvim['"]`))) {
+              const nl = content.indexOf('\n')
+              const firstLine = content.slice(0, nl > 0 ? nl : 0)
+              const insertAt = firstLine.startsWith('#!') || firstLine.includes("'use strict'") || firstLine.includes('"use strict"') ? nl + 1 : 0
+              content = content.slice(0, insertAt) + `import { ${name} } from 'coc.nvim'\n` + content.slice(insertAt)
+            }
           } else {
-            // Insert after shebang or 'use strict' if present
             const nl = content.indexOf('\n')
             const firstLine = content.slice(0, nl > 0 ? nl : 0)
-            if (firstLine.startsWith('#!') || firstLine.includes("'use strict'") || firstLine.includes('"use strict"')) {
-              const insertAt = nl + 1
-              content = content.slice(0, insertAt) + "import { Uri } from 'coc.nvim'\n" + content.slice(insertAt)
-            } else {
-              content = "import { Uri } from 'coc.nvim'\n" + content
+            const insertAt = firstLine.startsWith('#!') || firstLine.includes("'use strict'") || firstLine.includes('"use strict"') ? nl + 1 : 0
+            content = content.slice(0, insertAt) + `import { ${name} } from 'coc.nvim'\n` + content.slice(insertAt)
+          }
+        }
+        injectCocImport('Uri', 'Uri.parse(')
+        // Location.create(Uri.file(path), pos) → Location.create(path, Range.create(pos, pos))
+        // coc's Location.create expects (string_uri, Range), not (Uri_object, Position)
+        content = content.replace(
+          /Location\.create\(Uri\.file\(([^)]+)\),\s*(\w+(?:\.\w+\([^)]*\))?)\)/g,
+          'Location.create($1, Range.create($2, $2))'
+        )
+        injectCocImport('Range', 'Range.create(')
+        // 11. Apply plugin-specific patches from registry config
+        for (const step of steps) {
+          if (step.type === 'source') {
+            const patches = (step as any).patches as Array<{ find: string; replace: string }> | undefined
+            if (patches) {
+              for (const p of patches) {
+                const re = new RegExp(p.find, 'g')
+                const matches = content.match(re)
+                if (matches && matches.length > 0) {
+                  content = content.replace(re, p.replace)
+                  changed = true
+                }
+              }
             }
           }
         }

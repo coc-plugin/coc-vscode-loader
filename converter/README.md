@@ -78,7 +78,7 @@ Input: VS Code extension directory
   ├─ scanner        Analyze API → detect plugin type
   ├─ transforms/    AST transforms
   │   ├─ import-mapping      from 'vscode' → from 'coc.nvim'
-  │   ├─ class-to-factory    new Xxx() → Xxx.create()
+  │   ├─ class-to-factory    new Xxx() → Xxx.create() / TextEdit.replace()
   │   ├─ provider-register   Adapt provider registration signatures
   │   ├─ language-client     Adapt LanguageClient signatures
   │   └─ enum-offset         Comment on enum value offsets
@@ -114,7 +114,7 @@ See [../docs/converter-design-v2.md](../docs/converter-design-v2.md).
 ## Testing
 
 ```bash
-npm test                    # Unit tests (115 tests, 15 files) + coverage check
+npm test                    # Unit tests (114 tests, 14 files) + coverage check
 npm run test:smoke          # Registry smoke test — converts all 113 entries
 npm run test:watch          # Watch mode for development
 npm run check:tests         # Verify every source file has a matching test
@@ -124,17 +124,9 @@ npm run check:tests         # Verify every source file has a matching test
 
 | Test file | Tests | What it covers |
 |-----------|-------|----------------|
-| `transforms/import-mapping.test.ts` | 21 | All text-level replacements |
-| `transforms/class-to-factory.test.ts` | 7 | `new Xxx()` → `Xxx.create()` |
-| `transforms/provider-register.test.ts` | 7 | Provider signature adaptation |
-| `transforms/enum-offset.test.ts` | 3 | Enum value offset annotations |
-| `transforms/strip-volar.test.ts` | 4 | Volar framework import stripping |
-| `steps/source.test.ts` | 8 | File copy, transforms pipeline, keepDeps |
-| `steps/snippets.test.ts` | 4 | Snippet file copy and error handling |
-| `steps/language-client.test.ts` | 5 | LanguageClient code generation |
-| `steps/bridge.test.ts` | 4 | Bridge preset resolution and code injection |
-| `steps/mark-unsupported.test.ts` | 7 | Unsupported API marking |
-| `convert.test.ts` | 15 | Full conversion pipeline (text replacements, output generation, step orchestration) |
+| `transforms/import-mapping.test.ts` | 22 | All text-level replacements + real transform Uri injection |
+| `transforms/class-to-factory.test.ts` | 7 | `new Xxx()` → `Xxx.create()` / `TextEdit.replace()` |
+| `convert.test.ts` | 17 | Full conversion pipeline (text replacements, output generation, step orchestration, patches) |
 | `registry-validation.test.ts` | 12 | Registry.json schema (113 entries) |
 | `scanner.test.ts` | 6 | API scanner detection |
 | `presets.test.ts` | 5 | Bridge preset definitions |
@@ -186,6 +178,7 @@ Each source file has a corresponding `.test.ts` with unit tests — see [Testing
 |-----|---------|----------|----------|
 | import | `from 'vscode'` | `from 'coc.nvim'` | Direct replace |
 | Position/Range/Location etc. | `new Xxx()` | `Xxx.create()` | AST replace |
+| TextEdit | `new TextEdit(range, text)` | `TextEdit.replace(range, text)` | Namespace map (not .create()) |
 | EventEmitter | `EventEmitter<T>` | `Emitter<T>` | Direct replace |
 | registerCompletionItemProvider | `(sel, p, ...t)` | `(name, shortcut, sel, p, t?)` | Pad arguments |
 | registerCodeActionsProvider | `registerCodeActionsProvider` | `registerCodeActionProvider` | Rename |
@@ -196,6 +189,7 @@ Each source file has a corresponding `.test.ts` with unit tests — see [Testing
 | documentSelector | `[{ language: 'xxx' }]` | Same | Auto-infer from package.json |
 | getWordRangeAtPosition | `document.getWordRangeAtPosition()` | Not available | Inline word boundary calculation |
 | fileName | `document.fileName` | Not available | Replace with `document.uri` |
+| Location.create | `Location(Uri.file(path), pos)` | `Location(path, Range.create(pos, pos))` | convert.ts: auto‑wrap pos in Range |
 | createTextEditorDecorationType | `window.createTextEditorDecorationType()` | Not available | Mark TODO |
 | createWebviewPanel | `window.createWebviewPanel()` | Not available | Mark TODO |
 

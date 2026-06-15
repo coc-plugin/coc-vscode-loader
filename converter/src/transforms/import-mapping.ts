@@ -232,8 +232,9 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
       /(import\s+(?:type\s+)?\{\s*)([^}]*?)(\s*\}\s*from\s*['"]coc\.nvim['"])/g,
       (match, prefix, existing, suffix) => {
         if (!existing.includes(name)) {
-          const sep = existing.trim() ? ', ' : ''
-          return `${prefix}${existing.trim()}${sep}${name}${suffix}`
+          const trimmed = existing.trim().replace(/,\s*$/, '')
+          const sep = trimmed ? ', ' : ''
+          return `${prefix}${trimmed}${sep}${name}${suffix}`
         }
         return match
       }

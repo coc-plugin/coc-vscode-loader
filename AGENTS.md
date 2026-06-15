@@ -26,12 +26,73 @@ External commands required at runtime:
 | `docs/` | API mapping docs, converter design, migration guides |
 | `docs/types/` | Type definitions (vscode.d.ts, coc.d.ts) for reference |
 
+## Registry 添加规则
+
+`coc-vscode-registry/registry.json` 按语言生态分组，添加新条目时遵循以下规则：
+
+### 插入位置
+
+找到对应语言生态的组，按 `name` 字母序插入。组顺序：
+
+```
+1. Vue（Volar + Vue snippets）
+2. React + Next.js + SolidJS（snippets）
+3. Angular（snippets）
+4. Svelte + Astro（LSP + snippets）
+5. CSS/Style（Stylelint, CSS Peek, CSS Modules, Tailwind, HTML CSS Support, Bootstrap）
+6. Formatter（Prettier）
+7. JS/TS LSP（Biome, Deno）
+8. JS/TS Snippets
+9. Python
+10. PHP
+11. Go/Rust
+12. Lua / TOML / YAML / Prisma / Ansible / Shell / Gitignore
+13. C/C++/C#/Java
+14. Flutter/Dart
+15. NestJS/Express / Spring Boot
+16. Testing
+17. Database
+18. Mobile（uni-app, Ionic）
+19. Game Dev（Unity, Unreal）
+20. Other（未分类）
+```
+
+如果新插件不属于任何现有组，放在 Other 组末尾。
+
+### 必需字段
+
+```json
+{
+  "name": "vscode-<short-name>",
+  "displayName": "Human-readable name",
+  "description": "Brief description of what the extension does",
+  "type": "pure-lsp | ts-bridge | direct-api | snippets",
+  "source": { "type": "github", "repo": "owner/repo" },
+  "url": "https://github.com/owner/repo",
+  "languages": ["lang1", "lang2"],
+  "categories": ["LSP", "Formatter", "Completion", "Linter", "Snippets"],
+  "convert": [{ "type": "source" | "language-client" | "bridge" | "snippets", ... }]
+}
+```
+
+### 插件特有文本补丁
+
+- 插件级别的文本修复（如修复原扩展自身 bug）用 `patches` 字段
+- 不要写在 converter 通用逻辑里
+- 使用 `patches` 时设 `minPluginVersion: "1.4.3"`
+
+### 命名规范
+
+- 名称统一用 `vscode-<repository-short-name>` 格式
+- `displayName` 用原扩展的 displayName
+- `languages` 包含所有触发语言（遵守原扩展的 activationEvents）
+
 ## Converter transforms
 
 | Transform | What it does |
 |-----------|-------------|
 | `import-mapping` | `from 'vscode'` → `from 'coc.nvim'` + text-level API polyfills |
-| `class-to-factory` | `new Xxx()` → `Xxx.create()` |
+| `class-to-factory` | `new Xxx()` → `Xxx.create()`, `new TextEdit()` → `TextEdit.replace()` |
 | `provider-register` | Adapt provider registration signatures |
 | `enum-offset` | Comment on enum value differences |
 | `language-client` | LanguageClient signature adaptation |
@@ -67,6 +128,43 @@ converter 主流程在步骤执行后还会对所有输出源文件做一轮通�
 | `{ fileName } = doc` 解构拆分 | 同上，处理解构写法 |
 | `.uri.fsPath` → `Uri.parse($1.uri).fsPath` | coc 的 uri 是 file:// URI 字符串 |
 | `getWordRangeAtPosition` → 内联实现 | coc 无此 API |
+| `Location.create(Uri.file($1), $2)` → `Location.create($1, Range.create($2, $2))` | coc 的 Location.create 接受 `(string, Range)`，非 `(Uri, Position)` |
+| `Uri`/`Range` 自动注入 import | 命名空间 import 无法用解构注入，自动补 `import { Uri }`/`import { Range }` |
+
+### 插件级文本补丁 `patches`（v1.4.2+）
+
+插件特有的文本替换（如修复原扩展自身 bug）应通过 registry 的 `patches` 字段声明，不污染通用 converter：
+
+```json
+{
+  "type": "source",
+  "transforms": ["import-mapping", "class-to-factory", "provider-register"],
+  "patches": [
+    { "find": "\\\\[a-zA-Z0-9\\\\._\\\\[\"']\\\\]", "replace": "[a-zA-Z0-9._[\"'-]" }
+  ]
+}
+```
+
+- `find`：RegExp 源的**转义后**字符串（与 `new RegExp(find, 'g')` 兼容）
+- `replace`：替换文本
+- 所有 patch 在通用替换之后、写文件之前依次执行
+- 仅在 `source` step 中支持
+
+### `class-to-factory` 的命名空间映射
+
+部分 coc.nvim 类型是 interface（非 class），且 namespace 函数名不是 `.create()`：
+
+| VS Code | coc.nvim | 原因 |
+|---------|----------|------|
+| `new TextEdit(range, text)` | `TextEdit.replace(range, text)` | coc 的 TextEdit 是 interface，只有 `TextEdit.replace/insert/del` |
+
+通过 `NAMESPACE_MAP` 配置（`class-to-factory.ts`），新增类型只需添加一行映射：
+
+```typescript
+const NAMESPACE_MAP: Record<string, string> = {
+  'TextEdit': 'TextEdit.replace',
+}
+```
 
 **Bridge preset system** (`converter/src/presets.ts` + `converter/src/steps/bridge.ts` + `coc-vscode-registry/presets.json`):
 - Bridge logic is not used for source-based plugins
@@ -278,7 +376,7 @@ Registry 条目示例：
 Every source file must have a corresponding `.test.ts` file. Run before pushing:
 
 ```bash
-npm test                    # Unit tests (115) + check-tests (no missing/empty tests)
+npm test                    # Unit tests (114) + check-tests (no missing/empty tests)
 npm run test:smoke          # Registry smoke test (converts all 113 entries, validates output)
 ```
 

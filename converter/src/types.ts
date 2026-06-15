@@ -52,6 +52,8 @@ export interface SourceStep {
   entry?: string
   keepDeps?: string[] | Record<string, string>
   activationEvents?: string[]
+  /** Plugin-specific text find/replace pairs applied after all transforms */
+  patches?: Array<{ find: string; replace: string }>
   /** Enable debug logging in generated/transformed code */
   verbose?: boolean
 }

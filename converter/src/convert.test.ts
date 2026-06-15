@@ -289,4 +289,149 @@ describe('convert main flow', () => {
     const esbuild = fs.readFileSync(path.join(outdir, 'esbuild.mjs'), 'utf-8')
     expect(esbuild).toContain("entryPoints: ['src/index.ts']")
   })
+
+  it('converts css-modules-style direct-api extension with completion and definition providers', async () => {
+    writeInput('package.json', JSON.stringify({
+      name: 'vscode-css-modules',
+      displayName: 'CSS Modules',
+      description: 'CSS Modules support',
+      contributes: {
+        configuration: {
+          title: 'CSS Modules Configuration',
+          properties: {
+            'cssModules.camelCase': { type: ['boolean', 'string'], default: false },
+            'cssModules.pathAlias': { type: 'object', default: {} },
+          },
+        },
+      },
+    }))
+    writeInput('src/extension.ts', [
+      `import { DocumentFilter, ExtensionContext, languages } from "vscode";`,
+      `import { CompletionProvider } from "./CompletionProvider";`,
+      `import { DefinitionProvider } from "./DefinitionProvider";`,
+      `export function activate(context: ExtensionContext): void {`,
+      `  const mode: DocumentFilter[] = [`,
+      `    { language: "typescriptreact", scheme: "file" },`,
+      `    { language: "javascriptreact", scheme: "file" },`,
+      `  ];`,
+      `  context.subscriptions.push(`,
+      `    languages.registerCompletionItemProvider(`,
+      `      mode,`,
+      `      new CompletionProvider(),`,
+      `      ".",`,
+      `      '"',`,
+      `      "'"`,
+      `    )`,
+      `  );`,
+      `  context.subscriptions.push(`,
+      `    languages.registerDefinitionProvider(`,
+      `      mode,`,
+      `      new DefinitionProvider()`,
+      `    )`,
+      `  );`,
+      `}`,
+    ].join('\n'))
+    writeInput('src/CompletionProvider.ts', [
+      `import { CompletionItemProvider, TextDocument, Position, CompletionItem, CompletionItemKind } from "vscode";`,
+      `import * as path from "path";`,
+      `export class CompletionProvider implements CompletionItemProvider {`,
+      `  async provideCompletionItems(`,
+      `    document: TextDocument,`,
+      `    position: Position`,
+      `  ): Promise<CompletionItem[]> {`,
+      `    const currentDir = path.dirname(document.uri.fsPath);`,
+      `    return [new CompletionItem("foo", CompletionItemKind.Variable)];`,
+      `  }`,
+      `}`,
+    ].join('\n'))
+    writeInput('src/DefinitionProvider.ts', [
+      `import { DefinitionProvider, TextDocument, Position, Location, Uri } from "vscode";`,
+      `import * as path from "path";`,
+      `export class DefinitionProvider implements DefinitionProvider {`,
+      `  public async provideDefinition(`,
+      `    document: TextDocument,`,
+      `    position: Position,`,
+      `  ): Promise<Location> {`,
+      `    const importPath = path.dirname(document.uri.fsPath);`,
+      `    return new Location(Uri.file(importPath), new Position(0, 0));`,
+      `  }`,
+      `}`,
+    ].join('\n'))
+    const { convert } = await import('./convert.js')
+    await convert({
+      input: tmpdir,
+      output: outdir,
+      convert: [{
+        type: 'source',
+        transforms: ['import-mapping', 'class-to-factory', 'provider-register'],
+        entry: 'src/extension.ts',
+        activationEvents: ['onLanguage:typescriptreact', 'onLanguage:javascriptreact'],
+        keepDeps: { 'fs-extra': '^10.0.0', 'json5': '^2.2.0', 'lodash': '^4.17.21' },
+      }],
+    })
+
+    const ext = fs.readFileSync(path.join(outdir, 'src', 'extension.ts'), 'utf-8')
+    expect(ext).toContain('from "coc.nvim"')
+    expect(ext).not.toContain('from "vscode"')
+    expect(ext).not.toContain(',,')
+
+    const pkg = JSON.parse(fs.readFileSync(path.join(outdir, 'package.json'), 'utf-8'))
+    expect(pkg.name).toBe('coc-vscode-css-modules')
+    expect(pkg.main).toBe('lib/index.js')
+    expect(pkg.activationEvents).toEqual(['onLanguage:typescriptreact', 'onLanguage:javascriptreact'])
+    expect(pkg.contributes.configuration.properties['cssModules.camelCase']).toBeTruthy()
+    expect(pkg.contributes.configuration.properties['cssModules.pathAlias']).toBeTruthy()
+    expect(pkg.dependencies).toBeTruthy()
+    expect(pkg.dependencies['fs-extra']).toBeDefined()
+    expect(pkg.dependencies['lodash']).toBeDefined()
+    expect(pkg.dependencies['json5']).toBeDefined()
+
+    const completion = fs.readFileSync(path.join(outdir, 'src', 'CompletionProvider.ts'), 'utf-8')
+    expect(completion).toContain('from "coc.nvim"')
+    expect(completion).not.toContain('document.uri.fsPath')
+    expect(completion).not.toContain(',,')
+
+    const definition = fs.readFileSync(path.join(outdir, 'src', 'DefinitionProvider.ts'), 'utf-8')
+    expect(definition).toContain('from "coc.nvim"')
+    expect(definition).not.toContain('document.uri.fsPath')
+    expect(definition).not.toContain(',,')
+    expect(definition).toMatch(/Location\.create\([^)]+,\s*Range\.create\(/)
+    expect(definition).not.toContain('Uri.file(')
+    expect(definition).toMatch(/\bRange\b.*from\s['"]coc\.nvim['"]/)
+  })
+
+  it('injects Uri import for namespace-style import when Uri.parse is introduced', async () => {
+    writeInput('package.json', JSON.stringify({ name: 'ns-ext' }))
+    writeInput('src/extension.ts', `import * as vscode from 'vscode'\nconst p = workspaceFolder.uri.fsPath`)
+    const { convert } = await import('./convert.js')
+    await convert({
+      input: tmpdir,
+      output: outdir,
+      convert: [{ type: 'source', transforms: ['import-mapping'] }],
+    })
+    const content = fs.readFileSync(path.join(outdir, 'src', 'extension.ts'), 'utf-8')
+    expect(content).toContain('Uri.parse')
+    expect(content).toMatch(/import\s*\{\s*Uri\s*\}\s*from\s['"]coc\.nvim['"]/)
+    expect(content).not.toContain(',,')
+  })
+
+  it('applies plugin-specific patches from source step config', async () => {
+    writeInput('package.json', JSON.stringify({ name: 'patched-ext' }))
+    writeInput('src/extension.ts', `import * as vscode from 'vscode'\nconst x = 'hello world'`)
+    const { convert } = await import('./convert.js')
+    await convert({
+      input: tmpdir,
+      output: outdir,
+      convert: [{
+        type: 'source',
+        transforms: ['import-mapping'],
+        patches: [
+          { find: 'hello', replace: 'patched' },
+        ],
+      }],
+    })
+    const content = fs.readFileSync(path.join(outdir, 'src', 'extension.ts'), 'utf-8')
+    expect(content).toContain('patched')
+    expect(content).not.toContain('hello world')
+  })
 })

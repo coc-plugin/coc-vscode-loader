@@ -4,7 +4,6 @@ import { SyntaxKind } from 'ts-morph'
 const FACTORY_TYPES = new Set([
   'Position', 'Range', 'Location', 'LocationLink',
   'Diagnostic', 'DiagnosticRelatedInformation',
-  'TextEdit',
   'Hover', 'CompletionItem', 'CompletionList',
   'CodeAction', 'CodeLens', 'DocumentLink',
   'Color', 'ColorInformation', 'ColorPresentation',
@@ -14,6 +13,11 @@ const FACTORY_TYPES = new Set([
   'CallHierarchyItem', 'CallHierarchyIncomingCall', 'CallHierarchyOutgoingCall',
   'TypeHierarchyItem', 'LinkedEditingRanges',
 ])
+
+// Types that map to namespace functions with different names (not .create())
+const NAMESPACE_MAP: Record<string, string> = {
+  'TextEdit': 'TextEdit.replace',
+}
 
 export const transformClassToFactory: Transform = (ctx) => {
   const { file } = ctx
@@ -25,16 +29,25 @@ export const transformClassToFactory: Transform = (ctx) => {
   for (const expr of nodes) {
     const text = expr.getText()
     const m = text.match(/^new\s+(\w+)\(/)
-    if (!m || !FACTORY_TYPES.has(m[1])) continue
-    const args = text.slice(m[0].length, -1)
-    try { expr.replaceWithText(`${m[1]}.create(${args})`) } catch {}
+    if (!m) continue
+    if (FACTORY_TYPES.has(m[1])) {
+      const args = text.slice(m[0].length, -1)
+      try { expr.replaceWithText(`${m[1]}.create(${args})`) } catch {}
+    } else if (NAMESPACE_MAP[m[1]]) {
+      const args = text.slice(m[0].length, -1)
+      try { expr.replaceWithText(`${NAMESPACE_MAP[m[1]]}(${args})`) } catch {}
+    }
   }
 
   // Text fallback: catch remaining new Xxx() that AST might have missed
   let text = file.getText()
   text = text.replace(
-    /\bnew\s+(Position|Range|Location|Diagnostic|TextEdit)\s*\(/g,
+    /\bnew\s+(Position|Range|Location|Diagnostic)\s*\(/g,
     (match, type) => `${type}.create(`
+  )
+  text = text.replace(
+    /\bnew\s+TextEdit\s*\(/g,
+    'TextEdit.replace(',
   )
 
   // CompletionItem.create(label, kind) → item = CompletionItem.create(label); item.kind = kind
