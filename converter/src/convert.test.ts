@@ -128,7 +128,7 @@ describe('convert main flow', () => {
 
   it('handles fileName destructuring', async () => {
     writeInput('package.json', JSON.stringify({ name: 'test-ext' }))
-    writeInput('src/extension.ts', `import * as vscode from 'vscode'\nconst { fileName, other } = document;`)
+    writeInput('src/extension.ts', `import * as vscode from 'vscode'\nconst { fileName } = document;`)
     const { convert } = await import('./convert.js')
     await convert({
       input: tmpdir,
@@ -136,10 +136,8 @@ describe('convert main flow', () => {
       convert: [{ type: 'source', transforms: [] }],
     })
     const content = fs.readFileSync(path.join(outdir, 'src', 'extension.ts'), 'utf-8')
-    // Note: destructuring replacement is gated on content.includes('.fileName'), so { fileName }
-    // alone won't trigger it. This test documents the limitation.
-    // When .fileName is also present in the file, the replacement works:
-    // expect(content).toContain('fileName = Uri.parse')
+    expect(content).toContain('fileName = Uri.parse')
+    expect(content).not.toContain('{ fileName }')
   })
 
   it('preserves source plugin contributes.configuration in output package.json', async () => {

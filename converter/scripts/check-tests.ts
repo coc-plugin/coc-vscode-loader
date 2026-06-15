@@ -1,13 +1,10 @@
-import { readdirSync, existsSync } from 'fs'
+import { readdirSync, existsSync, readFileSync } from 'fs'
 import { join, relative } from 'path'
 
 const srcDir = new URL('../src', import.meta.url).pathname
 
-const EXEMPT = [
-  'types.ts',
-  'index.ts',
-  'cli.ts',
-]
+const EXEMPT = ['types.ts', 'index.ts', 'cli.ts']
+const MIN_TEST_SIZE = 50
 
 function walk(dir: string): string[] {
   const files: string[] = []
@@ -23,8 +20,8 @@ function walk(dir: string): string[] {
 }
 
 const files = walk(srcDir)
-
 let exitCode = 0
+
 for (const fp of files) {
   const name = relative(srcDir, fp)
   if (name.endsWith('.test.ts')) continue
@@ -34,10 +31,28 @@ for (const fp of files) {
   if (!existsSync(testFile)) {
     console.error(`  MISSING TEST: ${name}`)
     exitCode = 1
+    continue
+  }
+
+  // Validate test file is not empty or placeholder
+  const testContent = readFileSync(testFile, 'utf-8')
+  if (testContent.length < MIN_TEST_SIZE) {
+    console.error(`  EMPTY TEST: ${relative(srcDir, testFile)} (${testContent.length} bytes)`)
+    exitCode = 1
+    continue
+  }
+  if (!/\b(it|test)\s*\(/.test(testContent)) {
+    console.error(`  NO TEST CASES: ${relative(srcDir, testFile)} (no it() or test() calls)`)
+    exitCode = 1
+    continue
   }
 }
 
 if (exitCode === 0) {
-  console.log(`All source files have matching tests (${files.length - EXEMPT.length} sources checked)`)
+  const sourceFiles = files.filter(f => {
+    const name = relative(srcDir, f)
+    return !name.endsWith('.test.ts') && !EXEMPT.some(e => name === e || name.endsWith('/' + e))
+  })
+  console.log(`All ${sourceFiles.length} source files have valid tests`)
 }
 process.exit(exitCode)

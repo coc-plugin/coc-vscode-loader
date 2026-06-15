@@ -199,7 +199,9 @@ export async function convert(opts: ConvertOptions): Promise<void> {
           changed = true
         }
 
-        if (content.includes('.fileName') || content.includes('.uri.fsPath')) {
+        const hasFileNameRef = content.includes('.fileName') || content.includes('.uri.fsPath')
+        const hasFileNameDestructuring = /(const|let|var)\s*\{[^}]*\bfileName\b[^}]*\}\s*=\s*(document|doc|textDocument)/.test(content)
+        if (hasFileNameRef || hasFileNameDestructuring) {
           // .fileName → Uri.parse($1.uri).fsPath (coc's TextDocument#uri returns a file:// URI string)
           content = content.replace(/(document|this\.document|textDocument|scope|doc)\.fileName/g, 'Uri.parse($1.uri).fsPath')
           // Handle destructuring: const { fileName, ...rest } = document/doc/textDocument
