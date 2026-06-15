@@ -124,14 +124,16 @@ export class TUI {
         event: 'WinEnter',
         request: true,
         callback: async () => {
-          if (!this.winid) return
-          const curWin = await nvim.call('win_getid') as number
-          if (curWin === this.winid) return
-          const curBuf = await nvim.call('winbufnr', [curWin]) as number
-          const bt = await nvim.call('getbufvar', [curBuf, '&buftype']) as string
-          if (bt !== 'nofile' && bt !== 'prompt') {
-            await this.close()
-          }
+          try {
+            if (!this.winid) return
+            const curWin = await nvim.call('win_getid') as number
+            if (curWin === this.winid) return
+            const curBuf = await nvim.call('winbufnr', [curWin]) as number
+            const bt = await nvim.call('getbufvar', [curBuf, '&buftype']) as string
+            if (bt !== 'nofile' && bt !== 'prompt') {
+              await this.close()
+            }
+          } catch {}
         }
       })
     )
@@ -236,6 +238,11 @@ export class TUI {
         if (this.focusIndex >= s.scrollOffset + visibleCount) {
           s.scrollOffset = Math.min(Math.max(0, filtered.length - visibleCount), s.scrollOffset + 1)
           await this.render()
+          const focused = filtered[this.focusIndex]
+          const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
+          if (pkgLine !== undefined) {
+            await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, 0]])
+          }
           return
         }
         const focused = filtered[this.focusIndex]
@@ -254,6 +261,12 @@ export class TUI {
         if (this.focusIndex < s.scrollOffset) {
           s.scrollOffset = Math.max(0, s.scrollOffset - 1)
           await this.render()
+          const filtered = this.state.getFilteredPackages()
+          const focused = filtered[this.focusIndex]
+          const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
+          if (pkgLine !== undefined) {
+            await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, 0]])
+          }
           return
         }
         const filtered = this.state.getFilteredPackages()
@@ -307,6 +320,11 @@ export class TUI {
     if (!pkgName) return
     const entry = this.state.getPackage(pkgName)
     if (!entry) return
+
+    // Sync focusIndex to actual cursor position so render() won't jump
+    const filtered = this.state.getFilteredPackages()
+    const focusIdx = filtered.findIndex(p => p.info.name === pkgName)
+    if (focusIdx >= 0) this.focusIndex = focusIdx
 
     if (id === 'x') { this.state.toggleMark(pkgName); return }
     if (id === 'i' && entry.status === 'not-installed') { await installPackage(this.state, pkgName); return }
@@ -417,7 +435,10 @@ export class TUI {
         this.updateDetailPopup().catch(() => {})
       }
 
-      // Ensure focusIndex points to a visible package
+      this.pkgLineMap = result.pkgLineMap
+      this.logLineSet = result.logLines
+
+      // Ensure cursor points to focusIndex
       if (!state.showHelp && result.pkgLineMap.size > 0) {
         const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
         if (this.focusIndex < state.scrollOffset) {
@@ -435,9 +456,6 @@ export class TUI {
           }
         }
       }
-
-      this.pkgLineMap = result.pkgLineMap
-      this.logLineSet = result.logLines
     } finally {
       this.rendering = false
       if (this.pendingRender) this.render()
