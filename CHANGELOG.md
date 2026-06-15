@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.0] - 2026-06-15
+
+### Added
+- **Registry expansion: 4 packages** — PHP Intelephense (17.5M), Rust Analyzer (6.3M), Simple React Snippets (6.4M), JS JSX Snippets (1.4M)
+- **Converter fix** — `language-client` step now correctly handles module-based servers without `bin` field: `if (!serverPath)` → `if (!serverPath && !_mainEntry)`, preventing false "Cannot find language server" errors
+
 ## [1.2.9] - 2026-06-15
 
 ### Fixed

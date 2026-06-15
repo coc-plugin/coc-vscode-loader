@@ -162,8 +162,8 @@ npm install coc-vscode-loader    # or
 
 | Milestone | Target | Description |
 |-----------|--------|-------------|
-| [v1.2.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-08 | Registry expansion: Angular, ESLint, YAML, etc. |
-| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-10 | More transforms & bridge presets |
+| [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-06 | Registry expansion: PHP Intelephense, Rust Analyzer, Angular, ESLint |
+| [v1.4.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-08 | More transforms, bridge presets, registry expansion |
 | [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | Stable ecosystem: 10+ plugins, full transform coverage |
 
 ## keepDeps 版本解析策略（Converter v2.0）
@@ -186,7 +186,7 @@ npm install coc-vscode-loader    # or
 
 数组语法（自动解析）和对象语法（手动指定）互斥。
 
-### `snippets` step type（v1.2.6+）
+### `snippets` step type（v1.3.0+）
 
 用于纯 VS Code Snippets 扩展（无代码、无 LSP，只有 `contributes.snippets` JSON 文件）。
 

@@ -93,7 +93,7 @@ import * as path from 'path'
 export async function activate(context: ExtensionContext): Promise<void> {
   try {
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] activate() called')\n` : ''}${serverPathCode}
-    if (!serverPath) {
+    if (!serverPath && !_mainEntry) {
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] serverPath undefined')\n` : ''}\
       window.showErrorMessage('Cannot find language server.')
       return
