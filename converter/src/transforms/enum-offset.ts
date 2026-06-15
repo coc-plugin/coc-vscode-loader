@@ -22,7 +22,7 @@ export const transformEnumOffset: Transform = (ctx) => {
   // Replace any numeric enum comparisons with comments
   // e.g., `severity === 0` → `severity === 0 /* DiagnosticSeverity.Error = 1 in coc */`
   content = content.replace(
-    /(severity\s*[=!]==?\s*)(\d+)/g,
+    /(severity\s*(?:[=!]==?|[<>]=?)\s*)(\d+)/g,
     '$1$2 /* DiagnosticSeverity values differ in coc (1-4 vs 0-3) */'
   )
 

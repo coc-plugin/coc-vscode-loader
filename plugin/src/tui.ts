@@ -115,6 +115,17 @@ export class TUI {
     await nvim.call('nvim_win_set_option', [this.winid, 'spell', false])
     await nvim.call('nvim_win_set_option', [this.winid, 'foldenable', false])
 
+    const exists = await nvim.call('exists', ['*CocConverterDispatch']) as number
+    if (exists === 0) {
+      await nvim.command(`
+        function! CocConverterDispatch(key) abort
+          execute 'CocCommand loader._dispatch ' . a:key
+        endfunction
+      `)
+    }
+
+    await this.setupKeymaps()
+
     this.unsubscribe = this.state.subscribe(() => {
       this.render().catch(() => {})
     })
@@ -138,19 +149,14 @@ export class TUI {
       })
     )
 
-    const exists = await nvim.call('exists', ['*CocConverterDispatch']) as number
-    if (exists === 0) {
-      await nvim.command(`
-        function! CocConverterDispatch(key) abort
-          execute 'CocCommand loader._dispatch ' . a:key
-        endfunction
-      `)
-    }
-
-    await this.setupKeymaps()
-
     // Initial render with current state (may be empty if no cache)
-    await this.render()
+    try {
+      await this.render()
+    } catch {
+      // render failed — clean up so open() caller can handle
+      this.close().catch(() => {})
+      throw new Error('TUI render failed')
+    }
 
     // Fetch remote registry in background with progress, re-render when done
     this.state.setStatusMessage('Fetching registry...')
@@ -228,53 +234,48 @@ export class TUI {
       this.focusIndex = Math.max(0, filtered.length - 1)
       return
     }
+    const setCursor = async (line0: number) => {
+      try {
+        await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [line0 + 1, 0]])
+      } catch { /* window may be closed */ }
+    }
     if (id === 'j') {
       const filtered = this.state.getFilteredPackages()
       if (this.focusIndex < filtered.length - 1) {
         this.focusIndex++
-        this.focusLineOffset = 0
         const s = this.state.getState()
         const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
         if (this.focusIndex >= s.scrollOffset + visibleCount) {
-          s.scrollOffset = Math.min(Math.max(0, filtered.length - visibleCount), s.scrollOffset + 1)
+          this.state.setScrollOffset(Math.min(Math.max(0, filtered.length - visibleCount), s.scrollOffset + 1))
           await this.render()
           const focused = filtered[this.focusIndex]
           const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
-          if (pkgLine !== undefined) {
-            await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, 0]])
-          }
+          if (pkgLine !== undefined) await setCursor(pkgLine)
           return
         }
         const focused = filtered[this.focusIndex]
         const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
-        if (pkgLine !== undefined) {
-          await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, 0]])
-        }
+        if (pkgLine !== undefined) await setCursor(pkgLine)
       }
       return
     }
     if (id === 'k') {
       if (this.focusIndex > 0) {
         this.focusIndex--
-        this.focusLineOffset = 0
         const s = this.state.getState()
         if (this.focusIndex < s.scrollOffset) {
-          s.scrollOffset = Math.max(0, s.scrollOffset - 1)
+          this.state.setScrollOffset(Math.max(0, s.scrollOffset - 1))
           await this.render()
           const filtered = this.state.getFilteredPackages()
           const focused = filtered[this.focusIndex]
           const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
-          if (pkgLine !== undefined) {
-            await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, 0]])
-          }
+          if (pkgLine !== undefined) await setCursor(pkgLine)
           return
         }
         const filtered = this.state.getFilteredPackages()
         const focused = filtered[this.focusIndex]
         const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
-        if (pkgLine !== undefined) {
-          await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [pkgLine + 1, 0]])
-        }
+        if (pkgLine !== undefined) await setCursor(pkgLine)
       }
       return
     }
@@ -362,12 +363,7 @@ export class TUI {
     }
   }
 
-  private keyMap: Record<string, string> = {
-    q: 'q', esc: '<Esc>', question: '?', slash: '/', j: 'j', k: 'k', 'close-detail': 'close-detail',
-    'detail-j': 'detail-j', 'detail-k': 'detail-k',
-    U: 'U', Z: 'Z', i: 'i', u: 'u', X: 'X', R: 'R', cr: '<CR>',
-    f: 'f', s: 's', x: 'x', D: 'D', gg: 'gg', G: 'G',
-  }
+
 
   private async setupKeymaps() {
     const buf = workspace.nvim.createBuffer(this.bufnr)
@@ -407,7 +403,6 @@ export class TUI {
   private rendering = false
   private pendingRender = false
   private focusIndex = 0
-  private focusLineOffset = 0
 
   private async render() {
     if (!this.winid) return
@@ -476,7 +471,7 @@ export class TUI {
       }
     } finally {
       this.rendering = false
-      if (this.pendingRender) this.render()
+      if (this.pendingRender) await this.render()
     }
   }
 
@@ -512,8 +507,7 @@ export class TUI {
     const buf = new LineBuffer()
 
     buf.nl()
-    const needHome = !!(state.showHelp || state.searchQuery)
-    buf.append('coc-loader(H)', needHome ? 'CocConverterPillActive' : 'CocConverterTitle')
+    buf.append('coc-loader(H)', (state.showHelp || state.searchQuery) ? 'CocConverterPillActive' : 'CocConverterTitle')
     for (const [name, key] of [['Install', 'I'], ['Update', 'U'], ['Check', 'C'], ['Help', '?']] as const) {
       buf.append('  ')
       const isActive = key === '?' && state.showHelp
@@ -693,40 +687,46 @@ export class TUI {
     return lines
   }
 
+  private showDetailPopupBusy = false
   private async showDetailPopup(name: string) {
-    if (this.detailWinid) await this.closeDetailPopup()
-    this.detailPkgName = name
+    if (this.showDetailPopupBusy) return
+    this.showDetailPopupBusy = true
     const nvim = workspace.nvim
-    const entry = this.state.getPackage(name)
-    if (!entry) return
-    // Snapshot mode: show log for active/failed, info for stable states
-    this.detailMode = ['installing', 'updating', 'uninstalling', 'failed'].includes(entry.status) ? 'log' : 'info'
+    try {
+      if (this.detailWinid) await this.closeDetailPopup()
+      this.detailPkgName = name
+      const entry = this.state.getPackage(name)
+      if (!entry) return
+      this.detailMode = ['installing', 'updating', 'uninstalling', 'failed'].includes(entry.status) ? 'log' : 'info'
 
-    const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
-    const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
-    const lines = this.buildDetailLines(entry, this.detailMode)
-    const maxH = Math.floor(editorLines * 0.7)
-    const height = this.detailMode === 'log' ? Math.min(Math.max(lines.length, 5), maxH) : Math.min(lines.length, 20)
-    const row = Math.max(0, Math.floor((editorLines - height - 2) / 2))
-    const col = Math.max(0, Math.floor((editorCols - 82) / 2))
-    const buf = await nvim.createNewBuffer(false, true)
-    this.detailBufnr = buf.id
-    const win = await nvim.openFloatWindow(buf, true, {
-      relative: 'editor', width: 78, height, row, col,
-      border: 'rounded', style: 'minimal', zindex: 100,
-      title: this.detailMode === 'log' ? `${entry.info.displayName}  ·  Log` : entry.info.displayName,
-      title_pos: 'left',
-    })
-    this.detailWinid = win.id
-    await nvim.call('nvim_win_set_option', [this.detailWinid, 'wrap', true])
-    await nvim.call('nvim_buf_set_option', [this.detailBufnr, 'bufhidden', 'wipe'])
-    await nvim.call('nvim_buf_set_option', [this.detailBufnr, 'buftype', 'nofile'])
-    const keyBuf = nvim.createBuffer(this.detailBufnr)
-    keyBuf.setKeymap('n', 'q', '<Cmd>call CocConverterDispatch("close-detail")<CR>', { silent: true, nowait: true })
-    keyBuf.setKeymap('n', '<Esc>', '<Cmd>call CocConverterDispatch("close-detail")<CR>', { silent: true, nowait: true })
-    keyBuf.setKeymap('n', 'j', '<Cmd>call CocConverterDispatch("detail-j")<CR>', { silent: true, nowait: true })
-    keyBuf.setKeymap('n', 'k', '<Cmd>call CocConverterDispatch("detail-k")<CR>', { silent: true, nowait: true })
-    await this.updateDetailPopup()
+      const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
+      const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
+      const lines = this.buildDetailLines(entry, this.detailMode)
+      const maxH = Math.floor(editorLines * 0.7)
+      const height = this.detailMode === 'log' ? Math.min(20, maxH) : Math.min(lines.length, 20)
+      const row = Math.max(0, Math.floor((editorLines - height - 2) / 2))
+      const col = Math.max(0, Math.floor((editorCols - 80) / 2))
+      const buf = await nvim.createNewBuffer(false, true)
+      this.detailBufnr = buf.id
+      const win = await nvim.openFloatWindow(buf, true, {
+        relative: 'editor', width: 78, height, row, col,
+        border: 'rounded', style: 'minimal', zindex: 100,
+        title: this.detailMode === 'log' ? `${entry.info.displayName}  ·  Log` : entry.info.displayName,
+        title_pos: 'left',
+      })
+      this.detailWinid = win.id
+      await nvim.call('nvim_win_set_option', [this.detailWinid, 'wrap', true])
+      await nvim.call('nvim_buf_set_option', [this.detailBufnr, 'bufhidden', 'wipe'])
+      await nvim.call('nvim_buf_set_option', [this.detailBufnr, 'buftype', 'nofile'])
+      const keyBuf = nvim.createBuffer(this.detailBufnr)
+      keyBuf.setKeymap('n', 'q', '<Cmd>call CocConverterDispatch("close-detail")<CR>', { silent: true, nowait: true })
+      keyBuf.setKeymap('n', '<Esc>', '<Cmd>call CocConverterDispatch("close-detail")<CR>', { silent: true, nowait: true })
+      keyBuf.setKeymap('n', 'j', '<Cmd>call CocConverterDispatch("detail-j")<CR>', { silent: true, nowait: true })
+      keyBuf.setKeymap('n', 'k', '<Cmd>call CocConverterDispatch("detail-k")<CR>', { silent: true, nowait: true })
+      await this.updateDetailPopup()
+    } finally {
+      this.showDetailPopupBusy = false
+    }
   }
 
   private async updateDetailPopup() {
@@ -794,7 +794,7 @@ interface TuiRenderResult {
 }
 
 function sourceStr(source: { type: string; repo?: string; package?: string; subdir?: string }): string {
-  if (source.type === 'github') return `github:${source.repo}${source.subdir ? '/' + source.subdir : ''}`
-  if (source.type === 'npm') return `npm:${source.package}`
+  if (source.type === 'github') return `github:${source.repo || 'unknown'}${source.subdir ? '/' + source.subdir : ''}`
+  if (source.type === 'npm') return `npm:${source.package || 'unknown'}`
   return source.type
 }

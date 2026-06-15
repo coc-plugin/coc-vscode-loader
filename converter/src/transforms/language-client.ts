@@ -30,8 +30,8 @@ export const transformLanguageClient: Transform = (ctx) => {
     if (!serverOpts.includes('run:') || !serverOpts.includes('debug:')) return
 
     // Extract module and transport from run block
-    const moduleMatch = serverOpts.match(/module:\s*(\S+)/)
-    const transportMatch = serverOpts.match(/transport:\s*(\S+)/)
+    const moduleMatch = serverOpts.match(/module:\s*([^,}\s]+)/)
+    const transportMatch = serverOpts.match(/transport:\s*([^,}\s]+)/)
 
     if (!moduleMatch) return
 

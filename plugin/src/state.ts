@@ -15,6 +15,7 @@ function getInstalledSet(): Set<string> {
 }
 
 export type Status = 'not-installed' | 'installing' | 'installed' | 'updating' | 'uninstalling' | 'failed'
+const BUSY_STATUSES: ReadonlySet<Status> = new Set(['installing', 'updating', 'uninstalling'])
 
 export interface PackageEntry {
   info: PackageInfo
@@ -138,8 +139,10 @@ export class StateManager {
         if (extra?.progress !== undefined) pkg.progress = extra.progress
         if (extra?.logEntry !== undefined) {
           pkg.progressLog.push(extra.logEntry)
+          if (pkg.progressLog.length > 500) pkg.progressLog.splice(0, pkg.progressLog.length - 500)
         } else if (extra?.progress !== undefined) {
           pkg.progressLog.push(extra.progress)
+          if (pkg.progressLog.length > 500) pkg.progressLog.splice(0, pkg.progressLog.length - 500)
         }
         if (extra?.error !== undefined) pkg.error = extra.error
         if (status === 'installed' || status === 'not-installed') {
@@ -239,7 +242,7 @@ export class StateManager {
     }
     this.cachedFiltered = pkgs
     this.cachedFilterKey = key
-    return pkgs
+    return [...pkgs]
   }
 
   getPackage(name: string): PackageEntry | undefined {
@@ -270,8 +273,14 @@ export class StateManager {
       s.packages = updated.map(info => {
         const old = oldMap.get(info.name)
         if (old) {
+          // Don't clobber in-progress status from pipeline
+          if (!BUSY_STATUSES.has(old.status)) {
+            old.status = installedSet.has(info.name) ? 'installed' : 'not-installed'
+            if (old.status === 'installed' || old.status === 'not-installed') {
+              old.progressLog = []
+            }
+          }
           old.info = info
-          old.status = installedSet.has(info.name) ? 'installed' : 'not-installed'
           return old
         }
         return {

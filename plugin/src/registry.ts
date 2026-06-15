@@ -43,6 +43,7 @@ const REMOTE_REGISTRY_URL = 'https://raw.githubusercontent.com/coc-plugin/coc-vs
 const CACHE_PATH = path.join(os.homedir(), '.config', 'coc', 'converter-cache', 'registry.json')
 
 let cached: PackageInfo[] | null = null
+let registryFetching: Promise<number> | null = null
 
 // Detect if running in local dev mode by checking for coc-vscode-registry/ sibling
 function getLocalRegistryPath(): string | null {
@@ -70,11 +71,16 @@ async function fetchRegistryJSON(url: string, onProgress?: ProgressCallback): Pr
   try {
     const ctrl = new AbortController()
     const t = setTimeout(() => ctrl.abort(), 10000)
-    const res = await fetch(url, { signal: ctrl.signal })
-    clearTimeout(t)
+    let res: Response
+    try {
+      res = await fetch(url, { signal: ctrl.signal })
+    } finally {
+      clearTimeout(t)
+    }
     if (res.ok) {
       const total = parseInt(res.headers.get('content-length') || '0')
-      const reader = res.body!.getReader()
+      if (!res.body) throw new Error('Response has no body')
+      const reader = res.body.getReader()
       const chunks: Uint8Array[] = []
       let received = 0
       while (true) {
@@ -125,26 +131,40 @@ export async function updateRegistry(onProgress?: ProgressCallback): Promise<num
     const data: PackageInfo[] = JSON.parse(fs.readFileSync(localPath, 'utf-8'))
     if (!Array.isArray(data)) throw new Error('Invalid registry format')
     fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true })
-    fs.writeFileSync(CACHE_PATH, JSON.stringify(data, null, 2))
+    const tmp = CACHE_PATH + '.tmp'
+    fs.writeFileSync(tmp, JSON.stringify(data, null, 2))
+    fs.renameSync(tmp, CACHE_PATH)
     cached = data
     return data.length
   }
 
   // npm mode: fetch from remote (with curl fallback for proxy compatibility)
-  const data: PackageInfo[] = await fetchRegistryJSON(REMOTE_REGISTRY_URL, onProgress)
-  if (!Array.isArray(data)) throw new Error('Invalid registry format')
-  fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true })
-  fs.writeFileSync(CACHE_PATH, JSON.stringify(data, null, 2))
-  cached = data
-  if (onProgress) onProgress(`Registry updated: ${data.length} packages`)
-  return data.length
+  if (registryFetching) return registryFetching
+  registryFetching = (async () => {
+    const data: PackageInfo[] = await fetchRegistryJSON(REMOTE_REGISTRY_URL, onProgress)
+    if (!Array.isArray(data)) throw new Error('Invalid registry format')
+    fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true })
+    // Atomic write via temp + rename to avoid corruption on crash
+    const tmp = CACHE_PATH + '.tmp'
+    fs.writeFileSync(tmp, JSON.stringify(data, null, 2))
+    fs.renameSync(tmp, CACHE_PATH)
+    cached = data
+    if (onProgress) onProgress(`Registry updated: ${data.length} packages`)
+    return data.length
+  })()
+  try { return await registryFetching } finally { registryFetching = null }
 }
 
 function satisfiesVersion(required: string): boolean {
-  const a = pluginVersion().replace(/-.*$/, '').split('.').map(Number)
+  const fullVersion = pluginVersion()
+  // Pre-release versions (e.g. "1.3.0-alpha") are strictly less than release ("1.3.0")
+  if (fullVersion.includes('-')) return false
+  const a = fullVersion.split('.').map(Number)
   const b = required.replace(/-.*$/, '').split('.').map(Number)
   for (let i = 0; i < Math.max(a.length, b.length); i++) {
-    const va = a[i] || 0, vb = b[i] || 0
+    const va = a[i], vb = b[i]
+    if (va === undefined || vb === undefined) break
+    if (isNaN(va) || isNaN(vb)) return false
     if (va > vb) return true
     if (va < vb) return false
   }

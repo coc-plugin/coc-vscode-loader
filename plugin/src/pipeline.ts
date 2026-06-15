@@ -37,8 +37,8 @@ function converterCliPath(): string {
   }
   throw new Error(
     'converter CLI not found. ' +
-    'Please set $COC_CONVERTER_PATH to the converter/ directory, ' +
-    'or ensure it is at the same level as coc-converter/'
+    'Ensure the converter/ directory is at the same level as the plugin in dev mode, ' +
+    'or reinstall coc-vscode-loader to get the bundled converter.'
   )
 }
 
@@ -108,15 +108,20 @@ async function downloadSource(
   const srcDir = sourceDir(name)
   const cache = cacheDir(name)
   const repoUrl = `https://github.com/${info.source.repo}.git`
-  let output = ''
+
+  let beforeHead = ''
+  try {
+    beforeHead = (await runWithOutput('git', ['-C', srcDir, 'rev-parse', 'HEAD'], cache)).trim()
+  } catch {}
 
   if (fs.existsSync(srcDir)) {
-    onProgress(1, 5, 'Updating source...', `git -C ${srcDir} pull`)
+    // Use fetch + reset instead of pull for shallow clone safety (handles default branch rename, force push)
+    onProgress(1, 5, 'Updating source...', `git -C ${srcDir} fetch origin`)
     const log = (chunk: string) => {
-      output += chunk
       onProgress(1, 5, 'Updating source...', chunk.trim())
     }
-    await run('git', ['-C', srcDir, 'pull'], cache, log)
+    await run('git', ['-C', srcDir, 'fetch', '--depth', '1', 'origin'], cache, log)
+    await run('git', ['-C', srcDir, 'reset', '--hard', 'origin/HEAD'], cache)
   } else {
     onProgress(1, 5, 'Cloning repository...', `git clone --depth=1 ${repoUrl}`)
     fs.mkdirSync(cache, { recursive: true })
@@ -125,7 +130,13 @@ async function downloadSource(
   }
 
   const dir = info.source.subdir ? path.join(srcDir, info.source.subdir) : srcDir
-  const updated = !output.includes('Already up to date.')
+  let updated = true
+  if (beforeHead) {
+    try {
+      const afterHead = (await runWithOutput('git', ['-C', srcDir, 'rev-parse', 'HEAD'], cache)).trim()
+      updated = afterHead !== beforeHead
+    } catch {}
+  }
   return { dir, updated }
 }
 
@@ -290,7 +301,13 @@ async function buildPackage(
   const platformMap: Record<string, string> = {
     darwin: 'apple-darwin', linux: 'unknown-linux-gnu', win32: 'pc-windows-msvc',
   }
-  const arch = os.arch() === 'arm64' ? 'arm64' : 'x64'
+  const arch = (() => {
+    const a = os.arch()
+    if (a === 'arm64') return 'arm64'
+    if (a === 'x64') return 'x64'
+    console.warn(`  unsupported arch "${a}", falling back to x64 — binary download may fail`)
+    return 'x64'
+  })()
   const platform: string = process.platform === 'win32' ? 'win32' : process.platform === 'darwin' ? 'darwin' : 'linux'
   const rawArch = archMap[arch] || arch
   const rustTarget = `${rawArch}-${platformMap[platform] || platform}`
@@ -347,7 +364,7 @@ async function buildPackage(
       } else if (filename.endsWith('.gz') && !filename.endsWith('.tar.gz')) {
         // Single-file gzip: decompress then move to server dir
         const outName = filename.replace(/\.gz$/, '')
-        await run('gunzip', [filename], build)
+        await run('gunzip', ['-f', filename], build)
         fs.renameSync(path.join(build, outName), path.join(serverDir, outName))
       } else {
         // Raw binary: move to server dir, creating subdirs if needed
@@ -357,9 +374,14 @@ async function buildPackage(
         fs.renameSync(path.join(build, filename), destPath)
       }
       try {
-        fs.readdirSync(serverDir).forEach(f => {
-          fs.chmodSync(path.join(serverDir, f), 0o755)
-        })
+        const chmodRecursive = (d: string) => {
+          for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
+            const fp = path.join(d, entry.name)
+            if (entry.isDirectory()) chmodRecursive(fp)
+            else fs.chmodSync(fp, 0o755)
+          }
+        }
+        chmodRecursive(serverDir)
       } catch {}
       // Resolve {{version}} in lib/index.js (only available after GitHub API call)
       if (version) {
@@ -371,7 +393,7 @@ async function buildPackage(
           }
         }
       }
-      if (sb.binaryPath || filename.match(/\.(zip|gz)$/)) {
+      if (sb.binaryPath || filename.match(/\.(zip|tar\.gz|tgz|gz)$/)) {
         const archivePath = path.join(build, filename)
         if (fs.existsSync(archivePath)) await rimraf(archivePath)
       }
@@ -399,14 +421,23 @@ async function installToCoc(
   await cpdir(src, dest)
 
   const pkgPath = extensionsPkgPath()
-  const pkg = fs.existsSync(pkgPath) ? JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) : { dependencies: {} }
+  let pkg: Record<string, any>
+  try {
+    pkg = fs.existsSync(pkgPath) ? JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) : { dependencies: {} }
+  } catch {
+    // Corrupted package.json — start fresh
+    pkg = { dependencies: {} }
+  }
   pkg.dependencies = pkg.dependencies || {}
   const depName = `coc-${name}`
   if (!pkg.dependencies[depName]) {
     pkg.dependencies[depName] = `file:${dest}`
   }
   pkg.lastUpdate = Date.now()
-  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
+  // Atomic write
+  const tmp = pkgPath + '.tmp'
+  fs.writeFileSync(tmp, JSON.stringify(pkg, null, 2))
+  fs.renameSync(tmp, pkgPath)
 }
 
 function metaPath(name: string): string {
@@ -600,7 +631,9 @@ export async function runConcurrent<T>(
 ): Promise<void> {
   const pool = new Set<Promise<void>>()
   for (const item of items) {
-    const p = fn(item).catch(() => {}).finally(() => pool.delete(p))
+    const p = fn(item).catch((e: any) => {
+      console.warn(`runConcurrent: ${e.message}`)
+    }).finally(() => pool.delete(p))
     pool.add(p)
     if (pool.size >= concurrency) {
       await Promise.race(pool)

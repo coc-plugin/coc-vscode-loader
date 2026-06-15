@@ -50,13 +50,18 @@ program
       process.exit(1)
     }
 
-    await convert({
-      input,
-      output: opts.output,
-      convert: steps,
-      presets,
-      verbose: opts.verbose,
-    })
+    try {
+      await convert({
+        input,
+        output: opts.output,
+        convert: steps,
+        presets,
+        verbose: opts.verbose,
+      })
+    } catch (e: any) {
+      console.error(`convert failed: ${e.message}`)
+      process.exit(1)
+    }
   })
 
 program.parse()

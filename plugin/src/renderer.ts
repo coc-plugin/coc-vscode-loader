@@ -46,6 +46,17 @@ export class LineBuffer {
   }
 
   highlight(pattern: RegExp, hlGroup: string) {
+    if (!pattern.global) {
+      const segs = this.lines[this.li]
+      let full = ''
+      for (const seg of segs) full += seg.text
+      pattern.lastIndex = 0
+      const m = pattern.exec(full)
+      if (m) {
+        this.patternHls.push({ line: this.li, hlGroup, colStart: byteLen(full.slice(0, m.index)), colEnd: byteLen(full.slice(0, m.index)) + byteLen(m[0]) })
+      }
+      return this
+    }
     const segs = this.lines[this.li]
     let full = ''
     for (const seg of segs) full += seg.text

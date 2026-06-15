@@ -84,7 +84,9 @@ export const sourceGenerator: StepGenerator = {
     for (const rel of vscodeFiles) {
       const fp = path.join(outputsDir, rel)
       if (!fs.existsSync(fp) || rel.endsWith('.js')) continue
-      try { project.addSourceFileAtPath(fp) } catch {}
+      try { project.addSourceFileAtPath(fp) } catch {
+        if (verbose) console.warn(`  source: "${rel}" has syntax errors — applying text-level replacements only`)
+      }
     }
 
     for (const sf of project.getSourceFiles()) {
@@ -113,10 +115,19 @@ export const sourceGenerator: StepGenerator = {
       if (!fs.existsSync(fp)) continue
       let code = fs.readFileSync(fp, 'utf-8')
       const orig = code
+      let needsRequireExtras = false
       code = code.replace(/require\(['"]vscode['"]\)/g, "require('coc.nvim')")
       code = code.replace(/(\w+)\.fileName\b/g, "Uri.parse($1.uri).fsPath")
       code = code.replace(/(\w+(?:\.\w+)*?)\.uri\.fsPath/g, 'Uri.parse($1.uri).fsPath')
+      const hasUriDestructured = /(?:const|let|var)\s*\{[^}]*\bUri\b[^}]*\}\s*=\s*require\s*\(\s*['"]coc\.nvim['"]\s*\)/.test(code)
+      if (code.includes('Uri.parse(') && !hasUriDestructured) {
+        code = "const { Uri } = require('coc.nvim')\n" + code
+        needsRequireExtras = true
+      }
       if (code.includes('window.activeTextEditor')) {
+        if (!needsRequireExtras && !code.includes('const { workspace } = require(\'coc.nvim\')')) {
+          code = "const { workspace } = require('coc.nvim')\n" + code
+        }
         code = `\
 if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   try {

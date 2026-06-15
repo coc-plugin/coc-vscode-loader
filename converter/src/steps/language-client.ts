@@ -58,7 +58,7 @@ export const languageClientGenerator: StepGenerator = {
         const entry = ls.server.entry || 'main'
         const binName = ls.server.binName || ''
         const binLookupCode = binName
-          ? `(_pkg.bin && _pkg.bin['${escapeStr(binName)}'] ? _pkg.bin['${escapeStr(binName)}'] : Object.values(_pkg.bin)[0])`
+          ? `(typeof _pkg.bin === 'string' ? _pkg.bin : (_pkg.bin && _pkg.bin['${escapeStr(binName)}'] ? _pkg.bin['${escapeStr(binName)}'] : Object.values(_pkg.bin)[0]))`
           : `(typeof _pkg.bin === 'string' ? _pkg.bin : Object.values(_pkg.bin)[0])`
         serverPathCode = `\
     let serverPath: string | undefined
@@ -206,8 +206,10 @@ ${ls.verbose ? `      console.log('[${escapeStr(id)}] starting client')\n` : ''}
     context.subscriptions.push(
       commands.registerCommand('${escapeStr(pluginName)}.restart', async () => {
         for (const c of clients) {
-          await c.stop()
-          await c.start()
+          try { await c.stop() } catch {}
+        }
+        for (const c of clients) {
+          try { await c.start() } catch {}
         }
       }),
     )

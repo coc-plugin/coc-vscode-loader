@@ -38,12 +38,41 @@ export const transformClassToFactory: Transform = (ctx) => {
   )
 
   // CompletionItem.create(label, kind) → item = CompletionItem.create(label); item.kind = kind
-  text = text.replace(
-    /const\s+(\w+)\s*=\s*CompletionItem\.create\(([^,]+),\s*([^)]+)\)/g,
-    (_, varName, label, kind) => {
-      return `const ${varName} = CompletionItem.create(${label}); ${varName}.kind = ${kind}`
+  // Uses balanced paren matching to safely handle nested calls in label argument
+  const createRe = /const\s+(\w+)\s*=\s*CompletionItem\.create\(/g
+  let result = ''
+  let lastIdx = 0
+  let m: RegExpExecArray | null
+  while ((m = createRe.exec(text)) !== null) {
+    result += text.slice(lastIdx, m.index)
+    let depth = 1
+    let commas = 0
+    let i = m.index + m[0].length
+    while (i < text.length && depth > 0) {
+      if (text[i] === '(') depth++
+      else if (text[i] === ')') depth--
+      else if (text[i] === ',' && depth === 0) {
+        commas++
+        if (commas === 2) {
+          const label = text.slice(m.index + m[0].length, i)
+          i++ // skip comma
+          while (i < text.length && text[i] === ' ') i++
+          let kind = ''
+          while (i < text.length && text[i] !== ')') { kind += text[i]; i++ }
+          result += `const ${m[1]} = CompletionItem.create(${label}); ${m[1]}.kind = ${kind}`
+          lastIdx = i + 1
+          break
+        }
+      }
+      i++
     }
-  )
+    if (commas < 2) {
+      result += m[0]
+      lastIdx = m.index + m[0].length
+    }
+  }
+  result += text.slice(lastIdx)
+  text = result
 
   if (text !== file.getText()) {
     file.replaceWithText(text)

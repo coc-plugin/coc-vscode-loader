@@ -53,9 +53,8 @@ export async function convert(opts: ConvertOptions): Promise<void> {
     if (isLanguageClientStep(s) && s.server.kind === 'binary') {
       if (s.server.binary?.asset) {
         const vars = ['{{version}}', '{{platform}}', '{{arch}}', '{{rust-target}}']
-        for (const v of vars) {
-          if (s.server.binary.asset.includes(v)) break
-        }
+        const found = vars.some(v => s.server.binary.asset.includes(v))
+        if (!found) console.warn(`  binary asset "${s.server.binary.asset}" has no template variables — version may not resolve`)
       }
     }
   }
@@ -180,21 +179,24 @@ export async function convert(opts: ConvertOptions): Promise<void> {
         let changed = false
 
         if (content.includes('document.getWordRangeAtPosition')) {
-          // const range = document.getWordRangeAtPosition(pos, regex)
-          content = content.replace(
-            /const range = document\.getWordRangeAtPosition\(([^,]+),\s*([^)]+)\)/g,
-            'const line = document.getText().split("\\n")[$1.line]; const pre = line.slice(0, $1.character); const m = pre.match($2); const range = m ? { start: { line: $1.line, character: $1.character - m[0].length }, end: { line: $1.line, character: $1.character } } : undefined'
-          )
-          // const range = document.getWordRangeAtPosition(pos)
-          content = content.replace(
-            /const range = document\.getWordRangeAtPosition\(([^)]+)\)/g,
-            'const line = document.getText().split("\\n")[$1.line]; const pre = line.slice(0, $1.character); const m = pre.match(/[_a-zA-Z0-9-]+/); const range = m ? { start: { line: $1.line, character: $1.character - m[0].length }, end: { line: $1.line, character: $1.character } } : undefined'
-          )
-          // range = document.getWordRangeAtPosition(pos, regex) (without const)
-          content = content.replace(
-            /range = document\.getWordRangeAtPosition\(([^,]+),\s*([^)]+)\)/g,
-            '(() => { const ln = document.getText().split("\\n")[$1.line]; const pr = ln.slice(0, $1.character); const mt = pr.match($2); return mt ? { start: { line: $1.line, character: $1.character - mt[0].length }, end: { line: $1.line, character: $1.character } } : undefined; })()'
-          )
+          // Only replace when args have no nested parens (safe for simple expressions)
+          if (content.match(/\.getWordRangeAtPosition\([^()]+\)/)) {
+            // const range = document.getWordRangeAtPosition(pos, regex)
+            content = content.replace(
+              /const range = document\.getWordRangeAtPosition\(([^,]+),\s*([^)]+)\)/g,
+              'const line = document.getText().split("\\n")[$1.line]; const pre = line.slice(0, $1.character); const m = pre.match($2); const range = m ? { start: { line: $1.line, character: $1.character - m[0].length }, end: { line: $1.line, character: $1.character } } : undefined'
+            )
+            // const range = document.getWordRangeAtPosition(pos)
+            content = content.replace(
+              /const range = document\.getWordRangeAtPosition\(([^)]+)\)/g,
+              'const line = document.getText().split("\\n")[$1.line]; const pre = line.slice(0, $1.character); const m = pre.match(/[_a-zA-Z0-9-]+/); const range = m ? { start: { line: $1.line, character: $1.character - m[0].length }, end: { line: $1.line, character: $1.character } } : undefined'
+            )
+            // range = document.getWordRangeAtPosition(pos, regex) (without const)
+            content = content.replace(
+              /range = document\.getWordRangeAtPosition\(([^,]+),\s*([^)]+)\)/g,
+              '(() => { const ln = document.getText().split("\\n")[$1.line]; const pr = ln.slice(0, $1.character); const mt = pr.match($2); return mt ? { start: { line: $1.line, character: $1.character - mt[0].length }, end: { line: $1.line, character: $1.character } } : undefined; })()'
+            )
+          }
           changed = true
         }
 
@@ -205,7 +207,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
           content = content.replace(/(document|this\.document|textDocument|scope|doc)\.fileName/g, 'Uri.parse($1.uri).fsPath')
           // Handle destructuring: const { fileName, ...rest } = document/doc/textDocument
           content = content.replace(
-            /^(\s*)(const|let|var)\s*\{([^}]*)\}\s*=\s*(document|doc|textDocument)\s*;?\s*$/gm,
+            /(\s*)(const|let|var)\s*\{([^}]*)\}\s*=\s*(document|doc|textDocument)\s*;?\s*$/gm,
             (m: string, indent: string, kw: string, props: string, varName: string) => {
               const parts = props.split(',').map((p: string) => p.trim())
               if (!parts.some((p: string) => p === 'fileName')) return m
@@ -221,17 +223,29 @@ export async function convert(opts: ConvertOptions): Promise<void> {
         }
 
         // Ensure Uri is imported when introduced by Uri.parse() replacements
-        if (content.includes('Uri.parse(') && content.match(/from\s+['"]coc\.nvim['"]/)) {
-          content = content.replace(
-            /(import\s*\{\s*)([^}]*?)(\s*\}\s*from\s*['"]coc\.nvim['"])/g,
-            (_m: string, prefix: string, existing: string, suffix: string) => {
-              if (!existing.includes('Uri')) {
-                const sep = existing.trim() ? ', ' : ''
-                return `${prefix}${existing.trim()}${sep}Uri${suffix}`
+        if (content.includes('Uri.parse(')) {
+          if (content.match(/from\s+['"]coc\.nvim['"]/)) {
+            content = content.replace(
+              /(import\s(?:type\s+)?\{\s*)([^}]*?)(\s*\}\s*from\s*['"]coc\.nvim['"])/g,
+              (_m: string, prefix: string, existing: string, suffix: string) => {
+                if (!existing.includes('Uri')) {
+                  const sep = existing.trim() ? ', ' : ''
+                  return `${prefix}${existing.trim()}${sep}Uri${suffix}`
+                }
+                return _m
               }
-              return _m
+            )
+          } else {
+            // Insert after shebang or 'use strict' if present
+            const nl = content.indexOf('\n')
+            const firstLine = content.slice(0, nl > 0 ? nl : 0)
+            if (firstLine.startsWith('#!') || firstLine.includes("'use strict'") || firstLine.includes('"use strict"')) {
+              const insertAt = nl + 1
+              content = content.slice(0, insertAt) + "import { Uri } from 'coc.nvim'\n" + content.slice(insertAt)
+            } else {
+              content = "import { Uri } from 'coc.nvim'\n" + content
             }
-          )
+          }
         }
         if (changed) fs.writeFileSync(fp, content)
       }

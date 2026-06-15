@@ -99,16 +99,35 @@ export const transformImportMapping: Transform = (ctx) => {
   )
 
   // Convert dynamic import('vscode') to require('coc.nvim') (CJS sandbox)
+  // Note: also covers `await import('vscode').then(...)` → `require('coc.nvim')`
   newContent = newContent.replace(
-    /await\s+import\(['"]vscode['"]\)/g,
+    /await\s+import\(['"]vscode['"]\)(\.then\s*\([^)]*\))?/g,
+    "require('coc.nvim')",
+  )
+  // Bare import('vscode') (no await) → require('coc.nvim')
+  newContent = newContent.replace(
+    /(?<!\w)\bimport\(['"]vscode['"]\)(\.then\s*\([^)]*\))?/g,
     "require('coc.nvim')",
   )
 
   // Convert createStatusBarItem(name, alignment, priority) → createStatusBarItem(priority)
-  newContent = newContent.replace(
-    /createStatusBarItem\([^,]+,\s*(?:\w+\.)?(?:Right|Left),\s*/g,
-    'createStatusBarItem(',
-  )
+  // Use balanced paren to handle nested calls in name argument
+  newContent = replaceBalanced(newContent, /createStatusBarItem\(/, (call) => {
+    // Find the second comma (between alignment and priority) by tracking paren depth
+    let depth = 0
+    let commas = 0
+    for (let i = 'createStatusBarItem('.length; i < call.length; i++) {
+      if (call[i] === '(') depth++
+      else if (call[i] === ')') depth--
+      else if (call[i] === ',' && depth === 0) {
+        commas++
+        if (commas === 2) {
+          return 'createStatusBarItem(' + call.slice(i + 1)
+        }
+      }
+    }
+    return call // fallback: return as-is
+  })
 
   // Replace LanguageStatusSeverity.xxx → 2
   newContent = newContent.replace(
@@ -129,15 +148,20 @@ export const transformImportMapping: Transform = (ctx) => {
   )
 
   // Wrap new CodeAction() in try-catch (coc.nvim may not have CodeAction)
-  newContent = newContent.replace(
-    /const action = new CodeAction\(/g,
-    'let action; try { action = new CodeAction(',
-  )
-  // Close the try-catch before return [action]
-  newContent = newContent.replace(
-    /return \[action\];/g,
-    '}catch(e){action={title:"",kind:""}};return [action];',
-  )
+  // Only when unambiguous: exactly one match each, in order
+  const caMatches = newContent.match(/const action = new CodeAction\(/g)
+  const raMatches = newContent.match(/return \[action\];/g)
+  if (caMatches?.length === 1 && raMatches?.length === 1 &&
+      newContent.indexOf('const action = new CodeAction(') < newContent.indexOf('return [action];')) {
+    newContent = newContent.replace(
+      /const action = new CodeAction\(/,
+      'let action; try { action = new CodeAction(',
+    )
+    newContent = newContent.replace(
+      /return \[action\];/,
+      '}catch(e){action={title:"",kind:""}};return [action];',
+    )
+  }
 
   // window.createOutputChannel works in coc.nvim (workspace variant is deprecated)
   // no replacement needed
@@ -203,9 +227,9 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   // Ensure workspace/Uri is imported from coc.nvim when introduced by replacements
   function ensureCocImport(name: string) {
     if (!newContent.includes(name + '.') && !newContent.includes(name + '(')) return
-    // Handle destructured imports: import { ... } from 'coc.nvim'
+    // Handle destructured imports: import { ... } from 'coc.nvim' or import type { ... } from 'coc.nvim'
     newContent = newContent.replace(
-      /(import\s*\{\s*)([^}]*?)(\s*\}\s*from\s*['"]coc\.nvim['"])/g,
+      /(import\s+(?:type\s+)?\{\s*)([^}]*?)(\s*\}\s*from\s*['"]coc\.nvim['"])/g,
       (match, prefix, existing, suffix) => {
         if (!existing.includes(name)) {
           const sep = existing.trim() ? ', ' : ''
@@ -214,7 +238,10 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
         return match
       }
     )
-    // Namespace imports (import * as X from 'coc.nvim') already have all exports, no injection needed
+    // Fallback: no coc.nvim import yet, add one
+    if (!newContent.match(/import\s[^'"]*from\s*['"]coc\.nvim['"]/)) {
+      newContent = `import { ${name} } from 'coc.nvim'\n` + newContent
+    }
   }
   ensureCocImport('workspace')
   ensureCocImport('Uri')
