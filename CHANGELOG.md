@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.4.1] - 2026-06-15
+
+### Fixed
+- **`client` variable hoisting in language-client step** — hoist `client` from block-level `const` to function-level `let` so bridge code injection `registerBridge(context, client)` can access it. Fixes `client is not defined` error in Volar and other ts-bridge plugins.
+- **`_mainEntry` undeclared for binary servers** — add `let _mainEntry: string | undefined` declaration in binary server path code, preventing ReferenceError at runtime.
+- **`initializationOptions` escaping** — remove harmful backtick/`${}` escaping that injected `\`` into generated code.
+- **Multi-line volar imports** — `strip-volar` transform now uses `[\s\S]*?` instead of `.*` to handle multi-line `import { ... } from '@volar/vscode'`.
+- **`await import()` scope** — narrow replacement from all `await import(...)` to only `await import('vscode')`, preserving non-vscode dynamic imports.
+- **`workspace.workspaceFolders` guard** — extend guard from bracket-only access `[...]` to also cover property access (`.xxx`) and for-of iteration; preserve standalone truthiness checks.
+- **Multiple trigger chars** — `provider-register` now wraps ALL trailing string arguments in an array instead of just the last one.
+- **Node 18 compatibility** — replace `fs.readdirSync(dir, { recursive: true })` with manual directory walk.
+- **spawn crash safety** — add missing `.on('error')` handlers to `rimraf()`/`cpdir()`; add `settled` guard to prevent double `reject()` in `run()`/`runWithOutput()`.
+- **Binary path directory support** — create parent directories before `renameSync` when `binaryPath` contains subdirectories.
+- **npm registry caching** — fix `npmRegistryUrl()` re-running `execSync` on every call.
+- **State staleness** — `refreshPackages()` now recomputes `status` for existing entries against the filesystem.
+- **Detail popup scrolling** — add j/k scrolling and dynamic height (up to 70% screen) for log detail popup.
+- **WinEnter close** — allow `help`/`terminal`/`quickfix` buffer types without closing the TUI.
+
 ## [1.4.0] - 2026-06-15
 
 ### Added
