@@ -1,6 +1,6 @@
 import { StateManager } from './state'
 import { getPackage, PackageInfo } from './registry'
-import { spawn, execFile } from 'child_process'
+import { spawn, execFile, execSync } from 'child_process'
 import { window as cocWindow } from 'coc.nvim'
 import * as path from 'path'
 import * as fs from 'fs'
@@ -42,6 +42,29 @@ function converterCliPath(): string {
   )
 }
 
+let _npmRegistry: string | undefined
+function npmRegistryUrl(): string | undefined {
+  if (_npmRegistry !== undefined) return _npmRegistry
+  if (process.env.COC_NPM_REGISTRY) {
+    _npmRegistry = process.env.COC_NPM_REGISTRY
+    return _npmRegistry
+  }
+  try {
+    _npmRegistry = execSync('npm config get registry', { encoding: 'utf-8', timeout: 5000 }).trim()
+    if (_npmRegistry === 'https://registry.npmjs.org/') _npmRegistry = undefined
+  } catch {
+    _npmRegistry = undefined
+  }
+  return _npmRegistry
+}
+
+function npmInstallArgs(): string[] {
+  const args = ['install', '--legacy-peer-deps']
+  const reg = npmRegistryUrl()
+  if (reg) args.push('--registry', reg)
+  return args
+}
+
 const CMD_TIMEOUT = 300_000 // 5 minutes
 
 async function run(
@@ -54,14 +77,21 @@ async function run(
       child.kill('SIGTERM')
       reject(new Error(`Timed out after ${CMD_TIMEOUT / 1000}s: ${cmd} ${args.join(' ')}`))
     }, CMD_TIMEOUT)
-    const handler = (data: Buffer) => {
-      const text = data.toString()
+    let stderrBuf = ''
+    let lastReport = 0
+    const report = (text: string) => {
       onLine?.(text)
     }
-    child.stdout.on('data', handler)
-    child.stderr.on('data', handler)
-    let stderrBuf = ''
-    child.stderr.on('data', (d: Buffer) => { stderrBuf += d.toString() })
+    child.stdout.on('data', (d: Buffer) => report(d.toString()))
+    child.stderr.on('data', (d: Buffer) => {
+      const text = d.toString()
+      stderrBuf += text
+      const now = Date.now()
+      if (now - lastReport > 100) {
+        lastReport = now
+        report(text)
+      }
+    })
     child.on('close', code => {
       clearTimeout(timer)
       if (code === 0) resolve()
@@ -113,7 +143,7 @@ async function convertSource(
   if (!fs.existsSync(path.join(converterDir, 'node_modules', 'commander'))) {
     onProgress(2, 5, 'Installing converter dependencies...', '')
     const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
-    await run('npm', ['install', '--legacy-peer-deps', '--omit=dev'], converterDir, log)
+    await run('npm', [...npmInstallArgs(), '--omit=dev'], converterDir, log)
   }
 
   // Build convert config from registry entry
@@ -177,8 +207,8 @@ async function buildPackage(
   const build = buildDir(name)
 
   const npmLog = (chunk: string) => onProgress(3, 5, chunk.trim(), '')
-  onProgress(3, 5, 'Installing dependencies...', 'npm install --legacy-peer-deps')
-  await run('npm', ['install', '--legacy-peer-deps'], build, npmLog)
+  onProgress(3, 5, 'Installing dependencies...', `npm ${npmInstallArgs().join(' ')}`)
+  await run('npm', npmInstallArgs(), build, npmLog)
 
   // Run postinstall if present (some extensions download servers here)
   onProgress(3, 5, 'Running postinstall...', 'npm run postinstall')
@@ -225,8 +255,8 @@ async function buildPackage(
   // Check for server directory in original source and install its deps
   const serverDir = path.join(inputDir, 'server')
   if (fs.existsSync(serverDir) && fs.existsSync(path.join(serverDir, 'package.json'))) {
-    onProgress(3, 5, 'Installing server dependencies...', `npm install in ${serverDir}`)
-    await run('npm', ['install', '--legacy-peer-deps'], serverDir, npmLog)
+    onProgress(3, 5, 'Installing server dependencies...', `npm ${npmInstallArgs().join(' ')} in ${serverDir}`)
+    await run('npm', npmInstallArgs(), serverDir, npmLog)
     const destServer = path.join(build, 'server')
     await rimraf(destServer)
     await cpdir(serverDir, destServer)
