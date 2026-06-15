@@ -13,12 +13,17 @@ if [ -f converter/package.json ]; then
   cd ..
 fi
 
-echo ""
-echo "=== Registry smoke test ==="
-if [ -f converter/package.json ]; then
-  cd converter
-  npm run test:smoke
-  cd ..
+if [ -z "$SKIP_SMOKE" ]; then
+  echo ""
+  echo "=== Registry smoke test ==="
+  if [ -f converter/package.json ]; then
+    cd converter
+    npm run test:smoke
+    cd ..
+  fi
+else
+  echo ""
+  echo "=== Registry smoke test SKIPPED (SKIP_SMOKE=1) ==="
 fi
 
 echo ""
