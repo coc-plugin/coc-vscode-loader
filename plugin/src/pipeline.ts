@@ -206,6 +206,22 @@ async function buildPackage(
 ): Promise<void> {
   const build = buildDir(name)
 
+  // Copy local language server from source if configured with a relative path
+  const hasLocalServer = (info.convert || []).some(s =>
+    (s as any).type === 'language-client' && (s as any).server?.kind === 'module'
+    && typeof (s as any).server?.package === 'string'
+    && ((s as any).server.package.startsWith('./') || (s as any).server.package.startsWith('../'))
+  )
+  if (hasLocalServer && inputDir) {
+    const srcServer = path.join(inputDir, 'server')
+    const destServer = path.join(build, 'server')
+    if (fs.existsSync(srcServer)) {
+      onProgress(3, 5, 'Copying language server...', `cp ${srcServer} → ${destServer}`)
+      await rimraf(destServer)
+      await cpdir(srcServer, destServer)
+    }
+  }
+
   const npmLog = (chunk: string) => onProgress(3, 5, chunk.trim(), '')
   onProgress(3, 5, 'Installing dependencies...', `npm ${npmInstallArgs().join(' ')}`)
   await run('npm', npmInstallArgs(), build, npmLog)

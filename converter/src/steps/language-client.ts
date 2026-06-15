@@ -17,6 +17,8 @@ export const languageClientGenerator: StepGenerator = {
     const pluginName = ctx.origPkg.name || 'plugin'
     const description = ctx.origPkg.description || pluginName
 
+    const isLocal = ls.server.kind !== 'binary' && (ls.server.package.startsWith('./') || ls.server.package.startsWith('../'))
+
     let serverPathCode: string
     let serverOptionsCode: string
 
@@ -38,15 +40,27 @@ export const languageClientGenerator: StepGenerator = {
       serverOptionsCode = `{ command: serverPath, args: ${argsStr} }`
     } else {
       const pkg = ls.server.package
-      const entry = ls.server.entry || 'main'
 
-      // Same resolution as old converter: resolve main entry first, then walk for bin
-      // Use require.resolve('pkg/package.json') as fallback for packages without main entry
-      const binName = ls.server.binName || ''
-      const binLookupCode = binName
-        ? `(_pkg.bin && _pkg.bin['${escapeStr(binName)}'] ? _pkg.bin['${escapeStr(binName)}'] : Object.values(_pkg.bin)[0])`
-        : `(typeof _pkg.bin === 'string' ? _pkg.bin : Object.values(_pkg.bin)[0])`
-      serverPathCode = `\
+      if (pkg.startsWith('./') || pkg.startsWith('../')) {
+        // Local relative path server — simple resolve, no bin walking, no package.json fallback
+        serverPathCode = `\
+    let serverPath: string | undefined
+    let _mainEntry: string | undefined
+    try {
+      _mainEntry = require.resolve('${escapeStr(pkg)}')
+    } catch {}
+    if (!_mainEntry) {
+      _mainEntry = require('path').join(__dirname, '${escapeStr(pkg)}')
+    }`
+        serverOptionsCode = `{ module: _mainEntry, transport: ${transportExpr} }`
+      } else {
+        // npm package server — resolve main entry, then walk for bin
+        const entry = ls.server.entry || 'main'
+        const binName = ls.server.binName || ''
+        const binLookupCode = binName
+          ? `(_pkg.bin && _pkg.bin['${escapeStr(binName)}'] ? _pkg.bin['${escapeStr(binName)}'] : Object.values(_pkg.bin)[0])`
+          : `(typeof _pkg.bin === 'string' ? _pkg.bin : Object.values(_pkg.bin)[0])`
+        serverPathCode = `\
     let serverPath: string | undefined
     let _mainEntry: string | undefined
     try {
@@ -72,16 +86,42 @@ export const languageClientGenerator: StepGenerator = {
         _dir = require('path').dirname(_dir);
       }
     } catch {}`
-      // Use full require.resolve path (including bin walking) if available, else fallback to simple main entry
-      serverOptionsCode = `{ module: serverPath || _mainEntry || require.resolve('${escapeStr(pkg)}/package.json'), transport: ${transportExpr} }`
+        // Use full require.resolve path (including bin walking) if available, else fallback to simple main entry
+        serverOptionsCode = `{ module: serverPath || _mainEntry || require.resolve('${escapeStr(pkg)}/package.json'), transport: ${transportExpr} }`
+      }
     }
 
     const docSelectorCode = `[${languages.map(l => `{ scheme: 'file', language: '${l}' }`).join(', ')}]`
+
+    const stylesheetScanExts = ['css', 'scss', 'less']
+    const hasStylesheetLanguages = languages.some(l => stylesheetScanExts.includes(l))
+
+    const initOptsExpr = ls.initializationOptions || 'undefined'
+    const hasPreload = isLocal && hasStylesheetLanguages
+    const initOptsCode = hasPreload ? 'initOpts' : initOptsExpr
+    const preloadCode = hasPreload ? `
+    const initOpts = Object.assign({}, ${initOptsExpr})
+    if (!initOpts.stylesheets) initOpts.stylesheets = []
+    const exts = '{${stylesheetScanExts.join(',')}}'
+    const exclude = '{**/node_modules/**,**/bower_components/**,**/.git/**,**/dist/**,**/build/**,**/.next/**,**/out/**,**/coverage/**}'
+    const files = await workspace.findFiles(\`**/*.\${exts}\`, exclude)
+    for (const file of files) {
+      try {
+        const fsPath = file.fsPath || (typeof file === 'string' ? file : '')
+        if (!fsPath) continue
+        const text = require('fs').readFileSync(fsPath, 'utf-8')
+        const languageId = path.extname(fsPath).slice(1)
+        initOpts.stylesheets.push({ uri: file.toString(), languageId, text })
+      } catch {}
+    }
+` : ''
+
     const code = `\
 import {
   LanguageClient,
   TransportKind,
   services,
+  languages,
   workspace,
   window,
   commands,
@@ -97,8 +137,8 @@ ${ls.verbose ? `    console.log('[${escapeStr(id)}] serverPath undefined')\n` : 
       window.showErrorMessage('Cannot find language server.')
       return
     }
-${ls.verbose ? `    console.log('[${escapeStr(id)}] serverPath =', serverPath)\n` : ''}\
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] creating LanguageClient')\n` : ''}\
+${preloadCode}
     const createClient = () => {
       const client = new LanguageClient(
         '${escapeStr(id)}',
@@ -107,7 +147,9 @@ ${ls.verbose ? `    console.log('[${escapeStr(id)}] creating LanguageClient')\n`
         {
           documentSelector: ${docSelectorCode},
           outputChannelName: '${escapeStr(description)}',
-          ${ls.initializationOptions ? `initializationOptions: ${ls.initializationOptions},` : ''}
+          synchronize: { configurationSection: '${escapeStr(id)}' },
+          ${hasPreload ? `initializationOptions: initOpts,` : ''}
+          ${!hasPreload && ls.initializationOptions ? `initializationOptions: ${ls.initializationOptions},` : ''}
         },
       )
       context.subscriptions.push({ dispose: () => client.stop() })
@@ -133,6 +175,34 @@ ${ls.verbose ? `      console.log('[${escapeStr(id)}] starting client')\n` : ''}
       clients = [client]
     }
 
+    // Local server hover fallback: try server hover first, fallback to building from definition
+    ${isLocal ? `const hoverLanguages = [${languages.map((l: string) => `'${l}'`).join(', ')}]
+    const _client = client
+    context.subscriptions.push(
+      languages.registerHoverProvider(hoverLanguages, {
+        provideHover: async (_doc: any, _pos: any) => {
+          const params = {
+            textDocument: { uri: _doc.uri.toString() },
+            position: { line: _pos.line, character: _pos.character },
+          }
+          const hov = await _client.sendRequest<any>('textDocument/hover', params).catch(() => null)
+          if (hov) return hov
+          const defs = await _client.sendRequest<any>('textDocument/definition', params).catch(() => null)
+          if (!defs || defs.length === 0) return null
+          const loc = defs[0]
+          try {
+            const fpath = (loc.uri || '').replace(/^file:\\/\\//, '')
+            const lang = (fpath.match(/\\.(\\w+)$/) || [])[1] || 'text'
+            const lines = require('fs').readFileSync(fpath, 'utf-8').split('\\n').slice(loc.range.start.line, loc.range.end.line + 1)
+            const indent = lines.reduce((m: number, l: string) => { const s = l.match(/^(\\s*)/); return s ? Math.min(m, s[1].length) : m }, 999)
+            const snippet = lines.map((l: string) => l.slice(indent)).join('\\n').trim()
+            if (snippet) return { contents: { kind: 'markdown', value: '\`\`\`' + lang + String.fromCharCode(10) + snippet + String.fromCharCode(10) + '\`\`\`' } }
+          } catch {}
+          return null
+        },
+      })
+    )` : ''}
+
     context.subscriptions.push(
       commands.registerCommand('${escapeStr(pluginName)}.restart', async () => {
         for (const c of clients) {
@@ -141,6 +211,7 @@ ${ls.verbose ? `      console.log('[${escapeStr(id)}] starting client')\n` : ''}
         }
       }),
     )
+
   } catch (e: any) {
     window.showErrorMessage('${escapeStr(pluginName)} error: ' + (e.message || String(e)))
   }

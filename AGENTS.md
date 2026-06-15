@@ -216,6 +216,29 @@ Registry 条目示例：
 
 ## Converter 关键模块
 
+### Local server 支持（v1.4.2+）
+
+当 language server 是源码中本地子目录（而非已发布 npm 包），可在 `server.package` 使用相对路径：
+
+```json
+{
+  "type": "language-client",
+  "server": {
+    "kind": "module",
+    "package": "../server/out/server"
+  },
+  "languages": ["css", "scss", "less"]
+}
+```
+
+本地 server 的处理方式：
+- **代码生成**：`require.resolve` + `path.join` 回退（无 npm 特有的 bin walking / package.json fallback）
+- **Build**：esbuild.mjs 自动安装 `@types/node`、编译 `server/` 下的 TypeScript
+- **Pipeline**：`buildPackage()` 自动从 source 拷贝 `server/` 目录到 build 目录
+- **Hover fallback**：对 local server 自动注册直接 hover provider，先试 `textDocument/hover`，失败则从 `textDocument/definition` 结果读文件构造 hover 内容（语言标签从扩展名自动识别）
+
+注意：`server/` 目录需要有自己的 `package.json` 和 `tsconfig.json`。
+
 ### `binName` 字段（v1.2.0+）
 
 当 `server.kind === "module"` 且 `entry === "bin"` 时，可用 `binName` 指定 bin 字段的某个具体入口。适用于 `bin` 有多个值的包（如 `@tailwindcss/language-server` 有 `css-language-server` 和 `tailwindcss-language-server` 两个 bin）。
@@ -248,6 +271,7 @@ Registry 条目示例：
 - [x] Language-client step `initializationOptions` field (tsdk for Volar-based servers)
 - [x] `snippets` step type — 纯 snippets 扩展自动转换
 - [x] 20 snippet extensions 已录入 registry
+- [x] Local server support — `server.package` 支持相对路径，自动编译 `server/` TypeScript、pipeline 自动拷贝
 
 ## Testing
 
@@ -255,7 +279,7 @@ Every source file must have a corresponding `.test.ts` file. Run before pushing:
 
 ```bash
 npm test                    # Unit tests (115) + check-tests (no missing/empty tests)
-npm run test:smoke          # Registry smoke test (converts all 112 entries, validates output)
+npm run test:smoke          # Registry smoke test (converts all 113 entries, validates output)
 ```
 
 **Pre-push hook** runs both. CI runs unit tests on push/PR (Node 20/22) and smoke test after.

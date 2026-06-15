@@ -274,6 +274,8 @@ export async function convert(opts: ConvertOptions): Promise<void> {
   for (const s of steps) {
     if (isLanguageClientStep(s) && s.server.kind === 'module') {
       const pkg = s.server.package
+      // Skip relative paths — they refer to local files, not npm packages
+      if (pkg.startsWith('./') || pkg.startsWith('../')) continue
       const ver = origPkg.dependencies?.[pkg] || origPkg.devDependencies?.[pkg]
       if (ver && ver.startsWith('workspace:')) {
         serverDeps[pkg] = '*' // monorepo workspace → wildcard for npm
@@ -291,7 +293,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
       const v = ver as string
       if (v.startsWith('workspace:')) continue
       if (dep.startsWith('@types/')) continue
-      if (['typescript', 'mocha', 'c8', 'prettier', 'rollup', 'esbuild', '@vscode/test-electron'].some(p => dep.startsWith(p))) continue
+      if (['typescript', 'mocha', 'c8', 'prettier', 'rollup', 'esbuild', '@vscode/test', '@typescript-eslint', 'eslint'].some(p => dep.startsWith(p))) continue
       origDeps[dep] = v
     }
   }
@@ -306,6 +308,16 @@ export async function convert(opts: ConvertOptions): Promise<void> {
     if (typeof deps[k] === 'string' && deps[k].startsWith('workspace:')) deps[k] = '*'
   }
 
+  // Detect local language servers (relative path packages) for server compilation + build scripts
+  const hasLocalServer = steps.some(s => isLanguageClientStep(s) && s.server.kind === 'module' && (s.server.package.startsWith('./') || s.server.package.startsWith('../')))
+
+  const scripts: Record<string, string> = {
+    build: `node esbuild.mjs`,
+  }
+  if (hasLocalServer) {
+    scripts['postinstall'] = 'if [ -d server ] && [ -f server/package.json ]; then (cd server && npm install --legacy-peer-deps); fi'
+  }
+
   const pkg = {
     name: pluginName.startsWith('coc-') ? pluginName : `coc-${pluginName}`,
     version: origPkg.version || '0.1.0',
@@ -313,6 +325,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
     main: 'lib/index.js',
     engines: { coc: '^0.0.82' },
     activationEvents,
+    scripts,
     dependencies: deps,
     devDependencies: {
       esbuild: '^0.28.0',
@@ -356,9 +369,32 @@ export async function convert(opts: ConvertOptions): Promise<void> {
     return n.split('/')[0]
   }).filter((v, i, a) => v && a.indexOf(v) === i)
 
+  const prebuildSection = hasLocalServer ? `\
+import { execSync } from 'child_process'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+// Compile local language server TypeScript
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const serverDir = join(__dirname, 'server')
+if (existsSync(join(serverDir, 'tsconfig.json'))) {
+  // Ensure @types/node is available for the server
+  if (!existsSync(join(serverDir, 'node_modules', '@types', 'node'))) {
+    console.log('[build] Installing @types/node for server...')
+    execSync('npm install --save-dev @types/node --legacy-peer-deps', { cwd: serverDir, stdio: 'inherit' })
+  }
+  // Compile with strict mode disabled (server code has pre-existing TS strict issues)
+  console.log('[build] Compiling server TypeScript...')
+  execSync('npx tsc --skipLibCheck --strict false', { cwd: serverDir, stdio: 'inherit' })
+  console.log('[build] Server compiled successfully')
+}
+` : ''
+
   const esbuildConfig = `\
 import * as esbuild from 'esbuild'
-
+${prebuildSection}
 const options = {
   entryPoints: ['${esbuildEntry}'],
   bundle: true,
