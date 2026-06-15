@@ -130,7 +130,7 @@ export class TUI {
             if (curWin === this.winid) return
             const curBuf = await nvim.call('winbufnr', [curWin]) as number
             const bt = await nvim.call('getbufvar', [curBuf, '&buftype']) as string
-            if (bt !== 'nofile' && bt !== 'prompt') {
+            if (bt !== 'nofile' && bt !== 'prompt' && bt !== 'help' && bt !== 'terminal' && bt !== 'quickfix') {
               await this.close()
             }
           } catch {}
@@ -339,6 +339,23 @@ export class TUI {
       await this.closeDetailPopup()
       return
     }
+    if (id === 'detail-j' && this.detailWinid) {
+      const nvim = workspace.nvim
+      const cur = await nvim.call('nvim_win_get_cursor', [this.detailWinid]) as [number, number]
+      const bufLineCount = await nvim.call('nvim_buf_line_count', [this.detailBufnr]) as number
+      if (cur[0] < bufLineCount) {
+        await nvim.call('nvim_win_set_cursor', [this.detailWinid, [cur[0] + 1, cur[1]]])
+      }
+      return
+    }
+    if (id === 'detail-k' && this.detailWinid) {
+      const nvim = workspace.nvim
+      const cur = await nvim.call('nvim_win_get_cursor', [this.detailWinid]) as [number, number]
+      if (cur[0] > 1) {
+        await nvim.call('nvim_win_set_cursor', [this.detailWinid, [cur[0] - 1, cur[1]]])
+      }
+      return
+    }
     if (id === 'cr') {
       if (pkgName) await this.showDetailPopup(pkgName)
       return
@@ -347,6 +364,7 @@ export class TUI {
 
   private keyMap: Record<string, string> = {
     q: 'q', esc: '<Esc>', question: '?', slash: '/', j: 'j', k: 'k', 'close-detail': 'close-detail',
+    'detail-j': 'detail-j', 'detail-k': 'detail-k',
     U: 'U', Z: 'Z', i: 'i', u: 'u', X: 'X', R: 'R', cr: '<CR>',
     f: 'f', s: 's', x: 'x', D: 'D', gg: 'gg', G: 'G',
   }
@@ -687,7 +705,8 @@ export class TUI {
     const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
     const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
     const lines = this.buildDetailLines(entry, this.detailMode)
-    const height = this.detailMode === 'log' ? 20 : Math.min(lines.length, 20)
+    const maxH = Math.floor(editorLines * 0.7)
+    const height = this.detailMode === 'log' ? Math.min(Math.max(lines.length, 5), maxH) : Math.min(lines.length, 20)
     const row = Math.max(0, Math.floor((editorLines - height - 2) / 2))
     const col = Math.max(0, Math.floor((editorCols - 82) / 2))
     const buf = await nvim.createNewBuffer(false, true)
@@ -705,6 +724,8 @@ export class TUI {
     const keyBuf = nvim.createBuffer(this.detailBufnr)
     keyBuf.setKeymap('n', 'q', '<Cmd>call CocConverterDispatch("close-detail")<CR>', { silent: true, nowait: true })
     keyBuf.setKeymap('n', '<Esc>', '<Cmd>call CocConverterDispatch("close-detail")<CR>', { silent: true, nowait: true })
+    keyBuf.setKeymap('n', 'j', '<Cmd>call CocConverterDispatch("detail-j")<CR>', { silent: true, nowait: true })
+    keyBuf.setKeymap('n', 'k', '<Cmd>call CocConverterDispatch("detail-k")<CR>', { silent: true, nowait: true })
     await this.updateDetailPopup()
   }
 

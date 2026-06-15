@@ -271,6 +271,7 @@ export class StateManager {
         const old = oldMap.get(info.name)
         if (old) {
           old.info = info
+          old.status = installedSet.has(info.name) ? 'installed' : 'not-installed'
           return old
         }
         return {

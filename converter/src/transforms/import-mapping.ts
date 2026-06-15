@@ -98,10 +98,10 @@ export const transformImportMapping: Transform = (ctx) => {
     "require('coc.nvim')",
   )
 
-  // Convert dynamic import() to require()
+  // Convert dynamic import('vscode') to require('coc.nvim') (CJS sandbox)
   newContent = newContent.replace(
-    /await\s+import\(/g,
-    'require(',
+    /await\s+import\(['"]vscode['"]\)/g,
+    "require('coc.nvim')",
   )
 
   // Convert createStatusBarItem(name, alignment, priority) → createStatusBarItem(priority)
@@ -188,25 +188,36 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   // editor.setDecorations → no-op (coc has different decoration API)
   newContent = replaceBalanced(newContent, /editor\.setDecorations\s*\(/, () => '/* setDecorations */')
 
-  // Guard workspace.workspaceFolders when accessed via index (coc.nvim may return undefined)
+  // Guard workspace.workspaceFolders bracket/property access (coc.nvim may return undefined).
+  // Does not guard standalone references (e.g. `if (workspace.workspaceFolders)`) to preserve truthiness checks.
   newContent = newContent.replace(
-    /workspace\.workspaceFolders(?=\[)/g,
+    /workspace\.workspaceFolders(?=\s*(?:\[|\.\w))/g,
     '(workspace.workspaceFolders || [])'
   )
+  // Guard for-of iteration: `for (... of workspace.workspaceFolders)`
+  newContent = newContent.replace(
+    /(of\s+)workspace\.workspaceFolders(?!\s*\?)/g,
+    '$1(workspace.workspaceFolders || [])'
+  )
 
-  // Ensure workspace is imported from coc.nvim when we introduced workspace. references
-  if (newContent.includes('workspace.') && newContent.match(/from\s+['"]coc\.nvim['"]/)) {
+  // Ensure workspace/Uri is imported from coc.nvim when introduced by replacements
+  function ensureCocImport(name: string) {
+    if (!newContent.includes(name + '.') && !newContent.includes(name + '(')) return
+    // Handle destructured imports: import { ... } from 'coc.nvim'
     newContent = newContent.replace(
       /(import\s*\{\s*)([^}]*?)(\s*\}\s*from\s*['"]coc\.nvim['"])/g,
       (match, prefix, existing, suffix) => {
-        if (!existing.includes('workspace')) {
+        if (!existing.includes(name)) {
           const sep = existing.trim() ? ', ' : ''
-          return `${prefix}${existing.trim()}${sep}workspace${suffix}`
+          return `${prefix}${existing.trim()}${sep}${name}${suffix}`
         }
         return match
       }
     )
+    // Namespace imports (import * as X from 'coc.nvim') already have all exports, no injection needed
   }
+  ensureCocImport('workspace')
+  ensureCocImport('Uri')
 
   if (newContent !== content) {
     file.replaceWithText(newContent)

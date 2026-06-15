@@ -43,8 +43,10 @@ function converterCliPath(): string {
 }
 
 let _npmRegistry: string | undefined
+let _npmRegistryInited = false
 function npmRegistryUrl(): string | undefined {
-  if (_npmRegistry !== undefined) return _npmRegistry
+  if (_npmRegistryInited) return _npmRegistry
+  _npmRegistryInited = true
   if (process.env.COC_NPM_REGISTRY) {
     _npmRegistry = process.env.COC_NPM_REGISTRY
     return _npmRegistry
@@ -72,13 +74,14 @@ async function run(
   onLine?: (line: string) => void,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
+    let settled = false
     const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: false })
     const timer = setTimeout(() => {
+      if (settled) return; settled = true
       child.kill('SIGTERM')
       reject(new Error(`Timed out after ${CMD_TIMEOUT / 1000}s: ${cmd} ${args.join(' ')}`))
     }, CMD_TIMEOUT)
     let stderrBuf = ''
-    let lastReport = 0
     const report = (text: string) => {
       onLine?.(text)
     }
@@ -86,18 +89,15 @@ async function run(
     child.stderr.on('data', (d: Buffer) => {
       const text = d.toString()
       stderrBuf += text
-      const now = Date.now()
-      if (now - lastReport > 100) {
-        lastReport = now
-        report(text)
-      }
+      report(text)
     })
     child.on('close', code => {
+      if (settled) return; settled = true
       clearTimeout(timer)
       if (code === 0) resolve()
       else reject(new Error(`${cmd} ${args.join(' ')} exited with code ${code}\n${stderrBuf.trim()}`))
     })
-    child.on('error', (e) => { clearTimeout(timer); reject(e) })
+    child.on('error', (e) => { if (settled) return; settled = true; clearTimeout(timer); reject(e) })
   })
 }
 
@@ -334,9 +334,11 @@ async function buildPackage(
         await run('gunzip', [filename], build)
         fs.renameSync(path.join(build, outName), path.join(serverDir, outName))
       } else {
-        // Raw binary: just move to server dir
+        // Raw binary: move to server dir, creating subdirs if needed
         const binName = sb.binaryPath || filename
-        fs.renameSync(path.join(build, filename), path.join(serverDir, binName))
+        const destPath = path.join(serverDir, binName)
+        fs.mkdirSync(path.dirname(destPath), { recursive: true })
+        fs.renameSync(path.join(build, filename), destPath)
       }
       try {
         fs.readdirSync(serverDir).forEach(f => {
@@ -449,7 +451,9 @@ export async function installPackage(state: StateManager, name: string): Promise
 function rimraf(dir: string): Promise<void> {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(dir)) return resolve()
-    spawn('rm', ['-rf', dir], { stdio: 'ignore' }).on('close', code => code === 0 ? resolve() : reject(new Error(`rm -rf exited ${code}`)))
+    spawn('rm', ['-rf', dir], { stdio: 'ignore' })
+      .on('close', code => code === 0 ? resolve() : reject(new Error(`rm -rf exited ${code}`)))
+      .on('error', (e) => reject(e))
   })
 }
 
@@ -457,7 +461,9 @@ function cpdir(src: string, dest: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const parent = path.dirname(dest)
     if (!fs.existsSync(parent)) fs.mkdirSync(parent, { recursive: true })
-    spawn('cp', ['-r', src, dest], { stdio: 'ignore' }).on('close', code => code === 0 ? resolve() : reject(new Error(`cp -r exited ${code}`)))
+    spawn('cp', ['-r', src, dest], { stdio: 'ignore' })
+      .on('close', code => code === 0 ? resolve() : reject(new Error(`cp -r exited ${code}`)))
+      .on('error', (e) => reject(e))
   })
 }
 
@@ -552,16 +558,22 @@ function walkDir(dir: string): string[] {
 
 async function runWithOutput(cmd: string, args: string[], cwd: string): Promise<string> {
   return new Promise((resolve, reject) => {
+    let settled = false
     const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: false })
     const timer = setTimeout(() => {
+      if (settled) return; settled = true
       child.kill('SIGTERM')
       reject(new Error(`Timed out after ${CMD_TIMEOUT / 1000}s: ${cmd} ${args.join(' ')}`))
     }, CMD_TIMEOUT)
     let out = ''
     child.stdout.on('data', (d: Buffer) => { out += d.toString() })
     child.stderr.on('data', (d: Buffer) => { out += d.toString() })
-    child.on('close', code => { clearTimeout(timer); code === 0 ? resolve(out.trim()) : reject(new Error(`exit ${code}`)) })
-    child.on('error', (e) => { clearTimeout(timer); reject(e) })
+    child.on('close', code => {
+      if (settled) return; settled = true
+      clearTimeout(timer)
+      code === 0 ? resolve(out.trim()) : reject(new Error(`exit ${code}`))
+    })
+    child.on('error', (e) => { if (settled) return; settled = true; clearTimeout(timer); reject(e) })
   })
 }
 

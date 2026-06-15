@@ -19,7 +19,6 @@ export const languageClientGenerator: StepGenerator = {
 
     let serverPathCode: string
     let serverOptionsCode: string
-    let binaryDownloaded = false
 
     if (ls.server.kind === 'binary') {
       const pkg = ls.server.package
@@ -29,6 +28,7 @@ export const languageClientGenerator: StepGenerator = {
 
       serverPathCode = `\
     let serverPath: string | undefined
+    let _mainEntry: string | undefined
     try {
       serverPath = require.resolve('${escapeStr(pkg)}')
     } catch {}
@@ -36,7 +36,6 @@ export const languageClientGenerator: StepGenerator = {
       serverPath = require('path').join(__dirname, '..', 'server', '${escapeStr(binary.binaryPath || pkg)}')
     }`
       serverOptionsCode = `{ command: serverPath, args: ${argsStr} }`
-      binaryDownloaded = true
     } else {
       const pkg = ls.server.package
       const entry = ls.server.entry || 'main'
@@ -108,7 +107,7 @@ ${ls.verbose ? `    console.log('[${escapeStr(id)}] creating LanguageClient')\n`
         {
           documentSelector: ${docSelectorCode},
           outputChannelName: '${escapeStr(description)}',
-          ${ls.initializationOptions ? `initializationOptions: ${ls.initializationOptions.replace(/`/g, '\\`').replace(/\$\{/g, '\\${')},` : ''}
+          ${ls.initializationOptions ? `initializationOptions: ${ls.initializationOptions},` : ''}
         },
       )
       context.subscriptions.push({ dispose: () => client.stop() })

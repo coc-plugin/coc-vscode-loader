@@ -11,14 +11,15 @@ export const transformStripVolar: Transform = (ctx) => {
   let changed = false
 
   const patterns = [
-    /import .* from ['"]@volar\/vscode['"];?\n?/g,
-    /import .* from ['"]reactive-vscode['"];?\n?/g,
-    /import \* as lsp from ['"]@volar\/vscode\/node['"];?\n?/g,
+    /import[\s\S]*?from\s+['"]@volar\/vscode['"];?\n?/g,
+    /import[\s\S]*?from\s+['"]reactive-vscode['"];?\n?/g,
+    /import\s*\*\s*as\s+lsp\s+from\s+['"]@volar\/vscode\/node['"];?\n?/g,
   ]
 
   for (const re of patterns) {
-    if (re.test(content)) {
-      content = content.replace(re, '')
+    const newContent = content.replace(re, '')
+    if (newContent !== content) {
+      content = newContent
       changed = true
     }
   }

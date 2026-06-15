@@ -174,8 +174,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
   {
     const outputSrc = path.join(output, 'src')
     if (fs.existsSync(outputSrc)) {
-      for (const f of fs.readdirSync(outputSrc, { recursive: true })) {
-        const fp = typeof f === 'string' ? path.join(outputSrc, f) : f
+      for (const fp of walkTsFiles(outputSrc)) {
         if (!fp.endsWith('.ts') && !fp.endsWith('.js')) continue
         let content = fs.readFileSync(fp, 'utf-8')
         let changed = false
@@ -422,7 +421,7 @@ function walkTsFiles(dir: string): string[] {
       if (stat.isDirectory()) {
         if (entry.startsWith('.') || entry === 'node_modules') continue
         files.push(...walkTsFiles(full))
-      } else if (entry.endsWith('.ts') || entry.endsWith('.d.ts')) {
+      } else if (entry.endsWith('.ts') || entry.endsWith('.d.ts') || entry.endsWith('.js')) {
         files.push(full)
       }
     }

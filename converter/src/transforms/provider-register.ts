@@ -61,13 +61,19 @@ export const transformProviderRegister: Transform = (ctx) => {
       }
       const end = i
       const fullCall = content.slice(start, end)
-      const lastStrMatch = fullCall.match(/,?\s*'([^']+)'\s*\)$/)
-      const lastDblMatch = fullCall.match(/,?\s*"([^"]+)"\s*\)$/)
+      // Collect all trailing string arguments as trigger chars, wrap in array
+      const triggerRe = /((?:,\s*['"][^'"]*['"])+)\s*\)$/
+      const triggerMatch = fullCall.match(triggerRe)
       let replacement = fullCall
-      if (lastStrMatch) {
-        replacement = fullCall.slice(0, fullCall.length - lastStrMatch[0].length) + ', ["' + lastStrMatch[1] + '"])'
-      } else if (lastDblMatch) {
-        replacement = fullCall.slice(0, fullCall.length - lastDblMatch[0].length) + ', ["' + lastDblMatch[1] + '"])'
+      if (triggerMatch) {
+        const before = fullCall.slice(0, fullCall.length - triggerMatch[0].length)
+        const triggers = triggerMatch[1]
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean)
+          .map(s => s.replace(/^['"](.*)['"]$/, '"$1"'))
+          .join(', ')
+        replacement = before + ', [' + triggers + '])'
       }
       result += content.slice(lastIdx, start) + replacement
       lastIdx = end
