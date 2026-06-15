@@ -6,12 +6,13 @@
     "build:plugin": "cd plugin && npm run build",
     "build:converter": "cd converter && npm run build",
     "build": "npm run build:converter && npm run build:plugin",
-    "test": "npm run test:converter",
-    "test:converter": "cd converter && npm test",
     "switch:local": "bash switch.sh local",
     "switch:npm": "bash switch.sh npm",
     "switch:status": "bash switch.sh status",
-    "pr": "bash scripts/create-pr.sh"
+    "pr": "bash scripts/create-pr.sh",
+    "test": "npm run test:converter",
+    "test:converter": "cd converter && npm test",
+    "postinstall": "git config core.hooksPath .githooks 2>/dev/null; echo 'pre-push hook configured'"
   },
   "repository": {
     "type": "git",

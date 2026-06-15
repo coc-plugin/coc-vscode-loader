@@ -1,0 +1,20 @@
+#!/bin/sh
+# Pre-push hook: run tests before pushing to remote.
+# Skip with: git push --no-verify
+# Or:       git push -o "no-verify"
+
+set -e
+
+echo "Running tests before push..."
+
+# Run from repo root
+cd "$(git rev-parse --show-toplevel)"
+
+# Check if converter has test failures
+if [ -f converter/package.json ]; then
+  cd converter
+  npm test
+  cd ..
+fi
+
+echo "All tests passed."
