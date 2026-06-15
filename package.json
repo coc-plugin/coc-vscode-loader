@@ -6,6 +6,8 @@
     "build:plugin": "cd plugin && npm run build",
     "build:converter": "cd converter && npm run build",
     "build": "npm run build:converter && npm run build:plugin",
+    "test": "npm run test:converter",
+    "test:converter": "cd converter && npm test",
     "switch:local": "bash switch.sh local",
     "switch:npm": "bash switch.sh npm",
     "switch:status": "bash switch.sh status",

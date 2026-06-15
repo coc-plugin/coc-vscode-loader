@@ -2,18 +2,22 @@
   "name": "converter",
   "version": "1.3.0",
   "private": true,
-  "description": "vscode \u2192 coc.nvim converter prototype",
+  "description": "vscode → coc.nvim converter prototype",
   "type": "module",
   "scripts": {
-    "convert": "tsx src/cli.ts"
+    "convert": "tsx src/cli.ts",
+    "test": "npm run check:tests && vitest run",
+    "test:watch": "vitest",
+    "check:tests": "tsx scripts/check-tests.ts"
   },
   "dependencies": {
-    "ts-morph": "^28.0.0",
     "commander": "^15.0.0",
+    "ts-morph": "^28.0.0",
     "typescript": "^6.0.3"
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
-    "tsx": "^4.19.0"
+    "tsx": "^4.19.0",
+    "vitest": "^4.1.8"
   }
 }
