@@ -336,7 +336,7 @@ export class TUI {
       return
     }
     if (id === 'close-detail') {
-      this.closeDetailPopup()
+      await this.closeDetailPopup()
       return
     }
     if (id === 'cr') {
@@ -374,7 +374,7 @@ export class TUI {
     this.disposables = []
     // Destroy hidden detail popup on TUI close
     if (this.detailWinid) {
-      try { workspace.nvim.call('nvim_win_close', [this.detailWinid, true]) } catch {}
+      try { await workspace.nvim.call('nvim_win_close', [this.detailWinid, true]) } catch {}
       this.detailWinid = 0
     }
     if (this.winid) {
@@ -676,7 +676,7 @@ export class TUI {
   }
 
   private async showDetailPopup(name: string) {
-    if (this.detailWinid) this.closeDetailPopup()
+    if (this.detailWinid) await this.closeDetailPopup()
     this.detailPkgName = name
     const nvim = workspace.nvim
     const entry = this.state.getPackage(name)
@@ -714,41 +714,45 @@ export class TUI {
     if (!entry) return
     const lines = this.buildDetailLines(entry, this.detailMode)
     const nvim = workspace.nvim
-    await nvim.call('nvim_buf_set_lines', [this.detailBufnr, 0, -1, false, lines])
-    await nvim.call('nvim_buf_clear_namespace', [this.detailBufnr, this.ns, 0, -1])
-    // Highlights
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
-      if (line.startsWith('  [')) {
-        const endBracket = line.indexOf(']')
-        if (endBracket > 0) {
-          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: endBracket + 1, hl_group: 'CocConverterKey' }])
-          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, endBracket + 1, { end_col: line.length, hl_group: 'Comment' }])
-        }
-      } else if (line.startsWith('  $ ')) {
-        nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'Comment' }])
-      } else if (line.includes('✗') || line.includes('Error:')) {
-        nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'ErrorMsg' }])
-      } else if (line.match(/^\s{4}at\s/) || line.match(/^\s{4}Node\.js/)) {
-        nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'Comment' }])
-      } else if (line.match(/^\s{2}\w+\s{3,}/)) {
-        // Info mode: label/value pairs
-        const parts = line.substring(2).split(/\s{2,}/)
-        if (parts.length >= 2 && ['desc', 'type', 'status', 'source', 'langs', 'cats', 'link', 'commit', 'server'].includes(parts[0])) {
-          const labelEnd = 2 + parts[0].length + line.substring(2 + parts[0].length).match(/^\s*/)![0].length
-          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: labelEnd, hl_group: 'CocConverterKey' }])
-          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, labelEnd, { end_col: line.length, hl_group: 'Comment' }])
+    nvim.pauseNotification()
+    try {
+      nvim.call('nvim_buf_set_lines', [this.detailBufnr, 0, -1, false, lines], true)
+      nvim.call('nvim_buf_clear_namespace', [this.detailBufnr, this.ns, 0, -1], true)
+      // Highlights
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]
+        if (line.startsWith('  [')) {
+          const endBracket = line.indexOf(']')
+          if (endBracket > 0) {
+            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: endBracket + 1, hl_group: 'CocConverterKey' }], true)
+            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, endBracket + 1, { end_col: line.length, hl_group: 'Comment' }], true)
+          }
+        } else if (line.startsWith('  $ ')) {
+          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'Comment' }], true)
+        } else if (line.includes('✗') || line.includes('Error:')) {
+          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'ErrorMsg' }], true)
+        } else if (line.match(/^\s{4}at\s/) || line.match(/^\s{4}Node\.js/)) {
+          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'Comment' }], true)
+        } else if (line.match(/^\s{2}\w+\s{3,}/)) {
+          const parts = line.substring(2).split(/\s{2,}/)
+          if (parts.length >= 2 && ['desc', 'type', 'status', 'source', 'langs', 'cats', 'link', 'commit', 'server'].includes(parts[0])) {
+            const labelEnd = 2 + parts[0].length + line.substring(2 + parts[0].length).match(/^\s*/)![0].length
+            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: labelEnd, hl_group: 'CocConverterKey' }], true)
+            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, labelEnd, { end_col: line.length, hl_group: 'Comment' }], true)
+          }
         }
       }
-    }
-    if (this.detailMode === 'log') {
-      await nvim.call('nvim_win_set_cursor', [this.detailWinid, [lines.length, 0]])
+      if (this.detailMode === 'log') {
+        nvim.call('nvim_win_set_cursor', [this.detailWinid, [lines.length, 0]], true)
+      }
+    } finally {
+      await nvim.resumeNotification()
     }
   }
 
-  private closeDetailPopup() {
+  private async closeDetailPopup() {
     if (!this.detailWinid) return
-    try { workspace.nvim.call('nvim_win_close', [this.detailWinid, true]) } catch {}
+    try { await workspace.nvim.call('nvim_win_close', [this.detailWinid, true]) } catch {}
     this.detailWinid = 0
     this.detailBufnr = 0
     this.detailPkgName = ''
