@@ -77,6 +77,7 @@ export class TUI {
     await nvim.command('highlight default link CocConverterType Type')
     await nvim.command('highlight default link CocConverterSection Title')
     await nvim.command('highlight default link CocConverterTotal Identifier')
+    await nvim.command('highlight default link CocConverterSearchMatch Search')
 
     const buf = await nvim.createNewBuffer(false, true)
     this.bufnr = buf.id
@@ -495,6 +496,10 @@ export class TUI {
     buf.append(`F:${filterLabel}(f)`, 'CocConverterPill')
     buf.append(`  `)
     buf.append(`S:${sortLabel}(s)`, 'CocConverterPill')
+    if (state.searchQuery) {
+      buf.append('  |  ')
+      buf.append(`Search: /${state.searchQuery}/`, 'CocConverterSearchMatch')
+    }
     if (state.statusMessage) {
       buf.append('  ·  ')
       buf.append(state.statusMessage, 'Comment')
@@ -557,7 +562,7 @@ export class TUI {
     }
     buf.append(icon, iconHl)
     buf.append(' ')
-    buf.append(entry.info.displayName)
+    this.appendHighlightedText(buf, entry.info.displayName)
     // Status/progress inline
     let statusText = ''
     let statusHl = ''
@@ -596,6 +601,29 @@ export class TUI {
     }
 
     buf.nl()
+  }
+
+  private appendHighlightedText(buf: LineBuffer, text: string) {
+    const q = this.state.getState().searchQuery
+    if (!q) {
+      buf.append(text)
+      return
+    }
+    const lower = text.toLowerCase()
+    const qLower = q.toLowerCase()
+    let pos = 0
+    let idx = lower.indexOf(qLower, pos)
+    if (idx === -1) {
+      buf.append(text)
+      return
+    }
+    while (idx !== -1) {
+      if (idx > pos) buf.append(text.slice(pos, idx))
+      buf.append(text.slice(idx, idx + q.length), 'CocConverterSearchMatch')
+      pos = idx + q.length
+      idx = lower.indexOf(qLower, pos)
+    }
+    if (pos < text.length) buf.append(text.slice(pos))
   }
 
   private buildDetailLines(entry: PackageEntry, mode: 'log' | 'info' = 'info'): string[] {
