@@ -134,20 +134,33 @@ CONCURRENCY=12 npm run test:smoke
 
 ## File structure
 
-| File | Lines | Description |
-|------|-------|-------------|
-| `src/cli.ts` | 59 | CLI entry |
-| `src/convert.ts` | 465 | Main flow + template generation + API replacement |
-| `src/scanner.ts` | 52 | API scanner + plugin classification |
-| `src/transforms/import-mapping.ts` | 195 | Import replacement |
-| `src/transforms/language-client.ts` | 48 | LanguageClient adaptation |
-| `src/transforms/class-to-factory.ts` | 53 | new Xxx() → Xxx.create() |
-| `src/transforms/provider-register.ts` | 61 | Provider registration signature fixes |
-| `src/transforms/enum-offset.ts` | 32 | Enum value offset annotations |
-| `scripts/smoke-test.ts` | 208 | Registry smoke test (112 entries) |
-| `scripts/check-tests.ts` | 55 | Test coverage check |
-| **Tests** | | |
-| `src/**/*.test.ts` | 15 files, 115 tests | Unit tests for all transforms and steps |
+```
+src/
+├── cli.ts                  CLI entry
+├── convert.ts              Main flow + template generation + API replacement
+├── scanner.ts              API scanner
+├── presets.ts              Bridge preset definitions
+├── types.ts                Type definitions
+├── steps/
+│   ├── index.ts            Step registry
+│   ├── source.ts           Source file copy + transforms
+│   ├── snippets.ts         Snippet conversion
+│   ├── language-client.ts  LanguageClient code generation
+│   ├── bridge.ts           Bridge preset code generation
+│   └── mark-unsupported.ts Unsupported API marking
+└── transforms/
+    ├── import-mapping.ts   Import replacement
+    ├── class-to-factory.ts new Xxx() → Xxx.create()
+    ├── provider-register.ts Provider signature fixes
+    ├── language-client.ts   LanguageClient AST adaptation
+    ├── strip-volar.ts      Volar framework stripping
+    └── enum-offset.ts      Enum value offset annotations
+scripts/
+├── smoke-test.ts           Registry smoke test (112 entries)
+└── check-tests.ts          Test coverage enforcement
+```
+
+Each source file has a corresponding `.test.ts` with unit tests — see [Testing](#testing) above.
 
 ## Handled API differences
 
