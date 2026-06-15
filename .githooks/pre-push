@@ -1,20 +1,25 @@
 #!/bin/sh
-# Pre-push hook: run tests before pushing to remote.
+# Pre-push hook: run unit tests + registry smoke test before pushing.
 # Skip with: git push --no-verify
-# Or:       git push -o "no-verify"
 
 set -e
 
-echo "Running tests before push..."
-
-# Run from repo root
 cd "$(git rev-parse --show-toplevel)"
 
-# Check if converter has test failures
+echo "=== Unit tests ==="
 if [ -f converter/package.json ]; then
   cd converter
   npm test
   cd ..
 fi
 
+echo ""
+echo "=== Registry smoke test ==="
+if [ -f converter/package.json ]; then
+  cd converter
+  npm run test:smoke
+  cd ..
+fi
+
+echo ""
 echo "All tests passed."

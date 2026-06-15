@@ -8,6 +8,7 @@
     "convert": "tsx src/cli.ts",
     "test": "npm run check:tests && vitest run",
     "test:watch": "vitest",
+    "test:smoke": "tsx scripts/smoke-test.ts",
     "check:tests": "tsx scripts/check-tests.ts"
   },
   "dependencies": {
