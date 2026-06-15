@@ -132,22 +132,48 @@ async function testOne(entry: RegistryEntry, presets: any): Promise<string | nul
   const hasNonSource = entry.convert.some(s => s.type !== 'source' && s.type !== 'mark-unsupported')
   const isSnippets = entry.convert.some(s => s.type === 'snippets')
 
+  // Read output package.json if it exists
+  let pkg: any = null
+  if (hasPkg) {
+    try { pkg = JSON.parse(fs.readFileSync(path.join(outputDir, 'package.json'), 'utf-8')) } catch {}
+  }
+
   try {
     if (isSnippets) {
-      if (!hasPkg) return 'missing package.json'
-      const pkg = JSON.parse(fs.readFileSync(path.join(outputDir, 'package.json'), 'utf-8'))
+      // Snippets: must have package.json + activationEvents + src/index.ts + snippet files copied
+      if (!pkg) return 'missing package.json'
       if (!pkg.name) return 'package.json missing name'
       if (!pkg.activationEvents?.length) return 'package.json missing activationEvents'
       if (!fs.existsSync(path.join(outputDir, 'src', 'index.ts'))) return 'missing src/index.ts'
+      // Check contributed snippet files actually exist in output
+      const contributed = pkg.contributes?.snippets
+      if (contributed?.length) {
+        const missing = contributed.filter((s: any) => !fs.existsSync(path.join(outputDir, s.path)))
+        if (missing.length > 0) {
+          return `${missing.length} snippet files not copied (e.g. ${missing[0].path})`
+        }
+      }
     } else if (hasNonSource) {
-      if (!hasPkg) return 'no output'
-      const pkg = JSON.parse(fs.readFileSync(path.join(outputDir, 'package.json'), 'utf-8'))
+      // language-client / bridge: must have package.json + entry point + esbuild.mjs
+      if (!pkg) return 'no output (package.json missing)'
       if (!pkg.name) return 'package.json missing name'
       if (!pkg.main) return 'package.json missing main'
       if (!fs.existsSync(path.join(outputDir, 'esbuild.mjs'))) return 'missing esbuild.mjs'
-    } else if (hasPkg) {
-      const pkg = JSON.parse(fs.readFileSync(path.join(outputDir, 'package.json'), 'utf-8'))
-      if (!pkg.name) return 'package.json missing name'
+      // Check generated entry point exists
+      if (!fs.existsSync(path.join(outputDir, 'src', 'index.ts')) && !fs.existsSync(path.join(outputDir, 'src', 'bridge.ts'))) {
+        return 'missing generated entry (src/index.ts or src/bridge.ts)'
+      }
+    } else {
+      // Source-only: conversion may produce no output if no vscode imports found (expected)
+      if (pkg) {
+        if (!pkg.name) return 'package.json missing name'
+        // Check at least some source files were copied
+        const srcDir = path.join(outputDir, 'src')
+        if (fs.existsSync(srcDir)) {
+          const files = fs.readdirSync(srcDir).filter(f => f.endsWith('.ts') || f.endsWith('.js'))
+          if (files.length === 0) return 'no source files in src/'
+        }
+      }
     }
   } catch (e: any) {
     return `validate: ${e.message}`
