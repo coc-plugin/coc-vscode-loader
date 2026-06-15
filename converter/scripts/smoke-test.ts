@@ -16,6 +16,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
 import { execFileSync } from 'child_process'
+import { convert } from '../src/convert.js'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -24,6 +25,7 @@ const PRESETS_PATH = path.resolve(__dirname, '../../coc-vscode-registry/presets.
 const CACHE_DIR = path.join(os.homedir(), '.cache', 'coc-converter-smoke')
 const TEST_OUTPUT = path.join(os.tmpdir(), 'coc-smoke-output')
 const CONCURRENCY = parseInt(process.env.CONCURRENCY || '8', 10)
+const CACHE_TTL_DAYS = parseInt(process.env.CACHE_TTL || '7', 10)
 
 interface RegistryEntry {
   name: string; displayName: string; type: string
@@ -37,54 +39,76 @@ function cacheDir(e: RegistryEntry): string {
 
 function downloadOrCached(entry: RegistryEntry): string {
   const dest = cacheDir(entry)
-  if (fs.existsSync(dest)) {
-    // Validate cache is complete (has package.json)
-    if (!process.env.NO_CACHE && fs.existsSync(path.join(dest, 'package.json'))) return dest
-    fs.rmSync(dest, { recursive: true, force: true })
-  }
-
-  fs.mkdirSync(dest, { recursive: true })
   const src = entry.source
+  const isSnippets = entry.convert.some(s => s.type === 'snippets')
 
   if (src.type === 'github' && src.repo) {
-    try {
-      execFileSync('git', ['clone', '--depth', '1', '--single-branch',
-        `https://github.com/${src.repo}.git`, path.join(dest, '_clone')],
-        { stdio: 'pipe', timeout: 300000 })
-    } catch (e) {
-      fs.rmSync(dest, { recursive: true, force: true })
-      throw e
+    const url = `https://github.com/${src.repo}.git`
+
+    if (fs.existsSync(path.join(dest, '.git'))) {
+      // Fast incremental update
+      try {
+        execFileSync('git', ['fetch', '--depth', '1', 'origin', 'main'], { cwd: dest, stdio: 'pipe', timeout: 30000 })
+        execFileSync('git', ['reset', '--hard', 'origin/main'], { cwd: dest, stdio: 'pipe', timeout: 30000 })
+      } catch {
+        // Fetch failed, re-clone
+        fs.rmSync(dest, { recursive: true, force: true })
+        fs.mkdirSync(dest, { recursive: true })
+        execFileSync('git', ['clone', '--depth', '1', '--single-branch', url, dest], { stdio: 'pipe', timeout: 300000 })
+      }
+    } else {
+      // Fresh clone
+      if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
+      fs.mkdirSync(dest, { recursive: true })
+      execFileSync('git', ['clone', '--depth', '1', '--single-branch', url, dest], { stdio: 'pipe', timeout: 300000 })
     }
-    const cloneDir = path.join(dest, '_clone')
-    const sourceDir = src.subdir ? path.join(cloneDir, src.subdir) : cloneDir
-    for (const f of fs.readdirSync(sourceDir)) {
-      if (f === '.git') continue
-      fs.cpSync(path.join(sourceDir, f), path.join(dest, f), { recursive: true })
+
+    // Validate expected files exist
+    const checkDir = src.subdir ? path.join(dest, src.subdir) : dest
+    if (isSnippets) {
+      // Snippets need contributes.snippets in package.json
+      if (!fs.existsSync(path.join(checkDir, 'package.json')))
+        throw new Error(`package.json not found in ${src.subdir ? src.subdir : 'root'} of ${src.repo}`)
     }
-    fs.rmSync(cloneDir, { recursive: true, force: true })
-    return dest
+    return checkDir
   }
 
   if (src.type === 'npm' && src.package) {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'npm-'))
-    try {
-      execFileSync('npm', ['pack', src.package], { cwd: tmp, stdio: 'pipe', timeout: 60000 })
-    } catch (e) {
+    // npm packages: re-download if stale or missing
+    const metaPath = path.join(dest, '.npm-meta.json')
+    let stale = !fs.existsSync(dest) || !fs.existsSync(path.join(dest, 'package.json'))
+    if (!stale) {
+      try {
+        const meta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'))
+        const age = (Date.now() - new Date(meta.fetched).getTime()) / 1000 / 86400
+        if (age > CACHE_TTL_DAYS) stale = true
+      } catch { stale = true }
+    }
+    if (stale || process.env.NO_CACHE) {
+      if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
+      fs.mkdirSync(dest, { recursive: true })
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'npm-'))
+      try {
+        execFileSync('npm', ['pack', src.package], { cwd: tmp, stdio: 'pipe', timeout: 60000 })
+      } catch (e) {
+        fs.rmSync(tmp, { recursive: true, force: true })
+        fs.rmSync(dest, { recursive: true, force: true })
+        throw e
+      }
+      const tarball = fs.readdirSync(tmp).find(f => f.endsWith('.tgz'))
+      if (!tarball) { fs.rmSync(tmp, { recursive: true, force: true }); throw new Error(`npm pack failed for ${src.package}`) }
+      execFileSync('tar', ['xzf', path.join(tmp, tarball)], { cwd: dest, stdio: 'pipe' })
+      if (fs.existsSync(path.join(dest, 'package'))) {
+        for (const f of fs.readdirSync(path.join(dest, 'package')))
+          fs.cpSync(path.join(dest, 'package', f), path.join(dest, f), { recursive: true })
+        fs.rmSync(path.join(dest, 'package'), { recursive: true, force: true })
+      }
       fs.rmSync(tmp, { recursive: true, force: true })
-      fs.rmSync(dest, { recursive: true, force: true })
-      throw e
+      fs.writeFileSync(metaPath, JSON.stringify({ fetched: new Date().toISOString() }))
     }
-    const tarball = fs.readdirSync(tmp).find(f => f.endsWith('.tgz'))
-    if (!tarball) throw new Error(`npm pack failed for ${src.package}`)
-    execFileSync('tar', ['xzf', path.join(tmp, tarball)], { cwd: dest, stdio: 'pipe' })
-    if (fs.existsSync(path.join(dest, 'package'))) {
-      for (const f of fs.readdirSync(path.join(dest, 'package')))
-        fs.cpSync(path.join(dest, 'package', f), path.join(dest, f), { recursive: true })
-      fs.rmSync(path.join(dest, 'package'), { recursive: true, force: true })
-    }
-    fs.rmSync(tmp, { recursive: true, force: true })
     return dest
   }
+
   throw new Error(`Unknown source type: ${src.type}`)
 }
 
@@ -98,8 +122,6 @@ async function testOne(entry: RegistryEntry, presets: any): Promise<string | nul
 
   const outputDir = path.join(TEST_OUTPUT, entry.name)
   fs.mkdirSync(outputDir, { recursive: true })
-  const { convert } = await import('../src/convert.js')
-
   try {
     await convert({ input: inputDir, output: outputDir, convert: entry.convert, presets })
   } catch (e: any) {
