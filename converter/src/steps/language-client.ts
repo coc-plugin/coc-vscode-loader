@@ -101,7 +101,7 @@ ${ls.verbose ? `    console.log('[${escapeStr(id)}] serverPath undefined')\n` : 
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] serverPath =', serverPath)\n` : ''}\
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] creating LanguageClient')\n` : ''}\
     const createClient = () => {
-      const c = new LanguageClient(
+      const client = new LanguageClient(
         '${escapeStr(id)}',
         '${escapeStr(description)}',
         ${serverOptionsCode},
@@ -111,12 +111,13 @@ ${ls.verbose ? `    console.log('[${escapeStr(id)}] creating LanguageClient')\n`
           ${ls.initializationOptions ? `initializationOptions: ${ls.initializationOptions.replace(/`/g, '\\`').replace(/\$\{/g, '\\${')},` : ''}
         },
       )
-      context.subscriptions.push({ dispose: () => c.stop() })
-      context.subscriptions.push(services.registerLanguageClient(c))
-      return c
+      context.subscriptions.push({ dispose: () => client.stop() })
+      context.subscriptions.push(services.registerLanguageClient(client))
+      return client
     }
 
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] registering LanguageClient')\n` : ''}\
+    let client: LanguageClient | undefined
     let clients: LanguageClient[]
     if (${multiRoot ? 'workspace.workspaceFolders && workspace.workspaceFolders.length > 1' : 'false'}) {
 ${ls.verbose ? `      console.log('[${escapeStr(id)}] multiRoot mode')\n` : ''}\
@@ -125,11 +126,12 @@ ${ls.verbose ? `      console.log('[${escapeStr(id)}] multiRoot mode')\n` : ''}\
         c.start()
         return c
       })
+      client = clients[0]
     } else {
-      const c = createClient()
+      client = createClient()
 ${ls.verbose ? `      console.log('[${escapeStr(id)}] starting client')\n` : ''}\
-      c.start()
-      clients = [c]
+      client.start()
+      clients = [client]
     }
 
     context.subscriptions.push(
