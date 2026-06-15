@@ -249,6 +249,34 @@ Registry 条目示例：
 - [x] `snippets` step type — 纯 snippets 扩展自动转换
 - [x] 20 snippet extensions 已录入 registry
 
+## Testing
+
+Every source file must have a corresponding `.test.ts` file. Run before pushing:
+
+```bash
+npm test                    # Unit tests (115) + check-tests (no missing/empty tests)
+npm run test:smoke          # Registry smoke test (converts all 112 entries, validates output)
+```
+
+**Pre-push hook** runs both. CI runs unit tests on push/PR (Node 20/22) and smoke test after.
+
+### check-tests enforcement
+
+| Check | Trigger |
+|-------|---------|
+| `MISSING TEST` | Source file has no `.test.ts` |
+| `EMPTY TEST` | Test file < 50 bytes |
+| `NO TEST CASES` | Test file has no `it(` or `test(` calls |
+
+### Smoke test cache
+
+Repos cached in `~/.cache/coc-converter-smoke/`. Uses `git fetch --depth 1` for incremental updates.
+
+```bash
+NO_CACHE=1 npm run test:smoke    # Force re-download all repos
+CACHE_TTL=1 npm run test:smoke   # Re-download repos older than 1 day
+```
+
 ## Type sync workflow
 
 - Type definitions (`vscode.d.ts`, `coc.d.ts`) are auto-synced daily to [`docs/types/`](./docs/types/)

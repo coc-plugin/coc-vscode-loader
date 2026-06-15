@@ -93,19 +93,61 @@ Adding a new bridge type = add a new preset in `presets.ts`, no changes to main 
 
 See [../docs/converter-design-v2.md](../docs/converter-design-v2.md).
 
+## Testing
+
+```bash
+npm test                    # Unit tests (115 tests, 15 files) + coverage check
+npm run test:smoke          # Registry smoke test — converts all 112 entries
+npm run test:watch          # Watch mode for development
+npm run check:tests         # Verify every source file has a matching test
+```
+
+**Unit tests** cover all transforms, steps, scanner, and the main convert flow:
+
+| Test file | Tests | What it covers |
+|-----------|-------|----------------|
+| `transforms/import-mapping.test.ts` | 21 | All text-level replacements |
+| `transforms/class-to-factory.test.ts` | 7 | `new Xxx()` → `Xxx.create()` |
+| `transforms/provider-register.test.ts` | 7 | Provider signature adaptation |
+| `transforms/enum-offset.test.ts` | 3 | Enum value offset annotations |
+| `transforms/strip-volar.test.ts` | 4 | Volar framework import stripping |
+| `steps/source.test.ts` | 8 | File copy, transforms pipeline, keepDeps |
+| `steps/snippets.test.ts` | 4 | Snippet file copy and error handling |
+| `steps/language-client.test.ts` | 5 | LanguageClient code generation |
+| `steps/bridge.test.ts` | 4 | Bridge preset resolution and code injection |
+| `steps/mark-unsupported.test.ts` | 7 | Unsupported API marking |
+| `convert.test.ts` | 15 | Full conversion pipeline (text replacements, output generation, step orchestration) |
+| `registry-validation.test.ts` | 12 | Registry.json schema (112 entries) |
+| `scanner.test.ts` | 6 | API scanner detection |
+| `presets.test.ts` | 5 | Bridge preset definitions |
+| `transforms/language-client.test.ts` | 5 | LanguageClient AST adaptation |
+
+**Smoke test** — `npm run test:smoke` clones all 112 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
+
+```bash
+# Force re-clone all repos
+NO_CACHE=1 npm run test:smoke
+
+# Run with more concurrent downloads
+CONCURRENCY=12 npm run test:smoke
+```
+
 ## File structure
 
 | File | Lines | Description |
 |------|-------|-------------|
 | `src/cli.ts` | 59 | CLI entry |
-| `src/convert.ts` | 461 | Main flow + template generation + API replacement |
+| `src/convert.ts` | 465 | Main flow + template generation + API replacement |
 | `src/scanner.ts` | 52 | API scanner + plugin classification |
-| `src/transforms/import-mapping.ts` | 193 | Import replacement |
+| `src/transforms/import-mapping.ts` | 195 | Import replacement |
 | `src/transforms/language-client.ts` | 48 | LanguageClient adaptation |
 | `src/transforms/class-to-factory.ts` | 53 | new Xxx() → Xxx.create() |
 | `src/transforms/provider-register.ts` | 61 | Provider registration signature fixes |
 | `src/transforms/enum-offset.ts` | 32 | Enum value offset annotations |
-| **Total** | **~959** | |
+| `scripts/smoke-test.ts` | 208 | Registry smoke test (112 entries) |
+| `scripts/check-tests.ts` | 55 | Test coverage check |
+| **Tests** | | |
+| `src/**/*.test.ts` | 15 files, 115 tests | Unit tests for all transforms and steps |
 
 ## Handled API differences
 

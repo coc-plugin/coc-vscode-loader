@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.4.0] - 2026-06-15
+
+### Added
+- **Test infrastructure** — 115 unit tests across 15 test files covering all transforms, steps, scanner, and the main conversion pipeline
+- **Registry smoke test** — `npm run test:smoke` converts all 112 registry entries, validates output structure. `git fetch --depth 1` for incremental repo updates
+- **Test coverage check** — `npm run check:tests` verifies every source file has a valid `.test.ts` with `it()`/`test()` calls
+- **Pre-push hook** — automatic `npm test` + `npm run test:smoke` on every `git push`
+- **GitHub Actions CI** — unit tests on push/PR (Node 20/22); smoke test after unit passes
+
+### Fixed
+- **`{ fileName }` destructuring** — `const { fileName } = document` now correctly converted to `Uri.parse(document.uri).fsPath` (was gated on `.fileName` check)
+- **`require('vscode')` single-quote detection** — `source.ts` now also checks for single-quoted `require('vscode')` (was double-quote only)
+- **`@vscode/` filter** — changed from `'@vscode/'` to `'@vscode/test-electron'` to avoid filtering out runtime deps like `@vscode/l10n`
+- **devDeps priority** — `dependencies` now correctly override `devDependencies` (was reversed), matching npm behavior
+- **Nested parens in import-mapping** — `setDecorations`, `createLanguageStatusItem`, `showOpenDialog`, `authentication.getSession` regexes now use paren-balanced matching instead of `[^)]+`
+- **pluginName in provider-register** — `TransformContext` now receives `pluginName` from `origPkg` instead of always resolving to `"output"`
+- **Scanner JS support** — scanner now detects `.js` files with vscode imports
+- **CLI error messages** — `--presets-file` parse failure now shows error message (was silent)
+
+### Changed
+- TUI search: active query displayed in header bar, matched text highlighted in package list
+- Cursor no longer jumps on install/update (focusIndex synced to actual cursor before actions)
+- Detail popup extmarks now batched via `pauseNotification`/`resumeNotification`
+- ESM `require()` dead code removed from `source.ts:resolveDepVersion`
+- Documentation updated: README, CONTRIBUTING, converter/README, PR template, AGENTS.md
+
 ## [1.3.0] - 2026-06-15
 
 ### Added

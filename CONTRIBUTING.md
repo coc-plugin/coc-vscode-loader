@@ -113,24 +113,33 @@ When the converter doesn't cover the APIs or patterns your plugin uses, extend i
 **Case C: Need a new bridge preset**
 - Add a new preset in `converter/src/steps/bridge.ts`
 
-### 4. Verify
+### 4. Update docs
+
+If your change adds or modifies a converter feature, update:
+- [`converter/README.md`](./converter/README.md) — file structure, transform list
+- [`docs/import-mapping.md`](./docs/import-mapping.md) — API mapping table
+
+### 5. Verify
 
 ```bash
-# Validate registry JSON format
-python3 -c "import json; json.load(open('path/to/registry.json'))"
+# Run all unit tests (115 tests, 15 test files)
+npm test
 
-# Test conversion locally
-cd converter
-npx tsx src/cli.ts convert ../path/to/vscode-ext -o ./output \
-  --convert-file <(echo '[{"type":"source","transforms":["import-mapping"]}]')
-cd ./output && npm install && node esbuild.mjs
+# Run registry smoke test (converts all 112 entries)
+npm run test:smoke
+
+# Validate registry JSON format
+python3 -c "import json; json.load(open('coc-vscode-registry/registry.json'))"
 ```
 
-### 5. Submit a PR
+**Pre-push hook** automatically runs `npm test` + `npm run test:smoke` on every `git push`. See [.githooks/pre-push](../.githooks/pre-push).
+
+### 6. Submit a PR
 
 - **Registry entry only** → PR to [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)
 - **Both registry and converter changes** → PR to this repo (coc-vscode-loader), including the registry entry
   - Both changes must be in the same PR — otherwise the plugin won't work
+  - **Checklist:** Update converter tests in `converter/src/**/*.test.ts`; run `npm test` + `npm run test:smoke` before submitting
 
 ---
 

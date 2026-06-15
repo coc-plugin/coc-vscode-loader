@@ -84,6 +84,26 @@ Input → Scan (API detection + classification → TS-bridge/Pure LSP/Direct API
 
 ## Development
 
+### Testing
+
+Two test suites must pass before pushing:
+
+```bash
+npm test                    # Unit tests (115 tests) + test coverage check
+npm run test:smoke          # Registry smoke test (converts all 112 entries)
+```
+
+**Pre-push hook** — `git push` automatically runs both suites. Configure once:
+
+```bash
+git config core.hooksPath .githooks
+# Or just run npm install (pre-configured via postinstall)
+```
+
+Skip with `git push --no-verify` (use sparingly).
+
+**GitHub Actions CI** — unit tests run on push/PR (Node 20/22). Smoke test runs after unit passes with repo caching.
+
 ### Switch between local dev and npm release
 
 ```bash
