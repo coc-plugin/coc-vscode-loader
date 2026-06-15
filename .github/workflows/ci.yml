@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  unit:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -23,8 +23,7 @@ jobs:
           cache-dependency-path: converter/package-lock.json
 
       - name: Fetch registry
-        run: |
-          git clone --depth 1 --single-branch https://github.com/coc-plugin/coc-vscode-registry.git coc-vscode-registry
+        run: git clone --depth 1 --single-branch https://github.com/coc-plugin/coc-vscode-registry.git coc-vscode-registry
 
       - name: Install dependencies
         run: npm ci
@@ -36,4 +35,33 @@ jobs:
 
       - name: Run unit tests
         run: npm test
+        working-directory: converter
+
+  smoke:
+    needs: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: converter/package-lock.json
+
+      - name: Fetch registry
+        run: git clone --depth 1 --single-branch https://github.com/coc-plugin/coc-vscode-registry.git coc-vscode-registry
+
+      - name: Cache smoke repos
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/coc-converter-smoke
+          key: smoke-cache-${{ hashFiles('converter/src/**') }}
+          restore-keys: smoke-cache-
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: converter
+
+      - name: Run registry smoke test
+        run: npm run test:smoke
         working-directory: converter
