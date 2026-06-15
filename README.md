@@ -171,7 +171,7 @@ Close the TUI — it will auto-run `:CocRestart`. Or manually run `:CocRestart`.
 
 ### Which VS Code extensions are supported?
 
-Browse the [registry website](https://coc-plugin.github.io/coc-vscode-registry/) or check [registry.json](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json). Includes LSP servers (Volar, Prisma, Deno, Tailwind CSS, Rust Analyzer, etc.), direct-API plugins (HTML CSS Support, Prettier, gitignore, ShellCheck), and snippet extensions for most languages. See [`docs/conversion-feasibility-210.md`](./docs/conversion-feasibility-210.md) for the full 210-plugin analysis.
+Browse the [registry website](https://coc-plugin.github.io/coc-vscode-registry/) or check [registry.json](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json). Includes LSP servers, direct-API plugins, and snippet extensions for most languages.
 
 ### How is this different from running the VS Code extension directly?
 
