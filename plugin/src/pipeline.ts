@@ -203,12 +203,18 @@ async function convertSource(
     }
   }
 
-  const args = ['tsx', cli, 'convert', inputDir, '-o', build, '--convert-file', convertFile]
-  if (fs.existsSync(presetsFile)) args.push('--presets-file', presetsFile)
+  // Use local tsx binary from converter's node_modules (avoids npx download)
+  const tsxPath = path.join(converterDir, 'node_modules', '.bin', 'tsx')
+  const tsxArgs = [cli, 'convert', inputDir, '-o', build, '--convert-file', convertFile]
+  if (fs.existsSync(presetsFile)) tsxArgs.push('--presets-file', presetsFile)
 
   onProgress(2, 5, 'Converting...', `converter convert ${inputDir} -o ${build}`)
   const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
-  await run('npx', args, cacheDir(name), log)
+  if (fs.existsSync(tsxPath)) {
+    await run(tsxPath, tsxArgs, cacheDir(name), log)
+  } else {
+    await run('npx', ['tsx', ...tsxArgs], cacheDir(name), log)
+  }
 }
 
 async function buildPackage(

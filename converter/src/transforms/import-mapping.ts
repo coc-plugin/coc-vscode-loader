@@ -109,6 +109,17 @@ export const transformImportMapping: Transform = (ctx) => {
     /(?<!\w)\bimport\(['"]vscode['"]\)(\.then\s*\([^)]*\))?/g,
     "require('coc.nvim')",
   )
+  // General dynamic import → require (CJS sandbox doesn't support import())
+  // Must be after vscode-specific replacements to avoid double-processing
+  newContent = newContent.replace(
+    /await\s+import\(/g,
+    'require(',
+  )
+  // Bare import(...) (no await) → require(...)
+  newContent = newContent.replace(
+    /(?<!\w)\bimport\(/g,
+    'require(',
+  )
 
   // Convert createStatusBarItem(name, alignment, priority) → createStatusBarItem(priority)
   // Use balanced paren to handle nested calls in name argument
