@@ -61,7 +61,7 @@ function npmRegistryUrl(): string | undefined {
 }
 
 function npmInstallArgs(): string[] {
-  const args = ['install', '--legacy-peer-deps']
+  const args = ['install', '--legacy-peer-deps', '--no-audit', '--no-fund']
   const reg = npmRegistryUrl()
   if (reg) args.push('--registry', reg)
   return args
