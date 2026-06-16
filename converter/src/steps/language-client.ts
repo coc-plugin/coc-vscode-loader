@@ -34,6 +34,7 @@ export const languageClientGenerator: StepGenerator = {
     if (ls.server.kind === 'binary') {
       const pkg = ls.server.package
       const binary = ls.server.binary
+      const fallbackName = binary ? (binary.binaryPath || pkg) : pkg
       const args = ls.server.args || []
       const argsStr = args.length ? `[${args.map(a => `'${escapeStr(a)}'`).join(', ')}]` : '[]'
 
@@ -44,7 +45,12 @@ export const languageClientGenerator: StepGenerator = {
       serverPath = require.resolve('${escapeStr(pkg)}')
     } catch {}
     if (!serverPath) {
-      serverPath = require('path').join(__dirname, '..', 'server', '${escapeStr(binary.binaryPath || pkg)}')
+      const _fallback = require('path').join(__dirname, '..', 'server', '${escapeStr(fallbackName)}')
+      if (require('fs').existsSync(_fallback)) {
+        serverPath = _fallback
+      } else {
+        serverPath = '${escapeStr(pkg)}'
+      }
     }`
       serverOptionsCode = `{ command: serverPath, args: ${argsStr} }`
     } else {
@@ -240,7 +246,7 @@ ${ls.verbose ? `      console.log('[${escapeStr(id)}] starting client')\n` : ''}
       entryPoint: 'src/index.ts',
       keepDeps: {},
       activationEvents,
-      serverBinary: ls.server.kind === 'binary' ? {
+      serverBinary: ls.server.kind === 'binary' && ls.server.binary ? {
         repo: ls.server.binary.repo,
         asset: ls.server.binary.asset,
         binaryPath: ls.server.binary.binaryPath,
