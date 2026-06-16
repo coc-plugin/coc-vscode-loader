@@ -53,6 +53,8 @@ export interface AppState {
   sortBy: SortBy
   scrollOffset: number
   categoryFilter: string | null
+  languageFilter: string | null
+  queuedNames: string[]
   batchStats: BatchStats | null
 }
 
@@ -87,7 +89,7 @@ export function createInitialState(): AppState {
       marked: false,
     }
   })
-  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default', scrollOffset: 0, categoryFilter: null, batchStats: null }
+  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default', scrollOffset: 0, categoryFilter: null, languageFilter: null, queuedNames: [], batchStats: null }
 }
 
 export class StateManager {
@@ -106,7 +108,7 @@ export class StateManager {
   }
 
   private filterKey(): string {
-    return `${this.state.viewFilter}|${this.state.searchQuery}|${this.state.sortBy}|${this.state.categoryFilter || ''}`
+    return `${this.state.viewFilter}|${this.state.searchQuery}|${this.state.sortBy}|${this.state.categoryFilter || ''}|${this.state.languageFilter || ''}`
   }
 
   subscribe(fn: Listener) {
@@ -225,6 +227,27 @@ export class StateManager {
     this.mutate(s => { s.categoryFilter = cat; s.scrollOffset = 0 })
   }
 
+  setLanguageFilter(lang: string | null) {
+    this.invalidateFilterCache()
+    this.mutate(s => { s.languageFilter = lang; s.scrollOffset = 0 })
+  }
+
+  getLanguages(): string[] {
+    const langs = new Set<string>()
+    for (const p of this.state.packages) {
+      for (const l of p.info.languages) langs.add(l)
+    }
+    return [...langs].sort()
+  }
+
+  setQueued(names: string[]) {
+    this.mutate(s => { s.queuedNames = names })
+  }
+
+  removeQueued(name: string) {
+    this.mutate(s => { s.queuedNames = s.queuedNames.filter(n => n !== name) })
+  }
+
   getCategories(): string[] {
     const cats = new Set<string>()
     for (const p of this.state.packages) {
@@ -273,6 +296,10 @@ export class StateManager {
     const cat = this.state.categoryFilter
     if (cat) {
       pkgs = pkgs.filter(p => p.info.categories.includes(cat))
+    }
+    const lang = this.state.languageFilter
+    if (lang) {
+      pkgs = pkgs.filter(p => p.info.languages.includes(lang))
     }
     const sortBy = this.state.sortBy
     if (sortBy === 'name') {

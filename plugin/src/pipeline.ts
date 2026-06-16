@@ -768,13 +768,16 @@ async function runWithOutput(cmd: string, args: string[], cwd: string): Promise<
   })
 }
 
-export async function runConcurrent<T>(
+export async function runConcurrent<T extends string>(
   items: T[],
   fn: (item: T) => Promise<void>,
   state: StateManager | null = null,
   concurrency = 3,
 ): Promise<void> {
-  if (state) state.setBatchStats({ total: items.length, completed: 0, failed: 0 })
+  if (state) {
+    state.setBatchStats({ total: items.length, completed: 0, failed: 0 })
+    state.setQueued(items as string[])
+  }
   let completed = 0
   let failed = 0
   const updateStats = () => {
@@ -782,6 +785,7 @@ export async function runConcurrent<T>(
   }
   const pool = new Set<Promise<void>>()
   for (const item of items) {
+    if (state) state.removeQueued(item as string)
     const p = fn(item).then(() => {
       completed++
       updateStats()
@@ -793,12 +797,14 @@ export async function runConcurrent<T>(
     pool.add(p)
     if (pool.size >= concurrency) {
       await Promise.race(pool)
-      // Wait a tick to let .finally() microtask drain before checking pool size
       await new Promise(r => setImmediate(r))
     }
   }
   await Promise.allSettled(pool)
-  if (state) setTimeout(() => state.setBatchStats(null), 3000)
+  if (state) {
+    setTimeout(() => state.setBatchStats(null), 3000)
+    state.setQueued([])
+  }
 }
 
 let checkUpdatesBusy = false

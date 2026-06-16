@@ -53,6 +53,7 @@ const KEYMAP_ENTRIES: [string, string][] = [
   ['C', 'Check for updates'],
   ['c', 'Check package version'],
   ['<C-c>', 'Cancel install / update'],
+  ['<C-f>', 'Cycle language filter'],
   ['/', 'Search packages'],
   ['<CR>', 'Toggle package details / log'],
   ['1-9', 'Switch view tab'],
@@ -221,6 +222,30 @@ export class TUI {
             nvim.command('nohlsearch', true)
           }
         }
+      }),
+      workspace.registerAutocmd({
+        event: 'VimResized',
+        request: true,
+        callback: async () => {
+          if (!this.winid) return
+          const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
+          const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
+          const cmdheight = await nvim.call('nvim_get_option', ['cmdheight']) as number
+          const availLines = Math.max(1, editorLines - cmdheight)
+          this.windowHeight = Math.floor(availLines * 0.9)
+          this.windowWidth = Math.floor(editorCols * 0.8)
+          const row = Math.max(Math.floor((availLines - this.windowHeight) / 2), 0)
+          const col = Math.max(Math.floor((editorCols - this.windowWidth) / 2), 0)
+          try {
+            nvim.pauseNotification()
+            nvim.call('nvim_win_set_config', [this.winid, { width: this.windowWidth, height: this.windowHeight, row, col }], true)
+            if (this.backdropWinid) {
+              nvim.call('nvim_win_set_config', [this.backdropWinid, { width: editorCols, height: editorLines }], true)
+            }
+            await nvim.resumeNotification()
+            await this.render()
+          } catch {}
+        }
       })
     )
 
@@ -287,7 +312,17 @@ export class TUI {
     }
 
     if (id === 'language-filter') {
-      cocWindow.showInformationMessage('Language filter not yet implemented')
+      const langs = this.state.getLanguages()
+      if (langs.length === 0) return
+      const current = s.languageFilter
+      const idx = current ? langs.indexOf(current) : -1
+      const next = idx >= langs.length - 1 ? null : langs[idx + 1]
+      this.state.setLanguageFilter(next)
+      if (next) {
+        cocWindow.showInformationMessage(`Language filter: ${next}`)
+      } else {
+        cocWindow.showInformationMessage('Language filter cleared')
+      }
       return
     }
 
@@ -578,13 +613,20 @@ export class TUI {
     buf.nl()
     buf.nl()
 
-    const failed = filtered.filter(p => p.status === 'failed')
-    const installing = filtered.filter(p => ['installing', 'updating', 'uninstalling'].includes(p.status))
-    const installed = filtered.filter(p => p.status === 'installed')
-    const available = filtered.filter(p => p.status === 'not-installed')
+    const queuedNames = state.queuedNames || []
+    const failed = filtered.filter(p => p.status === 'failed' && !queuedNames.includes(p.info.name))
+    const queued = filtered.filter(p => queuedNames.includes(p.info.name))
+    const installing = filtered.filter(p => p.status === 'installing' && !queuedNames.includes(p.info.name))
+    const updating = filtered.filter(p => p.status === 'updating' && !queuedNames.includes(p.info.name))
+    const uninstalling = filtered.filter(p => p.status === 'uninstalling' && !queuedNames.includes(p.info.name))
+    const installed = filtered.filter(p => p.status === 'installed' && !queuedNames.includes(p.info.name))
+    const available = filtered.filter(p => p.status === 'not-installed' && !queuedNames.includes(p.info.name))
 
     this.renderSection(buf, pkgLineMap, 'Failed', failed)
+    this.renderSection(buf, pkgLineMap, 'Queued', queued)
     this.renderSection(buf, pkgLineMap, 'Installing', installing)
+    this.renderSection(buf, pkgLineMap, 'Updating', updating)
+    this.renderSection(buf, pkgLineMap, 'Uninstalling', uninstalling)
     this.renderSection(buf, pkgLineMap, 'Installed', installed)
     this.renderSection(buf, pkgLineMap, 'Available', available)
 
