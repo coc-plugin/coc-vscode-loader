@@ -22,8 +22,9 @@ const HELP_TEXT = [
   '    C          Check for updates',
   '    X          Uninstall package under cursor',
   '    <CR>       Toggle package details',
-  '    ?          Toggle this help',
+  '    g? / ?     Toggle this help',
   '    q / <Esc>  Close window',
+  '    c          Check package version',
   '',
   '  ' + '─'.repeat(40),
   '',
@@ -65,6 +66,8 @@ export class TUI {
     await nvim.command('highlight default link CocLoaderSearchMatch Search')
     await nvim.command('highlight default CocLoaderWarning guifg=#DCA561')
     await nvim.command('highlight default CocLoaderBackdrop guibg=#000000')
+    await nvim.command('highlight default CocLoaderHighlightBlock guibg=#56B6C2 guifg=#222222')
+    await nvim.command('highlight default CocLoaderMutedBlock guibg=#888888 guifg=#222222')
 
     const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
     const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
@@ -77,23 +80,26 @@ export class TUI {
     const row = Math.max(Math.floor((availLines - height) / 2), 0)
     const col = Math.max(Math.floor((editorCols - width) / 2), 0)
 
-    // Create backdrop (Mason-style dim overlay)
-    const backdropBuf = await nvim.createNewBuffer(false, true)
-    this.backdropBufnr = backdropBuf.id
-    const backdropWin = await nvim.openFloatWindow(backdropBuf, false, {
-      relative: 'editor',
-      width: editorCols,
-      height: editorLines,
-      row: 0,
-      col: 0,
-      style: 'minimal',
-      focusable: false,
-      border: 'none',
-      zindex: 44,
-    })
-    this.backdropWinid = backdropWin.id
-    await nvim.call('nvim_win_set_option', [backdropWin.id, 'winhighlight', 'Normal:CocLoaderBackdrop'])
-    await nvim.call('nvim_win_set_option', [backdropWin.id, 'winblend', 60])
+    // Create backdrop (Mason-style dim overlay, requires termguicolors)
+    const termguicolors = await nvim.call('nvim_get_option', ['termguicolors']) as number
+    if (termguicolors === 1) {
+      const backdropBuf = await nvim.createNewBuffer(false, true)
+      this.backdropBufnr = backdropBuf.id
+      const backdropWin = await nvim.openFloatWindow(backdropBuf, false, {
+        relative: 'editor',
+        width: editorCols,
+        height: editorLines,
+        row: 0,
+        col: 0,
+        style: 'minimal',
+        focusable: false,
+        border: 'none',
+        zindex: 44,
+      })
+      this.backdropWinid = backdropWin.id
+      await nvim.call('nvim_win_set_option', [backdropWin.id, 'winhighlight', 'Normal:CocLoaderBackdrop'])
+      await nvim.call('nvim_win_set_option', [backdropWin.id, 'winblend', 60])
+    }
 
     const buf = await nvim.createNewBuffer(false, true)
     this.bufnr = buf.id
@@ -213,6 +219,18 @@ export class TUI {
       await checkUpdates(this.state)
       return
     }
+    if (id === 'c') {
+      const pkgName = this.pkgLineMap.get(line0)
+      if (pkgName) {
+        const entry = this.state.getPackage(pkgName)
+        if (entry && entry.hasUpdate) {
+          cocWindow.showInformationMessage(`${entry.info.displayName} has an update available`)
+        } else if (entry) {
+          cocWindow.showInformationMessage(`${entry.info.displayName} is up to date`)
+        }
+      }
+      return
+    }
     if (id === 'U') {
       const installed = s.packages.filter(p => p.status === 'installed')
       if (installed.length === 0) return
@@ -247,8 +265,8 @@ export class TUI {
   private async setupKeymaps() {
     const buf = workspace.nvim.createBuffer(this.bufnr)
     const entries: [string, string][] = [
-      ['q', 'q'], ['<Esc>', 'esc'], ['?', 'question'],
-      ['i', 'i'], ['u', 'u'], ['U', 'U'], ['C', 'C'], ['X', 'X'],
+      ['q', 'q'], ['<Esc>', 'esc'], ['?', 'question'], ['g?', 'question'],
+      ['i', 'i'], ['u', 'u'], ['U', 'U'], ['C', 'C'], ['c', 'c'], ['X', 'X'],
       ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'],
       ['6', '6'], ['7', '7'], ['8', '8'], ['9', '9'],
       ['<CR>', 'cr'],
@@ -426,7 +444,12 @@ export class TUI {
     buf.append('  ')
     buf.append('◍', iconHl)
     buf.append(' ')
-    this.appendHighlightedText(buf, entry.info.displayName)
+    const isExpanded = ['installed', 'not-installed', 'failed'].includes(entry.status) && entry.expanded
+    if (isExpanded) {
+      buf.append(entry.info.displayName, 'CocLoaderHeading')
+    } else {
+      this.appendHighlightedText(buf, entry.info.displayName)
+    }
     buf.nl()
 
     // Mason-style installing log: tail or full log toggle
@@ -435,11 +458,10 @@ export class TUI {
         buf.append('    ▼ Displaying full log', 'CocLoaderHeading')
         buf.nl()
         for (const log of entry.progressLog) {
-          for (const l of log.split('\n')) {
-            buf.append('      ', undefined)
-            buf.append(l, 'CocLoaderMuted')
-            buf.nl()
-          }
+          const summary = log.split('\n')[0]
+          buf.append('      ', undefined)
+          buf.append(summary, 'CocLoaderMuted')
+          buf.nl()
         }
       } else {
         const last = entry.progressLog[entry.progressLog.length - 1]
