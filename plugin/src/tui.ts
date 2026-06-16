@@ -216,7 +216,7 @@ export class TUI {
     if (id === 'slash') {
       try {
         const q = await workspace.nvim.call('input', ['Search: ', '']) as string
-        if (q) this.state.setSearchQuery(q)
+        if (q) { this.state.setSearchQuery(q); this.focusIndex = 0 }
       } catch {}
       return
     }
@@ -262,18 +262,23 @@ export class TUI {
     if (id === 'k') {
       if (this.focusIndex > 0) {
         this.focusIndex--
+        const filtered = this.state.getFilteredPackages()
+        if (this.focusIndex >= filtered.length) {
+          this.focusIndex = Math.max(0, filtered.length - 1)
+        }
         const s = this.state.getState()
         if (this.focusIndex < s.scrollOffset) {
           this.state.setScrollOffset(Math.max(0, s.scrollOffset - 1))
           await this.render()
-          const filtered = this.state.getFilteredPackages()
-          const focused = filtered[this.focusIndex]
+          const refiltered = this.state.getFilteredPackages()
+          const focused = refiltered[this.focusIndex]
+          if (!focused) return
           const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
           if (pkgLine !== undefined) await setCursor(pkgLine)
           return
         }
-        const filtered = this.state.getFilteredPackages()
         const focused = filtered[this.focusIndex]
+        if (!focused) return
         const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
         if (pkgLine !== undefined) await setCursor(pkgLine)
       }
