@@ -11,7 +11,7 @@
   <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.5.2" alt="TUI preview" width="100%">
 </p>
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png" alt="Registry preview" width="100%">
+  <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png?v=1.5.2" alt="Registry preview" width="100%">
 </p>
 
 在 coc.nvim 中无缝运行 VS Code 扩展。
