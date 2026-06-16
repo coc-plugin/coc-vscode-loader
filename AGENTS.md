@@ -552,3 +552,13 @@ CACHE_TTL=1 npm run test:smoke   # Re-download repos older than 1 day
 - Type definitions (`vscode.d.ts`, `coc.d.ts`) are auto-synced daily to [`docs/types/`](./docs/types/)
 - The sync CI workflow and script live in [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)
 - **Do not manually edit type files**
+
+## GitHub image cache
+
+When updating images in `README.md` (e.g. `plugin/assets/tui-preview.png`), GitHub's CDN (`raw.githubusercontent.com`) caches aggressively. Always append a cache-busting query parameter to the URL:
+
+```markdown
+<img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=<version>">
+```
+
+Use the current version number (e.g. `v=1.5.2`) as the parameter value so it changes with each release. Do NOT use timestamps or random values — version numbers are meaningful and auto-increment.
