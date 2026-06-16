@@ -482,13 +482,24 @@ Registry 条目示例：
 
 ## TUI design
 
-TUI 完全参照 Mason.nvim 的视觉风格和交互设计。详见 [`docs/tui-design.md`](./docs/tui-design.md)。
+TUI 完全参照 Mason.nvim 的视觉风格和交互设计，目标 1:1 一致。详见 [`docs/tui-design.md`](./docs/tui-design.md)。
 
 关键设计决策：
-- Mason 色彩精确复制（金色标题 #DCA561 + 青色高亮 #56B6C2 + 灰色辅助 #888888）
+- Mason 色彩精确复制（金色 #DCA561 + 青色 #56B6C2 + 灰色 #888888）
+- Mason 窗口选项一致（无 border、80%宽、90%高、backdrop 遮罩）
 - Sections 按状态分组：Failed → Installing → Installed → Available
-- Tabs 使用数字键 1-9 切换，动态从 registry categories 生成
-- 不保留 Mason 没有的功能（标记/批量操作/排序/ggG 跳转）
+- Tabs 使用数字键 1-9 切换，格式 ` (N) Name `
+- 包行：`◍ displayName`，展开详情/日志内联显示
+- 不保留 Mason 没有的功能
+
+### Mason 功能映射
+
+- Header 金色居中 + `g?` 提示 ✓
+- 安装/更新/卸载/检查更新 ✓
+- `<CR>` 内联展开详情/日志 ✓
+- 缩进链: 4sp→6sp→8sp ✓
+- `<C-f>` 语言筛选: 预留
+- `<C-c>` 取消安装: 待实现
 - [x] `rimraf` 容错 — 删除前 chmod -R u+w，处理 Go 模块缓存只读目录
 
 ### goPackages / cargoPackages（v1.5.0+）
