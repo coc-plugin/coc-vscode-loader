@@ -52,6 +52,7 @@ const KEYMAP_ENTRIES: [string, string][] = [
   ['X', 'Uninstall package'],
   ['C', 'Check for updates'],
   ['c', 'Check package version'],
+  ['/', 'Search packages'],
   ['<CR>', 'Toggle package details / log'],
   ['1-9', 'Switch view tab'],
   ['g? / ?', 'Toggle this help'],
@@ -75,6 +76,7 @@ export class TUI {
   private windowWidth: number = 0
   private _helpAnimChars = 0
   private _helpAnimating = false
+  private _inSearchMode = false
 
   constructor(state: StateManager) {
     this.state = state
@@ -198,6 +200,29 @@ export class TUI {
       })
     )
 
+    // Mason-style real-time search via CmdLine
+    this.disposables.push(
+      workspace.registerAutocmd({
+        event: 'CmdLineChanged',
+        request: true,
+        callback: async () => {
+          if (!this._inSearchMode) return
+          const cmdline = await nvim.call('getcmdline') as string
+          this.state.setSearchQuery(cmdline)
+        }
+      }),
+      workspace.registerAutocmd({
+        event: 'CmdLineLeave',
+        request: true,
+        callback: async () => {
+          this._inSearchMode = false
+          if (this.state.getState().searchQuery) {
+            nvim.command('nohlsearch', true)
+          }
+        }
+      })
+    )
+
     try {
       await this.render()
     } catch {
@@ -238,6 +263,15 @@ export class TUI {
       await this.close(); return
     }
     if (id === 'question') { this.state.toggleHelp(); return }
+    if (id === 'search') {
+      if (s.showHelp) return
+      this._inSearchMode = true
+      await this.render()
+      setTimeout(() => {
+        if (this.winid) workspace.nvim.call('feedkeys', ['/', 'n'])
+      }, 16)
+      return
+    }
 
     // Number key tab switching (Mason-style)
     if (id >= '1' && id <= '9') {
@@ -316,6 +350,7 @@ export class TUI {
       ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'],
       ['6', '6'], ['7', '7'], ['8', '8'], ['9', '9'],
       ['<C-f>', 'language-filter'],
+      ['/', 'search'],
       ['<CR>', 'cr'],
     ]
     for (const [vimKey, id] of entries) {
@@ -576,6 +611,10 @@ export class TUI {
       buf.append(entry.info.displayName, 'CocLoaderHeading')
     } else {
       this.appendHighlightedText(buf, entry.info.displayName)
+    }
+    // Mason-style keywords in search mode
+    if ((this._inSearchMode || this.state.getState().searchQuery) && entry.info.languages.length > 0) {
+      buf.append(` (keywords: ${entry.info.languages.join(', ')})`, 'CocLoaderMuted')
     }
     buf.nl()
 
