@@ -12,7 +12,7 @@ const VERSION: string = (() => {
 })()
 
 const HELP_TEXT = [
-  `  coc-loader v${VERSION} — VS Code extension → coc.nvim plugin converter`,
+  `  coc-loader v${VERSION} — VS Code extension loader for coc.nvim`,
   '',
   '  Keymaps:',
   '    1-9        Switch view tab',
@@ -351,7 +351,7 @@ export class TUI {
   private renderHelp(): TuiRenderResult {
     const lines = [
       '',
-      `  mason.nvim v${VERSION}`,
+      `  coc-loader v${VERSION}`,
       '  press ? help | q quit',
       '  ' + '─'.repeat(50),
       '',
@@ -368,12 +368,12 @@ export class TUI {
 
     const buf = new LineBuffer()
 
-    // Centered header: "mason.nvim v1.5.0" (gold) + key hint (centered)
-    const hdrLine = `mason.nvim v${VERSION}`
+    // Centered header + key hint
+    const hdrLine = `coc-loader v${VERSION}`
     const hdrLen = Buffer.from(hdrLine).length
     const hdrPad = Math.max(0, Math.floor((this.windowWidth - hdrLen) / 2) - 2)
     if (hdrPad > 0) buf.append(' '.repeat(hdrPad), undefined)
-    buf.append(`mason.nvim v${VERSION}`, 'CocLoaderHeader')
+    buf.append(hdrLine, 'CocLoaderHeader')
     buf.nl()
     const hintLine = 'press g? for help'
     const hintLen = Buffer.from(hintLine).length
