@@ -36,6 +36,12 @@ export interface PackageEntry {
 export type ViewFilter = 'all' | 'installed' | 'not-installed'
 export type SortBy = 'default' | 'name' | 'status' | 'type'
 
+export interface BatchStats {
+  total: number
+  completed: number
+  failed: number
+}
+
 export interface AppState {
   packages: PackageEntry[]
   searchQuery: string
@@ -46,6 +52,8 @@ export interface AppState {
   viewFilter: ViewFilter
   sortBy: SortBy
   scrollOffset: number
+  categoryFilter: string | null
+  batchStats: BatchStats | null
 }
 
 type Listener = (state: AppState) => void
@@ -79,7 +87,7 @@ export function createInitialState(): AppState {
       marked: false,
     }
   })
-  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default', scrollOffset: 0 }
+  return { packages, searchQuery: '', showHelp: false, activePill: null, dirty: false, viewFilter: 'all', sortBy: 'default', scrollOffset: 0, categoryFilter: null, batchStats: null }
 }
 
 export class StateManager {
@@ -98,7 +106,7 @@ export class StateManager {
   }
 
   private filterKey(): string {
-    return `${this.state.viewFilter}|${this.state.searchQuery}|${this.state.sortBy}`
+    return `${this.state.viewFilter}|${this.state.searchQuery}|${this.state.sortBy}|${this.state.categoryFilter || ''}`
   }
 
   subscribe(fn: Listener) {
@@ -212,6 +220,37 @@ export class StateManager {
     this.mutate(s => { s.scrollOffset = n })
   }
 
+  setCategoryFilter(cat: string | null) {
+    this.invalidateFilterCache()
+    this.mutate(s => { s.categoryFilter = cat; s.scrollOffset = 0 })
+  }
+
+  getCategories(): string[] {
+    const cats = new Set<string>()
+    for (const p of this.state.packages) {
+      for (const c of p.info.categories) cats.add(c)
+    }
+    return [...cats].sort()
+  }
+
+  cycleCategory(next: boolean) {
+    const cats = this.getCategories()
+    if (cats.length === 0) return
+    const current = this.state.categoryFilter
+    const idx = current ? cats.indexOf(current) : -1
+    let newIdx: number
+    if (next) {
+      newIdx = idx >= cats.length - 1 ? -1 : idx + 1
+    } else {
+      newIdx = idx <= -1 ? cats.length - 1 : idx - 1
+    }
+    this.setCategoryFilter(newIdx === -1 ? null : cats[newIdx])
+  }
+
+  setBatchStats(stats: BatchStats | null) {
+    this.mutate(s => { s.batchStats = stats })
+  }
+
   getFilteredPackages(): PackageEntry[] {
     const key = this.filterKey()
     if (this.cachedFiltered && this.cachedFilterKey === key) {
@@ -230,6 +269,10 @@ export class StateManager {
         p.info.displayName.toLowerCase().includes(q) ||
         p.info.description.toLowerCase().includes(q)
       )
+    }
+    const cat = this.state.categoryFilter
+    if (cat) {
+      pkgs = pkgs.filter(p => p.info.categories.includes(cat))
     }
     const sortBy = this.state.sortBy
     if (sortBy === 'name') {

@@ -740,11 +740,23 @@ async function runWithOutput(cmd: string, args: string[], cwd: string): Promise<
 export async function runConcurrent<T>(
   items: T[],
   fn: (item: T) => Promise<void>,
+  state: StateManager | null = null,
   concurrency = 3,
 ): Promise<void> {
+  if (state) state.setBatchStats({ total: items.length, completed: 0, failed: 0 })
+  let completed = 0
+  let failed = 0
+  const updateStats = () => {
+    if (state) state.setBatchStats({ total: items.length, completed, failed })
+  }
   const pool = new Set<Promise<void>>()
   for (const item of items) {
-    const p = fn(item).catch((e: any) => {
+    const p = fn(item).then(() => {
+      completed++
+      updateStats()
+    }).catch((e: any) => {
+      failed++
+      updateStats()
       console.warn(`runConcurrent: ${e.message}`)
     }).finally(() => { pool.delete(p) })
     pool.add(p)
@@ -755,6 +767,7 @@ export async function runConcurrent<T>(
     }
   }
   await Promise.allSettled(pool)
+  if (state) setTimeout(() => state.setBatchStats(null), 3000)
 }
 
 let checkUpdatesBusy = false

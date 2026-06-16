@@ -479,6 +479,16 @@ Registry 条目示例：
 - [x] Go LSP (`vscode-go`) — 加入 registry，goPackages 支持自动 go install gopls
 - [x] `targetAssets` — serverBinary per-platform 资产映射，支持非标准平台命名
 - [x] `installToCoc` 优化 — 跳过 node_modules，选择性复制 + 重新 npm install
+
+## TUI design
+
+TUI 完全参照 Mason.nvim 的视觉风格和交互设计。详见 [`docs/tui-design.md`](./docs/tui-design.md)。
+
+关键设计决策：
+- Mason 色彩精确复制（金色标题 #DCA561 + 青色高亮 #56B6C2 + 灰色辅助 #888888）
+- Sections 按状态分组：Failed → Installing → Installed → Available
+- Tabs 使用数字键 1-9 切换，动态从 registry categories 生成
+- 不保留 Mason 没有的功能（标记/批量操作/排序/ggG 跳转）
 - [x] `rimraf` 容错 — 删除前 chmod -R u+w，处理 Go 模块缓存只读目录
 
 ### goPackages / cargoPackages（v1.5.0+）

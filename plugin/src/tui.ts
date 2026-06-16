@@ -1,8 +1,8 @@
 import { workspace, window as cocWindow, Disposable } from 'coc.nvim'
-import { StateManager, PackageEntry, AppState, ViewFilter, SortBy } from './state'
+import { StateManager, PackageEntry, AppState } from './state'
 import { installPackage, uninstallPackage, updatePackage, checkUpdates, runConcurrent } from './pipeline'
 import { updateRegistry, getPackage, ProgressCallback } from './registry'
-import { LineBuffer, RenderResult } from './renderer'
+import { LineBuffer } from './renderer'
 
 const VERSION: string = (() => {
   try {
@@ -15,31 +15,21 @@ const HELP_TEXT = [
   `  coc-loader v${VERSION} — VS Code extension → coc.nvim plugin converter`,
   '',
   '  Keymaps:',
+  '    1-9        Switch view tab',
   '    i          Install package under cursor',
   '    u          Update package under cursor',
   '    U          Update all installed packages',
-  '    C          Check for updates from remote',
+  '    C          Check for updates',
   '    X          Uninstall package under cursor',
-  '    R          Reinstall package under cursor',
-  '    Z          Uninstall all installed packages (with confirm)',
-  '    D          Clean up orphaned packages',
-  '    x          Toggle mark',
-  '    f          Cycle filter: all → installed → not-installed',
-  '    s          Cycle sort: default → name → status → type',
-  '    j/k        Scroll through packages',
-  '    /          Search filter (then j/k to scroll)',
-  '    gg         Jump to first page',
-  '    G          Jump to last page',
-  '    <Enter>    Open detail popup (description, source, log)',
-  '    q          Close window',
-  '    <Esc>      Help→Search→Marks→Busy guard→Close',
+  '    <CR>       Toggle package details',
+  '    ?          Toggle this help',
+  '    q / <Esc>  Close window',
   '',
   '  ' + '─'.repeat(40),
   '',
-  '  Plugin types:',
-  '    ts-bridge   Depends on TypeScript LSP bridge (e.g. Volar)',
-  '    pure-lsp    Standard LSP protocol (e.g. Prisma, ESLint)',
-  '    direct-api  Direct coc.nvim API calls (e.g. HTML CSS Support)',
+  '  View tabs:',
+  '    All        All packages',
+  '    <category> Filter by category',
 ]
 
 export class TUI {
@@ -50,15 +40,13 @@ export class TUI {
   private disposables: Disposable[] = []
   private unsubscribe: (() => void) | null = null
   private pkgLineMap: Map<number, string> = new Map()
-  private logLineSet: Set<number> = new Set()
   private detailWinid: number = 0
   private detailBufnr: number = 0
   private detailPkgName: string = ''
   private detailMode: 'log' | 'info' = 'info'
   private windowHeight: number = 0
   private windowWidth: number = 0
-  private static readonly HEADER_LINES = 6
-  private static readonly FOOTER_LINES = 3
+  private lastFocusedPkg: string = ''
 
   constructor(state: StateManager) {
     this.state = state
@@ -68,16 +56,17 @@ export class TUI {
     const nvim = workspace.nvim
     this.ns = await nvim.createNamespace('coc-loader')
 
-    await nvim.command('highlight default link CocConverterTitle Title')
-    await nvim.command('highlight default link CocConverterPill Visual')
-    await nvim.command('highlight default link CocConverterPillActive IncSearch')
-    await nvim.command('highlight CocConverterKey guifg=#569CD6 guibg=NONE ctermbg=NONE')
-    await nvim.command('highlight default link CocConverterInstalled String')
-    await nvim.command('highlight default link CocConverterAvailable Comment')
-    await nvim.command('highlight default link CocConverterType Type')
-    await nvim.command('highlight default link CocConverterSection Title')
-    await nvim.command('highlight default link CocConverterTotal Identifier')
-    await nvim.command('highlight default link CocConverterSearchMatch Search')
+    // Mason-style highlight groups
+    await nvim.command('highlight CocLoaderHeader guibg=#DCA561 guifg=#222222 gui=bold')
+    await nvim.command('highlight CocLoaderHeaderSec guibg=#56B6C2 guifg=#222222 gui=bold')
+    await nvim.command('highlight CocLoaderTabActive guibg=#56B6C2 guifg=#222222 gui=bold')
+    await nvim.command('highlight CocLoaderTabInactive guibg=#888888 guifg=#222222')
+    await nvim.command('highlight CocLoaderHeading gui=bold')
+    await nvim.command('highlight CocLoaderHighlight guifg=#56B6C2')
+    await nvim.command('highlight CocLoaderMuted guifg=#888888')
+    await nvim.command('highlight default link CocLoaderError ErrorMsg')
+    await nvim.command('highlight default link CocLoaderNormal NormalFloat')
+    await nvim.command('highlight default link CocLoaderSearchMatch Search')
 
     const buf = await nvim.createNewBuffer(false, true)
     this.bufnr = buf.id
@@ -85,9 +74,9 @@ export class TUI {
     const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
     const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
     const height = Math.min(Math.floor(editorLines * 0.85), 40)
-    this.windowHeight = height - 2 // content area (border takes 2 rows)
+    this.windowHeight = height - 2
     const width = Math.min(Math.floor(editorCols * 0.85), 120)
-    this.windowWidth = width - 2 // content area (border takes 2 cols)
+    this.windowWidth = width - 2
     const row = Math.max(Math.floor((editorLines - height) / 2), 0)
     const col = Math.max(Math.floor((editorCols - width) / 2), 0)
 
@@ -102,6 +91,7 @@ export class TUI {
     })
     this.winid = win.id
 
+    await nvim.call('nvim_win_set_option', [this.winid, 'winhighlight', 'NormalFloat:CocLoaderNormal'])
     await nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', false])
     await nvim.call('nvim_buf_set_option', [this.bufnr, 'bufhidden', 'wipe'])
     await nvim.call('nvim_buf_set_option', [this.bufnr, 'buftype', 'nofile'])
@@ -149,16 +139,13 @@ export class TUI {
       })
     )
 
-    // Initial render with current state (may be empty if no cache)
     try {
       await this.render()
     } catch {
-      // render failed — clean up so open() caller can handle
       this.close().catch(() => {})
       throw new Error('TUI render failed')
     }
 
-    // Fetch remote registry in background with progress, re-render when done
     this.state.setStatusMessage('Fetching registry...')
     const onProgress: ProgressCallback = (msg) => {
       this.state.setStatusMessage(msg)
@@ -185,166 +172,48 @@ export class TUI {
     const s = this.state.getState()
 
     if (id === 'q') { await this.close(); return }
-    if (id === 'I') {
-      this.state.setActivePill('I')
-      const marked = this.state.getMarkedNames()
-      if (marked.length === 0) {
-        cocWindow.showInformationMessage('No packages marked. Use x to mark packages.')
-        this.state.setActivePill(null)
-        return
-      }
-      await runConcurrent(marked, name => installPackage(this.state, name))
-      this.state.setActivePill(null)
-      return
-    }
-    if (id === 'H') {
-      this.state.setSearchQuery('')
-      this.state.setActivePill(null)
-      if (s.showHelp) this.state.toggleHelp()
-      return
-    }
     if (id === 'esc') {
       if (s.showHelp) { this.state.toggleHelp(); return }
-      if (s.searchQuery) { this.state.setSearchQuery(''); return }
-      const hasMarks = s.packages.some(p => p.marked)
-      if (hasMarks) { this.state.clearMarks(); return }
-      const busy = s.packages.some(p => ['installing', 'updating', 'uninstalling'].includes(p.status))
-      if (busy) { cocWindow.showInformationMessage('Operation in progress, wait for it to finish'); return }
+      if (s.categoryFilter) { this.state.setCategoryFilter(null); return }
       await this.close(); return
     }
     if (id === 'question') { this.state.toggleHelp(); return }
-    if (id === 'slash') {
-      try {
-        const q = await workspace.nvim.call('input', ['Search: ', '']) as string
-        if (q) { this.state.setSearchQuery(q); this.focusIndex = 0 }
-      } catch {}
-      return
-    }
-    if (id === 'f') { this.state.cycleViewFilter(); this.focusIndex = 0; return }
-    if (id === 's') { this.state.cycleSortBy(); this.focusIndex = 0; return }
-    if (id === 'gg') {
-      this.state.setScrollOffset(0)
-      this.focusIndex = 0
-      return
-    }
-    if (id === 'G') {
-      const filtered = this.state.getFilteredPackages()
-      const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
-      this.state.setScrollOffset(Math.max(0, filtered.length - visibleCount))
-      this.focusIndex = Math.max(0, filtered.length - 1)
-      return
-    }
-    const setCursor = async (line0: number) => {
-      try {
-        await workspace.nvim.call('nvim_win_set_cursor', [this.winid, [line0 + 1, 0]])
-      } catch { /* window may be closed */ }
-    }
-    if (id === 'j') {
-      const filtered = this.state.getFilteredPackages()
-      if (this.focusIndex < filtered.length - 1) {
-        this.focusIndex++
-        const s = this.state.getState()
-        const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
-        if (this.focusIndex >= s.scrollOffset + visibleCount) {
-          this.state.setScrollOffset(Math.min(Math.max(0, filtered.length - visibleCount), s.scrollOffset + 1))
-          await this.render()
-          const focused = filtered[this.focusIndex]
-          const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
-          if (pkgLine !== undefined) await setCursor(pkgLine)
-          return
-        }
-        const focused = filtered[this.focusIndex]
-        const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
-        if (pkgLine !== undefined) await setCursor(pkgLine)
+
+    // Number key tab switching (Mason-style)
+    if (id >= '1' && id <= '9') {
+      const tabs = this.getTabs()
+      const idx = parseInt(id) - 1
+      if (idx < tabs.length) {
+        const tab = tabs[idx]
+        this.state.setCategoryFilter(tab === 'All' ? null : tab)
       }
       return
     }
-    if (id === 'k') {
-      if (this.focusIndex > 0) {
-        this.focusIndex--
-        const filtered = this.state.getFilteredPackages()
-        if (this.focusIndex >= filtered.length) {
-          this.focusIndex = Math.max(0, filtered.length - 1)
-        }
-        const s = this.state.getState()
-        if (this.focusIndex < s.scrollOffset) {
-          this.state.setScrollOffset(Math.max(0, s.scrollOffset - 1))
-          await this.render()
-          const refiltered = this.state.getFilteredPackages()
-          const focused = refiltered[this.focusIndex]
-          if (!focused) return
-          const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
-          if (pkgLine !== undefined) await setCursor(pkgLine)
-          return
-        }
-        const focused = filtered[this.focusIndex]
-        if (!focused) return
-        const pkgLine = [...this.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
-        if (pkgLine !== undefined) await setCursor(pkgLine)
-      }
-      return
-    }
-    if (id === 'D') {
-      const installed = s.packages.filter(p => p.status === 'installed')
-      const removed = installed.filter(p => !getPackage(p.info.name))
-      if (removed.length === 0) {
-        cocWindow.showInformationMessage('No orphaned packages found')
-        return
-      }
-      const ok = await cocWindow.showPrompt(`Uninstall ${removed.length} orphaned package(s)?`)
-      if (ok) {
-        for (const p of removed) await uninstallPackage(this.state, p.info.name)
-      }
+
+    if (id === 'C') {
+      await checkUpdates(this.state)
       return
     }
     if (id === 'U') {
       const installed = s.packages.filter(p => p.status === 'installed')
       if (installed.length === 0) return
-      this.state.setActivePill('U')
-      const names = installed.map(p => p.info.name)
-      await runConcurrent(names, name => updatePackage(this.state, name))
-      this.state.setActivePill(null)
-      return
-    }
-    if (id === 'Z') {
-      const installed = s.packages.filter(p => p.status === 'installed')
-      if (installed.length === 0) return
-      const ok = await cocWindow.showPrompt(`Uninstall all ${installed.length} packages?`)
-      if (ok) {
-        for (const pkg of installed) await uninstallPackage(this.state, pkg.info.name)
-      }
-      return
-    }
-    if (id === 'C') {
-      this.state.setActivePill('C')
-      await checkUpdates(this.state)
-      this.state.setActivePill(null)
+      await runConcurrent(installed.map(p => p.info.name), name => updatePackage(this.state, name), this.state)
       return
     }
 
+    // Package operations
     const pkgName = this.pkgLineMap.get(line0)
     if (!pkgName) return
     const entry = this.state.getPackage(pkgName)
     if (!entry) return
 
-    // Sync focusIndex to actual cursor position so render() won't jump
-    const filtered = this.state.getFilteredPackages()
-    const focusIdx = filtered.findIndex(p => p.info.name === pkgName)
-    if (focusIdx >= 0) this.focusIndex = focusIdx
+    this.lastFocusedPkg = pkgName
 
-    if (id === 'x') { this.state.toggleMark(pkgName); return }
     if (id === 'i' && entry.status === 'not-installed') { await installPackage(this.state, pkgName); return }
     if (id === 'u' && entry.status === 'installed') { await updatePackage(this.state, pkgName); return }
     if (id === 'X' && entry.status === 'installed') { await uninstallPackage(this.state, pkgName); return }
-    if (id === 'R' && entry.status === 'installed') {
-      await uninstallPackage(this.state, pkgName)
-      await installPackage(this.state, pkgName)
-      return
-    }
-    if (id === 'close-detail') {
-      await this.closeDetailPopup()
-      return
-    }
+    if (id === 'cr') { if (pkgName) await this.showDetailPopup(pkgName); return }
+    if (id === 'close-detail') { await this.closeDetailPopup(); return }
     if (id === 'detail-j' && this.detailWinid) {
       const nvim = workspace.nvim
       const cur = await nvim.call('nvim_win_get_cursor', [this.detailWinid]) as [number, number]
@@ -362,23 +231,20 @@ export class TUI {
       }
       return
     }
-    if (id === 'cr') {
-      if (pkgName) await this.showDetailPopup(pkgName)
-      return
-    }
   }
 
-
+  private getTabs(): string[] {
+    const cats = this.state.getCategories()
+    return ['All', ...cats.slice(0, 6)]
+  }
 
   private async setupKeymaps() {
     const buf = workspace.nvim.createBuffer(this.bufnr)
     const entries: [string, string][] = [
-      ['q', 'q'], ['<Esc>', 'esc'], ['?', 'question'], ['/', 'slash'],
-      ['U', 'U'], ['Z', 'Z'], ['C', 'C'], ['i', 'i'], ['I', 'I'], ['H', 'H'],
-      ['u', 'u'], ['X', 'X'], ['R', 'R'],
-      ['f', 'f'], ['s', 's'], ['x', 'x'], ['D', 'D'],
-      ['j', 'j'], ['k', 'k'],
-      ['gg', 'gg'], ['G', 'G'],
+      ['q', 'q'], ['<Esc>', 'esc'], ['?', 'question'],
+      ['i', 'i'], ['u', 'u'], ['U', 'U'], ['C', 'C'], ['X', 'X'],
+      ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'],
+      ['6', '6'], ['7', '7'], ['8', '8'], ['9', '9'],
       ['<CR>', 'cr'],
     ]
     for (const [vimKey, id] of entries) {
@@ -391,7 +257,6 @@ export class TUI {
     if (this.unsubscribe) { this.unsubscribe(); this.unsubscribe = null }
     for (const d of this.disposables) { d.dispose() }
     this.disposables = []
-    // Destroy hidden detail popup on TUI close
     if (this.detailWinid) {
       try { await workspace.nvim.call('nvim_win_close', [this.detailWinid, true]) } catch {}
       this.detailWinid = 0
@@ -407,7 +272,6 @@ export class TUI {
 
   private rendering = false
   private pendingRender = false
-  private focusIndex = 0
 
   private async render() {
     if (!this.winid) return
@@ -423,7 +287,6 @@ export class TUI {
         ? this.renderHelp()
         : this.renderPackageList(state, filtered)
 
-      // Clip highlights to window width
       if (this.windowWidth > 0) {
         result.highlights = result.highlights.filter(h => h.colStart < this.windowWidth)
         for (const h of result.highlights) {
@@ -448,30 +311,17 @@ export class TUI {
         await nvim.resumeNotification()
       }
 
-      // Refresh detail popup content if open
       if (this.detailWinid) {
         this.updateDetailPopup().catch(() => {})
       }
 
       this.pkgLineMap = result.pkgLineMap
-      this.logLineSet = result.logLines
 
-      // Ensure cursor points to focusIndex
-      if (!state.showHelp && result.pkgLineMap.size > 0) {
-        const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
-        if (this.focusIndex < state.scrollOffset) {
-          this.state.setScrollOffset(this.focusIndex)
-        } else if (this.focusIndex >= state.scrollOffset + visibleCount) {
-          this.state.setScrollOffset(Math.max(0, this.focusIndex - visibleCount + 1))
-        }
-        const visible = this.state.getFilteredPackages()
-        const idx = Math.min(this.focusIndex, visible.length - 1)
-        const focused = visible[idx]
-        if (focused) {
-          const targetLine = [...result.pkgLineMap.entries()].find(([l, n]) => n === focused.info.name)?.[0]
-          if (targetLine !== undefined) {
-            await nvim.call('nvim_win_set_cursor', [this.winid, [targetLine + 1, 0]])
-          }
+      // Restore cursor position
+      if (!state.showHelp && this.lastFocusedPkg && result.pkgLineMap.size > 0) {
+        const targetLine = [...result.pkgLineMap.entries()].find(([l, n]) => n === this.lastFocusedPkg)?.[0]
+        if (targetLine !== undefined) {
+          await nvim.call('nvim_win_set_cursor', [this.winid, [targetLine + 1, 0]])
         }
       }
     } finally {
@@ -481,158 +331,97 @@ export class TUI {
   }
 
   private renderHelp(): TuiRenderResult {
-    const header = [
+    const lines = [
       '',
-      `  coc-loader v${VERSION}`,
-      '  press ? help | / search | q quit',
+      `  mason.nvim v${VERSION}`,
+      '  press ? help | q quit',
       '  ' + '─'.repeat(50),
       '',
+      ...HELP_TEXT,
+      '',
+      '  q to return',
     ]
-    return { lines: [...header, ...HELP_TEXT, '', '  q to return'], pkgLineMap: new Map(), logLines: new Set(), highlights: [] }
-  }
-
-  private statusLabel(status: string): string {
-    switch (status) {
-      case 'installed': return '[installed]'
-      case 'not-installed': return '[not installed]'
-      case 'installing': return '[installing]'
-      case 'updating': return '[updating]'
-      case 'uninstalling': return '[uninstalling]'
-      case 'failed': return '[failed]'
-      default: return ''
-    }
+    return { lines, pkgLineMap: new Map(), logLines: new Set(), highlights: [] }
   }
 
   private renderPackageList(state: AppState, filtered: PackageEntry[]): TuiRenderResult {
     const pkgLineMap = new Map<number, string>()
-    const logSet = new Set<number>()
     this.pkgLineMap = pkgLineMap
-    this.logLineSet = logSet
 
     const buf = new LineBuffer()
 
     buf.nl()
-    buf.append('coc-loader(H)', (state.showHelp || state.searchQuery) ? 'CocConverterPillActive' : 'CocConverterTitle')
-    for (const [name, key] of [['Install', 'I'], ['Update', 'U'], ['Check', 'C'], ['Help', '?']] as const) {
-      buf.append('  ')
-      const isActive = key === '?' && state.showHelp
-        || key === 'I' && state.activePill === 'I'
-        || key === 'U' && state.activePill === 'U'
-        || key === 'C' && state.activePill === 'C'
-      buf.append(`${name}(${key})`, isActive ? 'CocConverterPillActive' : 'CocConverterPill')
-    }
-    buf.highlight(/\([IU?C]\)/g, 'CocConverterKey')
+    buf.append('mason.nvim ', 'CocLoaderHeader')
+    buf.append(`v${VERSION} `, 'CocLoaderHeaderSec')
+    buf.append(' press ? for help')
     buf.nl()
     buf.nl()
-    const filterLabel = state.viewFilter === 'all' ? 'All' : state.viewFilter === 'installed' ? 'Installed' : 'Available'
-    const sortLabel = state.sortBy === 'default' ? 'Default' : state.sortBy === 'name' ? 'Name' : state.sortBy === 'status' ? 'Status' : 'Type'
-    buf.append(`Total: ${filtered.length} packages`, 'CocConverterTotal')
-    buf.append(`  |  `)
-    buf.append(`F:${filterLabel}(f)`, 'CocConverterPill')
-    buf.append(`  `)
-    buf.append(`S:${sortLabel}(s)`, 'CocConverterPill')
-    if (state.searchQuery) {
-      buf.append('  |  ')
-      buf.append(`Search: /${state.searchQuery}/`, 'CocConverterSearchMatch')
-    }
-    if (state.statusMessage) {
-      buf.append('  ·  ')
-      buf.append(state.statusMessage, 'Comment')
+
+    // Tabs: "(1) All  (2) LSP  (3) Snippets  ..."
+    const tabs = this.getTabs()
+    for (let i = 0; i < tabs.length; i++) {
+      const tab = tabs[i]
+      const isActive = (i === 0 && !state.categoryFilter) || (i > 0 && state.categoryFilter === tab)
+      const hl = isActive ? 'CocLoaderTabActive' : 'CocLoaderTabInactive'
+      buf.append(`(${i + 1}) ${tab}`, hl)
+      if (i < tabs.length - 1) {
+        buf.append('  ', undefined)
+      }
     }
     buf.nl()
     buf.nl()
 
-    // Virtual scroll: visible window
-    const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
-    const maxOffset = Math.max(0, filtered.length - visibleCount)
-    const start = Math.min(state.scrollOffset, maxOffset)
-    const end = Math.min(start + visibleCount, filtered.length)
-    const visible = filtered.slice(start, end)
+    const failed = filtered.filter(p => p.status === 'failed')
+    const installing = filtered.filter(p => ['installing', 'updating', 'uninstalling'].includes(p.status))
+    const installed = filtered.filter(p => p.status === 'installed')
+    const available = filtered.filter(p => p.status === 'not-installed')
 
-    // Indicator
-    const indicator = filtered.length > visibleCount
-      ? `${start + 1}–${end} of ${filtered.length}`
-      : `${filtered.length} packages`
-    buf.append(indicator, 'CocConverterTotal')
-    buf.nl()
-    buf.nl()
-
-    // Render visible items (virtual list)
-    for (const e of visible) {
-      this.renderEntry(buf, pkgLineMap, logSet, e)
-    }
-
-    if (filtered.length === 0 && state.searchQuery) {
-      buf.nl('no matching packages')
-    }
-
-    // Footer (in main buffer, always visible)
-    buf.nl()
-    buf.append(' ' + '─'.repeat(50), 'Comment')
-    buf.nl()
-    const filterLabel2 = state.viewFilter === 'all' ? 'All' : state.viewFilter === 'installed' ? 'Installed' : 'Available'
-    const sortLabel2 = state.sortBy === 'default' ? 'Default' : state.sortBy === 'name' ? 'Name' : state.sortBy === 'status' ? 'Status' : 'Type'
-    buf.append(` ${filtered.length} packages · ${filterLabel2} · ${sortLabel2}`, 'Comment')
+    this.renderSection(buf, pkgLineMap, 'Failed', failed)
+    this.renderSection(buf, pkgLineMap, 'Installing', installing)
+    this.renderSection(buf, pkgLineMap, 'Installed', installed)
+    this.renderSection(buf, pkgLineMap, 'Available', available)
 
     const result = buf.render(2)
-    return { lines: result.lines, pkgLineMap, logLines: logSet, highlights: result.highlights }
+    return { lines: result.lines, pkgLineMap, logLines: new Set(), highlights: result.highlights }
   }
 
-  private renderEntry(
-    buf: LineBuffer, pkgLineMap: Map<number, string>, _logSet: Set<number>,
-    entry: PackageEntry,
-  ) {
-    const icon = entry.status === 'installed' ? '●' : entry.status === 'failed' ? '✗' : '○'
-    const iconHl = entry.status === 'installed' ? 'CocConverterInstalled'
-      : entry.status === 'failed' ? 'ErrorMsg' : 'CocConverterAvailable'
+  private renderSection(buf: LineBuffer, pkgLineMap: Map<number, string>, title: string, entries: PackageEntry[]) {
+    if (entries.length === 0) return
+    buf.append(`${title} `, 'CocLoaderHeading')
+    buf.append(`(${entries.length})`, 'CocLoaderMuted')
+    buf.nl()
+    for (const entry of entries) {
+      this.renderEntry(buf, pkgLineMap, entry)
+    }
+    buf.nl()
+  }
 
+  private renderEntry(buf: LineBuffer, pkgLineMap: Map<number, string>, entry: PackageEntry) {
     const pkgLine = buf.currentLine()
     pkgLineMap.set(pkgLine, entry.info.name)
 
-    if (entry.marked) {
-      buf.append('▸', 'CocConverterKey')
-      buf.append(' ')
+    let iconHl: string
+    if (entry.status === 'failed') {
+      iconHl = 'CocLoaderError'
+    } else if (entry.status === 'installed') {
+      iconHl = 'CocLoaderHighlight'
+    } else if (['installing', 'updating', 'uninstalling'].includes(entry.status)) {
+      iconHl = 'CocLoaderHighlight'
     } else {
-      buf.append('  ')
+      iconHl = 'CocLoaderMuted'
     }
-    buf.append(icon, iconHl)
+    buf.append('  ')
+    buf.append('◍', iconHl)
     buf.append(' ')
-    this.appendHighlightedText(buf, entry.info.displayName)
-    // Status/progress inline
-    let statusText = ''
-    let statusHl = ''
+    this.appendHighlightedText(buf, entry.info.name)
+
     if (entry.progress) {
-      statusText = `  ${entry.progress}`
-      statusHl = 'Comment'
+      buf.append(`  ${entry.progress}`, 'CocLoaderMuted')
     } else if (entry.status === 'failed' && entry.error) {
-      statusText = `  ✗ ${entry.error}`
-      statusHl = 'ErrorMsg'
-    }
-    buf.append(' ')
-    buf.append(entry.info.type, 'CocConverterType')
-    if (statusText) {
-      buf.append(statusText, statusHl)
+      buf.append(`  ${entry.error}`, 'CocLoaderError')
     }
     if (entry.hasUpdate) {
-      buf.append('  ↑', 'CocConverterKey')
-    }
-    // Commit info (only when stable, not during install/update/uninstall)
-    if (entry.commit && entry.commitMsg && entry.status === 'installed') {
-      const cr = entry.commitDate ? ` (${entry.commitDate})` : ''
-      let msg = entry.commitMsg
-      if (this.windowWidth > 0) {
-        const prefixLen = buf.currentByteLen()
-        const commitPrefix = `  ${entry.commit} `
-        const suffix = cr
-        const available = this.windowWidth - 2 - prefixLen - Buffer.from(commitPrefix).length - Buffer.from(suffix).length - 3
-        if (available > 0 && Buffer.from(msg).length > available) {
-          while (Buffer.from(msg).length > available && msg.length > 0) {
-            msg = msg.slice(0, -1)
-          }
-          msg += '…'
-        }
-      }
-      buf.append(`  ${entry.commit} ${msg}${cr}`, 'Comment')
+      buf.append('  ↑', 'CocLoaderHighlight')
     }
 
     buf.nl()
@@ -654,7 +443,7 @@ export class TUI {
     }
     while (idx !== -1) {
       if (idx > pos) buf.append(text.slice(pos, idx))
-      buf.append(text.slice(idx, idx + q.length), 'CocConverterSearchMatch')
+      buf.append(text.slice(idx, idx + q.length), 'CocLoaderSearchMatch')
       pos = idx + q.length
       idx = lower.indexOf(qLower, pos)
     }
@@ -663,7 +452,6 @@ export class TUI {
 
   private buildDetailLines(entry: PackageEntry, mode: 'log' | 'info' = 'info'): string[] {
     const lines: string[] = []
-    // Log mode (snapshot from popup open): show only log + error
     if (mode === 'log') {
       for (const log of entry.progressLog) {
         for (const l of log.split('\n')) {
@@ -673,7 +461,6 @@ export class TUI {
       if (entry.error) lines.push('', `  ✗ ${entry.error}`)
       return lines
     }
-    // Not-installed / installed: show package info only
     lines.push(
       `  desc     ${entry.info.description}`,
       `  type     ${entry.info.type}`,
@@ -744,13 +531,12 @@ export class TUI {
     try {
       nvim.call('nvim_buf_set_lines', [this.detailBufnr, 0, -1, false, lines], true)
       nvim.call('nvim_buf_clear_namespace', [this.detailBufnr, this.ns, 0, -1], true)
-      // Highlights
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i]
         if (line.startsWith('  [')) {
           const endBracket = line.indexOf(']')
           if (endBracket > 0) {
-            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: endBracket + 1, hl_group: 'CocConverterKey' }], true)
+            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: endBracket + 1, hl_group: 'CocLoaderHighlight' }], true)
             nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, endBracket + 1, { end_col: line.length, hl_group: 'Comment' }], true)
           }
         } else if (line.startsWith('  $ ')) {
@@ -763,7 +549,7 @@ export class TUI {
           const parts = line.substring(2).split(/\s{2,}/)
           if (parts.length >= 2 && ['desc', 'type', 'status', 'source', 'langs', 'cats', 'link', 'commit', 'server'].includes(parts[0])) {
             const labelEnd = 2 + parts[0].length + line.substring(2 + parts[0].length).match(/^\s*/)![0].length
-            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: labelEnd, hl_group: 'CocConverterKey' }], true)
+            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: labelEnd, hl_group: 'CocLoaderHighlight' }], true)
             nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, labelEnd, { end_col: line.length, hl_group: 'Comment' }], true)
           }
         }
