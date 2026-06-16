@@ -8,7 +8,7 @@
 [![open issues](https://img.shields.io/github/issues/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader/issues)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png" alt="TUI preview" width="100%">
+  <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.5.2" alt="TUI preview" width="100%">
 </p>
 <p align="center">
   <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png" alt="Registry preview" width="100%">
