@@ -24,6 +24,10 @@ function pluginDir(name: string): string {
   return path.join(os.homedir(), '.config', 'coc', 'extensions', 'node_modules', `coc-${name}`)
 }
 
+function extensionsPkgPath(): string {
+  return path.join(os.homedir(), '.config', 'coc', 'extensions', 'package.json')
+}
+
 function converterCliPath(): string {
   const base = path.resolve(__dirname, '..')
   const candidates = [
@@ -409,10 +413,6 @@ async function buildPackage(
   }
 }
 
-function extensionsPkgPath(): string {
-  return path.join(os.homedir(), '.config', 'coc', 'extensions', 'package.json')
-}
-
 async function installToCoc(
   name: string,
   onProgress: (step: number, total: number, msg: string, cmd: string) => void,
@@ -431,7 +431,6 @@ async function installToCoc(
   try {
     pkg = fs.existsSync(pkgPath) ? JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) : { dependencies: {} }
   } catch {
-    // Corrupted package.json — start fresh
     pkg = { dependencies: {} }
   }
   pkg.dependencies = pkg.dependencies || {}
@@ -439,8 +438,13 @@ async function installToCoc(
   if (!pkg.dependencies[depName]) {
     pkg.dependencies[depName] = `file:${dest}`
   }
+  // Mark as locked so CocUpdate skips it (avoid npm registry 404)
+  const lockedArr = pkg.locked || []
+  if (!lockedArr.includes(depName)) {
+    lockedArr.push(depName)
+  }
+  pkg.locked = lockedArr
   pkg.lastUpdate = Date.now()
-  // Atomic write
   const tmp = pkgPath + '.tmp'
   fs.writeFileSync(tmp, JSON.stringify(pkg, null, 2))
   fs.renameSync(tmp, pkgPath)
@@ -535,12 +539,17 @@ export async function uninstallPackage(state: StateManager, name: string): Promi
     const depName = `coc-${name}`
     if (pkg.dependencies[depName]) {
       delete pkg.dependencies[depName]
-      pkg.lastUpdate = Date.now()
-      fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
     }
+    const lockedArr = pkg.locked || []
+    const idx = lockedArr.indexOf(depName)
+    if (idx !== -1) {
+      lockedArr.splice(idx, 1)
+      pkg.locked = lockedArr
+    }
+    pkg.lastUpdate = Date.now()
+    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
 
     state.setPackageStatus(name, 'uninstalling', { progress: '[3/3] Removing cache...' })
-
     await rimraf(cacheDir(name))
 
     state.setPackageStatus(name, 'not-installed')
