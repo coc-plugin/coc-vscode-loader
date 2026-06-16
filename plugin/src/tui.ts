@@ -42,7 +42,7 @@ export class TUI {
   private pkgLineMap: Map<number, string> = new Map()
   private windowHeight: number = 0
   private windowWidth: number = 0
-  private lastFocusedPkg: string = ''
+
 
   constructor(state: StateManager) {
     this.state = state
@@ -226,8 +226,6 @@ export class TUI {
     const entry = this.state.getPackage(pkgName)
     if (!entry) return
 
-    this.lastFocusedPkg = pkgName
-
     if (id === 'i' && entry.status === 'not-installed') { await installPackage(this.state, pkgName); return }
     if (id === 'u' && entry.status === 'installed') { await updatePackage(this.state, pkgName); return }
     if (id === 'X' && entry.status === 'installed') { await uninstallPackage(this.state, pkgName); return }
@@ -291,6 +289,9 @@ export class TUI {
       const state = this.state.getState()
       const filtered = this.state.getFilteredPackages()
 
+      // Save cursor line before render to restore position after
+      const prevCursor = await nvim.call('nvim_win_get_cursor', [this.winid]) as [number, number]
+
       const result = state.showHelp
         ? this.renderHelp()
         : this.renderPackageList(state, filtered)
@@ -321,12 +322,10 @@ export class TUI {
 
       this.pkgLineMap = result.pkgLineMap
 
-      // Restore cursor position
-      if (!state.showHelp && this.lastFocusedPkg && result.pkgLineMap.size > 0) {
-        const targetLine = [...result.pkgLineMap.entries()].find(([l, n]) => n === this.lastFocusedPkg)?.[0]
-        if (targetLine !== undefined) {
-          await nvim.call('nvim_win_set_cursor', [this.winid, [targetLine + 1, 0]])
-        }
+      // Restore cursor to same line (clamped to new buffer size)
+      if (!state.showHelp) {
+        const restoreLine = Math.min(prevCursor[0], result.lines.length)
+        await nvim.call('nvim_win_set_cursor', [this.winid, [restoreLine, 0]])
       }
     } finally {
       this.rendering = false
