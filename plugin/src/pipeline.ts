@@ -73,16 +73,29 @@ function npmInstallArgs(): string[] {
 
 const CMD_TIMEOUT = 300_000 // 5 minutes
 
+// Track running child processes per package for cancellation
+const runningProcesses = new Map<string, import('child_process').ChildProcess>()
+
+export function cancelPackage(name: string): boolean {
+  const proc = runningProcesses.get(name)
+  if (!proc) return false
+  try { proc.kill('SIGTERM') } catch {}
+  return true
+}
+
 async function run(
   cmd: string, args: string[], cwd: string,
   onLine?: (line: string) => void,
   env?: Record<string, string>,
+  pkgName?: string,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     let settled = false
     const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: false, env: env ? { ...process.env, ...env } : undefined })
+    if (pkgName) runningProcesses.set(pkgName, child)
     const timer = setTimeout(() => {
       if (settled) return; settled = true
+      if (pkgName) runningProcesses.delete(pkgName)
       child.kill('SIGTERM')
       reject(new Error(`Timed out after ${CMD_TIMEOUT / 1000}s: ${cmd} ${args.join(' ')}`))
     }, CMD_TIMEOUT)
@@ -99,10 +112,11 @@ async function run(
     child.on('close', code => {
       if (settled) return; settled = true
       clearTimeout(timer)
+      if (pkgName) runningProcesses.delete(pkgName)
       if (code === 0) resolve()
       else reject(new Error(`${cmd} ${args.join(' ')} exited with code ${code}\n${stderrBuf.trim()}`))
     })
-    child.on('error', (e) => { if (settled) return; settled = true; clearTimeout(timer); reject(e) })
+    child.on('error', (e) => { if (settled) return; settled = true; clearTimeout(timer); if (pkgName) runningProcesses.delete(pkgName); reject(e) })
   })
 }
 
@@ -125,13 +139,13 @@ async function downloadSource(
     const log = (chunk: string) => {
       onProgress(1, 5, 'Updating source...', chunk.trim())
     }
-    await run('git', ['-C', srcDir, 'fetch', '--depth', '1', 'origin'], cache, log)
-    await run('git', ['-C', srcDir, 'reset', '--hard', 'origin/HEAD'], cache)
+    await run('git', ['-C', srcDir, 'fetch', '--depth', '1', 'origin'], cache, log, undefined, name)
+    await run('git', ['-C', srcDir, 'reset', '--hard', 'origin/HEAD'], cache, undefined, undefined, name)
   } else {
     onProgress(1, 5, 'Cloning repository...', `git clone --depth=1 ${repoUrl}`)
     fs.mkdirSync(cache, { recursive: true })
     const log = (chunk: string) => onProgress(1, 5, 'Cloning repository...', chunk.trim())
-    await run('git', ['clone', '--depth=1', repoUrl, srcDir], cache, log)
+    await run('git', ['clone', '--depth=1', repoUrl, srcDir], cache, log, undefined, name)
   }
 
   const dir = info.source.subdir ? path.join(srcDir, info.source.subdir) : srcDir
@@ -159,7 +173,7 @@ async function convertSource(
   if (!fs.existsSync(path.join(converterDir, 'node_modules', 'commander'))) {
     onProgress(2, 5, 'Installing converter dependencies...', '')
     const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
-    await run('npm', [...npmInstallArgs(), '--omit=dev'], converterDir, log)
+    await run('npm', [...npmInstallArgs(), '--omit=dev'], converterDir, log, undefined, name)
   }
 
   // Build convert config from registry entry
@@ -216,9 +230,9 @@ async function convertSource(
   onProgress(2, 5, 'Converting...', `converter convert ${inputDir} -o ${build}`)
   const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
   if (fs.existsSync(tsxPath)) {
-    await run(tsxPath, tsxArgs, cacheDir(name), log)
+    await run(tsxPath, tsxArgs, cacheDir(name), log, undefined, name)
   } else {
-    await run('npx', ['tsx', ...tsxArgs], cacheDir(name), log)
+    await run('npx', ['tsx', ...tsxArgs], cacheDir(name), log, undefined, name)
   }
 }
 
@@ -246,12 +260,12 @@ async function buildPackage(
 
   const npmLog = (chunk: string) => onProgress(3, 5, chunk.trim(), '')
   onProgress(3, 5, 'Installing dependencies...', `npm ${npmInstallArgs().join(' ')}`)
-  await run('npm', npmInstallArgs(), build, npmLog)
+  await run('npm', npmInstallArgs(), build, npmLog, undefined, name)
 
   // Run postinstall if present (some extensions download servers here)
   onProgress(3, 5, 'Running postinstall...', 'npm run postinstall')
   try {
-    await run('npm', ['run', 'postinstall', '--if-present'], build, npmLog)
+    await run('npm', ['run', 'postinstall', '--if-present'], build, npmLog, undefined, name)
   } catch (e: any) {
     onProgress(3, 5, `Warning: postinstall failed (${e.message})`, 'may affect plugin functionality')
   }
@@ -268,7 +282,7 @@ async function buildPackage(
     let pythonBin = ''
     for (const p of pythonPaths) {
       if (p === 'python3') {
-        try { await run('python3', ['--version'], build); pythonBin = 'python3'; break } catch { continue }
+        try { await run('python3', ['--version'], build, undefined, undefined, name); pythonBin = 'python3'; break } catch { continue }
       } else if (fs.existsSync(p)) {
         pythonBin = p; break
       }
@@ -287,7 +301,7 @@ async function buildPackage(
       } catch {}
     }
     onProgress(3, 5, 'Installing pip packages...', `${pythonBin} -m pip install ${info.pipPackages.join(' ')}`)
-    await run(pythonBin, pipArgs.concat(...info.pipPackages), build, pipLog)
+    await run(pythonBin, pipArgs.concat(...info.pipPackages), build, pipLog, undefined, name)
   }
 
   // Install Go packages via go install (e.g. gopls)
@@ -300,7 +314,7 @@ async function buildPackage(
       const gocache = path.join(build, '.gocache')
       try {
         onProgress(3, 5, `Installing Go package: ${pkg}`, `go install ${pkg}`)
-        await run('go', ['install', pkg], build, goLog, { GOPATH: gopath, GOBIN: serverDir, GOCACHE: gocache })
+        await run('go', ['install', pkg], build, goLog, { GOPATH: gopath, GOBIN: serverDir, GOCACHE: gocache }, name)
       } catch (e: any) {
         onProgress(3, 5, `Warning: go install failed (${e.message})`, '')
       } finally {
@@ -321,7 +335,7 @@ async function buildPackage(
       onProgress(3, 5, `Installing Cargo package: ${crate}`, `cargo install ${crate}`)
       const tmpRoot = path.join(build, '.cargo-root')
       try {
-        await run('cargo', ['install', crate, '--root', tmpRoot], build, cargoLog)
+        await run('cargo', ['install', crate, '--root', tmpRoot], build, cargoLog, undefined, name)
         const src = path.join(tmpRoot, 'bin', binName)
         if (fs.existsSync(src)) {
           fs.copyFileSync(src, path.join(serverDir, binName))
@@ -339,7 +353,7 @@ async function buildPackage(
   const serverDir = path.join(inputDir, 'server')
   if (fs.existsSync(serverDir) && fs.existsSync(path.join(serverDir, 'package.json'))) {
     onProgress(3, 5, 'Installing server dependencies...', `npm ${npmInstallArgs().join(' ')} in ${serverDir}`)
-    await run('npm', npmInstallArgs(), serverDir, npmLog)
+    await run('npm', npmInstallArgs(), serverDir, npmLog, undefined, name)
     const destServer = path.join(build, 'server')
     await rimraf(destServer)
     await cpdir(serverDir, destServer)
@@ -347,7 +361,7 @@ async function buildPackage(
 
   onProgress(4, 5, 'Building...', 'node esbuild.mjs')
   const buildLog = (chunk: string) => onProgress(4, 5, chunk.trim(), '')
-  await run('node', ['esbuild.mjs'], build, buildLog)
+  await run('node', ['esbuild.mjs'], build, buildLog, undefined, name)
 
   // Resolve template variables {{...}} in lib/index.js (generated by language-client step)
   // Must run AFTER esbuild since lib/index.js is created by it
@@ -431,20 +445,20 @@ async function buildPackage(
       const url = `https://github.com/${sb.repo}/releases/download/${tag}/${filename}`
 
       onProgress(4, 5, 'Downloading...', `curl ${filename}`)
-      await run('curl', ['-#SL', url, '-o', path.join(build, filename)], build)
+      await run('curl', ['-#SL', url, '-o', path.join(build, filename)], build, undefined, undefined, name)
       onProgress(4, 5, 'Extracting...', filename)
 
       const serverDir = path.join(build, 'server')
       fs.mkdirSync(serverDir, { recursive: true })
 
       if (filename.endsWith('.zip')) {
-        await run('unzip', ['-o', filename, '-d', serverDir], build)
+        await run('unzip', ['-o', filename, '-d', serverDir], build, undefined, undefined, name)
       } else if (filename.endsWith('.tar.gz') || filename.endsWith('.tgz')) {
-        await run('tar', ['xzf', filename, '-C', serverDir], build)
+        await run('tar', ['xzf', filename, '-C', serverDir], build, undefined, undefined, name)
       } else if (filename.endsWith('.gz') && !filename.endsWith('.tar.gz')) {
         // Single-file gzip: decompress then move to server dir
         const outName = filename.replace(/\.gz$/, '')
-        await run('gunzip', ['-f', filename], build)
+        await run('gunzip', ['-f', filename], build, undefined, undefined, name)
         fs.renameSync(path.join(build, outName), path.join(serverDir, outName))
       } else {
         // Raw binary: move to server dir, creating subdirs if needed
@@ -518,7 +532,7 @@ async function installToCoc(
   // Re-install npm deps in the plugin directory (needed for plugins with custom deps like pyright)
   onProgress(5, 5, 'Installing dependencies...', `npm install in ${dest}`)
   const npmLog = (chunk: string) => onProgress(5, 5, chunk.trim(), '')
-  await run('npm', npmInstallArgs(), dest, npmLog)
+  await run('npm', npmInstallArgs(), dest, npmLog, undefined, name)
 
   const pkgPath = extensionsPkgPath()
   let pkg: Record<string, any>
@@ -595,7 +609,11 @@ export async function installPackage(state: StateManager, name: string): Promise
       }
     } catch { /* non-critical: commit display */ }
   } catch (e: any) {
-    state.setPackageStatus(name, 'failed', { error: e.message })
+      // Check if user cancelled via <C-c> (TUI set status to 'not-installed')
+      const p = state.getState().packages.find(p => p.info.name === name)
+      if (p?.status !== 'not-installed') {
+        state.setPackageStatus(name, 'failed', { error: e.message })
+      }
   }
 }
 
@@ -653,7 +671,10 @@ export async function uninstallPackage(state: StateManager, name: string): Promi
     state.setDirty()
     cocWindow.showInformationMessage(`coc-${name} uninstalled`)
   } catch (e: any) {
-    state.setPackageStatus(name, 'failed', { error: e.message })
+    const p = state.getState().packages.find(p => p.info.name === name)
+    if (p?.status !== 'not-installed') {
+      state.setPackageStatus(name, 'failed', { error: e.message })
+    }
   }
 }
 
@@ -700,7 +721,10 @@ export async function updatePackage(state: StateManager, name: string): Promise<
       }
     } catch { /* non-critical: commit display */ }
   } catch (e: any) {
-    state.setPackageStatus(name, 'failed', { error: e.message })
+    const p = state.getState().packages.find(p => p.info.name === name)
+    if (p?.status !== 'not-installed') {
+      state.setPackageStatus(name, 'failed', { error: e.message })
+    }
   }
 }
 

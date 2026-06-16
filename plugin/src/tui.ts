@@ -1,6 +1,6 @@
 import { workspace, window as cocWindow, Disposable } from 'coc.nvim'
 import { StateManager, PackageEntry, AppState } from './state'
-import { installPackage, uninstallPackage, updatePackage, checkUpdates, runConcurrent } from './pipeline'
+import { installPackage, uninstallPackage, updatePackage, checkUpdates, runConcurrent, cancelPackage } from './pipeline'
 import { updateRegistry, getPackage, ProgressCallback } from './registry'
 import { LineBuffer } from './renderer'
 
@@ -52,6 +52,7 @@ const KEYMAP_ENTRIES: [string, string][] = [
   ['X', 'Uninstall package'],
   ['C', 'Check for updates'],
   ['c', 'Check package version'],
+  ['<C-c>', 'Cancel install / update'],
   ['/', 'Search packages'],
   ['<CR>', 'Toggle package details / log'],
   ['1-9', 'Switch view tab'],
@@ -324,6 +325,17 @@ export class TUI {
     const entry = this.state.getPackage(pkgName)
     if (!entry) return
 
+    if (id === 'cancel') {
+      if (['installing', 'updating', 'uninstalling'].includes(entry.status)) {
+        cancelPackage(pkgName)
+        this.state.setPackageStatus(pkgName, 'not-installed', {
+          logEntry: '✗ Cancelled',
+          error: '',
+        })
+      }
+      return
+    }
+
     if (id === 'i' && entry.status === 'not-installed') { await installPackage(this.state, pkgName); return }
     if (id === 'u' && entry.status === 'installed') { await updatePackage(this.state, pkgName); return }
     if (id === 'X' && entry.status === 'installed') { await uninstallPackage(this.state, pkgName); return }
@@ -349,6 +361,7 @@ export class TUI {
       ['i', 'i'], ['u', 'u'], ['U', 'U'], ['C', 'C'], ['c', 'c'], ['X', 'X'],
       ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'],
       ['6', '6'], ['7', '7'], ['8', '8'], ['9', '9'],
+      ['<C-c>', 'cancel'],
       ['<C-f>', 'language-filter'],
       ['/', 'search'],
       ['<CR>', 'cr'],
