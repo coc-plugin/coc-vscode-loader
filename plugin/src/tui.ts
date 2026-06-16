@@ -80,9 +80,11 @@ export class TUI {
     const row = Math.max(Math.floor((availLines - height) / 2), 0)
     const col = Math.max(Math.floor((editorCols - width) / 2), 0)
 
-    // Create backdrop (Mason-style dim overlay, requires termguicolors)
+    // Create backdrop (Mason-style dim overlay, requires termguicolors and non-transparent)
     const termguicolors = await nvim.call('nvim_get_option', ['termguicolors']) as number
-    if (termguicolors === 1) {
+    const normalHl = await nvim.call('nvim_get_hl', [0, { name: 'Normal' }]) as Record<string, any>
+    const isTransparent = normalHl && normalHl.bg === null
+    if (termguicolors === 1 && !isTransparent) {
       const backdropBuf = await nvim.createNewBuffer(false, true)
       this.backdropBufnr = backdropBuf.id
       const backdropWin = await nvim.openFloatWindow(backdropBuf, false, {
@@ -122,6 +124,7 @@ export class TUI {
     await nvim.call('nvim_buf_set_option', [this.bufnr, 'buftype', 'nofile'])
     await nvim.call('nvim_buf_set_option', [this.bufnr, 'swapfile', false])
     await nvim.call('nvim_buf_set_option', [this.bufnr, 'undolevels', -1])
+    await nvim.call('nvim_buf_set_option', [this.bufnr, 'filetype', 'coc-loader'])
     await nvim.call('nvim_win_set_option', [this.winid, 'cursorline', true])
     await nvim.call('nvim_win_set_option', [this.winid, 'number', false])
     await nvim.call('nvim_win_set_option', [this.winid, 'relativenumber', false])
@@ -199,6 +202,7 @@ export class TUI {
     if (id === 'q') { await this.close(); return }
     if (id === 'esc') {
       if (s.showHelp) { this.state.toggleHelp(); return }
+      if (s.searchQuery) { this.state.setSearchQuery(''); return }
       if (s.categoryFilter) { this.state.setCategoryFilter(null); return }
       await this.close(); return
     }
@@ -215,7 +219,18 @@ export class TUI {
       return
     }
 
+    if (id === 'language-filter') {
+      cocWindow.showInformationMessage('Language filter not yet implemented')
+      return
+    }
+
     if (id === 'C') {
+      this.state.setStatusMessage('Updating registry...')
+      try {
+        await updateRegistry((msg) => this.state.setStatusMessage(msg))
+        this.state.refreshPackages()
+        this.state.setStatusMessage('Checking for updates...')
+      } catch {}
       await checkUpdates(this.state)
       return
     }
@@ -269,6 +284,7 @@ export class TUI {
       ['i', 'i'], ['u', 'u'], ['U', 'U'], ['C', 'C'], ['c', 'c'], ['X', 'X'],
       ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'],
       ['6', '6'], ['7', '7'], ['8', '8'], ['9', '9'],
+      ['<C-f>', 'language-filter'],
       ['<CR>', 'cr'],
     ]
     for (const [vimKey, id] of entries) {
@@ -372,7 +388,8 @@ export class TUI {
     const buf = new LineBuffer()
 
     // Centered header + key hint
-    const hdrLine = `coc-loader v${VERSION}`
+    const searchSuffix = state.searchQuery ? ' (search mode)' : ''
+    const hdrLine = `coc-loader v${VERSION}${searchSuffix}`
     const hdrLen = Buffer.from(hdrLine).length
     const hdrPad = Math.max(0, Math.floor((this.windowWidth - hdrLen) / 2) - 2)
     if (hdrPad > 0) buf.append(' '.repeat(hdrPad), undefined)
