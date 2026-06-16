@@ -3,6 +3,8 @@
 ## [1.5.0] - 2026-06-16
 
 ### Added
+- **`targetAssets` — serverBinary per-platform 资产映射**。当 GitHub Release 的二进制命名因平台而异时（如 clangd 用 `mac`/`windows` 而非 `darwin`/`win32`），可用 `targetAssets` 数组按 `platform` + `arch` 匹配，每条目指定 `file` 和 `binaryPath`
+- **vscode-clangd** — 加入 registry，使用 `targetAssets` 实现 per-platform 二进制下载
 - **`goPackages`** — registry 字段，pipeline 通过 `go install` 编译 Go language server（如 gopls），二进制自动放入 `server/` 目录
 - **`cargoPackages`** — registry 字段，pipeline 通过 `cargo install --root` 编译 Rust language server，二进制复制到 `server/` 目录
 - **vscode-go** — 加入 registry，使用 `goPackages` 自动安装 gopls

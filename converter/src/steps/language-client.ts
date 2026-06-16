@@ -251,6 +251,7 @@ ${ls.verbose ? `      console.log('[${escapeStr(id)}] starting client')\n` : ''}
         asset: ls.server.binary.asset,
         binaryPath: ls.server.binary.binaryPath,
         args: ls.server.args,
+        targetAssets: ls.server.binary.targetAssets,
       } : undefined,
     }
   },

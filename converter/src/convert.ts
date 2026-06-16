@@ -27,6 +27,12 @@ interface MergedResult {
     asset: string
     binaryPath?: string
     args?: string[]
+    targetAssets?: Array<{
+      platform?: string
+      arch?: string
+      file: string
+      binaryPath?: string
+    }>
   }
 }
 

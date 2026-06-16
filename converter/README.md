@@ -41,6 +41,7 @@ cd ~/.config/coc/extensions && npm install /path/to/coc-ext
 | Go | Pure LSP | Source-compiled binary server (`go install gopls`) |
 | Docker | Pure LSP | npm package server (`dockerfile-language-server-nodejs`) |
 | Bash IDE | Pure LSP | npm package server (`bash-language-server`) |
+| clangd | Pure LSP | Binary server with per-platform assets (`targetAssets`) |
 
 See the [registry](https://github.com/coc-plugin/coc-vscode-registry) for the full list and latest status.
 

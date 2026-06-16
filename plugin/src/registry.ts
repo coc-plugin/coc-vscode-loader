@@ -25,6 +25,12 @@ export interface PackageInfo {
     asset: string       // "name-{{version}}-{{platform}}-{{arch}}.tar.gz"
     binaryPath?: string // relative path inside tarball, e.g. "bin/lua-language-server"
     args?: string[]     // CLI args to start the LSP, e.g. ["lsp"] for deno
+    targetAssets?: Array<{
+      platform?: string // "darwin" | "linux" | "win32" (default: any)
+      arch?: string     // "x64" | "arm64" (default: any)
+      file: string      // asset filename template
+      binaryPath?: string
+    }>
   }
   pipPackages?: string[]  // Python packages to install via pip, e.g. ["ansible-lint"]
   goPackages?: string[]   // Go packages to install via go install, e.g. ["golang.org/x/tools/gopls@latest"]

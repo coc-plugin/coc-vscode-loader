@@ -398,7 +398,22 @@ async function buildPackage(
       const tag: string = tagData.tag_name
       const version = tag.replace(/^v/, '')
 
-      const filename = sb.asset
+      // Resolve asset + binaryPath: prefer targetAssets match, fallback to top-level asset/binaryPath
+      let assetTemplate = sb.asset
+      let resolvedBinaryPath = sb.binaryPath
+      if (sb.targetAssets?.length) {
+        const match = sb.targetAssets.find(t => {
+          if (t.platform && t.platform !== platform) return false
+          if (t.arch && t.arch !== arch) return false
+          return true
+        })
+        if (match) {
+          assetTemplate = match.file
+          if (match.binaryPath) resolvedBinaryPath = match.binaryPath
+        }
+      }
+
+      const filename = assetTemplate
         .replace(/\{\{version}}/g, version)
         .replace(/\{\{platform}}/g, platform)
         .replace(/\{\{arch}}/g, arch)
@@ -424,7 +439,7 @@ async function buildPackage(
         fs.renameSync(path.join(build, outName), path.join(serverDir, outName))
       } else {
         // Raw binary: move to server dir, creating subdirs if needed
-        const binName = sb.binaryPath || filename
+        const binName = resolvedBinaryPath || filename
         const destPath = path.join(serverDir, binName)
         fs.mkdirSync(path.dirname(destPath), { recursive: true })
         fs.renameSync(path.join(build, filename), destPath)
@@ -439,6 +454,16 @@ async function buildPackage(
         }
         chmodRecursive(serverDir)
       } catch {}
+      // If binary resides in a nested path (e.g. "clangd_22.1.0/bin/clangd"), copy it flat to server/<package>
+      // so the generated code's fallback path can find it without knowing the internal archive structure.
+      if (resolvedBinaryPath && resolvedBinaryPath.includes('/')) {
+        const inside = path.join(serverDir, resolvedBinaryPath)
+        if (fs.existsSync(inside)) {
+          const flat = path.join(serverDir, path.basename(resolvedBinaryPath))
+          fs.copyFileSync(inside, flat)
+          fs.chmodSync(flat, 0o755)
+        }
+      }
       // Resolve {{version}} in lib/index.js (only available after GitHub API call)
       if (version) {
         const verPath = path.join(build, 'lib', 'index.js')
@@ -449,7 +474,7 @@ async function buildPackage(
           }
         }
       }
-      if (sb.binaryPath || filename.match(/\.(zip|tar\.gz|tgz|gz)$/)) {
+      if (resolvedBinaryPath || filename.match(/\.(zip|tar\.gz|tgz|gz)$/)) {
         const archivePath = path.join(build, filename)
         if (fs.existsSync(archivePath)) await rimraf(archivePath)
       }
@@ -470,17 +495,15 @@ async function installToCoc(
 
   await rimraf(dest)
   fs.mkdirSync(dest, { recursive: true })
-  // Copy only essential files — skip node_modules/ (huge, causes cp issues with symlinks)
-  const essentials = ['lib', 'server', 'package.json', 'esbuild.mjs', 'coc-convert.json']
-  for (const item of essentials) {
-    const srcPath = path.join(src, item)
-    if (fs.existsSync(srcPath)) {
-      const destPath = path.join(dest, item)
-      if (fs.statSync(srcPath).isDirectory()) {
-        await fs.promises.cp(srcPath, destPath, { recursive: true, dereference: true, force: true })
-      } else {
-        fs.copyFileSync(srcPath, destPath)
-      }
+  // Copy everything except node_modules/ — handles all plugin types (LSP, snippets, source-converted)
+  for (const entry of fs.readdirSync(src)) {
+    if (entry === 'node_modules') continue
+    const srcPath = path.join(src, entry)
+    const destPath = path.join(dest, entry)
+    if (fs.statSync(srcPath).isDirectory()) {
+      await fs.promises.cp(srcPath, destPath, { recursive: true, dereference: true, force: true })
+    } else {
+      fs.copyFileSync(srcPath, destPath)
     }
   }
   // Re-install npm deps in the plugin directory (needed for plugins with custom deps like pyright)

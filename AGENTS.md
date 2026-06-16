@@ -429,6 +429,34 @@ Registry 条目示例：
 { module: serverPath, transport: TransportKind.ipc, args: ['--ngProbeLocations', require('path').resolve(__dirname, '..'), ...] }
 ```
 
+### `targetAssets` 字段（v1.5.0+）
+
+当 GitHub Release 的二进制文件命名**因平台而异**（如 clangd 用 `mac`/`windows` 而非 `darwin`/`win32`），可用 `targetAssets` 覆盖默认的 `asset`/`binaryPath`：
+
+```json
+{
+  "serverBinary": {
+    "repo": "clangd/clangd",
+    "asset": "clangd-linux-{{version}}.zip",
+    "binaryPath": "clangd_{{version}}/bin/clangd",
+    "targetAssets": [
+      { "platform": "darwin", "file": "clangd-mac-{{version}}.zip", "binaryPath": "clangd_{{version}}/bin/clangd" },
+      { "platform": "linux",  "file": "clangd-linux-{{version}}.zip", "binaryPath": "clangd_{{version}}/bin/clangd" },
+      { "platform": "win32",  "file": "clangd-windows-{{version}}.zip", "binaryPath": "clangd_{{version}}/bin/clangd.exe" }
+    ]
+  }
+}
+```
+
+匹配规则：按 `platform` + `arch` 查找，找到则用该条目的 `file` 和 `binaryPath`；不匹配则回退到顶层 `asset`/`binaryPath`。
+
+| 字段 | 必需 | 说明 |
+|------|------|------|
+| `platform` | ❌ | 目标平台，`"darwin"` \| `"linux"` \| `"win32"`，缺省匹配所有 |
+| `arch` | ❌ | 目标架构，`"x64"` \| `"arm64"`，缺省匹配所有 |
+| `file` | ✅ | 该平台的 asset 文件名模板 |
+| `binaryPath` | ❌ | 该平台的压缩包内二进制路径 |
+
 ## Pending
 
 - [x] Angular Language Service (`vscode-ng-language-service`) — added to registry
@@ -447,6 +475,11 @@ Registry 条目示例：
 - [x] `snippets` step type — 纯 snippets 扩展自动转换
 - [x] 20 snippet extensions 已录入 registry
 - [x] Local server support — `server.package` 支持相对路径，自动编译 `server/` TypeScript、pipeline 自动拷贝
+- [x] Pyright (`vscode-pyright`) — 加入 registry，module kind 自动安装 pyright npm 包
+- [x] Go LSP (`vscode-go`) — 加入 registry，goPackages 支持自动 go install gopls
+- [x] `targetAssets` — serverBinary per-platform 资产映射，支持非标准平台命名
+- [x] `installToCoc` 优化 — 跳过 node_modules，选择性复制 + 重新 npm install
+- [x] `rimraf` 容错 — 删除前 chmod -R u+w，处理 Go 模块缓存只读目录
 
 ### goPackages / cargoPackages（v1.5.0+）
 

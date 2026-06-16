@@ -2,6 +2,7 @@ node_modules/
 lib/
 dist/
 *.log
+package/
 plugin/converter/
 coc-vscode-registry/
 code_20260614.txt

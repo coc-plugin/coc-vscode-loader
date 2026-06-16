@@ -36,6 +36,15 @@ export interface ServerBinaryConfig {
     repo: string
     asset: string
     binaryPath?: string
+    /** Per-platform/arch asset overrides. Each entry specifies file + binaryPath for matching platform/arch.
+     *  When present, overrides the top-level asset/binaryPath for matching platform.
+     *  platform/arch default to "*" (matches any). */
+    targetAssets?: Array<{
+      platform?: string   // "darwin" | "linux" | "win32"
+      arch?: string       // "x64" | "arm64"
+      file: string        // asset filename template (supports {{version}}, {{platform}}, {{arch}}, etc.)
+      binaryPath?: string // relative path inside archive
+    }>
   }
   args?: string[]
 }
@@ -111,6 +120,12 @@ export interface StepResult {
     asset: string
     binaryPath?: string
     args?: string[]
+    targetAssets?: Array<{
+      platform?: string
+      arch?: string
+      file: string
+      binaryPath?: string
+    }>
   }
   /** Code to inject into previously generated files (target path, code to insert, insertion point) */
   codeInjections?: Array<{
