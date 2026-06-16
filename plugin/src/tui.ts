@@ -40,12 +40,6 @@ export class TUI {
   private disposables: Disposable[] = []
   private unsubscribe: (() => void) | null = null
   private pkgLineMap: Map<number, string> = new Map()
-  private detailWinid: number = 0
-  private detailBufnr: number = 0
-  private backdropBufnr: number = 0
-  private backdropWinid: number = 0
-  private detailPkgName: string = ''
-  private detailMode: 'log' | 'info' = 'info'
   private windowHeight: number = 0
   private windowWidth: number = 0
   private lastFocusedPkg: string = ''
@@ -271,10 +265,6 @@ export class TUI {
     if (this.unsubscribe) { this.unsubscribe(); this.unsubscribe = null }
     for (const d of this.disposables) { d.dispose() }
     this.disposables = []
-    if (this.detailWinid) {
-      try { await workspace.nvim.call('nvim_win_close', [this.detailWinid, true]) } catch {}
-      this.detailWinid = 0
-    }
     if (this.backdropWinid) {
       try { await workspace.nvim.call('nvim_win_close', [this.backdropWinid, true]) } catch {}
       this.backdropWinid = 0
@@ -327,10 +317,6 @@ export class TUI {
         }
       } finally {
         await nvim.resumeNotification()
-      }
-
-      if (this.detailWinid) {
-        this.updateDetailPopup().catch(() => {})
       }
 
       this.pkgLineMap = result.pkgLineMap
@@ -442,9 +428,6 @@ export class TUI {
     buf.append('◍', iconHl)
     buf.append(' ')
     this.appendHighlightedText(buf, entry.info.displayName)
-    if (entry.hasUpdate) {
-      buf.append('  ↑', 'CocLoaderHighlight')
-    }
     buf.nl()
 
     // Mason-style installing log: tail or full log toggle
@@ -462,8 +445,7 @@ export class TUI {
       } else {
         const last = entry.progressLog[entry.progressLog.length - 1]
         const head = last.split('\n')[0]
-        buf.append('    ▶ # ', undefined)
-        buf.append(entry.progress || head, 'CocLoaderMuted')
+        buf.append(`    ▶ # ${entry.progress || head}`, 'CocLoaderMuted')
         buf.nl()
       }
     }
@@ -526,128 +508,6 @@ export class TUI {
       idx = lower.indexOf(qLower, pos)
     }
     if (pos < text.length) buf.append(text.slice(pos))
-  }
-
-  private buildDetailLines(entry: PackageEntry, mode: 'log' | 'info' = 'info'): string[] {
-    const lines: string[] = []
-    if (mode === 'log') {
-      for (const log of entry.progressLog) {
-        for (const l of log.split('\n')) {
-          lines.push(`  ${l}`)
-        }
-      }
-      if (entry.error) lines.push('', `  ✗ ${entry.error}`)
-      return lines
-    }
-    lines.push(
-      `  desc     ${entry.info.description}`,
-      `  type     ${entry.info.type}`,
-      `  status   ${entry.status}`,
-    )
-    if (entry.commit) lines.push(`  commit   ${entry.commit}`)
-    lines.push(
-      `  source   ${sourceStr(entry.info.source)}`,
-      `  langs    ${entry.info.languages.join(', ')}`,
-      `  cats     ${entry.info.categories.join(', ')}`,
-      `  link     ${entry.info.url}`,
-    )
-    if (entry.info.serverBinary) {
-      lines.push(`  server   ${entry.info.serverBinary.repo}`)
-    }
-    return lines
-  }
-
-  private showDetailPopupBusy = false
-  private async showDetailPopup(name: string) {
-    if (this.showDetailPopupBusy) return
-    this.showDetailPopupBusy = true
-    const nvim = workspace.nvim
-    try {
-      if (this.detailWinid) await this.closeDetailPopup()
-      this.detailPkgName = name
-      const entry = this.state.getPackage(name)
-      if (!entry) return
-      this.detailMode = ['installing', 'updating', 'uninstalling', 'failed'].includes(entry.status) ? 'log' : 'info'
-
-      const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
-      const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
-      const lines = this.buildDetailLines(entry, this.detailMode)
-      const maxH = Math.floor(editorLines * 0.7)
-      const height = this.detailMode === 'log' ? Math.min(20, maxH) : Math.min(lines.length, 20)
-      const row = Math.max(0, Math.floor((editorLines - height - 2) / 2))
-      const col = Math.max(0, Math.floor((editorCols - 80) / 2))
-      const buf = await nvim.createNewBuffer(false, true)
-      this.detailBufnr = buf.id
-      const win = await nvim.openFloatWindow(buf, true, {
-        relative: 'editor', width: 78, height, row, col,
-        border: 'rounded', style: 'minimal', zindex: 100,
-        title: this.detailMode === 'log' ? `${entry.info.displayName}  ·  Log` : entry.info.displayName,
-        title_pos: 'left',
-      })
-      this.detailWinid = win.id
-      await nvim.call('nvim_win_set_option', [this.detailWinid, 'wrap', true])
-      await nvim.call('nvim_buf_set_option', [this.detailBufnr, 'bufhidden', 'wipe'])
-      await nvim.call('nvim_buf_set_option', [this.detailBufnr, 'buftype', 'nofile'])
-      const keyBuf = nvim.createBuffer(this.detailBufnr)
-      keyBuf.setKeymap('n', 'q', '<Cmd>call CocConverterDispatch("close-detail")<CR>', { silent: true, nowait: true })
-      keyBuf.setKeymap('n', '<Esc>', '<Cmd>call CocConverterDispatch("close-detail")<CR>', { silent: true, nowait: true })
-      keyBuf.setKeymap('n', 'j', '<Cmd>call CocConverterDispatch("detail-j")<CR>', { silent: true, nowait: true })
-      keyBuf.setKeymap('n', 'k', '<Cmd>call CocConverterDispatch("detail-k")<CR>', { silent: true, nowait: true })
-      await this.updateDetailPopup()
-    } finally {
-      this.showDetailPopupBusy = false
-    }
-  }
-
-  private async updateDetailPopup() {
-    if (!this.detailWinid || !this.detailPkgName) return
-    const entry = this.state.getPackage(this.detailPkgName)
-    if (!entry) return
-    const lines = this.buildDetailLines(entry, this.detailMode)
-    const nvim = workspace.nvim
-    nvim.pauseNotification()
-    try {
-      nvim.call('nvim_buf_set_lines', [this.detailBufnr, 0, -1, false, lines], true)
-      nvim.call('nvim_buf_clear_namespace', [this.detailBufnr, this.ns, 0, -1], true)
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i]
-        if (line.startsWith('  [')) {
-          const endBracket = line.indexOf(']')
-          if (endBracket > 0) {
-            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: endBracket + 1, hl_group: 'CocLoaderHighlight' }], true)
-            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, endBracket + 1, { end_col: line.length, hl_group: 'Comment' }], true)
-          }
-        } else if (line.startsWith('  $ ')) {
-          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'Comment' }], true)
-        } else if (line.includes('✗') || line.includes('Error:')) {
-          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'ErrorMsg' }], true)
-        } else if (line.match(/^\s{4}at\s/) || line.match(/^\s{4}Node\.js/)) {
-          nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 0, { end_col: line.length, hl_group: 'Comment' }], true)
-        } else if (line.match(/^\s{2}\w+\s{3,}/)) {
-          const parts = line.substring(2).split(/\s{2,}/)
-          if (parts.length >= 2 && ['desc', 'type', 'status', 'source', 'langs', 'cats', 'link', 'commit', 'server'].includes(parts[0])) {
-            const labelEnd = 2 + parts[0].length + line.substring(2 + parts[0].length).match(/^\s*/)![0].length
-            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, 2, { end_col: labelEnd, hl_group: 'CocLoaderHighlight' }], true)
-            nvim.call('nvim_buf_set_extmark', [this.detailBufnr, this.ns, i, labelEnd, { end_col: line.length, hl_group: 'Comment' }], true)
-          }
-        }
-      }
-      if (this.detailMode === 'log') {
-        nvim.call('nvim_win_set_cursor', [this.detailWinid, [lines.length, 0]], true)
-      }
-    } finally {
-      await nvim.resumeNotification()
-    }
-  }
-
-  private async closeDetailPopup() {
-    if (!this.detailWinid) return
-    try { await workspace.nvim.call('nvim_win_close', [this.detailWinid, true]) } catch {}
-    this.detailWinid = 0
-    this.detailBufnr = 0
-    this.detailPkgName = ''
-    this.detailMode = 'info'
-    this.render().catch(() => {})
   }
 
   isOpen(): boolean {
