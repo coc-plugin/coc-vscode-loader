@@ -60,7 +60,10 @@ npm install coc-vscode-loader
 ## Features
 
 - **Real conversion pipeline** — git clone → converter → npm install → esbuild → register to coc
+- **Source-compiled servers** — pipeline auto-installs Go servers via `go install` (`goPackages`) and Rust servers via `cargo install` (`cargoPackages`), binaries go to `server/` directory
+- **Binary server download** — auto-downloads pre-built server binaries from GitHub Releases (`.zip`, `.tar.gz`, `.gz`)
 - **Local server build** — auto-copies `server/` directory from source, installs deps, compiles TypeScript during build
+- **Pip install** — auto-installs Python packages via `pip` for plugins that need them (e.g. ansible-lint)
 - **Auto-fetch registry** — remote registry fetched in background when TUI opens, no manual refresh needed
 - **Virtual scrolling** — `j`/`k` smooth scroll through packages, handles 100k+ registry entries
 - **Incremental cache** — source/ keeps git repo, updates via git pull only
@@ -82,7 +85,7 @@ npm install coc-vscode-loader
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache |
-| `src/pipeline.ts` | Real install/update/uninstall flow (git + npx tsx + npm + node + cp). Handles local servers (copies `server/` dir, installs deps). |
+| `src/pipeline.ts` | Real install/update/uninstall flow (git + npx tsx + npm + node + cp). Handles local servers (copies `server/` dir, installs deps), binary server download, Go/Cargo source-compiled servers, pip install. |
 | `src/renderer.ts` | LineBuffer render engine (inspired by lazy.nvim) |
 
 ## Build

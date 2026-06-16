@@ -68,6 +68,11 @@ The `convert` array in `registry.json` tells the converter what to do:
     "subdir": "extensions/vscode"
   },
   "languages": ["mylang"],
+  // Optional install fields:
+  "pipPackages": ["ansible-lint"],       // Python pip dependencies
+  "goPackages": ["golang.org/x/tools/gopls@latest"],  // Go packages (go install)
+  "cargoPackages": [{ "crate": "nil", "binary": "nil" }],  // Rust crates (cargo install)
+  "serverBinary": { "repo": "org/repo", "asset": "name-{{platform}}-{{arch}}.tar.gz", "binaryPath": "bin/server" },
   "convert": [
     // Step type 1: Generate LanguageClient entry to launch an LSP server
     {

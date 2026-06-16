@@ -37,6 +37,10 @@ cd ~/.config/coc/extensions && npm install /path/to/coc-ext
 | gitignore | Direct API | Source transforms |
 | CSS Peek | Pure LSP | Local server (TypeScript source in `server/`) |
 | Angular Language Service | Pure LSP | npm package server (`@angular/language-server`), `binName` + `args` with `{pluginDir}` |
+| Pyright | Pure LSP | npm package server (`pyright` → `pyright-langserver`), `binName` |
+| Go | Pure LSP | Source-compiled binary server (`go install gopls`) |
+| Docker | Pure LSP | npm package server (`dockerfile-language-server-nodejs`) |
+| Bash IDE | Pure LSP | npm package server (`bash-language-server`) |
 
 See the [registry](https://github.com/coc-plugin/coc-vscode-registry) for the full list and latest status.
 
@@ -95,6 +99,17 @@ npm install ChuYanLon/coc-tsserver --legacy-peer-deps
 - `replace`：替换文本
 - 所有 patch 通过 `server-patches.json` 写入 build 目录，由 `esbuild.mjs` prebuild 段在构建时读取执行
 
+## Source-compiled server support (v1.5.0+)
+
+当 language server 是 Go 或 Rust 项目时，pipeline 可用源码编译安装：
+
+| 字段 | 机制 | 示例 |
+|------|------|------|
+| `goPackages` | Pipeline 执行 `go install`，`GOBIN` 指向 `server/` | `["golang.org/x/tools/gopls@latest"]` |
+| `cargoPackages` | Pipeline 执行 `cargo install --root`，从临时目录复制二进制到 `server/` | `[{ "crate": "nil", "binary": "nil" }]` |
+
+详见 [AGENTS.md](../AGENTS.md#gopackages--cargopackagesv150).
+
 详见 [AGENTS.md](../AGENTS.md#%E6%8F%92%E4%BB%B6%E7%BA%A7%E6%96%87%E6%9C%AC%E8%A1%A5%E4%B8%81-patchessource-step).
 
 ## Architecture
@@ -141,8 +156,8 @@ See [../docs/converter-design-v2.md](../docs/converter-design-v2.md).
 ## Testing
 
 ```bash
-npm test                    # Unit tests (115 tests, 14 files) + coverage check
-npm run test:smoke          # Registry smoke test — converts all 114 entries
+npm test                    # Unit tests (116 tests, 14 files) + coverage check
+npm run test:smoke          # Registry smoke test — converts all 121 entries
 npm run test:watch          # Watch mode for development
 npm run check:tests         # Verify every source file has a matching test
 ```
@@ -154,12 +169,12 @@ npm run check:tests         # Verify every source file has a matching test
 | `transforms/import-mapping.test.ts` | 22 | All text-level replacements + real transform Uri injection |
 | `transforms/class-to-factory.test.ts` | 7 | `new Xxx()` → `Xxx.create()` / `TextEdit.replace()` |
 | `convert.test.ts` | 17 | Full conversion pipeline (text replacements, output generation, step orchestration, patches) |
-| `registry-validation.test.ts` | 12 | Registry.json schema (114 entries) |
+| `registry-validation.test.ts` | 12 | Registry.json schema (121 entries) |
 | `scanner.test.ts` | 6 | API scanner detection |
 | `presets.test.ts` | 5 | Bridge preset definitions |
 | `transforms/language-client.test.ts` | 5 | LanguageClient AST adaptation |
 
-**Smoke test** — `npm run test:smoke` clones all 114 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
+**Smoke test** — `npm run test:smoke` clones all 121 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
 
 ```bash
 # Force re-clone all repos

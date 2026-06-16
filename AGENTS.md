@@ -11,6 +11,8 @@ Reference documentation for migrating VS Code extensions to coc.nvim + **convert
 External commands required at runtime:
 - `git`, `node`/`npm`/`npx` (Node.js >= 18), `curl`, `unzip`, `tar`/`gunzip`
 - `python3` + `pip` (only if plugin has `pipPackages` in registry)
+- `go` (only if plugin has `goPackages` in registry)
+- `cargo` (only if plugin has `cargoPackages` in registry)
 - Plugin pipeline runs all commands via `spawn(cmd, args, { shell: true })`
 
 ## Repo map
@@ -74,6 +76,14 @@ External commands required at runtime:
   "convert": [{ "type": "source" | "language-client" | "bridge" | "snippets", ... }]
 }
 ```
+
+### 可选安装字段
+
+| 字段 | 说明 | 示例 |
+|------|------|------|
+| `pipPackages` | Python pip 依赖，pipeline 自动安装 | `["ansible-lint"]` |
+| `goPackages` | Go 包，pipeline 执行 `go install` 编译到 `server/` | `["golang.org/x/tools/gopls@latest"]` |
+| `cargoPackages` | Rust crate，pipeline 执行 `cargo install --root` 编译后复制到 `server/` | `[{ "crate": "nil", "binary": "nil" }]` |
 
 ### 插件特有文本补丁
 
@@ -217,7 +227,7 @@ const NAMESPACE_MAP: Record<string, string> = {
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache + version compatibility filter |
-| `src/pipeline.ts` | Real install/update/uninstall flow (git / npx tsx / npm / node / cp) + pip install + binary server download + code patching (documentSelector, client.start guard) |
+| `src/pipeline.ts` | Real install/update/uninstall flow (git / npx tsx / npm / node / cp) + pip install + go install + cargo install + binary server download + code patching (documentSelector, client.start guard) |
 | `src/renderer.ts` | LineBuffer render engine (inspired by lazy.nvim) |
 
 ### Version compatibility (minPluginVersion)
@@ -245,6 +255,8 @@ Registry entries can specify `minPluginVersion` (e.g. `"1.1.2"`) to require a mi
 - **Registry auto-fetch**: remote registry fetched in background when TUI opens
 - **Binary server support**: auto-download + extract (.zip, .gz, .tar.gz) server binaries from GitHub Releases, patch generated code for command-mode startup, fix documentSelector and activationEvents
 - **Pip packages**: auto-install Python dependencies via pip (e.g. ansible-lint), only uses `--break-system-packages` on Linux
+- **Go packages**: auto-install Go language servers via `go install` (e.g. gopls), binary placed in `server/` directory
+- **Cargo packages**: auto-install Rust language servers via `cargo install --root` (e.g. nil), binary placed in `server/` directory
 
 ### Commands
 
@@ -290,6 +302,7 @@ npm install coc-vscode-loader    # or
 |-----------|--------|-------------|
 | [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-06 | Registry expansion: PHP Intelephense, Rust Analyzer, ESLint |
 | [v1.4.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-08 | More transforms, bridge presets, registry expansion |
+| [v1.5.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/4) | 2026-06 | Go/Cargo source install, `installToCoc` optimization, registry expansion |
 | [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | Stable ecosystem: 10+ plugins, full transform coverage |
 
 ## keepDeps 版本解析策略（Converter v2.0）
@@ -435,13 +448,30 @@ Registry 条目示例：
 - [x] 20 snippet extensions 已录入 registry
 - [x] Local server support — `server.package` 支持相对路径，自动编译 `server/` TypeScript、pipeline 自动拷贝
 
+### goPackages / cargoPackages（v1.5.0+）
+
+当 language server 不是 npm 包也没有 GitHub 预编译二进制时，可用源码编译安装：
+
+| 字段 | 机制 | 示例 |
+|------|------|------|
+| `goPackages` | Pipeline 执行 `go install`，`GOBIN` 指向 `server/`，二进制直接输出到 `server/` | `["golang.org/x/tools/gopls@latest"]` |
+| `cargoPackages` | Pipeline 执行 `cargo install --root`，从临时目录复制二进制到 `server/` | `[{ "crate": "nil", "binary": "nil" }]` |
+
+Go/Cargo 编译缓存在 `build/.gopath/` 和 `build/.cargo-root/`，安装完成后自动清理。
+
+### Pipeline 健壮性改进（v1.5.0+）
+
+- **`rimraf` 容错**：删除前先 `chmod -R u+w`，处理 Go 模块缓存的 0555 只读目录
+- **`cpdir` 改用 `fs.cp`**：Node.js 原生递归复制，正确处理符号链接和权限
+- **`installToCoc` 优化**：只复制 `lib/`、`server/`、`package.json` 等必要文件，跳过 `node_modules/`，到目标目录后重新 `npm install`，避免 `cp -rL` 在大 `node_modules` 上的问题
+
 ## Testing
 
 Every source file must have a corresponding `.test.ts` file. Run before pushing:
 
 ```bash
-npm test                    # Unit tests (115) + check-tests (no missing/empty tests)
-npm run test:smoke          # Registry smoke test (converts all 114 entries, validates output)
+npm test                    # Unit tests (116) + check-tests (no missing/empty tests)
+npm run test:smoke          # Registry smoke test (converts all 121 entries, validates output)
 ```
 
 **Pre-push hook** runs both. CI runs unit tests on push/PR (Node 20/22) and smoke test after.

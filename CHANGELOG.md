@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.5.0] - 2026-06-16
+
+### Added
+- **`goPackages`** — registry 字段，pipeline 通过 `go install` 编译 Go language server（如 gopls），二进制自动放入 `server/` 目录
+- **`cargoPackages`** — registry 字段，pipeline 通过 `cargo install --root` 编译 Rust language server，二进制复制到 `server/` 目录
+- **vscode-go** — 加入 registry，使用 `goPackages` 自动安装 gopls
+- **vscode-pyright** — 加入 registry，使用 `pyright` npm 包 + `pyright-langserver` binName
+
+### Changed
+- **plugin/pipeline**: `rimraf` 先在 `rm -rf` 前 `chmod -R u+w`，处理 Go 模块缓存的 0555 只读目录
+- **plugin/pipeline**: `cpdir` 改用 Node.js `fs.cp`（`dereference: true`），处理符号链接和权限问题
+- **plugin/pipeline**: `installToCoc` 优化：只复制 `lib/`、`server/`、`package.json` 等必要文件，跳过 `node_modules/`，到目标目录后重新 `npm install`，避免 `cp -rL` 在大 `node_modules` 上的问题
+- **plugin/pipeline**: `run()` 支持可选 `env` 参数，用于传递 `GOPATH`/`GOBIN`/`GOCACHE` 等环境变量
+- **converter**: bump to v1.5.0
+- **plugin**: bump to v1.5.0
+
 ## [1.4.5] - 2026-06-16
 
 ### Added

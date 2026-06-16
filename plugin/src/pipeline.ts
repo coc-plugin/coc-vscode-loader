@@ -76,10 +76,11 @@ const CMD_TIMEOUT = 300_000 // 5 minutes
 async function run(
   cmd: string, args: string[], cwd: string,
   onLine?: (line: string) => void,
+  env?: Record<string, string>,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     let settled = false
-    const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: false })
+    const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: false, env: env ? { ...process.env, ...env } : undefined })
     const timer = setTimeout(() => {
       if (settled) return; settled = true
       child.kill('SIGTERM')
@@ -289,6 +290,51 @@ async function buildPackage(
     await run(pythonBin, pipArgs.concat(...info.pipPackages), build, pipLog)
   }
 
+  // Install Go packages via go install (e.g. gopls)
+  if (info.goPackages?.length) {
+    const serverDir = path.join(build, 'server')
+    fs.mkdirSync(serverDir, { recursive: true })
+    for (const pkg of info.goPackages) {
+      const goLog = (chunk: string) => onProgress(3, 5, chunk.trim(), '')
+      const gopath = path.join(build, '.gopath')
+      const gocache = path.join(build, '.gocache')
+      try {
+        onProgress(3, 5, `Installing Go package: ${pkg}`, `go install ${pkg}`)
+        await run('go', ['install', pkg], build, goLog, { GOPATH: gopath, GOBIN: serverDir, GOCACHE: gocache })
+      } catch (e: any) {
+        onProgress(3, 5, `Warning: go install failed (${e.message})`, '')
+      } finally {
+        await rimraf(gopath).catch(() => {})
+        await rimraf(gocache).catch(() => {})
+      }
+    }
+  }
+
+  // Install Cargo packages via cargo install (e.g. nil)
+  if (info.cargoPackages?.length) {
+    const serverDir = path.join(build, 'server')
+    fs.mkdirSync(serverDir, { recursive: true })
+    for (const cp of info.cargoPackages) {
+      const cargoLog = (chunk: string) => onProgress(3, 5, chunk.trim(), '')
+      const crate = typeof cp === 'string' ? cp : cp.crate
+      const binName = typeof cp === 'string' ? cp : (cp.binary || cp.crate)
+      onProgress(3, 5, `Installing Cargo package: ${crate}`, `cargo install ${crate}`)
+      const tmpRoot = path.join(build, '.cargo-root')
+      try {
+        await run('cargo', ['install', crate, '--root', tmpRoot], build, cargoLog)
+        const src = path.join(tmpRoot, 'bin', binName)
+        if (fs.existsSync(src)) {
+          fs.copyFileSync(src, path.join(serverDir, binName))
+          fs.chmodSync(path.join(serverDir, binName), 0o755)
+        }
+      } catch (e: any) {
+        onProgress(3, 5, `Warning: cargo install failed (${e.message})`, '')
+      } finally {
+        await rimraf(tmpRoot).catch(() => {})
+      }
+    }
+  }
+
   // Check for server directory in original source and install its deps
   const serverDir = path.join(inputDir, 'server')
   if (fs.existsSync(serverDir) && fs.existsSync(path.join(serverDir, 'package.json'))) {
@@ -423,8 +469,24 @@ async function installToCoc(
   onProgress(5, 5, 'Installing to coc...', `copy to ${dest} + register in extensions/package.json`)
 
   await rimraf(dest)
-  fs.mkdirSync(path.dirname(dest), { recursive: true })
-  await cpdir(src, dest)
+  fs.mkdirSync(dest, { recursive: true })
+  // Copy only essential files — skip node_modules/ (huge, causes cp issues with symlinks)
+  const essentials = ['lib', 'server', 'package.json', 'esbuild.mjs', 'coc-convert.json']
+  for (const item of essentials) {
+    const srcPath = path.join(src, item)
+    if (fs.existsSync(srcPath)) {
+      const destPath = path.join(dest, item)
+      if (fs.statSync(srcPath).isDirectory()) {
+        await fs.promises.cp(srcPath, destPath, { recursive: true, dereference: true, force: true })
+      } else {
+        fs.copyFileSync(srcPath, destPath)
+      }
+    }
+  }
+  // Re-install npm deps in the plugin directory (needed for plugins with custom deps like pyright)
+  onProgress(5, 5, 'Installing dependencies...', `npm install in ${dest}`)
+  const npmLog = (chunk: string) => onProgress(5, 5, chunk.trim(), '')
+  await run('npm', npmInstallArgs(), dest, npmLog)
 
   const pkgPath = extensionsPkgPath()
   let pkg: Record<string, any>
@@ -508,6 +570,8 @@ export async function installPackage(state: StateManager, name: string): Promise
 function rimraf(dir: string): Promise<void> {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(dir)) return resolve()
+    // chmod before rm to handle Go module cache (dirs are 0555 = unwritable, rm -rf fails)
+    try { execSync(`chmod -R u+w ${dir}`, { timeout: 10000 }) } catch {}
     spawn('rm', ['-rf', dir], { stdio: 'ignore' })
       .on('close', code => code === 0 ? resolve() : reject(new Error(`rm -rf exited ${code}`)))
       .on('error', (e) => reject(e))
@@ -518,10 +582,11 @@ function cpdir(src: string, dest: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const parent = path.dirname(dest)
     if (!fs.existsSync(parent)) fs.mkdirSync(parent, { recursive: true })
-    // Use -rL to follow symlinks (resolves monorepo shared/ dirs into actual copies)
-    spawn('cp', ['-rL', src, dest], { stdio: 'ignore' })
-      .on('close', code => code === 0 ? resolve() : reject(new Error(`cp -rL exited ${code}`)))
-      .on('error', (e) => reject(e))
+    // Use Node.js fs.cp (available since Node 16) — handles symlinks and permissions better than cp -rL
+    fs.cp(src, dest, { recursive: true, dereference: true, errorOnExist: false, force: true }, (err) => {
+      if (err) reject(new Error(`cpdir failed: ${err.message}`))
+      else resolve()
+    })
   })
 }
 

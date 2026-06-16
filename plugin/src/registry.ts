@@ -27,6 +27,8 @@ export interface PackageInfo {
     args?: string[]     // CLI args to start the LSP, e.g. ["lsp"] for deno
   }
   pipPackages?: string[]  // Python packages to install via pip, e.g. ["ansible-lint"]
+  goPackages?: string[]   // Go packages to install via go install, e.g. ["golang.org/x/tools/gopls@latest"]
+  cargoPackages?: Array<{ crate: string; binary?: string } | string>  // Rust crates to install via cargo install, e.g. [{crate: "nil", binary: "nil"}]
   /** v2.0 config-driven conversion steps */
   convert?: any[]          // Array of ConvertStep, passed as --convert JSON to CLI
 }
