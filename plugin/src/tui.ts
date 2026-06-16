@@ -239,6 +239,7 @@ export class TUI {
       this.state.setStatusMessage()
       this.state.refreshPackages()
       this.render()
+      checkUpdates(this.state).catch(() => {})
     }).catch(() => {
       this.state.setStatusMessage('Failed to fetch remote registry (offline?)')
       setTimeout(() => this.state.setStatusMessage(), 5000)
@@ -595,6 +596,13 @@ export class TUI {
     if (entries.length === 0) return
     buf.append(`${title} `, 'CocLoaderHeading')
     buf.append(`(${entries.length})`, 'CocLoaderMuted')
+    if (title === 'Installed') {
+      const updatable = entries.filter(e => e.hasUpdate)
+      if (updatable.length > 0) {
+        buf.append('  ', undefined)
+        buf.append(`Press U to update ${updatable.length} package(s)`, 'CocLoaderWarning')
+      }
+    }
     buf.nl()
     for (const entry of entries) {
       this.renderEntry(buf, pkgLineMap, entry)
@@ -624,6 +632,10 @@ export class TUI {
       buf.append(entry.info.displayName, 'CocLoaderHeading')
     } else {
       this.appendHighlightedText(buf, entry.info.displayName)
+    }
+    // Mason-style update indicator
+    if (entry.hasUpdate && entry.status === 'installed') {
+      buf.append(' [update]', 'CocLoaderWarning')
     }
     // Mason-style keywords in search mode
     if ((this._inSearchMode || this.state.getState().searchQuery) && entry.info.languages.length > 0) {

@@ -604,6 +604,7 @@ export async function installPackage(state: StateManager, name: string): Promise
             p.commitMsg = meta.msg
             p.commitDate = meta.date
             p.updated = true
+            p.hasUpdate = false
           }
         })
       }
@@ -695,6 +696,11 @@ export async function updatePackage(state: StateManager, name: string): Promise<
     const { dir: input, updated } = await downloadSource(info, name, prog)
     if (!updated) {
       state.setPackageStatus(name, 'installed')
+      await saveMeta(name)
+      state.mutate(s => {
+        const p = s.packages.find(p => p.info.name === name)
+        if (p) p.hasUpdate = false
+      })
       cocWindow.showInformationMessage(`coc-${name} is already up to date`)
       return
     }
@@ -705,7 +711,7 @@ export async function updatePackage(state: StateManager, name: string): Promise<
     state.setDirty()
     state.setPackageStatus(name, 'installed')
     cocWindow.showInformationMessage(`coc-${name} updated`)
-    // Update commit in state
+    // Update commit in state and clear update flag
     try {
       const meta = JSON.parse(fs.readFileSync(metaPath(name), 'utf-8'))
       if (meta.commit) {
@@ -716,6 +722,7 @@ export async function updatePackage(state: StateManager, name: string): Promise<
             p.commitMsg = meta.msg
             p.commitDate = meta.date
             p.updated = true
+            p.hasUpdate = false
           }
         })
       }
