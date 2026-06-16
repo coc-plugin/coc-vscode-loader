@@ -441,7 +441,7 @@ export class TUI {
     buf.append('  ')
     buf.append('◍', iconHl)
     buf.append(' ')
-    this.appendHighlightedText(buf, entry.info.name)
+    this.appendHighlightedText(buf, entry.info.displayName)
     if (entry.hasUpdate) {
       buf.append('  ↑', 'CocLoaderHighlight')
     }
