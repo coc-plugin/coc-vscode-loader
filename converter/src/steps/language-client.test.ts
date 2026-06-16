@@ -106,6 +106,50 @@ describe('language-client step', () => {
     expect(code).toContain('tsdk: serverPath')
   })
 
+  it('includes synchronize config by default', async () => {
+    const { languageClientGenerator } = await import('./language-client.js')
+    const result = languageClientGenerator.generate(
+      {
+        input: '/fake',
+        output: '/fake/out',
+        origPkg: { name: 'sync-ls', description: 'Sync LS' },
+        project: null as any,
+      },
+      {
+        type: 'language-client',
+        id: 'test-id',
+        server: { kind: 'module', package: 'some-server' },
+        languages: ['test'],
+      },
+    )
+
+    const code = result.generatedFiles[0].content
+    expect(code).toContain('synchronize')
+    expect(code).toContain("configurationSection: 'test-id'")
+  })
+
+  it('omits synchronize config when syncConfig is false', async () => {
+    const { languageClientGenerator } = await import('./language-client.js')
+    const result = languageClientGenerator.generate(
+      {
+        input: '/fake',
+        output: '/fake/out',
+        origPkg: { name: 'no-sync-ls', description: 'No Sync LS' },
+        project: null as any,
+      },
+      {
+        type: 'language-client',
+        id: 'no-sync',
+        syncConfig: false,
+        server: { kind: 'module', package: 'some-server' },
+        languages: ['test'],
+      },
+    )
+
+    const code = result.generatedFiles[0].content
+    expect(code).not.toContain('synchronize')
+  })
+
   it('uses custom id for LanguageClient name', async () => {
     const { languageClientGenerator } = await import('./language-client.js')
     const result = languageClientGenerator.generate(

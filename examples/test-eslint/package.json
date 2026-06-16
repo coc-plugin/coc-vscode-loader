@@ -1,0 +1,12 @@
+{
+  "name": "test-eslint",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Test project for coc-vscode-loader ESLint conversion",
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}

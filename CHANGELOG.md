@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.4.5] - 2026-06-16
+
+### Added
+- **`server.patches`** — local server 编译后文本补丁通用机制。支持在 registry 的 `server.patches` 中声明对编译后 JS 文件的 find/replace 补丁（如禁用 pull diagnostics、注入事件钩子等），替代之前 converter 里的硬编码 ESLint 补丁
+- **ESLint (`vscode-eslint`)** — 加入 registry，使用 `server.patches` 实现三处修复：pull diagnostics 禁用（避免重复）、diagnostic refresh 注入（onDidOpen/onDidChangeContent）、resolveSettings 提前返回修复
+
+### Changed
+- **converter**: 移除 `convert.ts` 中所有硬编码 ESLint 补丁，改为通用 `server.patches` 机制
+- **converter**: bump to v1.4.5
+- **plugin**: bump to v1.4.5
+
 ## [1.4.4] - 2026-06-16
 
 ### Fixed

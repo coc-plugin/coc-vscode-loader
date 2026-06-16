@@ -69,7 +69,33 @@ npm install ChuYanLon/coc-tsserver --legacy-peer-deps
 - pipeline 自动拷贝 server 目录
 - 注册 hover fallback provider
 
-详见 [AGENTS.md](../AGENTS.md#local-server-%E6%94%AF%E6%8C%81v142).
+### Server patches (`server.patches`, v1.4.5+)
+
+对 local server 编译后的 JS 输出文件做文本替换，适用于修复 server 端 behavior（如禁用 pull diagnostics、注入事件钩子等）。通过 registry 的 `server.patches` 声明：
+
+```json
+{
+  "type": "language-client",
+  "server": {
+    "kind": "module",
+    "package": "../server/out/eslintServer.js",
+    "patches": [
+      {
+        "file": "eslintServer.js",
+        "find": "connection\\.listen\\(\\);",
+        "replace": "connection.listen();\ndocuments.onDidOpen(...)..."
+      }
+    ]
+  }
+}
+```
+
+- `file`：相对于 `server/out/` 的文件路径
+- `find`：RegExp 源的转义后字符串（与 `new RegExp(find, 'g')` 兼容）
+- `replace`：替换文本
+- 所有 patch 通过 `server-patches.json` 写入 build 目录，由 `esbuild.mjs` prebuild 段在构建时读取执行
+
+详见 [AGENTS.md](../AGENTS.md#%E6%8F%92%E4%BB%B6%E7%BA%A7%E6%96%87%E6%9C%AC%E8%A1%A5%E4%B8%81-patchessource-step).
 
 ## Architecture
 

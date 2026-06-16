@@ -514,8 +514,9 @@ function cpdir(src: string, dest: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const parent = path.dirname(dest)
     if (!fs.existsSync(parent)) fs.mkdirSync(parent, { recursive: true })
-    spawn('cp', ['-r', src, dest], { stdio: 'ignore' })
-      .on('close', code => code === 0 ? resolve() : reject(new Error(`cp -r exited ${code}`)))
+    // Use -rL to follow symlinks (resolves monorepo shared/ dirs into actual copies)
+    spawn('cp', ['-rL', src, dest], { stdio: 'ignore' })
+      .on('close', code => code === 0 ? resolve() : reject(new Error(`cp -rL exited ${code}`)))
       .on('error', (e) => reject(e))
   })
 }

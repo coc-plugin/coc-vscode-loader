@@ -1,6 +1,6 @@
 {
   "name": "coc-vscode-loader",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "Run VS Code extensions seamlessly in coc.nvim",
   "main": "lib/index.js",
   "keywords": [

@@ -21,6 +21,12 @@ export interface ServerModuleConfig {
   /** Arguments to pass to the server process.
    *  Use `{dir}` placeholder for the compiled output directory (__dirname at runtime). */
   args?: string[]
+  /** Post-compilation text patches for server output files.
+   *  Applied after tsc compiles the server TypeScript.
+   *  file: relative path from server/out/ (e.g. "eslintServer.js")
+   *  find: regex pattern (unescaped, used as `new RegExp(find, 'g')`)
+   *  replace: replacement text */
+  patches?: Array<{ file: string; find: string; replace: string }>
 }
 
 export interface ServerBinaryConfig {
@@ -47,6 +53,9 @@ export interface LanguageClientStep {
   verbose?: boolean
   /** Extra options passed as initializationOptions to LanguageClient (JS object expression, inserted as-is) */
   initializationOptions?: string
+  /** When false, omit synchronize config (disables coc.nvim auto config sync).
+   *  Default: true (synchronize section generated) */
+  syncConfig?: boolean
 }
 
 export interface SourceStep {

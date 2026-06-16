@@ -426,10 +426,45 @@ if (existsSync(join(serverDir, 'tsconfig.json'))) {
     console.log('[build] Installing @types/node for server...')
     execSync('npm install --save-dev @types/node --legacy-peer-deps', { cwd: serverDir, stdio: 'inherit' })
   }
-  // Compile with strict mode disabled (server code has pre-existing TS strict issues)
+  // Patch tsconfig to be self-contained — handle monorepo extends
+  const tsconfigPath = join(serverDir, 'tsconfig.json')
+  try {
+    const tsconfig = JSON.parse(readFileSync(tsconfigPath, 'utf-8'))
+    const patched = { ...tsconfig, extends: undefined }
+    if (!patched.compilerOptions) patched.compilerOptions = {}
+    patched.compilerOptions.strict = false
+    // Exclude test files (not needed at runtime)
+    const exclude = patched.exclude || ['node_modules']
+    for (const f of ['src/tests']) if (!exclude.includes(f)) exclude.push(f)
+    patched.exclude = exclude
+    writeFileSync(tsconfigPath, JSON.stringify(patched, null, 2))
+  } catch {}
+  // Suppress TS errors in pre-existing problematic files (e.g., linkedMap MapIterator compat)
+  const linkedMapPath = join(serverDir, 'src', 'linkedMap.ts')
+  if (existsSync(linkedMapPath)) {
+    const content = readFileSync(linkedMapPath, 'utf-8')
+    if (!content.startsWith('// @ts-nocheck')) {
+      writeFileSync(linkedMapPath, '// @ts-nocheck\\n' + content)
+    }
+  }
+  // Compile server TypeScript
   console.log('[build] Compiling server TypeScript...')
   execSync('npx tsc --skipLibCheck --strict false', { cwd: serverDir, stdio: 'inherit' })
   console.log('[build] Server compiled successfully')
+  // Apply server post-compilation patches (from registry server.patches)
+  const patchesPath = join(__dirname, 'server-patches.json')
+  if (existsSync(patchesPath)) {
+    const patches = JSON.parse(readFileSync(patchesPath, 'utf-8'))
+    for (const p of patches) {
+      const patchPath = join(serverDir, 'out', p.file)
+      if (existsSync(patchPath)) {
+        console.log('[build] Applying server patch: ' + p.file)
+        let pc = readFileSync(patchPath, 'utf-8')
+        pc = pc.replace(new RegExp(p.find, 'g'), p.replace)
+        writeFileSync(patchPath, pc)
+      }
+    }
+  }
 }
 ` : ''
 
@@ -454,6 +489,17 @@ if (result.errors.length) {
 }
 `
   fs.writeFileSync(path.join(output, 'esbuild.mjs'), esbuildConfig)
+
+  // Write server patches file for post-compilation patches
+  const serverPatches: Array<{ file: string; find: string; replace: string }> = []
+  for (const s of steps) {
+    if (isLanguageClientStep(s) && s.server.kind === 'module' && 'patches' in s.server && s.server.patches) {
+      serverPatches.push(...s.server.patches)
+    }
+  }
+  if (serverPatches.length > 0) {
+    fs.writeFileSync(path.join(output, 'server-patches.json'), JSON.stringify(serverPatches))
+  }
 
   // 15. Write step metadata for pipeline
   const meta = {

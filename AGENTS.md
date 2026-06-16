@@ -135,6 +135,10 @@ converter 主流程在步骤执行后还会对所有输出源文件做一轮通�
 
 插件特有的文本替换（如修复原扩展自身 bug）应通过 registry 的 `patches` 字段声明，不污染通用 converter：
 
+**类型一：源码层 patches（source step）**
+
+对转换后的 TypeScript/JavaScript 源文件做文本替换，在通用替换之后、写文件之前依次执行。
+
 ```json
 {
   "type": "source",
@@ -147,8 +151,32 @@ converter 主流程在步骤执行后还会对所有输出源文件做一轮通�
 
 - `find`：RegExp 源的**转义后**字符串（与 `new RegExp(find, 'g')` 兼容）
 - `replace`：替换文本
-- 所有 patch 在通用替换之后、写文件之前依次执行
-- 仅在 `source` step 中支持
+
+**类型二：Server 编译后 patches（language-client step）**
+
+对 local language server 编译后的 JS 输出文件做文本替换，在 `tsc` 编译完成后、`esbuild` 打包之前执行。适用于修复 server 端 behavior（如禁用 pull diagnostics、注入事件钩子等）。
+
+```json
+{
+  "type": "language-client",
+  "server": {
+    "kind": "module",
+    "package": "../server/out/eslintServer.js",
+    "patches": [
+      {
+        "file": "eslintServer.js",
+        "find": "connection\\.listen\\(\\);",
+        "replace": "connection.listen();\ndocuments.onDidOpen(...)..."
+      }
+    ]
+  }
+}
+```
+
+- `file`：相对于 `server/out/` 的文件路径（如 `"eslintServer.js"`、`"eslint.js"`）
+- `find`：RegExp 源的**转义后**字符串
+- `replace`：替换文本
+- 所有 patch 通过 `server-patches.json` 写入 build 目录，由生成的 `esbuild.mjs` prebuild 段在构建时读取执行
 
 ### `class-to-factory` 的命名空间映射
 
@@ -392,7 +420,9 @@ Registry 条目示例：
 
 - [x] Angular Language Service (`vscode-ng-language-service`) — added to registry
 - [x] `args` field for module-kind language servers — supports `{dir}` and `{pluginDir}` placeholders
-- [ ] Add more plugins to registry (ESLint, Code Spell Checker)
+- [x] ESLint added to registry (with server patches: diagnostic injection, pull diagnostics disabled, resolveSettings fix)
+- [x] `server.patches` — local server 编译后文本补丁通用机制（v1.4.5+）
+- [ ] Add more plugins to registry (Code Spell Checker)
 - [ ] Add `vscode-languageclient` import rewrite to `import-mapping` transform
 - [ ] Add more transforms (uri-mapping, more provider signatures)
 - [ ] Add python-bridge / rust-bridge preset examples

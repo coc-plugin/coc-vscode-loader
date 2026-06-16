@@ -160,7 +160,7 @@ ${preloadCode}
         {
           documentSelector: ${docSelectorCode},
           outputChannelName: '${escapeStr(description)}',
-          synchronize: { configurationSection: '${escapeStr(id)}' },
+          ${ls.syncConfig !== false ? `synchronize: { configurationSection: '${escapeStr(id)}' },` : ''}
           ${hasPreload ? `initializationOptions: initOpts,` : ''}
           ${!hasPreload && ls.initializationOptions ? `initializationOptions: ${ls.initializationOptions},` : ''}
         },
