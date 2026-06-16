@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.4.4] - 2026-06-16
+
+### Fixed
+- **converter/transforms/class-to-factory**: fix `CompletionItem.create(label, kind)` split — `depth === 0` was never matching commas inside `create()` args, causing all `item.kind` assignments to be silently dropped since v1.4.2. Now correctly uses `depth === 1` to find the argument-separating comma. Affects all plugins using `CompletionItem.create` with a kind argument (e.g. `vscode-html-css-support` missing completion icons)
+- **converter/transforms/import-mapping**: add general `await import(...)` → `require(...)` and bare `import(...)` → `require(...)` replacement (was only converting `import('vscode')`), fixing `ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING` in coc.nvim's CJS sandbox (e.g. `coc-prettier-vscode`)
+
+### Changed
+- **plugin/pipeline**: npm install now uses `--no-audit --no-fund` to skip unnecessary audit/funding checks, speeding up dependency installation
+- **plugin/pipeline**: use local `tsx` binary from converter's `node_modules` instead of `npx tsx`, avoiding first-time `npx` download delay
+- **converter**: move `tsx` from devDependencies to dependencies (runtime requirement for converter CLI)
+- **converter**: bump to v1.4.4
+- **plugin**: bump to v1.4.4
+
 ## [1.4.3] - 2026-06-16
 
 ### Added
