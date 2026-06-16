@@ -475,13 +475,15 @@ export class TUI {
   }
 
   private renderExpandedInfo(buf: LineBuffer, entry: PackageEntry) {
-    // Description in Comment (Mason-style)
-    buf.append('  ', undefined)
-    buf.append(entry.info.description, 'CocLoaderMuted')
-    buf.nl()
+    // Description in Comment (multi-line support)
+    for (const descLine of entry.info.description.split('\n')) {
+      buf.append('    ', undefined)
+      buf.append(descLine, 'CocLoaderMuted')
+      buf.nl()
+    }
     buf.nl()
 
-    // Table with muted labels + highlighted/bold values
+    // Table: muted labels + value in highlight/bold
     const rows: [string, string, string][] = [
       ['type', entry.info.type, 'CocLoaderHighlight'],
       ['source', sourceStr(entry.info.source), 'CocLoaderHighlight'],
@@ -495,7 +497,7 @@ export class TUI {
     }
     const labelWidth = Math.max(...rows.map(r => r[0].length))
     for (const [label, value, valueHl] of rows) {
-      buf.append('  ', undefined)
+      buf.append('    ', undefined)
       buf.append(label + ' '.repeat(labelWidth - label.length + 2), 'CocLoaderMuted')
       buf.append(value, valueHl)
       buf.nl()
