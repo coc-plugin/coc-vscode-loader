@@ -419,6 +419,15 @@ async function buildPackage(
         .replace(/\{\{arch}}/g, arch)
         .replace(/\{\{raw-arch}}/g, rawArch)
         .replace(/\{\{rust-target}}/g, rustTarget)
+      // Also resolve template vars in binaryPath (handles versioned paths like "clangd_{{version}}/bin/clangd")
+      if (resolvedBinaryPath) {
+        resolvedBinaryPath = resolvedBinaryPath
+          .replace(/\{\{version}}/g, version)
+          .replace(/\{\{platform}}/g, platform)
+          .replace(/\{\{arch}}/g, arch)
+          .replace(/\{\{raw-arch}}/g, rawArch)
+          .replace(/\{\{rust-target}}/g, rustTarget)
+      }
       const url = `https://github.com/${sb.repo}/releases/download/${tag}/${filename}`
 
       onProgress(4, 5, 'Downloading...', `curl ${filename}`)
