@@ -654,6 +654,11 @@ export class TUI {
     if (['installed', 'not-installed', 'failed'].includes(entry.status) && entry.expanded) {
       this.renderExpandedInfo(buf, entry)
     }
+
+    // Map all lines of this entry (log, expanded details) to the package
+    for (let l = pkgLine + 1; l <= buf.currentLine(); l++) {
+      pkgLineMap.set(l, entry.info.name)
+    }
   }
 
   private renderExpandedInfo(buf: LineBuffer, entry: PackageEntry) {
