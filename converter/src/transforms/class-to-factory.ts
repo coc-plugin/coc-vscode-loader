@@ -51,7 +51,7 @@ export const transformClassToFactory: Transform = (ctx) => {
   )
 
   // CompletionItem.create(label, kind) → item = CompletionItem.create(label); item.kind = kind
-  // Uses balanced paren matching to safely handle nested calls in label argument
+  // Uses balanced paren matching to safely handle any expression in kind argument (e.g. ternary)
   const createRe = /const\s+(\w+)\s*=\s*CompletionItem\.create\(/g
   let result = ''
   let lastIdx = 0
@@ -59,27 +59,23 @@ export const transformClassToFactory: Transform = (ctx) => {
   while ((m = createRe.exec(text)) !== null) {
     result += text.slice(lastIdx, m.index)
     let depth = 1
-    let commas = 0
     let i = m.index + m[0].length
+    let firstComma = -1
     while (i < text.length && depth > 0) {
       if (text[i] === '(') depth++
       else if (text[i] === ')') depth--
-      else if (text[i] === ',' && depth === 0) {
-        commas++
-        if (commas === 2) {
-          const label = text.slice(m.index + m[0].length, i)
-          i++ // skip comma
-          while (i < text.length && text[i] === ' ') i++
-          let kind = ''
-          while (i < text.length && text[i] !== ')') { kind += text[i]; i++ }
-          result += `const ${m[1]} = CompletionItem.create(${label}); ${m[1]}.kind = ${kind}`
-          lastIdx = i + 1
-          break
-        }
-      }
+      else if (text[i] === ',' && depth === 1 && firstComma === -1) firstComma = i
       i++
     }
-    if (commas < 2) {
+    // i is now past the closing paren
+    if (firstComma !== -1) {
+      const label = text.slice(m.index + m[0].length, firstComma)
+      let kindStart = firstComma + 1
+      while (kindStart < text.length && text[kindStart] === ' ') kindStart++
+      const kind = text.slice(kindStart, i - 1).trim()
+      result += `const ${m[1]} = CompletionItem.create(${label}); ${m[1]}.kind = ${kind}`
+      lastIdx = i
+    } else {
       result += m[0]
       lastIdx = m.index + m[0].length
     }
