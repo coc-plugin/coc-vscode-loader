@@ -215,13 +215,13 @@ export class StateManager {
   getFilteredPackages(): PackageEntry[] {
     const key = this.filterKey()
     if (this.cachedFiltered && this.cachedFilterKey === key) {
-      return this.cachedFiltered
+      return [...this.cachedFiltered]
     }
     let pkgs = this.state.packages
     if (this.state.viewFilter === 'not-installed') {
-      pkgs = pkgs.filter(p => p.status === 'not-installed')
+      pkgs = pkgs.filter(p => p.status === 'not-installed' || p.status === 'failed')
     } else if (this.state.viewFilter === 'installed') {
-      pkgs = pkgs.filter(p => p.status === 'installed')
+      pkgs = pkgs.filter(p => p.status === 'installed' || p.status === 'failed')
     }
     const q = this.state.searchQuery.toLowerCase()
     if (q) {
@@ -278,6 +278,7 @@ export class StateManager {
             old.status = installedSet.has(info.name) ? 'installed' : 'not-installed'
             if (old.status === 'installed' || old.status === 'not-installed') {
               old.progressLog = []
+              old.error = undefined
             }
           }
           old.info = info

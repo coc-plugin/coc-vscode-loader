@@ -264,14 +264,14 @@ async function buildPackage(
     }
     if (!pythonBin) throw new Error('python3 not found, cannot install pip packages: ' + info.pipPackages.join(', '))
     const pipArgs = ['-m', 'pip', 'install']
-    // --break-system-packages needed on Linux and macOS (PEP 668); check Python version for support
-    if (process.platform === 'linux' || process.platform === 'darwin') {
+    // --break-system-packages needed on Linux (PEP 668); check pip version for support
+    if (process.platform === 'linux') {
       try {
-        const verOut = await runWithOutput(pythonBin, ['--version'], build)
-        const m = verOut.match(/^Python\s+(\d+)\.(\d+)/)
+        const verOut = await runWithOutput(pythonBin, ['-m', 'pip', '--version'], build)
+        const m = verOut.match(/^pip\s+(\d+)\.(\d+)/)
         if (m) {
-          const pyMajor = parseInt(m[1]), pyMinor = parseInt(m[2])
-          if (pyMajor > 3 || (pyMajor === 3 && pyMinor >= 11)) pipArgs.push('--break-system-packages')
+          const pipMajor = parseInt(m[1]), pipMinor = parseInt(m[2])
+          if (pipMajor > 21 || (pipMajor === 21 && pipMinor >= 3)) pipArgs.push('--break-system-packages')
         }
       } catch {}
     }
@@ -614,7 +614,7 @@ async function runWithOutput(cmd: string, args: string[], cwd: string): Promise<
     }, CMD_TIMEOUT)
     let out = ''
     child.stdout.on('data', (d: Buffer) => { out += d.toString() })
-    child.stderr.on('data', (d: Buffer) => { out += d.toString() })
+    child.stderr.on('data', (d: Buffer) => { /* discard stderr to avoid corrupting output parsing */ })
     child.on('close', code => {
       if (settled) return; settled = true
       clearTimeout(timer)
@@ -633,10 +633,12 @@ export async function runConcurrent<T>(
   for (const item of items) {
     const p = fn(item).catch((e: any) => {
       console.warn(`runConcurrent: ${e.message}`)
-    }).finally(() => pool.delete(p))
+    }).finally(() => { pool.delete(p) })
     pool.add(p)
     if (pool.size >= concurrency) {
       await Promise.race(pool)
+      // Wait a tick to let .finally() microtask drain before checking pool size
+      await new Promise(r => setImmediate(r))
     }
   }
   await Promise.allSettled(pool)

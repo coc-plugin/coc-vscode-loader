@@ -181,6 +181,6 @@ export async function activate(context: ExtensionContext) {
   cocWindow.showInformationMessage('coc-loader activated! Use :CocCommand loader.open')
 }
 
-export function deactivate(): void {
-  closeCurrentTUI()
+export async function deactivate(): Promise<void> {
+  await closeCurrentTUI()
 }

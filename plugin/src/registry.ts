@@ -58,7 +58,8 @@ function getLocalRegistryPath(): string | null {
 function loadCache(): PackageInfo[] | null {
   try {
     if (fs.existsSync(CACHE_PATH)) {
-      return JSON.parse(fs.readFileSync(CACHE_PATH, 'utf-8'))
+      const data = JSON.parse(fs.readFileSync(CACHE_PATH, 'utf-8'))
+      if (Array.isArray(data)) return data
     }
   } catch { /* corrupted cache file */ }
   return null
@@ -157,10 +158,11 @@ export async function updateRegistry(onProgress?: ProgressCallback): Promise<num
 
 function satisfiesVersion(required: string): boolean {
   const fullVersion = pluginVersion()
-  // Pre-release versions (e.g. "1.3.0-alpha") are strictly less than release ("1.3.0")
-  if (fullVersion.includes('-')) return false
-  const a = fullVersion.split('.').map(Number)
+  // Pre-release versions: strip suffix, compare base. If equal, pre-release < release
+  const baseVersion = fullVersion.replace(/-.*$/, '')
+  const a = baseVersion.split('.').map(Number)
   const b = required.replace(/-.*$/, '').split('.').map(Number)
+  let allEqual = true
   for (let i = 0; i < Math.max(a.length, b.length); i++) {
     const va = a[i], vb = b[i]
     if (va === undefined || vb === undefined) break
@@ -168,6 +170,8 @@ function satisfiesVersion(required: string): boolean {
     if (va > vb) return true
     if (va < vb) return false
   }
+  // If base versions are equal and the current version is pre-release, it's strictly less
+  if (allEqual && fullVersion.includes('-')) return false
   return true
 }
 

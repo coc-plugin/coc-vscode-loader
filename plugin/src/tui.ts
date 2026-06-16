@@ -460,9 +460,9 @@ export class TUI {
       if (!state.showHelp && result.pkgLineMap.size > 0) {
         const visibleCount = Math.max(1, this.windowHeight - TUI.HEADER_LINES - TUI.FOOTER_LINES)
         if (this.focusIndex < state.scrollOffset) {
-          state.scrollOffset = this.focusIndex
+          this.state.setScrollOffset(this.focusIndex)
         } else if (this.focusIndex >= state.scrollOffset + visibleCount) {
-          state.scrollOffset = Math.max(0, this.focusIndex - visibleCount + 1)
+          this.state.setScrollOffset(Math.max(0, this.focusIndex - visibleCount + 1))
         }
         const visible = this.state.getFilteredPackages()
         const idx = Math.min(this.focusIndex, visible.length - 1)
