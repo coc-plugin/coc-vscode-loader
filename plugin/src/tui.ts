@@ -11,27 +11,57 @@ const VERSION: string = (() => {
   } catch { return '0.0.0' }
 })()
 
-const HELP_TEXT = [
-  `  coc-loader v${VERSION} — VS Code extension loader for coc.nvim`,
-  '',
-  '  Keymaps:',
-  '    1-9        Switch view tab',
-  '    i          Install package under cursor',
-  '    u          Update package under cursor',
-  '    U          Update all installed packages',
-  '    C          Check for updates',
-  '    X          Uninstall package under cursor',
-  '    <CR>       Toggle package details',
-  '    g? / ?     Toggle this help',
-  '    q / <Esc>  Close window',
-  '    c          Check package version',
-  '',
-  '  ' + '─'.repeat(40),
-  '',
-  '  View tabs:',
-  '    All        All packages',
-  '    <category> Filter by category',
+// Per-tab educational content (Mason-style, concise)
+const TAB_HELP_CONTENT: Record<string, string[]> = {
+  'All': [
+    'coc-loader lets VS Code extensions run in coc.nvim.',
+    'Extensions are automatically converted and managed here.',
+  ],
+  'LSP': [
+    'LSP provides language features — completions, diagnostics,',
+    'go-to-definition, hover — via a standard protocol.',
+    'Extensions are converted from VS Code LSP clients.',
+  ],
+  'Snippets': [
+    'Snippets are reusable code templates that expand from',
+    'a prefix. Select from the completion menu to insert.',
+  ],
+  'Formatter': [
+    'Formatters restructure code to follow consistent style.',
+    'Trigger via :CocCommand or auto-format on save.',
+  ],
+  'Linter': [
+    'Linters analyze code for errors and style issues.',
+    'Diagnostics appear inline via coc.nvim.',
+  ],
+  'Completion': [
+    'Completion sources provide intelligent suggestions',
+    'as you type — keywords, symbols, and more.',
+  ],
+}
+
+const GENERIC_TAB_HELP = [
+  'Packages in this category extend coc.nvim\'s',
+  'capabilities. Install and restart to activate.',
 ]
+
+const KEYMAP_ENTRIES: [string, string][] = [
+  ['i', 'Install package'],
+  ['u', 'Update package'],
+  ['U', 'Update all installed'],
+  ['X', 'Uninstall package'],
+  ['C', 'Check for updates'],
+  ['c', 'Check package version'],
+  ['<CR>', 'Toggle package details / log'],
+  ['1-9', 'Switch view tab'],
+  ['g? / ?', 'Toggle this help'],
+  ['q / <Esc>', 'Close window'],
+]
+
+const CONFIG_HOME = (() => {
+  try { return require('path').join(require('os').homedir(), '.config', 'coc') }
+  catch { return '~/.config/coc' }
+})()
 
 export class TUI {
   private bufnr: number = 0
@@ -43,7 +73,8 @@ export class TUI {
   private pkgLineMap: Map<number, string> = new Map()
   private windowHeight: number = 0
   private windowWidth: number = 0
-
+  private _helpAnimChars = 0
+  private _helpAnimating = false
 
   constructor(state: StateManager) {
     this.state = state
@@ -361,6 +392,15 @@ export class TUI {
         const restoreLine = Math.min(prevCursor[0], result.lines.length)
         await nvim.call('nvim_win_set_cursor', [this.winid, [restoreLine, 0]])
       }
+
+      // Trigger Mason-style typewriter header animation
+      if (state.showHelp && !this._helpAnimating && this._helpAnimChars === 0) {
+        this.animateHelpHeader().catch(() => {})
+      }
+      if (!state.showHelp) {
+        this._helpAnimChars = 0
+        this._helpAnimating = false
+      }
     } finally {
       this.rendering = false
       if (this.pendingRender) await this.render()
@@ -368,17 +408,87 @@ export class TUI {
   }
 
   private renderHelp(): TuiRenderResult {
-    const lines = [
-      '',
-      `  coc-loader v${VERSION}`,
-      '  press ? help | q quit',
-      '  ' + '─'.repeat(50),
-      '',
-      ...HELP_TEXT,
-      '',
-      '  q to return',
-    ]
-    return { lines, pkgLineMap: new Map(), logLines: new Set(), highlights: [] }
+    const buf = new LineBuffer()
+    const state = this.state.getState()
+    const tab = state.categoryFilter || 'All'
+    // Centered header like main interface
+    const headerText = 'coc-loader help'
+    const showLen = this._helpAnimChars
+    const display = headerText.slice(0, showLen)
+    const textLen = Buffer.from(display).length
+    let pad = Math.floor((this.windowWidth - textLen) / 2) - 2
+    if (pad < 2) pad = 2
+    if (pad > 0) buf.append(' '.repeat(pad), undefined)
+    buf.append(display, 'CocLoaderHeader')
+    buf.nl()
+    buf.nl()
+
+    // Tab-specific educational content (centered)
+    const edu = TAB_HELP_CONTENT[tab] || GENERIC_TAB_HELP
+    for (const line of edu) {
+      const lineLen = Buffer.from(line).length
+      let pad = Math.floor((this.windowWidth - lineLen) / 2) - 2
+      if (pad < 2) pad = 2
+      buf.append(' '.repeat(pad), undefined)
+      buf.append(line, 'CocLoaderMuted')
+      buf.nl()
+    }
+    buf.nl()
+
+    // Keymaps
+    buf.append('Keymaps', 'CocLoaderHeading')
+    buf.nl()
+    const keyWidth = Math.max(...KEYMAP_ENTRIES.map(([k]) => k.length))
+    for (const [key, action] of KEYMAP_ENTRIES) {
+      buf.append('  ', undefined)
+      buf.append(key + ' '.repeat(keyWidth - key.length + 2), 'CocLoaderHighlight')
+      buf.append(action, undefined)
+      buf.nl()
+    }
+    buf.nl()
+
+    // Debugging
+    buf.append('Debugging', 'CocLoaderHeading')
+    buf.nl()
+    const dbgKeyWidth = Math.max(':CocCommand loader.updateRegistry'.length, ':CocRestart'.length)
+    for (const [cmd, desc] of [
+      [':CocRestart', 'Restart after install'] as [string, string],
+      [':CocCommand loader.open', 'Open this TUI'] as [string, string],
+      [':CocCommand loader.updateRegistry', 'Force registry refresh'] as [string, string],
+    ]) {
+      buf.append('  ', undefined)
+      buf.append(cmd + ' '.repeat(dbgKeyWidth - cmd.length + 2), 'CocLoaderHighlight')
+      buf.append(desc, undefined)
+      buf.nl()
+    }
+    buf.append(`  Log: ${CONFIG_HOME}/coc-vscode-loader.log`, 'CocLoaderMuted')
+    buf.nl()
+    buf.nl()
+
+    // Contributing
+    buf.append('Contributing', 'CocLoaderHeading')
+    buf.nl()
+    buf.append('  Missing a package? ', undefined)
+    buf.append('github.com/coc-plugin/coc-vscode-registry', 'CocLoaderHighlight')
+    buf.nl()
+    buf.append('  Report issues: ', undefined)
+    buf.append('github.com/coc-plugin/coc-vscode-loader/issues', 'CocLoaderHighlight')
+
+    const result = buf.render(2)
+    return { lines: result.lines, pkgLineMap: new Map(), logLines: new Set(), highlights: result.highlights }
+  }
+
+  private async animateHelpHeader() {
+    this._helpAnimating = true
+    const headerText = 'coc-loader help'
+    for (let i = 1; i <= headerText.length && this._helpAnimating; i++) {
+      await new Promise(r => setTimeout(r, 60))
+      if (!this._helpAnimating || !this.winid) break
+      this._helpAnimChars = i
+      await this.render().catch(() => {})
+    }
+    this._helpAnimChars = headerText.length
+    this._helpAnimating = false
   }
 
   private renderPackageList(state: AppState, filtered: PackageEntry[]): TuiRenderResult {
