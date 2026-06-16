@@ -42,6 +42,8 @@ export class TUI {
   private pkgLineMap: Map<number, string> = new Map()
   private detailWinid: number = 0
   private detailBufnr: number = 0
+  private backdropBufnr: number = 0
+  private backdropWinid: number = 0
   private detailPkgName: string = ''
   private detailMode: 'log' | 'info' = 'info'
   private windowHeight: number = 0
@@ -56,29 +58,51 @@ export class TUI {
     const nvim = workspace.nvim
     this.ns = await nvim.createNamespace('coc-loader')
 
-    // Mason-style highlight groups
-    await nvim.command('highlight CocLoaderHeader guibg=#DCA561 guifg=#222222 gui=bold')
-    await nvim.command('highlight CocLoaderHeaderSec guibg=#56B6C2 guifg=#222222 gui=bold')
-    await nvim.command('highlight CocLoaderTabActive guibg=#56B6C2 guifg=#222222 gui=bold')
-    await nvim.command('highlight CocLoaderTabInactive guibg=#888888 guifg=#222222')
-    await nvim.command('highlight CocLoaderHeading gui=bold')
-    await nvim.command('highlight CocLoaderHighlight guifg=#56B6C2')
-    await nvim.command('highlight CocLoaderMuted guifg=#888888')
+    // Mason-style highlight groups (all with `default` to respect user theme)
+    await nvim.command('highlight default CocLoaderHeader guibg=#DCA561 guifg=#222222 gui=bold')
+    await nvim.command('highlight default CocLoaderHeaderSec guibg=#56B6C2 guifg=#222222 gui=bold')
+    await nvim.command('highlight default CocLoaderTabActive guibg=#56B6C2 guifg=#222222 gui=bold')
+    await nvim.command('highlight default CocLoaderTabInactive guibg=#888888 guifg=#222222')
+    await nvim.command('highlight default CocLoaderHeading gui=bold')
+    await nvim.command('highlight default CocLoaderHighlight guifg=#56B6C2')
+    await nvim.command('highlight default CocLoaderMuted guifg=#888888')
     await nvim.command('highlight default link CocLoaderError ErrorMsg')
     await nvim.command('highlight default link CocLoaderNormal NormalFloat')
     await nvim.command('highlight default link CocLoaderSearchMatch Search')
-
-    const buf = await nvim.createNewBuffer(false, true)
-    this.bufnr = buf.id
+    await nvim.command('highlight default CocLoaderWarning guifg=#DCA561')
+    await nvim.command('highlight default CocLoaderBackdrop guibg=#000000')
 
     const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
     const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
-    const height = Math.min(Math.floor(editorLines * 0.85), 40)
-    this.windowHeight = height - 2
-    const width = Math.min(Math.floor(editorCols * 0.85), 120)
-    this.windowWidth = width - 2
-    const row = Math.max(Math.floor((editorLines - height) / 2), 0)
+    const cmdheight = await nvim.call('nvim_get_option', ['cmdheight']) as number
+    const availLines = Math.max(1, editorLines - cmdheight)
+    const height = Math.floor(availLines * 0.9)
+    const width = Math.floor(editorCols * 0.8)
+    this.windowHeight = height
+    this.windowWidth = width
+    const row = Math.max(Math.floor((availLines - height) / 2), 0)
     const col = Math.max(Math.floor((editorCols - width) / 2), 0)
+
+    // Create backdrop (Mason-style dim overlay)
+    const backdropBuf = await nvim.createNewBuffer(false, true)
+    this.backdropBufnr = backdropBuf.id
+    const backdropWin = await nvim.openFloatWindow(backdropBuf, false, {
+      relative: 'editor',
+      width: editorCols,
+      height: editorLines,
+      row: 0,
+      col: 0,
+      style: 'minimal',
+      focusable: false,
+      border: 'none',
+      zindex: 44,
+    })
+    this.backdropWinid = backdropWin.id
+    await nvim.call('nvim_win_set_option', [backdropWin.id, 'winhighlight', 'Normal:CocLoaderBackdrop'])
+    await nvim.call('nvim_win_set_option', [backdropWin.id, 'winblend', 60])
+
+    const buf = await nvim.createNewBuffer(false, true)
+    this.bufnr = buf.id
 
     const win = await nvim.openFloatWindow(buf, true, {
       relative: 'editor',
@@ -86,8 +110,9 @@ export class TUI {
       height,
       row,
       col,
-      border: 'rounded',
+      border: 'none',
       style: 'minimal',
+      zindex: 45,
     })
     this.winid = win.id
 
@@ -261,6 +286,10 @@ export class TUI {
       try { await workspace.nvim.call('nvim_win_close', [this.detailWinid, true]) } catch {}
       this.detailWinid = 0
     }
+    if (this.backdropWinid) {
+      try { await workspace.nvim.call('nvim_win_close', [this.backdropWinid, true]) } catch {}
+      this.backdropWinid = 0
+    }
     if (this.winid) {
       try { await workspace.nvim.call('nvim_win_close', [this.winid, true]) } catch {}
       this.winid = 0
@@ -350,22 +379,32 @@ export class TUI {
 
     const buf = new LineBuffer()
 
+    // Centered header: "mason.nvim v1.5.0" (gold) + key hint (centered)
+    const hdrLine = `mason.nvim v${VERSION}`
+    const hdrLen = Buffer.from(hdrLine).length
+    const hdrPad = Math.max(0, Math.floor((this.windowWidth - hdrLen) / 2) - 2)
+    if (hdrPad > 0) buf.append(' '.repeat(hdrPad), undefined)
+    buf.append(`mason.nvim v${VERSION}`, 'CocLoaderHeader')
     buf.nl()
-    buf.append('mason.nvim ', 'CocLoaderHeader')
-    buf.append(`v${VERSION} `, 'CocLoaderHeaderSec')
-    buf.append(' press ? for help')
+    const hintLine = 'press g? for help'
+    const hintLen = Buffer.from(hintLine).length
+    const hintPad = Math.max(0, Math.floor((this.windowWidth - hintLen) / 2) - 2)
+    if (hintPad > 0) buf.append(' '.repeat(hintPad), undefined)
+    buf.append('press ', undefined)
+    buf.append('g?', 'CocLoaderHighlight')
+    buf.append(' for help')
     buf.nl()
     buf.nl()
 
-    // Tabs: "(1) All  (2) LSP  (3) Snippets  ..."
+    // Tabs: " (1) All  (2) LSP  (3) Snippets ..."
     const tabs = this.getTabs()
     for (let i = 0; i < tabs.length; i++) {
       const tab = tabs[i]
       const isActive = (i === 0 && !state.categoryFilter) || (i > 0 && state.categoryFilter === tab)
       const hl = isActive ? 'CocLoaderTabActive' : 'CocLoaderTabInactive'
-      buf.append(`(${i + 1}) ${tab}`, hl)
+      buf.append(` (${i + 1}) ${tab} `, hl)
       if (i < tabs.length - 1) {
-        buf.append('  ', undefined)
+        buf.append(' ', undefined)
       }
     }
     buf.nl()

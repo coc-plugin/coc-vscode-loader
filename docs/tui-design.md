@@ -9,16 +9,17 @@ TUI 完全参照 [mason.nvim](https://github.com/mason-org/mason.nvim) 的 UI �
 ```
 ┌───────────────────────────────────────────────────────────────────┐
 │                                                                   │
-│   mason.nvim v1.5.0  press ? for help       ← Header (gold+cyan) │
+│                   mason.nvim v1.5.0          ← Header (gold, centered)
+│                   press g? for help          ← Key hint (centered)
 │                                                                   │
-│   (1) All  (2) LSP  (3) Snippets  (4) ...  ← Tabs (cyan/gray)   │
+│   (1) All  (2) LSP  (3) Snippets …          ← Tabs (cyan/gray)   │
 │                                                                   │
-│   Installed (15)                           ← Section heading     │
-│     ◍ vscode-eslint                        ← Installed (cyan)    │
-│     ◍ pyright                                                     │
+│   Installed (15)                            ← Section heading     │
+│     ◍ vscode-eslint                         ← Installed (cyan)    │
+│     ◍ pyright                                                      │
 │                                                                   │
-│   Available (106)                          ← Section heading     │
-│     ◍ vscode-javascript-snippets           ← Uninstalled (gray)  │
+│   Available (106)                           ← Section heading     │
+│     ◍ vscode-javascript-snippets            ← Uninstalled (gray)  │
 │                                                                   │
 └───────────────────────────────────────────────────────────────────┘
 ```
@@ -30,7 +31,7 @@ TUI 完全参照 [mason.nvim](https://github.com/mason-org/mason.nvim) 的 UI �
 | Highlight 组 | 用途 | 前景 | 背景 | 粗体 |
 |---|---|---|---|---|
 | `CocLoaderHeader` | 标题 "mason.nvim" | #222222 | #DCA561 (金色) | yes |
-| `CocLoaderHeaderSec` | 版本号 "vX.X.X" | #222222 | #56B6C2 (青色) | yes |
+| `CocLoaderHeaderSec` | 版本号 "vX.X.X" (仅帮助动画) | #222222 | #56B6C2 (青色) | yes |
 | `CocLoaderTabActive` | 当前选中的 tab | #222222 | #56B6C2 (青色) | yes |
 | `CocLoaderTabInactive` | 未选中的 tab | #222222 | #888888 (灰色) | no |
 | `CocLoaderHeading` | Section 标题 (如 "Installed") | 继承 | 无 | yes |
@@ -38,6 +39,7 @@ TUI 完全参照 [mason.nvim](https://github.com/mason-org/mason.nvim) 的 UI �
 | `CocLoaderMuted` | 未安装图标 + 辅助文本 | #888888 | 无 | no |
 | `CocLoaderError` | 失败图标 | 链接到 ErrorMsg | 无 | no |
 | `CocLoaderSearchMatch` | 搜索匹配高亮 | 链接到 Search | 无 | no |
+| `CocLoaderWarning` | 警告信息 | #DCA561 | 无 | no |
 
 ## 架构
 
