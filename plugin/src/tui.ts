@@ -237,22 +237,11 @@ export class TUI {
     if (id === 'i' && entry.status === 'not-installed') { await installPackage(this.state, pkgName); return }
     if (id === 'u' && entry.status === 'installed') { await updatePackage(this.state, pkgName); return }
     if (id === 'X' && entry.status === 'installed') { await uninstallPackage(this.state, pkgName); return }
-    if (id === 'cr') { if (pkgName) await this.showDetailPopup(pkgName); return }
-    if (id === 'close-detail') { await this.closeDetailPopup(); return }
-    if (id === 'detail-j' && this.detailWinid) {
-      const nvim = workspace.nvim
-      const cur = await nvim.call('nvim_win_get_cursor', [this.detailWinid]) as [number, number]
-      const bufLineCount = await nvim.call('nvim_buf_line_count', [this.detailBufnr]) as number
-      if (cur[0] < bufLineCount) {
-        await nvim.call('nvim_win_set_cursor', [this.detailWinid, [cur[0] + 1, cur[1]]])
-      }
-      return
-    }
-    if (id === 'detail-k' && this.detailWinid) {
-      const nvim = workspace.nvim
-      const cur = await nvim.call('nvim_win_get_cursor', [this.detailWinid]) as [number, number]
-      if (cur[0] > 1) {
-        await nvim.call('nvim_win_set_cursor', [this.detailWinid, [cur[0] - 1, cur[1]]])
+    if (id === 'cr') {
+      if (['installing', 'updating', 'uninstalling'].includes(entry.status)) {
+        this.state.toggleLog(pkgName)
+      } else {
+        this.state.toggleExpand(pkgName)
       }
       return
     }
@@ -453,16 +442,64 @@ export class TUI {
     buf.append('◍', iconHl)
     buf.append(' ')
     this.appendHighlightedText(buf, entry.info.name)
-
-    if (entry.progress) {
-      buf.append(`  ${entry.progress}`, 'CocLoaderMuted')
-    } else if (entry.status === 'failed' && entry.error) {
-      buf.append(`  ${entry.error}`, 'CocLoaderError')
-    }
     if (entry.hasUpdate) {
       buf.append('  ↑', 'CocLoaderHighlight')
     }
+    buf.nl()
 
+    // Mason-style installing log: tail or full log toggle
+    if (['installing', 'updating', 'uninstalling'].includes(entry.status) && entry.progressLog.length > 0) {
+      if (entry.logExpanded) {
+        buf.append('    ▼ Displaying full log', 'CocLoaderHeading')
+        buf.nl()
+        for (const log of entry.progressLog) {
+          for (const l of log.split('\n')) {
+            buf.append('      ', undefined)
+            buf.append(l, 'CocLoaderMuted')
+            buf.nl()
+          }
+        }
+      } else {
+        const last = entry.progressLog[entry.progressLog.length - 1]
+        const head = last.split('\n')[0]
+        buf.append('    ▶ # ', undefined)
+        buf.append(entry.progress || head, 'CocLoaderMuted')
+        buf.nl()
+      }
+    }
+
+    // Mason-style inline expanded package details
+    if (['installed', 'not-installed', 'failed'].includes(entry.status) && entry.expanded) {
+      this.renderExpandedInfo(buf, entry)
+    }
+  }
+
+  private renderExpandedInfo(buf: LineBuffer, entry: PackageEntry) {
+    // Description in Comment (Mason-style)
+    buf.append('  ', undefined)
+    buf.append(entry.info.description, 'CocLoaderMuted')
+    buf.nl()
+    buf.nl()
+
+    // Table with muted labels + highlighted/bold values
+    const rows: [string, string, string][] = [
+      ['type', entry.info.type, 'CocLoaderHighlight'],
+      ['source', sourceStr(entry.info.source), 'CocLoaderHighlight'],
+      ['languages', entry.info.languages.join(', '), 'CocLoaderHeading'],
+      ['categories', entry.info.categories.join(', '), 'CocLoaderHeading'],
+      ['homepage', entry.info.url, 'CocLoaderHighlight'],
+    ]
+    if (entry.commit) {
+      const verMsg = entry.commit + (entry.commitMsg ? ' ' + entry.commitMsg : '')
+      rows.unshift(['version', verMsg, 'CocLoaderHeading'])
+    }
+    const labelWidth = Math.max(...rows.map(r => r[0].length))
+    for (const [label, value, valueHl] of rows) {
+      buf.append('  ', undefined)
+      buf.append(label + ' '.repeat(labelWidth - label.length + 2), 'CocLoaderMuted')
+      buf.append(value, valueHl)
+      buf.nl()
+    }
     buf.nl()
   }
 
