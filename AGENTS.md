@@ -293,6 +293,11 @@ Registry entries can specify `minPluginVersion` (e.g. `"1.1.2"`) to require a mi
 - **Pip packages**: auto-install Python dependencies via pip (e.g. ansible-lint), only uses `--break-system-packages` on Linux
 - **Go packages**: auto-install Go language servers via `go install` (e.g. gopls), binary placed in `server/` directory
 - **Cargo packages**: auto-install Rust language servers via `cargo install --root` (e.g. nil), binary placed in `server/` directory
+- **Global extensions**: `g:coc_loader_global_extensions` auto-installs extensions on activation
+- **Smart name resolution**: `findPackage()` matches by exact name, displayName, or auto-prepends `vscode-` prefix
+- **Auto-check updates**: silent check on startup, notifies only when updates found
+- **Cache cleanup**: `loader.cleanCache` removes source/build directories
+- **Export package list**: `loader.list` copies installed package names to clipboard
 
 ### Commands
 
@@ -305,6 +310,8 @@ Registry entries can specify `minPluginVersion` (e.g. `"1.1.2"`) to require a mi
 | `:CocCommand loader.reinstall <name>` | Reinstall a package |
 | `:CocCommand loader.uninstallAll` | Uninstall all (with confirm) |
 | `:CocCommand loader.updateRegistry` | Fetch latest registry from remote |
+| `:CocCommand loader.cleanCache` | Clean build cache for all packages |
+| `:CocCommand loader.list` | List installed packages and copy to clipboard |
 
 ### Build
 

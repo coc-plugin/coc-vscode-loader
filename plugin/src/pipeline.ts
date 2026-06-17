@@ -627,7 +627,7 @@ export async function installPackage(state: StateManager, name: string): Promise
   }
 }
 
-function rimraf(dir: string): Promise<void> {
+export function rimraf(dir: string): Promise<void> {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(dir)) return resolve()
     // chmod before rm to handle Go module cache (dirs are 0555 = unwritable, rm -rf fails)
@@ -818,20 +818,20 @@ export async function runConcurrent<T extends string>(
 
 let checkUpdatesBusy = false
 
-export async function checkUpdates(state: StateManager): Promise<void> {
-  if (checkUpdatesBusy) return
+export async function checkUpdates(state: StateManager, silent = false): Promise<number> {
+  if (checkUpdatesBusy) return 0
   checkUpdatesBusy = true
   try {
     const s = state.getState()
     const results: Record<string, boolean> = {}
 
-    state.setStatusMessage('Checking for updates...')
+    if (!silent) state.setStatusMessage('Checking for updates...')
 
     for (const pkg of s.packages) {
       if (pkg.status !== 'installed' || !pkg.commit) continue
       const live = state.getPackage(pkg.info.name)
       if (!live || live.status !== 'installed' || !live.commit) continue
-      state.setStatusMessage(`Checking ${pkg.info.displayName}...`)
+      if (!silent) state.setStatusMessage(`Checking ${pkg.info.displayName}...`)
       try {
         const out = await runWithOutput('git', ['ls-remote', `https://github.com/${pkg.info.source.repo}.git`, 'HEAD'], os.homedir())
         const remote = out.split('\t')[0]
@@ -844,16 +844,19 @@ export async function checkUpdates(state: StateManager): Promise<void> {
       for (const p of s.packages) {
         if (results[p.info.name] !== undefined) p.hasUpdate = results[p.info.name]
       }
-      s.statusMessage = undefined
+      if (!silent) s.statusMessage = undefined
     })
 
-    if (updateCount > 0) {
-      state.setStatusMessage(`Found ${updateCount} package(s) with updates. Use 'u' to update.`)
-      setTimeout(() => state.setStatusMessage(), 5000)
-    } else {
-      state.setStatusMessage('All packages up to date.')
-      setTimeout(() => state.setStatusMessage(), 3000)
+    if (!silent) {
+      if (updateCount > 0) {
+        state.setStatusMessage(`Found ${updateCount} package(s) with updates. Use 'u' to update.`)
+        setTimeout(() => state.setStatusMessage(), 5000)
+      } else {
+        state.setStatusMessage('All packages up to date.')
+        setTimeout(() => state.setStatusMessage(), 3000)
+      }
     }
+    return updateCount
   } finally {
     checkUpdatesBusy = false
   }

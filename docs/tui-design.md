@@ -18,6 +18,8 @@ TUI 完全参照 [mason.nvim](https://github.com/mason-org/mason.nvim) 的 UI �
 │   Installing (2)                                                    │
 │     ◍ packagename                                   ← 青色 icon   │
 │       ▶ # [2/5] Converting...                       ← tail 日志    │
+│   Queued (1)                                                         │
+│     ◍ otherpackage                                  ← 青色 icon   │
 │                                                                   │
 │   Installed (15)                                                    │
 │     ◍ vscode-eslint                                 ← 青色 icon   │

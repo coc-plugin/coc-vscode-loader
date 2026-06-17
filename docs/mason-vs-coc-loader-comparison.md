@@ -160,6 +160,8 @@ coc-loader:
   │   Installing (2)                        │
   │     ◍ rust-analyzer                     │
   │       ▶ # [5/24] some output           │
+  │   Queued (1)                            │
+  │     ◍ stylua                           │
   │   Installed (15)                       │
   │     ◍ lua-language-server              │
   │   Available (106)                      │
@@ -175,10 +177,10 @@ coc-loader:
 | Header 居中 `g?` 提示 | ✅ | ✅ | ✅ |
 | Language Filter 提示行 | ✅ 显示当前语言过滤或提示 | ❌ 无此组件 | ❌ |
 | Tabs 栏 | ✅ `(N) Name` 格式，5个固定：All, LSP, DAP, Linter, Formatter | ✅ `(N) Name` 格式，前6个 categories + All | △ 不同（Mason 固定，coc 动态） |
-| **Queued 分区** | ✅ 有 "Queued" 区，显示等待并发槽的包 | ❌ 无此概念 | ❌ |
+| **Queued 分区** | ✅ 有 "Queued" 区，显示等待并发槽的包 | ✅ 有 "Queued" 区 | ✅ |
 | Registry 更新进度 | ✅ 在 Installed 头部显示进度条 "updating registry 60%" | ❌ 只有 statusMessage 文字提示 | ❌ |
 | 过期包数量提示 | ✅ Installed 头部显示 "Press U to update 3 packages (rust-analyzer, ...)" | ❌ 只有 statusMessage | ❌ |
-| Section 顺序 | Failed → Installing → **Queued** → Installed → Available | Failed → Installing → Installed → Available | ❌ 缺 Queued |
+| Section 顺序 | Failed → **Installing → Queued** → Installed → Available | Failed → **Installing → Queued** → Updating → Uninstalling → Installed → Available | ✅ (顺序一致，coc 额外有 Updating/Uninstalling 区) |
 
 ---
 
@@ -247,9 +249,9 @@ coc-loader:
 
 | 属性 | Mason | coc-loader |
 |------|-------|------------|
-| 存在 | ✅ Queued 分区，青色 icon + name | ❌ 不存在 |
-| 取消 | ✅ `<C-c>` 取消 | ❌ |
-| 行为 | 等待并发槽的包显示于此，安装开始后移入 Installing | 无此概念 |
+| 存在 | ✅ Queued 分区，青色 icon + name | ✅ Queued 分区，青色 icon + name |
+| 取消 | ✅ `<C-c>` 取消 | ✅ `<C-c>` 取消 |
+| 行为 | 等待并发槽的包显示于此，安装开始后移入 Installing | 同 Mason |
 
 ### 5.4 LSP Settings Schema 浏览器 (❌ coc-loader 缺失)
 
@@ -319,9 +321,9 @@ Mason 在已装包的展开详情中，如果该 LSP server 有配置 schema，�
 | `g?` | 切换帮助视图 | 切换帮助视图 | ✅ |
 | `q` | 关闭窗口 | 关闭窗口 | ✅ |
 | `<Esc>` | 关闭/取消搜索/清除语言过滤/关闭窗口 | 逐级取消(帮助→搜索→过滤→关闭) | ✅ |
-| `<C-c>` | **取消安装** | ❌ 无 | ❌ |
-| `<C-f>` | **打开语言选择器 (`vim.ui.select`)** | 预留，显示 "not yet implemented" | △ stub |
-| `/` | **进入搜索模式** (neovim 原生) | ❌ 无 | ❌ |
+| `<C-c>` | **取消安装** | ✅ 有 (cancelPackage) | ✅ |
+| `<C-f>` | **打开语言选择器 (`vim.ui.select`)** | ✅ 有 | ✅ |
+| `/` | **进入搜索模式** (neovim 原生) | ✅ 实现搜索过滤 + 文本高亮 | ✅ |
 
 ### 6.2 按键作用域
 
@@ -350,13 +352,12 @@ Mason 的按键有**作用域**概念：一个 keybind 节点可以声明只对�
 
 ## 七、功能差异详细说明
 
-### 7.1 Queued 分区 (❌ coc-loader 缺失)
+### 7.1 Queued 分区 (✅ coc-loader 已实现)
 
 Mason 在 `max_concurrent_installers = 4` 的限制下，超出并发数的安装请求会进入 Queued。
 用户可以在 Queued 区看到等待中的包，并可以用 `<C-c>` 取消。
 
-coc-loader 的 `runConcurrent()` 也有限制并发数为 3，但没有 Queued 的可视化展示。
-如果安装队列满了，后续包只是静默等待。
+coc-loader 的 `runConcurrent()` 同样限制并发数为 3（可通过参数调整），超出部分显示在 Queued 区，安装开始后自动移入 Installing。
 
 ### 7.2 取消安装 (❌ coc-loader 缺失)
 
@@ -563,7 +564,7 @@ coc-loader 帮助视图只是静态文本，无任何动画。
 | 11 | Tab 栏 `(N) Name` 格式 |
 | 12 | Tab 活跃=青块，非活跃=灰块 |
 | 13 | 数字键 1-9 切换 tab |
-| 14 | Section 分组 (Failed/Installing/Installed/Available) |
+| 14 | Section 分组 (Failed/Installing/Queued/Installed/Available) |
 | 15 | `◍` icon，按状态着色 |
 | 16 | `i` 安装 |
 | 17 | `u` 更新 |
@@ -590,11 +591,7 @@ coc-loader 帮助视图只是静态文本，无任何动画。
 ### ❌ 缺失的 Mason 核心功能（33项，按重要度排序）
 
 | # | 功能 | 重要度 | 说明 |
-|---|------|--------|------|
-| 1 | **取消安装 `<C-c>`** | ★★★ | 无法中断进行中的 install/update |
-| 2 | **Queued 分区** | ★★☆ | 并发安装排队不可见 |
-| 3 | **语言筛选 `<C-f>`** | ★★☆ | 目前 stub，无实际功能 |
-| 4 | **搜索模式 `/`** | ★★☆ | 过滤逻辑存在，但 `/` 键未注册到 TUI |
+|--|------|--------|------|
 | 5 | **过期包提示** | ★★☆ | 只在 statusMessage 中短暂显示 |
 | 6 | **Registry 更新进度条** | ★☆☆ | 仅文字提示 |
 | 7 | **Sticky cursor** | ★☆☆ | 跨渲染光标追踪 |
@@ -631,12 +628,13 @@ coc-loader 帮助视图只是静态文本，无任何动画。
 |---|------|------|
 | 1 | `f` 循环 viewFilter | 按 all/installed/not-installed 筛选 |
 | 2 | `s` 循环排序 | default/name/status/type |
-| 3 | `x` 标记/取消 | 可多选后批量操作 |
-| 4 | `Z` 全部卸载 | 确认后卸载所有 |
-| 5 | `D` 清理孤儿 | 清理无 registry 条目的包 |
-| 6 | `R` 重装 | 卸载后重新安装 |
-| 7 | Tab 动态生成 | 基于 categories，最多 9 个 |
-| 8 | `U` 更新"所有已装"变 "所有过期" | 逻辑不同 |
-| 9 | `<Esc>` 逐级取消 | 帮助→搜索→过滤→关闭 |
-| 10 | 无 "No packages." 空状态 | Mason 有 |
-| 11 | 并发批量安装 | Mason 也有（但 coc 用 `BatchStats` 追踪进度） |
+| 3 | `Z` 全部卸载 | 确认后卸载所有 |
+| 4 | `R` 重装 | 卸载后重新安装 |
+| 5 | Tab 动态生成 | 基于 categories，最多 9 个 |
+| 6 | `<Esc>` 逐级取消 | 语言筛选→搜索→关闭 |
+| 7 | **`g:coc_loader_global_extensions`** | 配置列表自动安装扩展 |
+| 8 | **智能包名解析 (`findPackage`)** | 支持 displayName 和自动补 `vscode-` 前缀 |
+| 9 | **`loader.cleanCache`** | 清理 build cache |
+| 10 | **`loader.list`** | 导出已装包列表到剪贴板 |
+| 11 | **自动检查更新** | 启动时静默检查，有更新才通知 |
+| 12 | **Updating/Uninstalling 分区** | Mason 归入 Installing，coc 区分显示 |

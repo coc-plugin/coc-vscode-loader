@@ -1,8 +1,13 @@
 import { commands, workspace, window as cocWindow, ExtensionContext } from 'coc.nvim'
 import { createInitialState, StateManager } from './state'
 import { TUI } from './tui'
-import { installPackage, uninstallPackage, updatePackage, runConcurrent } from './pipeline'
+import { installPackage, uninstallPackage, updatePackage, runConcurrent, checkUpdates, rimraf } from './pipeline'
 import { updateRegistry, findPackage } from './registry'
+import * as path from 'path'
+import * as fs from 'fs'
+import * as os from 'os'
+
+const CACHE_ROOT = path.join(os.homedir(), '.config', 'coc', 'converter-cache')
 
 let currentTUI: TUI | null = null
 let openingTUI = false
@@ -239,6 +244,49 @@ export async function activate(context: ExtensionContext) {
   )
 
   context.subscriptions.push(
+    commands.registerCommand('loader.cleanCache', async () => {
+      try {
+        const dirs = fs.readdirSync(CACHE_ROOT).filter(n => {
+          const p = path.join(CACHE_ROOT, n)
+          return fs.statSync(p).isDirectory() && n !== 'registry.json' && !n.startsWith('.')
+        })
+        if (dirs.length === 0) {
+          cocWindow.showInformationMessage('No cached packages to clean')
+          return
+        }
+        const ok = await cocWindow.showPrompt(`Clean build cache for ${dirs.length} package(s)?`)
+        if (!ok) return
+        let cleaned = 0
+        for (const name of dirs) {
+          await rimraf(path.join(CACHE_ROOT, name))
+          cleaned++
+        }
+        cocWindow.showInformationMessage(`Cleaned cache for ${cleaned} package(s)`)
+      } catch (e: unknown) {
+        cocWindow.showErrorMessage(`loader.cleanCache: ${safeMsg(e)}`)
+      }
+    })
+  )
+
+  context.subscriptions.push(
+    commands.registerCommand('loader.list', async () => {
+      try {
+        const installed = state.getState().packages.filter(p => p.status === 'installed')
+        if (installed.length === 0) {
+          cocWindow.showInformationMessage('No packages installed')
+          return
+        }
+        const names = installed.map(p => p.info.name).sort()
+        const output = `['${names.join("', '")}']`
+        await workspace.nvim.call('setreg', ['+', output])
+        cocWindow.showInformationMessage(`Installed (${names.length}): ${output} (copied to clipboard)`)
+      } catch (e: unknown) {
+        cocWindow.showErrorMessage(`loader.list: ${safeMsg(e)}`)
+      }
+    })
+  )
+
+  context.subscriptions.push(
     commands.registerCommand('loader._dispatch', async (key: string) => {
       if (currentTUI) {
         await currentTUI.handleKey(key)
@@ -248,6 +296,13 @@ export async function activate(context: ExtensionContext) {
 
   // Auto-install global extensions from vim.g.coc_loader_global_extensions
   ensureGlobalExtensions(state).catch(() => {})
+
+  // Silent update check on startup — only notify if updates found
+  checkUpdates(state, true).then(count => {
+    if (count > 0) {
+      cocWindow.showInformationMessage(`[coc-loader] ${count} package(s) have updates. Open TUI and press U to update.`)
+    }
+  }).catch(() => {})
 
   cocWindow.showInformationMessage('coc-loader activated! Use :CocCommand loader.open')
 }

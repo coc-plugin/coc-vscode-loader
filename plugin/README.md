@@ -54,6 +54,8 @@ npm install coc-vscode-loader
 | `:CocCommand loader.reinstall <name>` | Reinstall a package (uninstall + install) |
 | `:CocCommand loader.uninstallAll` | Uninstall all (with confirmation) |
 | `:CocCommand loader.updateRegistry` | Fetch latest registry from remote |
+| `:CocCommand loader.cleanCache` | Clean build cache for all packages |
+| `:CocCommand loader.list` | List installed packages (copied to clipboard) |
 
 ## Global Extensions (auto-install)
 
@@ -89,6 +91,9 @@ On next `:CocRestart`, the plugin will fetch the registry and install any missin
 - **Filter & sort** — `f` cycle view filter, `s` cycle sort order (name/status/type)
 - **Concurrency limit** — max 3 parallel operations for `U` (Update All)
 - **Desktop notifications** — `showInformationMessage` on install/update/uninstall complete
+- **Auto-check updates** — silent check on startup, notifies only when updates found
+- **Cache cleanup** — `:CocCommand loader.cleanCache` removes build artifacts
+- **Export package list** — `:CocCommand loader.list` copies installed package names to clipboard
 
 ## Architecture
 
