@@ -41,7 +41,7 @@ npm install coc-vscode-loader
 | `<CR>` | Open detail popup (info / install log with syntax highlights) |
 | `/` | Search filter |
 | `q` | Close (auto `:CocRestart` if changes detected) |
-| `<Esc>` | Help→Search→Cancel|Close |
+| `<Esc>` | Language filter→Search→Close |
 
 ## Commands
 

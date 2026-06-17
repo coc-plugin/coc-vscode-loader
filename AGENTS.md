@@ -285,7 +285,7 @@ Registry entries can specify `minPluginVersion` (e.g. `"1.1.2"`) to require a mi
 - **Navigation**: `j`/`k` virtual scroll, `gg`/`G` first/last, `/` search
 - **Batch**: `U` update all (max 3 concurrent)
 - **Update check**: `C` git ls-remote compares commits, shows `↑` when outdated
-- **Other**: `q` close / `<Esc>` step-by-step cancel (help→search→busy guard→close)
+- **Other**: `q` close / `<Esc>` close (language filter→search→busy guard)
 - **Detail popup**: centered float window with syntax highlights — shows package info (installed/available) or live install log with full command output (active/failed)
 - **Progress**: inline `[step/total]` status on package line
 - **Registry auto-fetch**: remote registry fetched in background when TUI opens

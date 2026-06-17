@@ -287,9 +287,8 @@ export class TUI {
 
     if (id === 'q') { await this.close(); return }
     if (id === 'esc') {
-      if (s.showHelp) { this.state.toggleHelp(); return }
+      if (s.languageFilter) { this.state.setLanguageFilter(null); return }
       if (s.searchQuery) { this.state.setSearchQuery(''); return }
-      if (s.categoryFilter) { this.state.setCategoryFilter(null); return }
       const busyCount = s.packages.filter(p => ['installing', 'updating', 'uninstalling'].includes(p.status)).length
       if (busyCount > 0) {
         cocWindow.showWarningMessage(`${busyCount} operation(s) in progress. Use <C-c> to cancel, or wait for completion.`)
