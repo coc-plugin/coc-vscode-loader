@@ -830,8 +830,8 @@ export async function runConcurrent<T extends string>(
 let checkUpdatesBusy = false
 
 export async function checkUpdates(state: StateManager, silent = false): Promise<number> {
-  if (checkUpdatesBusy) return 0
-  checkUpdatesBusy = true
+  if (!silent && checkUpdatesBusy) return 0
+  if (!silent) checkUpdatesBusy = true
   try {
     const s = state.getState()
     const results: Record<string, boolean> = {}
@@ -869,6 +869,6 @@ export async function checkUpdates(state: StateManager, silent = false): Promise
     }
     return updateCount
   } finally {
-    checkUpdatesBusy = false
+    if (!silent) checkUpdatesBusy = false
   }
 }
