@@ -24,6 +24,14 @@ async function closeCurrentTUI(): Promise<void> {
   }
 }
 
+async function ensureRegistry(state: StateManager): Promise<void> {
+  if (state.getState().packages.length > 0) return
+  try {
+    await updateRegistry()
+    state.refreshPackages()
+  } catch {}
+}
+
 function resolvePackageName(state: StateManager, query: string): { regName: string; pkg: PackageEntry } | undefined {
   const info = findPackage(query)
   if (!info) return undefined
@@ -136,6 +144,7 @@ export async function activate(context: ExtensionContext) {
     context.subscriptions.push(
       commands.registerCommand(`loader.${name}`, async (input?: string) => {
         try {
+          await ensureRegistry(state)
           if (!input) {
             const raw: unknown = await workspace.nvim.call('input', ['Plugin name: ', ''])
             if (typeof raw !== 'string' || !raw) return
@@ -181,6 +190,7 @@ export async function activate(context: ExtensionContext) {
   context.subscriptions.push(
     commands.registerCommand('loader.uninstallAll', async () => {
       try {
+        await ensureRegistry(state)
         const installed = state.getState().packages.filter(p => p.status === 'installed')
         if (installed.length === 0) {
           cocWindow.showInformationMessage('No packages installed')
@@ -248,6 +258,7 @@ export async function activate(context: ExtensionContext) {
   context.subscriptions.push(
     commands.registerCommand('loader.list', async () => {
       try {
+        await ensureRegistry(state)
         const installed = state.getState().packages.filter(p => p.status === 'installed')
         if (installed.length === 0) {
           cocWindow.showInformationMessage('No packages installed')
