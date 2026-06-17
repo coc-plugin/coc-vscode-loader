@@ -319,21 +319,6 @@ export class StateManager {
     return this.state.packages.find(p => p.info.name === name)
   }
 
-  toggleMark(name: string) {
-    this.mutate(s => {
-      const pkg = s.packages.find(p => p.info.name === name)
-      if (pkg) pkg.marked = !pkg.marked
-    })
-  }
-
-  clearMarks() {
-    this.mutate(s => { for (const p of s.packages) p.marked = false })
-  }
-
-  getMarkedNames(): string[] {
-    return this.state.packages.filter(p => p.marked).map(p => p.info.name)
-  }
-
   refreshPackages() {
     this.invalidateFilterCache()
     const installedSet = getInstalledSet()

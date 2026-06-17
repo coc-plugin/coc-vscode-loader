@@ -53,6 +53,7 @@ const KEYMAP_ENTRIES: [string, string][] = [
   ['C', 'Check for updates'],
   ['c', 'Check package version'],
   ['<C-c>', 'Cancel install / update'],
+  ['s', 'Cycle sort'],
   ['<C-f>', 'Cycle language filter'],
   ['/', 'Search packages'],
   ['<CR>', 'Toggle package details / log'],
@@ -333,6 +334,7 @@ export class TUI {
       return
     }
 
+    if (id === 's') { this.state.cycleSortBy(); return }
     if (id === 'C') {
       this.state.setStatusMessage('Updating registry...')
       try {
@@ -405,6 +407,7 @@ export class TUI {
       ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'],
       ['6', '6'], ['7', '7'], ['8', '8'], ['9', '9'],
       ['<C-c>', 'cancel'],
+      ['s', 's'],
       ['<C-f>', 'language-filter'],
       ['/', 'search'],
       ['<CR>', 'cr'],

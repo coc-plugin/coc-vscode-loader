@@ -26,15 +26,13 @@ npm install coc-vscode-loader
 | `I` | Install mode (button highlight) |
 | `U` | Update all installed packages (max 3 concurrent) |
 | `C` | Check for remote updates (git ls-remote commit compare) |
-| `Z` | Uninstall all installed packages (with confirmation) |
-| `D` | Cleanup orphaned packages (installed but removed from registry) |
+
 | `H` | Home (reset all state) |
 | `?` | Help |
 | `i` | Install package under cursor |
 | `u` | Update package under cursor |
 | `X` | Uninstall package under cursor |
 | `R` | Reinstall package under cursor |
-| `x` | Toggle mark package for batch operations |
 | `f` | Cycle filter: all → installed → available |
 | `s` | Cycle sort: default → name → status → type |
 | `j` / `k` | Scroll through packages (virtual scroll) |
@@ -43,7 +41,7 @@ npm install coc-vscode-loader
 | `<CR>` | Open detail popup (info / install log with syntax highlights) |
 | `/` | Search filter |
 | `q` | Close (auto `:CocRestart` if changes detected) |
-| `<Esc>` | Help→Search→Clear marks→Cancel|Close |
+| `<Esc>` | Help→Search→Cancel|Close |
 
 ## Commands
 
@@ -72,7 +70,6 @@ npm install coc-vscode-loader
 - **Auto restart** — `:CocRestart` triggered automatically on close when changes detected
 - **Manual registry update** — `:CocCommand loader.updateRegistry` also available for re-fetch
 - **Detail popup** — `<CR>` opens centered float window with package info or live install log (syntax highlighted, auto-scroll to latest)
-- **Mark & batch** — `x` toggle mark, visual indicator, `D` clean orphaned packages
 - **Filter & sort** — `f` cycle view filter, `s` cycle sort order (name/status/type)
 - **Concurrency limit** — max 3 parallel operations for `U` (Update All)
 - **Desktop notifications** — `showInformationMessage` on install/update/uninstall complete
