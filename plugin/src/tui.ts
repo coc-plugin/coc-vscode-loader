@@ -628,8 +628,8 @@ export class TUI {
     const available = filtered.filter(p => p.status === 'not-installed' && !queuedNames.includes(p.info.name))
 
     this.renderSection(buf, pkgLineMap, 'Failed', failed)
-    this.renderSection(buf, pkgLineMap, 'Queued', queued)
     this.renderSection(buf, pkgLineMap, 'Installing', installing)
+    this.renderSection(buf, pkgLineMap, 'Queued', queued)
     this.renderSection(buf, pkgLineMap, 'Updating', updating)
     this.renderSection(buf, pkgLineMap, 'Uninstalling', uninstalling)
     this.renderSection(buf, pkgLineMap, 'Installed', installed)

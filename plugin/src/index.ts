@@ -1,7 +1,7 @@
 import { commands, workspace, window as cocWindow, ExtensionContext } from 'coc.nvim'
 import { createInitialState, StateManager } from './state'
 import { TUI } from './tui'
-import { installPackage, uninstallPackage, updatePackage } from './pipeline'
+import { installPackage, uninstallPackage, updatePackage, runConcurrent } from './pipeline'
 import { updateRegistry } from './registry'
 
 let currentTUI: TUI | null = null
@@ -16,6 +16,71 @@ async function closeCurrentTUI(): Promise<void> {
   if (currentTUI) {
     try { await currentTUI.close() } catch { /* ignore close errors */ }
     currentTUI = null
+  }
+}
+
+async function ensureGlobalExtensions(state: StateManager): Promise<void> {
+  const nvim = workspace.nvim
+  let globalExt: unknown
+  try {
+    globalExt = await nvim.getVar('coc_loader_global_extensions')
+  } catch {
+    return
+  }
+  if (!Array.isArray(globalExt) || globalExt.length === 0) return
+  const names = globalExt.filter((n): n is string => typeof n === 'string')
+  if (names.length === 0) return
+
+  try {
+    await updateRegistry()
+    state.refreshPackages()
+  } catch {
+    return
+  }
+
+  const toInstall: string[] = []
+  const unknown: string[] = []
+  const alreadyInstalled: string[] = []
+  for (const name of names) {
+    const pkg = state.getPackage(name)
+    if (!pkg) {
+      unknown.push(name)
+      continue
+    }
+    if (pkg.status === 'installed') {
+      alreadyInstalled.push(name)
+    } else {
+      toInstall.push(name)
+    }
+  }
+
+  if (unknown.length > 0) {
+    cocWindow.showWarningMessage(`[coc-loader] Unknown global extensions (check registry name): ${unknown.join(', ')}`)
+  }
+
+  if (toInstall.length === 0) {
+    if (alreadyInstalled.length === names.length) {
+      cocWindow.showInformationMessage('[coc-loader] All global extensions are already installed')
+    }
+    return
+  }
+
+  cocWindow.showInformationMessage(`[coc-loader] Installing ${toInstall.length}/${names.length} global extension(s)...`)
+  const failed: string[] = []
+  await runConcurrent(toInstall, async (name) => {
+    await installPackage(state, name)
+    const pkg = state.getPackage(name)
+    if (pkg && pkg.status !== 'installed') {
+      failed.push(name)
+    }
+  }, state, 3)
+
+  const succeeded = toInstall.filter(n => !failed.includes(n))
+  if (failed.length > 0) {
+    cocWindow.showErrorMessage(`[coc-loader] Failed: ${failed.join(', ')}`)
+  }
+  if (succeeded.length > 0) {
+    cocWindow.showInformationMessage(`[coc-loader] Installed: ${succeeded.join(', ')}. Restart coc to apply.`)
   }
 }
 
@@ -176,7 +241,8 @@ export async function activate(context: ExtensionContext) {
     })
   )
 
-  // Registry fetch happens when TUI opens, not on startup
+  // Auto-install global extensions from vim.g.coc_loader_global_extensions
+  ensureGlobalExtensions(state).catch(() => {})
 
   cocWindow.showInformationMessage('coc-loader activated! Use :CocCommand loader.open')
 }
