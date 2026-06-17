@@ -38,7 +38,6 @@ async function ensureGlobalExtensions(state: StateManager): Promise<void> {
     return
   }
 
-  const regNameByQuery = new Map<string, string>()
   const toInstall: string[] = []
   const unknown: string[] = []
   const alreadyInstalled: string[] = []
@@ -56,9 +55,7 @@ async function ensureGlobalExtensions(state: StateManager): Promise<void> {
     if (pkg.status === 'installed') {
       alreadyInstalled.push(query)
     } else {
-      const regName = info.name
-      regNameByQuery.set(query, regName)
-      toInstall.push(regName)
+      toInstall.push(info.name)
     }
   }
 
