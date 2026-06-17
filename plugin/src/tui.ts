@@ -91,7 +91,7 @@ export class TUI {
     const nvim = workspace.nvim
     this.ns = await nvim.createNamespace('coc-loader')
 
-    // Mason-style highlight groups (all with `default` to respect user theme)
+    // Mason-style fixed highlight groups (default=true so users can override)
     await nvim.command('highlight default CocLoaderHeader guibg=#DCA561 guifg=#222222 gui=bold')
     await nvim.command('highlight default CocLoaderHeaderSec guibg=#56B6C2 guifg=#222222 gui=bold')
     await nvim.command('highlight default CocLoaderTabActive guibg=#56B6C2 guifg=#222222 gui=bold')
