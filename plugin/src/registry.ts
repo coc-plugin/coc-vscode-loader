@@ -193,3 +193,19 @@ export function getAllPackages(): PackageInfo[] {
 export function getPackage(name: string): PackageInfo | undefined {
   return getAllPackages().find(p => p.name === name)
 }
+
+export function findPackage(query: string): PackageInfo | undefined {
+  const all = getAllPackages()
+  // 1. Exact match on name
+  const exact = all.find(p => p.name === query)
+  if (exact) return exact
+
+  // 2. Case-insensitive match on displayName
+  const ql = query.toLowerCase()
+  const byDisplay = all.find(p => p.displayName.toLowerCase() === ql)
+  if (byDisplay) return byDisplay
+
+  // 3. Auto-prepend vscode- then match name
+  const prefixed = `vscode-${query.replace(/^vscode-/, '')}`
+  return all.find(p => p.name === prefixed)
+}

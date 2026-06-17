@@ -2,7 +2,7 @@ import { commands, workspace, window as cocWindow, ExtensionContext } from 'coc.
 import { createInitialState, StateManager } from './state'
 import { TUI } from './tui'
 import { installPackage, uninstallPackage, updatePackage, runConcurrent } from './pipeline'
-import { updateRegistry } from './registry'
+import { updateRegistry, findPackage } from './registry'
 
 let currentTUI: TUI | null = null
 let openingTUI = false
@@ -38,24 +38,32 @@ async function ensureGlobalExtensions(state: StateManager): Promise<void> {
     return
   }
 
+  const regNameByQuery = new Map<string, string>()
   const toInstall: string[] = []
   const unknown: string[] = []
   const alreadyInstalled: string[] = []
-  for (const name of names) {
-    const pkg = state.getPackage(name)
+  for (const query of names) {
+    const info = findPackage(query)
+    if (!info) {
+      unknown.push(query)
+      continue
+    }
+    const pkg = state.getPackage(info.name)
     if (!pkg) {
-      unknown.push(name)
+      unknown.push(query)
       continue
     }
     if (pkg.status === 'installed') {
-      alreadyInstalled.push(name)
+      alreadyInstalled.push(query)
     } else {
-      toInstall.push(name)
+      const regName = info.name
+      regNameByQuery.set(query, regName)
+      toInstall.push(regName)
     }
   }
 
   if (unknown.length > 0) {
-    cocWindow.showWarningMessage(`[coc-loader] Unknown global extensions (check registry name): ${unknown.join(', ')}`)
+    cocWindow.showWarningMessage(`[coc-loader] Unknown global extensions: ${unknown.join(', ')}`)
   }
 
   if (toInstall.length === 0) {
@@ -67,11 +75,11 @@ async function ensureGlobalExtensions(state: StateManager): Promise<void> {
 
   cocWindow.showInformationMessage(`[coc-loader] Installing ${toInstall.length}/${names.length} global extension(s)...`)
   const failed: string[] = []
-  await runConcurrent(toInstall, async (name) => {
-    await installPackage(state, name)
-    const pkg = state.getPackage(name)
+  await runConcurrent(toInstall, async (regName) => {
+    await installPackage(state, regName)
+    const pkg = state.getPackage(regName)
     if (pkg && pkg.status !== 'installed') {
-      failed.push(name)
+      failed.push(regName)
     }
   }, state, 3)
 
