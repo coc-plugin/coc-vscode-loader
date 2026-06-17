@@ -321,14 +321,10 @@ export class TUI {
     if (id === 'language-filter') {
       const langs = this.state.getLanguages()
       if (langs.length === 0) return
-      const current = s.languageFilter
-      const idx = current ? langs.indexOf(current) : -1
-      const next = idx >= langs.length - 1 ? null : langs[idx + 1]
-      this.state.setLanguageFilter(next)
-      if (next) {
-        cocWindow.showInformationMessage(`Language filter: ${next}`)
-      } else {
-        cocWindow.showInformationMessage('Language filter cleared')
+      const picks = [...langs.map(l => ({ label: l })), { label: 'Clear filter' }]
+      const chosen = await cocWindow.showQuickPick(picks, { placehold: 'Select language filter' })
+      if (chosen) {
+        this.state.setLanguageFilter(chosen.label === 'Clear filter' ? null : chosen.label)
       }
       return
     }
