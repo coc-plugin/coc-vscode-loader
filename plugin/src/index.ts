@@ -48,6 +48,10 @@ async function ensureGlobalExtensions(state: StateManager): Promise<void> {
     await updateRegistry()
     state.refreshPackages()
   } catch {
+    const pkgs = state.getState().packages
+    if (pkgs.length === 0) {
+      cocWindow.showWarningMessage(`[coc-loader] Failed to fetch registry (offline?). Global extensions cannot be installed.`)
+    }
     return
   }
 
@@ -94,11 +98,16 @@ async function ensureGlobalExtensions(state: StateManager): Promise<void> {
   }, state, 3)
 
   const succeeded = toInstall.filter(n => !failed.includes(n))
-  if (failed.length > 0) {
-    cocWindow.showErrorMessage(`[coc-loader] Failed: ${failed.join(', ')}`)
-  }
-  if (succeeded.length > 0) {
-    cocWindow.showInformationMessage(`[coc-loader] Installed: ${succeeded.join(', ')}. Restart coc to apply.`)
+  const parts: string[] = []
+  if (succeeded.length > 0) parts.push(`Installed: ${succeeded.join(', ')}`)
+  if (failed.length > 0) parts.push(`Failed: ${failed.join(', ')}`)
+  if (parts.length > 0) {
+    const msg = parts.join('; ') + (succeeded.length > 0 ? '. Restart coc to apply.' : '')
+    if (failed.length > 0) {
+      cocWindow.showWarningMessage(`[coc-loader] ${msg}`)
+    } else {
+      cocWindow.showInformationMessage(`[coc-loader] ${msg}`)
+    }
   }
 }
 
@@ -179,9 +188,11 @@ export async function activate(context: ExtensionContext) {
         }
         const ok = await cocWindow.showPrompt(`Uninstall all ${installed.length} packages?`)
         if (ok) {
-          for (const pkg of installed) {
-            try { await uninstallPackage(state, pkg.info.name) } catch { /* skip */ }
-          }
+          await runConcurrent(
+            installed.map(p => p.info.name),
+            async name => { await uninstallPackage(state, name) },
+            state, 3,
+          )
         }
       } catch (e: unknown) {
         cocWindow.showErrorMessage(`loader.uninstallAll: ${safeMsg(e)}`)
@@ -242,10 +253,10 @@ export async function activate(context: ExtensionContext) {
           cocWindow.showInformationMessage('No packages installed')
           return
         }
-        const names = installed.map(p => p.info.name).sort()
-        const output = `['${names.join("', '")}']`
+        const shortNames = installed.map(p => p.info.name.replace(/^vscode-/, '')).sort()
+        const output = `['${shortNames.join("', '")}']`
         await workspace.nvim.call('setreg', ['+', output])
-        cocWindow.showInformationMessage(`Installed (${names.length}): ${output} (copied to clipboard)`)
+        cocWindow.showInformationMessage(`Installed (${shortNames.length}): ${output} (copied to clipboard)`)
       } catch (e: unknown) {
         cocWindow.showErrorMessage(`loader.list: ${safeMsg(e)}`)
       }
