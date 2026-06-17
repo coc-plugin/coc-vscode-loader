@@ -30,36 +30,61 @@ External commands required at runtime:
 
 ## Registry 添加规则
 
-`coc-vscode-registry/registry.json` 按语言生态分组，添加新条目时遵循以下规则：
+`coc-vscode-registry/registry.json` 是一个扁平数组（当前 122 条），按技术含量从高到低排列，同组内按 `name` 字母序插入。
 
-### 插入位置
+### 排列逻辑
 
-找到对应语言生态的组，按 `name` 字母序插入。组顺序：
+整体分为两大段：**非 snippets**（type 为 `pure-lsp` / `ts-bridge` / `direct-api`）在前，**snippets** 在后。非 snippets 段按技术含量从高到低分组：
 
 ```
-1. Vue（Volar + Vue snippets）
-2. React + Next.js + SolidJS（snippets）
-3. Angular（snippets）
-4. Svelte + Astro（LSP + snippets）
-5. CSS/Style（Stylelint, CSS Peek, CSS Modules, Tailwind, HTML CSS Support, Bootstrap）
-6. Formatter（Prettier）
-7. JS/TS LSP（Biome, Deno）
-8. JS/TS Snippets
-9. Python
-10. PHP
-11. Go/Rust
-12. Lua / TOML / YAML / Prisma / Ansible / Shell / Gitignore
-13. C/C++/C#/Java
-14. Flutter/Dart
-15. NestJS/Express / Spring Boot
-16. Testing
-17. Database
-18. Mobile（uni-app, Ionic）
-19. Game Dev（Unity, Unreal）
-20. Other（未分类）
+LSP (binary / module / bridge) → direct-api (API polyfill)
 ```
 
-如果新插件不属于任何现有组，放在 Other 组末尾。
+### 非 snippets 段插入位置
+
+按以下语言/工具类别分组，组内按 `name` 字母序插入：
+
+```
+1.  C/C++                    — clangd (binary)
+2.  Rust                     — rust-analyzer (binary)
+3.  Go                       — go (binary via goPackages)
+4.  Python                   — pyright (module), ruff (binary)
+5.  Angular                  — ng-language-service (module)
+6.  Vue                      — volar (ts-bridge)
+7.  JS/TS                    — eslint (module+patches), biome (binary), deno (binary)
+8.  Svelte                   — svelte (module)
+9.  Astro                    — astro (module)
+10. CSS/Style                — tailwindcss (module), stylelint (module), css-peek (module), html-css-support (direct-api), css-modules (direct-api)
+11. PHP                      — intelephense (module)
+12. Config/Shell/Infra       — lua, yaml, prisma, ansible, bash-language-server, docker, taplo
+13. Formatter                — prettier-vscode (direct-api)
+14. Other tools              — gitignore (direct-api), shellcheck (direct-api)
+```
+
+### snippets 段插入位置
+
+按以下类别分组，组内按 `name` 字母序插入：
+
+```
+1.  Vue
+2.  React / Next.js / SolidJS
+3.  Angular
+4.  Svelte
+5.  CSS / Bootstrap
+6.  JS / TS
+7.  Python
+8.  PHP
+9.  C / Rust
+10. Flutter / Dart
+11. Express / NestJS / Spring Boot
+12. Testing (Jest, Cypress, Playwright)
+13. Database (MySQL, PostgreSQL)
+14. Uni-app
+15. Game Dev (Unity, Unreal)
+16. Other
+```
+
+新插件不属于任何现有组时放在对应段的 Other 组末尾。
 
 ### 必需字段
 
@@ -77,13 +102,24 @@ External commands required at runtime:
 }
 ```
 
-### 可选安装字段
+### 可选字段
 
-| 字段 | 说明 | 示例 |
-|------|------|------|
-| `pipPackages` | Python pip 依赖，pipeline 自动安装 | `["ansible-lint"]` |
-| `goPackages` | Go 包，pipeline 执行 `go install` 编译到 `server/` | `["golang.org/x/tools/gopls@latest"]` |
-| `cargoPackages` | Rust crate，pipeline 执行 `cargo install --root` 编译后复制到 `server/` | `[{ "crate": "nil", "binary": "nil" }]` |
+| 字段 | 适用 type | 说明 |
+|------|-----------|------|
+| `minPluginVersion` | 全部 | 最低 coc-vscode-loader 版本，低于此版本的客户端会过滤掉该条目 |
+| `serverBinary` | pure-lsp (binary kind) | GitHub Release 二进制下载配置，含 `repo`、`asset`、`binaryPath`、可选 `args` 和 `targetAssets` |
+| `pipPackages` | pure-lsp | Python pip 依赖，pipeline 自动安装 |
+| `goPackages` | pure-lsp | Go 包，pipeline 执行 `go install` 编译到 `server/` |
+| `cargoPackages` | pure-lsp | Rust crate，pipeline 执行 `cargo install --root` 编译后复制到 `server/` |
+
+### convert 字段说明
+
+`convert` 是数组，按执行顺序排列：
+
+- **`language-client`** — 生成 `src/index.ts`，创建 LanguageClient 连接语言服务器。适用于 `pure-lsp` 类型。`server.kind` 可选 `module`（npm 包）或 `binary`（可执行文件）。binary 类型需要设置 `server.binary`（repo/asset/binaryPath）和可选 `args`。
+- **`source`** — 用 import-mapping 等 transform 转换 TypeScript 源码。可选，有则保留原扩展的部分功能。
+- **`bridge`** — 桥接预设（目前只有 `ts-bridge` 用于 Volar）。
+- **`snippets`** — 纯 Snippets 扩展，复制 snippets JSON 文件并生成空壳 `src/index.ts`。
 
 ### 插件特有文本补丁
 
