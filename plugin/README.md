@@ -55,6 +55,22 @@ npm install coc-vscode-loader
 | `:CocCommand loader.uninstallAll` | Uninstall all (with confirmation) |
 | `:CocCommand loader.updateRegistry` | Fetch latest registry from remote |
 
+## Global Extensions (auto-install)
+
+Define extensions to auto-install on plugin activation via vim variable:
+
+```vim
+" .vimrc
+let g:coc_loader_global_extensions = ['vscode-pyright', 'vscode-eslint', 'vscode-lua']
+```
+
+```lua
+-- init.lua
+vim.g.coc_loader_global_extensions = { 'vscode-pyright', 'vscode-eslint', 'vscode-lua' }
+```
+
+On next `:CocRestart`, the plugin will fetch the registry and install any missing extensions concurrently (max 3 at a time). Installed extensions are skipped.
+
 ## Features
 
 - **Real conversion pipeline** — git clone → converter → npm install → esbuild → register to coc

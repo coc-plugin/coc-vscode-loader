@@ -34,7 +34,19 @@ Then open the TUI to browse and install available extensions:
 :CocCommand loader.open
 ```
 
-Or browse all available extensions online: [coc-plugin.github.io/coc-vscode-registry](https://coc-plugin.github.io/coc-vscode-registry/)
+Or auto-install extensions via vim variable (no TUI needed):
+
+```vim
+" .vimrc
+let g:coc_loader_global_extensions = ['vscode-pyright', 'vscode-eslint']
+```
+
+```lua
+-- init.lua
+vim.g.coc_loader_global_extensions = { 'vscode-pyright', 'vscode-eslint' }
+```
+
+Browse all available extensions online: [coc-plugin.github.io/coc-vscode-registry](https://coc-plugin.github.io/coc-vscode-registry/)
 
 ---
 
