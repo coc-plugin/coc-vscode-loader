@@ -76,6 +76,15 @@ const CMD_TIMEOUT = 300_000 // 5 minutes
 // Track running child processes per package for cancellation
 const runningProcesses = new Map<string, import('child_process').ChildProcess>()
 
+// Mutex for serializing concurrent extensions/package.json writes
+let pkgJsonMutex = Promise.resolve()
+function withPkgJsonLock<T>(fn: () => Promise<T>): Promise<T> {
+  const prev = pkgJsonMutex
+  let release: () => void
+  pkgJsonMutex = new Promise(r => { release = r })
+  return prev.then(() => fn()).finally(() => release!())
+}
+
 export function cancelPackage(name: string): boolean {
   const proc = runningProcesses.get(name)
   if (!proc) return false
@@ -543,28 +552,30 @@ async function installToCoc(
   const npmLog = (chunk: string) => onProgress(5, 5, chunk.trim(), '')
   await run('npm', npmInstallArgs(), dest, npmLog, undefined, name)
 
-  const pkgPath = extensionsPkgPath()
-  let pkg: Record<string, any>
-  try {
-    pkg = fs.existsSync(pkgPath) ? JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) : { dependencies: {} }
-  } catch {
-    pkg = { dependencies: {} }
-  }
-  pkg.dependencies = pkg.dependencies || {}
-  const depName = `coc-${name}`
-  if (!pkg.dependencies[depName]) {
-    pkg.dependencies[depName] = `file:${dest}`
-  }
-  // Mark as locked so CocUpdate skips it (avoid npm registry 404)
-  const lockedArr = pkg.locked || []
-  if (!lockedArr.includes(depName)) {
-    lockedArr.push(depName)
-  }
-  pkg.locked = lockedArr
-  pkg.lastUpdate = Date.now()
-  const tmp = pkgPath + '.tmp'
-  fs.writeFileSync(tmp, JSON.stringify(pkg, null, 2))
-  fs.renameSync(tmp, pkgPath)
+  await withPkgJsonLock(async () => {
+    const pkgPath = extensionsPkgPath()
+    let pkg: Record<string, any>
+    try {
+      pkg = fs.existsSync(pkgPath) ? JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) : { dependencies: {} }
+    } catch {
+      pkg = { dependencies: {} }
+    }
+    pkg.dependencies = pkg.dependencies || {}
+    const depName = `coc-${name}`
+    if (!pkg.dependencies[depName]) {
+      pkg.dependencies[depName] = `file:${dest}`
+    }
+    // Mark as locked so CocUpdate skips it (avoid npm registry 404)
+    const lockedArr = pkg.locked || []
+    if (!lockedArr.includes(depName)) {
+      lockedArr.push(depName)
+    }
+    pkg.locked = lockedArr
+    pkg.lastUpdate = Date.now()
+    const tmp = pkgPath + '.tmp'
+    fs.writeFileSync(tmp, JSON.stringify(pkg, null, 2))
+    fs.renameSync(tmp, pkgPath)
+  })
 }
 
 function metaPath(name: string): string {

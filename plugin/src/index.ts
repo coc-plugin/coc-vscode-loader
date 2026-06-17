@@ -1,5 +1,5 @@
 import { commands, workspace, window as cocWindow, ExtensionContext } from 'coc.nvim'
-import { createInitialState, StateManager } from './state'
+import { createInitialState, StateManager, PackageEntry } from './state'
 import { TUI } from './tui'
 import { installPackage, uninstallPackage, updatePackage, runConcurrent, checkUpdates, rimraf } from './pipeline'
 import { updateRegistry, findPackage } from './registry'
@@ -22,6 +22,14 @@ async function closeCurrentTUI(): Promise<void> {
     try { await currentTUI.close() } catch { /* ignore close errors */ }
     currentTUI = null
   }
+}
+
+function resolvePackageName(state: StateManager, query: string): { regName: string; pkg: PackageEntry } | undefined {
+  const info = findPackage(query)
+  if (!info) return undefined
+  const pkg = state.getPackage(info.name)
+  if (!pkg) return undefined
+  return { regName: info.name, pkg }
 }
 
 async function ensureGlobalExtensions(state: StateManager): Promise<void> {
@@ -115,77 +123,51 @@ export async function activate(context: ExtensionContext) {
     })
   )
 
-  context.subscriptions.push(
-    commands.registerCommand('loader.install', async (name?: string) => {
-      try {
-        if (!name) {
-          const raw: unknown = await workspace.nvim.call('input', ['Plugin name: ', ''])
-          if (typeof raw !== 'string' || !raw) return
-          name = raw as string
+  function registerPackageCmd(name: string, fn: (regName: string, pkg: PackageEntry) => Promise<void>) {
+    context.subscriptions.push(
+      commands.registerCommand(`loader.${name}`, async (input?: string) => {
+        try {
+          if (!input) {
+            const raw: unknown = await workspace.nvim.call('input', ['Plugin name: ', ''])
+            if (typeof raw !== 'string' || !raw) return
+            input = raw as string
+          }
+          const resolved = resolvePackageName(state, input)
+          if (!resolved) {
+            cocWindow.showInformationMessage(`Unknown package: ${input}`)
+            return
+          }
+          await fn(resolved.regName, resolved.pkg)
+        } catch (e: unknown) {
+          cocWindow.showErrorMessage(`loader.${name}: ${safeMsg(e)}`)
         }
-        const pkg = state.getPackage(name)
-        if (!pkg) {
-          cocWindow.showInformationMessage(`Unknown package: ${name}`)
-          return
-        }
-        if (pkg.status === 'installed') {
-          cocWindow.showInformationMessage(`${name} is already installed`)
-          return
-        }
-        await installPackage(state, name)
-      } catch (e: unknown) {
-        cocWindow.showErrorMessage(`loader.install: ${safeMsg(e)}`)
-      }
-    })
-  )
+      })
+    )
+  }
 
-  context.subscriptions.push(
-    commands.registerCommand('loader.uninstall', async (name?: string) => {
-      try {
-        if (!name) {
-          const raw: unknown = await workspace.nvim.call('input', ['Plugin name: ', ''])
-          if (typeof raw !== 'string' || !raw) return
-          name = raw as string
-        }
-        const pkg = state.getPackage(name)
-        if (!pkg) {
-          cocWindow.showInformationMessage(`Unknown package: ${name}`)
-          return
-        }
-        if (pkg.status !== 'installed') {
-          cocWindow.showInformationMessage(`${name} is not installed`)
-          return
-        }
-        await uninstallPackage(state, name)
-      } catch (e: unknown) {
-        cocWindow.showErrorMessage(`loader.uninstall: ${safeMsg(e)}`)
-      }
-    })
-  )
+  registerPackageCmd('install', async (regName, pkg) => {
+    if (pkg.status === 'installed') {
+      cocWindow.showInformationMessage(`${regName} is already installed`)
+      return
+    }
+    await installPackage(state, regName)
+  })
 
-  context.subscriptions.push(
-    commands.registerCommand('loader.update', async (name?: string) => {
-      try {
-        if (!name) {
-          const raw: unknown = await workspace.nvim.call('input', ['Plugin name: ', ''])
-          if (typeof raw !== 'string' || !raw) return
-          name = raw as string
-        }
-        const pkg = state.getPackage(name)
-        if (!pkg) {
-          cocWindow.showInformationMessage(`Unknown package: ${name}`)
-          return
-        }
-        if (pkg.status !== 'installed') {
-          cocWindow.showInformationMessage(`${name} is not installed`)
-          return
-        }
-        await updatePackage(state, name)
-      } catch (e: unknown) {
-        cocWindow.showErrorMessage(`loader.update: ${safeMsg(e)}`)
-      }
-    })
-  )
+  registerPackageCmd('uninstall', async (regName, pkg) => {
+    if (pkg.status !== 'installed') {
+      cocWindow.showInformationMessage(`${regName} is not installed`)
+      return
+    }
+    await uninstallPackage(state, regName)
+  })
+
+  registerPackageCmd('update', async (regName, pkg) => {
+    if (pkg.status !== 'installed') {
+      cocWindow.showInformationMessage(`${regName} is not installed`)
+      return
+    }
+    await updatePackage(state, regName)
+  })
 
   context.subscriptions.push(
     commands.registerCommand('loader.uninstallAll', async () => {
@@ -207,30 +189,14 @@ export async function activate(context: ExtensionContext) {
     })
   )
 
-  context.subscriptions.push(
-    commands.registerCommand('loader.reinstall', async (name?: string) => {
-      try {
-        if (!name) {
-          const raw: unknown = await workspace.nvim.call('input', ['Plugin name: ', ''])
-          if (typeof raw !== 'string' || !raw) return
-          name = raw as string
-        }
-        const pkg = state.getPackage(name)
-        if (!pkg) {
-          cocWindow.showInformationMessage(`Unknown package: ${name}`)
-          return
-        }
-        if (pkg.status !== 'installed') {
-          cocWindow.showInformationMessage(`${name} is not installed`)
-          return
-        }
-        await uninstallPackage(state, name)
-        await installPackage(state, name)
-      } catch (e: unknown) {
-        cocWindow.showErrorMessage(`loader.reinstall: ${safeMsg(e)}`)
-      }
-    })
-  )
+  registerPackageCmd('reinstall', async (regName, pkg) => {
+    if (pkg.status !== 'installed') {
+      cocWindow.showInformationMessage(`${regName} is not installed`)
+      return
+    }
+    await uninstallPackage(state, regName)
+    await installPackage(state, regName)
+  })
 
   context.subscriptions.push(
     commands.registerCommand('loader.updateRegistry', async () => {
@@ -297,8 +263,11 @@ export async function activate(context: ExtensionContext) {
   // Auto-install global extensions from vim.g.coc_loader_global_extensions
   ensureGlobalExtensions(state).catch(() => {})
 
-  // Silent update check on startup — only notify if updates found
-  checkUpdates(state, true).then(count => {
+  // Silent update check on startup — only notify if updates found, timeout after 30s
+  Promise.race([
+    checkUpdates(state, true),
+    new Promise<number>(r => setTimeout(() => r(0), 30_000)),
+  ]).then(count => {
     if (count > 0) {
       cocWindow.showInformationMessage(`[coc-loader] ${count} package(s) have updates. Open TUI and press U to update.`)
     }
