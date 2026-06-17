@@ -174,7 +174,7 @@ function satisfiesVersion(required: string): boolean {
   for (let i = 0; i < Math.max(a.length, b.length); i++) {
     const va = a[i], vb = b[i]
     if (va === undefined || vb === undefined) break
-    if (isNaN(va) || isNaN(vb)) return false
+    if (isNaN(va) || isNaN(vb)) return true
     if (va > vb) return true
     if (va < vb) return false
   }

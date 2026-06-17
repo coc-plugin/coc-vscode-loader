@@ -79,6 +79,8 @@ export class TUI {
   private _helpAnimChars = 0
   private _helpAnimating = false
   private _inSearchMode = false
+  private backdropBufnr: number = 0
+  private backdropWinid: number = 0
 
   constructor(state: StateManager) {
     this.state = state
@@ -287,6 +289,7 @@ export class TUI {
       if (s.showHelp) { this.state.toggleHelp(); return }
       if (s.searchQuery) { this.state.setSearchQuery(''); return }
       if (s.categoryFilter) { this.state.setCategoryFilter(null); return }
+      if (this.state.getMarkedNames().length > 0) { this.state.clearMarks(); return }
       await this.close(); return
     }
     if (id === 'question') { this.state.toggleHelp(); return }
