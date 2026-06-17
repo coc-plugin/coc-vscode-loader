@@ -149,6 +149,13 @@ async function downloadSource(
   }
 
   const dir = info.source.subdir ? path.join(srcDir, info.source.subdir) : srcDir
+  if (!fs.existsSync(dir)) {
+    const hint = info.source.subdir ? ` (subdir: "${info.source.subdir}")` : ''
+    throw new Error(
+      `Source directory not found after cloning${hint}. ` +
+      `The repository "${info.source.repo}" may have changed its structure.`
+    )
+  }
   let updated = true
   if (beforeHead) {
     try {
@@ -194,9 +201,11 @@ async function convertSource(
     // Local dev mode: read from local coc-vscode-registry clone
     fs.writeFileSync(presetsFile, fs.readFileSync(localPresets))
   } else {
-    // npm mode: fetch from remote (cached globally)
+    // npm mode: fetch from remote (cached globally with 1-hour TTL)
     const globalPresetsCache = path.join(os.homedir(), '.config', 'coc', 'converter-cache', 'presets.json')
-    if (!fs.existsSync(globalPresetsCache)) {
+    const PRESETS_TTL = 3_600_000
+    const presetsAge = fs.existsSync(globalPresetsCache) ? Date.now() - fs.statSync(globalPresetsCache).mtimeMs : Infinity
+    if (presetsAge > PRESETS_TTL) {
       const presetsUrl = 'https://raw.githubusercontent.com/coc-plugin/coc-vscode-registry/main/presets.json'
       try {
         const res = await fetch(presetsUrl)

@@ -289,7 +289,11 @@ export class TUI {
       if (s.showHelp) { this.state.toggleHelp(); return }
       if (s.searchQuery) { this.state.setSearchQuery(''); return }
       if (s.categoryFilter) { this.state.setCategoryFilter(null); return }
-      if (this.state.getMarkedNames().length > 0) { this.state.clearMarks(); return }
+      const busyCount = s.packages.filter(p => ['installing', 'updating', 'uninstalling'].includes(p.status)).length
+      if (busyCount > 0) {
+        cocWindow.showWarningMessage(`${busyCount} operation(s) in progress. Use <C-c> to cancel, or wait for completion.`)
+        return
+      }
       await this.close(); return
     }
     if (id === 'question') { this.state.toggleHelp(); return }
