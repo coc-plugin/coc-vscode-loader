@@ -203,6 +203,10 @@ export async function activate(context: ExtensionContext) {
     if (!ok) return
     cocWindow.showInformationMessage(`Uninstalling ${regName}...`)
     await uninstallPackage(state, regName)
+    const after = state.getPackage(regName)
+    if (after?.status === 'failed') {
+      cocWindow.showErrorMessage(`${regName} uninstall failed: ${after.error || 'unknown error'}`)
+    }
   })
 
   registerPackageCmd('update', async (regName, pkg) => {
@@ -212,6 +216,10 @@ export async function activate(context: ExtensionContext) {
     }
     cocWindow.showInformationMessage(`Updating ${regName}...`)
     await updatePackage(state, regName)
+    const after = state.getPackage(regName)
+    if (after?.status === 'failed') {
+      cocWindow.showErrorMessage(`${regName} update failed: ${after.error || 'unknown error'}`)
+    }
   })
 
   context.subscriptions.push(
