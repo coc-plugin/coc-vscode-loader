@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.5.4] - 2026-06-17
+
+### Added
+- **`loader.cleanCache` command** — clean source/build directories for all packages with cache size display
+- **`loader.list` command** — export installed package names to clipboard (dual Lua/VimL format)
+- **Queued section in TUI** — visualize packages waiting on concurrency slot during batch operations
+- **Cancel install support** — `<C-c>` keybinding to kill in-progress package operations (SIGTERM)
+- **Search mode** — `/` key for interactive real-time filtering via Neovim cmdline
+- **Language filter** — `<C-f>` quick pick language selector
+- **Auto-install global extensions** — `g:coc_loader_global_extensions` vim variable support with flexible name matching (`findPackage` three-tier: exact name → displayName → `vscode-` prefix)
+- **Silent update check on startup** — background check with notification only when updates found
+- **30-second timeout on startup update check** — prevent plugin activation from hanging on slow network
+
+### Fixed
+- **Error reporting** — show error message when uninstall or update actually fails
+- **Registry pre-fetch** — auto-fetch registry before uninstall/list commands to prevent empty results
+- **Busy guard** — silent update checks no longer block user-initiated check updates
+- **package.json write race** — mutex in `installToCoc` to serialize concurrent writes to `extensions/package.json`
+
+### Changed
+- **`registerPackageCmd` refactor** — centralize command registration pattern across install/uninstall/update/reinstall
+- **`loader.list` format** — copy Lua format to clipboard, show both Lua and VimL formats
+- **converter**: bump to v1.5.4
+- **plugin**: bump to v1.5.4
+
 ## [1.5.0] - 2026-06-16
 
 ### Added
