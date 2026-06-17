@@ -9,6 +9,18 @@ import * as os from 'os'
 
 const CACHE_ROOT = path.join(os.homedir(), '.config', 'coc', 'converter-cache')
 
+function dirSize(dir: string): number {
+  try {
+    let size = 0
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, entry.name)
+      if (entry.isDirectory()) size += dirSize(p)
+      else if (entry.isFile()) size += fs.statSync(p).size
+    }
+    return size
+  } catch { return 0 }
+}
+
 let currentTUI: TUI | null = null
 let openingTUI = false
 
@@ -108,7 +120,13 @@ async function ensureGlobalExtensions(state: StateManager): Promise<void> {
   const succeeded = toInstall.filter(n => !failed.includes(n))
   const parts: string[] = []
   if (succeeded.length > 0) parts.push(`Installed: ${succeeded.join(', ')}`)
-  if (failed.length > 0) parts.push(`Failed: ${failed.join(', ')}`)
+  if (failed.length > 0) {
+    const errs = failed.map(n => {
+      const p = state.getPackage(n)
+      return p?.error ? `${n} (${p.error})` : n
+    })
+    parts.push(`Failed: ${errs.join(', ')}`)
+  }
   if (parts.length > 0) {
     const msg = parts.join('; ') + (succeeded.length > 0 ? '. Restart coc to apply.' : '')
     if (failed.length > 0) {
@@ -168,7 +186,12 @@ export async function activate(context: ExtensionContext) {
       cocWindow.showInformationMessage(`${regName} is already installed`)
       return
     }
+    cocWindow.showInformationMessage(`Installing ${regName}...`)
     await installPackage(state, regName)
+    const after = state.getPackage(regName)
+    if (after?.status === 'failed') {
+      cocWindow.showErrorMessage(`${regName} install failed: ${after.error || 'unknown error'}`)
+    }
   })
 
   registerPackageCmd('uninstall', async (regName, pkg) => {
@@ -176,6 +199,9 @@ export async function activate(context: ExtensionContext) {
       cocWindow.showInformationMessage(`${regName} is not installed`)
       return
     }
+    const ok = await cocWindow.showPrompt(`Uninstall ${regName}?`)
+    if (!ok) return
+    cocWindow.showInformationMessage(`Uninstalling ${regName}...`)
     await uninstallPackage(state, regName)
   })
 
@@ -184,6 +210,7 @@ export async function activate(context: ExtensionContext) {
       cocWindow.showInformationMessage(`${regName} is not installed`)
       return
     }
+    cocWindow.showInformationMessage(`Updating ${regName}...`)
     await updatePackage(state, regName)
   })
 
@@ -235,20 +262,27 @@ export async function activate(context: ExtensionContext) {
       try {
         const dirs = fs.readdirSync(CACHE_ROOT).filter(n => {
           const p = path.join(CACHE_ROOT, n)
-          return fs.statSync(p).isDirectory() && n !== 'registry.json' && !n.startsWith('.')
+          return fs.statSync(p).isDirectory() && !n.startsWith('.')
         })
         if (dirs.length === 0) {
           cocWindow.showInformationMessage('No cached packages to clean')
           return
         }
-        const ok = await cocWindow.showPrompt(`Clean build cache for ${dirs.length} package(s)?`)
+        let totalSize = 0
+        for (const name of dirs) {
+          totalSize += dirSize(path.join(CACHE_ROOT, name))
+        }
+        const sizeStr = totalSize > 1024 * 1024
+          ? `${(totalSize / 1024 / 1024).toFixed(1)}MB`
+          : `${(totalSize / 1024).toFixed(0)}KB`
+        const ok = await cocWindow.showPrompt(`Clean cache (${dirs.length} pkg, ${sizeStr})?`)
         if (!ok) return
-        let cleaned = 0
         for (const name of dirs) {
           await rimraf(path.join(CACHE_ROOT, name))
-          cleaned++
         }
-        cocWindow.showInformationMessage(`Cleaned cache for ${cleaned} package(s)`)
+        cocWindow.showInformationMessage(
+          `Cleaned ${dirs.length} package(s) (${sizeStr}) — extensions/node_modules not affected`,
+        )
       } catch (e: unknown) {
         cocWindow.showErrorMessage(`loader.cleanCache: ${safeMsg(e)}`)
       }
@@ -265,9 +299,12 @@ export async function activate(context: ExtensionContext) {
           return
         }
         const shortNames = installed.map(p => p.info.name.replace(/^vscode-/, '')).sort()
-        const output = `['${shortNames.join("', '")}']`
-        await workspace.nvim.call('setreg', ['+', output])
-        cocWindow.showInformationMessage(`Installed (${shortNames.length}): ${output} (copied to clipboard)`)
+        const viml = `['${shortNames.join("', '")}']`
+        const lua = `{ '${shortNames.join("', '")}' }`
+        await workspace.nvim.call('setreg', ['+', lua])
+        cocWindow.showInformationMessage(
+          `Installed (${shortNames.length}) — Lua: ${lua}  VimL: ${viml} (Lua copied to clipboard)`,
+        )
       } catch (e: unknown) {
         cocWindow.showErrorMessage(`loader.list: ${safeMsg(e)}`)
       }
@@ -295,7 +332,10 @@ export async function activate(context: ExtensionContext) {
     }
   }).catch(() => {})
 
-  cocWindow.showInformationMessage('coc-loader activated! Use :CocCommand loader.open')
+  const hasInstalled = state.getState().packages.some(p => p.status === 'installed')
+  if (!hasInstalled) {
+    cocWindow.showInformationMessage('coc-loader activated! Use :CocCommand loader.open')
+  }
 }
 
 export async function deactivate(): Promise<void> {
