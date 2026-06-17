@@ -378,6 +378,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
       esbuild: '^0.28.0',
     },
     contributes: {
+      languages: origPkg.contributes?.languages || undefined,
       configuration: origPkg.contributes?.configuration ? {
         type: 'object',
         title: origPkg.contributes.configuration.title || pluginName,
