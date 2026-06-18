@@ -65,6 +65,10 @@ export interface LanguageClientStep {
   /** When false, omit synchronize config (disables coc.nvim auto config sync).
    *  Default: true (synchronize section generated) */
   syncConfig?: boolean
+  /** Auto-append () on function/method completion items.
+   *  Uses LanguageClient middleware to patch insertText/textEdit.
+   *  Default: true */
+  autoParentheses?: boolean
 }
 
 export interface SourceStep {

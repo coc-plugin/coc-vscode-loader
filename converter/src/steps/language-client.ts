@@ -150,6 +150,9 @@ import * as path from 'path'
 
 export async function activate(context: ExtensionContext): Promise<void> {
   try {
+    // Normalize LANG: coc.nvim's getLocale() splits by '.' and may return en_US (invalid for Intl.Collator)
+    const _rawLang = process.env.LANG || '';
+    if (_rawLang.includes('_')) process.env.LANG = _rawLang.replace(/_/g, '-');
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] activate() called')\n` : ''}${serverPathCode}
     if (!serverPath && !_mainEntry) {
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] serverPath undefined')\n` : ''}\
@@ -169,6 +172,37 @@ ${preloadCode}
           ${ls.syncConfig !== false ? `synchronize: { configurationSection: '${escapeStr(id)}' },` : ''}
           ${hasPreload ? `initializationOptions: initOpts,` : ''}
           ${!hasPreload && ls.initializationOptions ? `initializationOptions: ${ls.initializationOptions},` : ''}
+          ${ls.autoParentheses !== false ? `middleware: {
+            provideCompletionItem: async (_doc, _pos, _ctx, _token, next) => {
+              const result = await next(_doc, _pos, _ctx, _token)
+              if (!result) return result
+              const patch = (item) => {
+                if ((item.kind === 2 || item.kind === 3) && item.insertTextFormat !== 2) {
+                  item.insertTextFormat = 2
+                  if (item.textEdit) {
+                    item.textEdit.newText = (item.textEdit.newText || item.label || '') + '($0)'
+                  } else {
+                    item.insertText = (typeof item.insertText === 'string' ? item.insertText : item.label ?? '') + '($0)'
+                  }
+                }
+              }
+              const items = Array.isArray(result) ? result : (result && result.items) || []
+              for (const item of items) patch(item)
+              return result
+            },
+            resolveCompletionItem: async (item, _token, next) => {
+              const result = await next(item, _token)
+              if (result && (result.kind === 2 || result.kind === 3) && result.insertTextFormat !== 2) {
+                result.insertTextFormat = 2
+                if (result.textEdit) {
+                  result.textEdit.newText = (result.textEdit.newText || result.label || '') + '($0)'
+                } else {
+                  result.insertText = (typeof result.insertText === 'string' ? result.insertText : result.label ?? '') + '($0)'
+                }
+              }
+              return result ?? item
+            },
+          },` : ''}
         },
       )
       context.subscriptions.push({ dispose: () => client.stop() })
