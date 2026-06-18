@@ -184,6 +184,7 @@ ${preloadCode}
                   } else {
                     item.insertText = (typeof item.insertText === 'string' ? item.insertText : item.label ?? '') + '($0)'
                   }
+                  item.command = { command: 'editor.action.triggerParameterHints', arguments: [] }
                 }
               }
               const items = Array.isArray(result) ? result : (result && result.items) || []
@@ -199,6 +200,7 @@ ${preloadCode}
                 } else {
                   result.insertText = (typeof result.insertText === 'string' ? result.insertText : result.label ?? '') + '($0)'
                 }
+                result.command = { command: 'editor.action.triggerParameterHints', arguments: [] }
               }
               return result ?? item
             },
