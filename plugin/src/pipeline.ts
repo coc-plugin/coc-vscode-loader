@@ -669,21 +669,23 @@ export async function uninstallPackage(state: StateManager, name: string): Promi
 
     state.setPackageStatus(name, 'uninstalling', { progress: '[2/3] Removing from package.json...' })
 
-    const pkgPath = extensionsPkgPath()
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
-    pkg.dependencies = pkg.dependencies || {}
-    const depName = `coc-${name}`
-    if (pkg.dependencies[depName]) {
-      delete pkg.dependencies[depName]
-    }
-    const lockedArr = pkg.locked || []
-    const idx = lockedArr.indexOf(depName)
-    if (idx !== -1) {
-      lockedArr.splice(idx, 1)
-      pkg.locked = lockedArr
-    }
-    pkg.lastUpdate = Date.now()
-    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
+    await withPkgJsonLock(async () => {
+      const pkgPath = extensionsPkgPath()
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+      pkg.dependencies = pkg.dependencies || {}
+      const depName = `coc-${name}`
+      if (pkg.dependencies[depName]) {
+        delete pkg.dependencies[depName]
+      }
+      const lockedArr = pkg.locked || []
+      const idx = lockedArr.indexOf(depName)
+      if (idx !== -1) {
+        lockedArr.splice(idx, 1)
+        pkg.locked = lockedArr
+      }
+      pkg.lastUpdate = Date.now()
+      fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
+    })
 
     state.setPackageStatus(name, 'uninstalling', { progress: '[3/3] Removing cache...' })
     await rimraf(cacheDir(name))

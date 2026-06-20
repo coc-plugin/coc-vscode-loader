@@ -87,7 +87,7 @@ case "${1:-}" in
 
   status)
     if [ -L "$EXT_DIR/$PLUGIN_NAME" ]; then
-      target=$(readlink -f "$EXT_DIR/$PLUGIN_NAME")
+      target=$(node -p "require('fs').realpathSync('$EXT_DIR/$PLUGIN_NAME')" 2>/dev/null || echo "$EXT_DIR/$PLUGIN_NAME")
       echo "📎 Local dev: $target"
       echo "🔧 Mode: LOCAL"
     elif [ -d "$EXT_DIR/$PLUGIN_NAME" ]; then

@@ -29,8 +29,13 @@ fi
 INPUT="$SOURCE${SUBDIR:+/$SUBDIR}"
 
 # Convert
+CONVERT_FILE="${CONVERT_FILE:-}"
 echo "[2/5] Converting..."
-npx tsx "$CONVERTER/src/cli.ts" convert "$INPUT" -o "$BUILD"
+CONVERT_ARGS=""
+if [ -n "$CONVERT_FILE" ]; then
+  CONVERT_ARGS="--convert-file $CONVERT_FILE"
+fi
+npx tsx "$CONVERTER/src/cli.ts" convert "$INPUT" -o "$BUILD" $CONVERT_ARGS
 
 # npm install
 echo "[3/5] npm install..."

@@ -47,7 +47,10 @@
     "onCommand:loader.install",
     "onCommand:loader.uninstall",
     "onCommand:loader.update",
+    "onCommand:loader.reinstall",
     "onCommand:loader.uninstallAll",
+    "onCommand:loader.list",
+    "onCommand:loader.cleanCache",
     "onCommand:loader.updateRegistry",
     "onCommand:loader._dispatch"
   ],
@@ -70,8 +73,20 @@
         "title": "Update a package"
       },
       {
+        "command": "loader.reinstall",
+        "title": "Reinstall a package"
+      },
+      {
         "command": "loader.uninstallAll",
         "title": "Uninstall all packages"
+      },
+      {
+        "command": "loader.list",
+        "title": "List installed packages"
+      },
+      {
+        "command": "loader.cleanCache",
+        "title": "Clean build cache"
       },
       {
         "command": "loader.updateRegistry",
