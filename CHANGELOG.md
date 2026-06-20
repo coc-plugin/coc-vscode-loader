@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.5.5] - 2026-06-20
+
+### Added
+- **`loader.reinstall` command** — reinstall a package (git clone + convert + build + install)
+- **`loader.list` command** — list installed packages and copy to clipboard (dual Lua/VimL format)
+- **`loader.cleanCache` command** — clean source/build directories for all packages with cache size display
+- **`--convert-file` argument** for `convert-plugin.sh` and `test-convert.sh` scripts
+- **`noExternal` field** in registry — dependencies to bundle instead of externalizing (handles ESM-only transitive deps)
+
+### Fixed
+- **Dynamic import transform** — handle nested parentheses in `.then()` callbacks via `replaceBalanced`
+- **Detached HEAD checkout** in `switch.sh` — replaced Linux-only `readlink -f` with cross-platform `node -p fs.realpathSync`
+- **Uninstall race** — wrap `package.json` mutation in `withPkgJsonLock` mutex
+
+### Changed
+- **`PackageInfo.type`** — accept `'snippets'` for snippet-only extension support
+- **converter**: bump to v1.5.5
+- **plugin**: bump to v1.5.5
+
 ## [1.5.4] - 2026-06-17
 
 ### Added
