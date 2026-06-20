@@ -157,6 +157,8 @@ export class StateManager {
         if (extra?.error !== undefined) pkg.error = extra.error
         if (status === 'installed' || status === 'not-installed') {
           pkg.progress = undefined
+          pkg.progressLog = []
+          pkg.error = undefined
         }
       }
     })

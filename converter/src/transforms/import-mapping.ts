@@ -99,14 +99,26 @@ export const transformImportMapping: Transform = (ctx) => {
   )
 
   // Convert dynamic import('vscode') to require('coc.nvim') (CJS sandbox)
-  // Note: also covers `await import('vscode').then(...)` → `require('coc.nvim')`
+  // Handle .then() with balanced parens (supports nested parens in callback)
+  newContent = replaceBalanced(
+    newContent,
+    /await\s+import\(['"]vscode['"]\)\s*\.then\s*\(/,
+    () => "require('coc.nvim')",
+  )
+  // await import('vscode') without .then()
   newContent = newContent.replace(
-    /await\s+import\(['"]vscode['"]\)(\.then\s*\([^)]*\))?/g,
+    /await\s+import\(['"]vscode['"]\)/g,
     "require('coc.nvim')",
   )
-  // Bare import('vscode') (no await) → require('coc.nvim')
+  // Bare import('vscode').then(...) (no await) — balanced parens
+  newContent = replaceBalanced(
+    newContent,
+    /(?<!\w)\bimport\(['"]vscode['"]\)\s*\.then\s*\(/,
+    () => "require('coc.nvim')",
+  )
+  // Bare import('vscode') without .then()
   newContent = newContent.replace(
-    /(?<!\w)\bimport\(['"]vscode['"]\)(\.then\s*\([^)]*\))?/g,
+    /(?<!\w)\bimport\(['"]vscode['"]\)/g,
     "require('coc.nvim')",
   )
   // General dynamic import → require (CJS sandbox doesn't support import())

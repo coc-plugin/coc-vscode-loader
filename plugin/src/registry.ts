@@ -14,7 +14,7 @@ export interface PackageInfo {
   name: string
   displayName: string
   description: string
-  type: 'ts-bridge' | 'pure-lsp' | 'direct-api'
+  type: 'ts-bridge' | 'pure-lsp' | 'direct-api' | 'snippets'
   source: RegistrySource
   url: string
   languages: string[]

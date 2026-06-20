@@ -604,4 +604,4 @@ When updating images in `README.md` (e.g. `plugin/assets/tui-preview.png`), GitH
 <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=<version>">
 ```
 
-Use the current version number (e.g. `v=1.5.4`) as the parameter value so it changes with each release. Do NOT use timestamps or random values — version numbers are meaningful and auto-increment.
+Use the current version number (e.g. `v=1.5.5`) as the parameter value so it changes with each release. Do NOT use timestamps or random values — version numbers are meaningful and auto-increment.

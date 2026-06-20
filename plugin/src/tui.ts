@@ -380,7 +380,7 @@ export class TUI {
     if (id === 'u' && entry.status === 'installed') { await updatePackage(this.state, pkgName); return }
     if (id === 'X' && entry.status === 'installed') { await uninstallPackage(this.state, pkgName); return }
     if (id === 'cr') {
-      if (['installing', 'updating', 'uninstalling'].includes(entry.status)) {
+      if (['installing', 'updating', 'uninstalling', 'failed'].includes(entry.status)) {
         this.state.toggleLog(pkgName)
       } else {
         this.state.toggleExpand(pkgName)
@@ -691,8 +691,29 @@ export class TUI {
     buf.nl()
 
     // Mason-style installing log: tail or full log toggle
-    if (['installing', 'updating', 'uninstalling'].includes(entry.status) && entry.progressLog.length > 0) {
-      if (entry.logExpanded) {
+    if (['installing', 'updating', 'uninstalling', 'failed'].includes(entry.status) && entry.progressLog.length > 0) {
+      if (entry.status === 'failed') {
+        if (entry.logExpanded) {
+          buf.append('    ▼ Displaying full log', 'CocLoaderHeading')
+          buf.nl()
+          for (const log of entry.progressLog) {
+            const summary = log.split('\n')[0]
+            buf.append('      ', undefined)
+            buf.append(summary, 'CocLoaderError')
+            buf.nl()
+          }
+        } else {
+          const tail = entry.progressLog.slice(-5)
+          buf.append(`    ▶ Error (${entry.progressLog.length})`, 'CocLoaderError')
+          buf.nl()
+          for (const log of tail) {
+            const summary = log.split('\n')[0]
+            buf.append('      ', undefined)
+            buf.append(summary, 'CocLoaderError')
+            buf.nl()
+          }
+        }
+      } else if (entry.logExpanded) {
         buf.append('    ▼ Displaying full log', 'CocLoaderHeading')
         buf.nl()
         for (const log of entry.progressLog) {
@@ -707,6 +728,11 @@ export class TUI {
         buf.append(`    ▶ # ${entry.progress || head}`, 'CocLoaderMuted')
         buf.nl()
       }
+    }
+    if (entry.status === 'failed' && entry.error) {
+      buf.append('    ', undefined)
+      buf.append('✗ ' + entry.error, 'CocLoaderError')
+      buf.nl()
     }
 
     // Mason-style inline expanded package details

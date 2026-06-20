@@ -5,13 +5,15 @@ set -euo pipefail
 NAME="${1:-}"
 REPO="${2:-}"
 SUBDIR="${3:-}"
+CONVERT_FILE="${4:-}"
 
 usage() {
-  echo "Usage: $0 <name> <github-repo> [subdir]"
+  echo "Usage: $0 <name> <github-repo> [subdir] [convert-file]"
   echo ""
   echo "Examples:"
   echo "  $0 eslint microsoft/vscode-eslint"
   echo "  $0 volar vuejs/language-tools extensions/vscode"
+  echo "  $0 pyright microsoft/pyright --convert-file ./pyright-convert.json"
   exit 1
 }
 
@@ -35,7 +37,11 @@ fi
 
 echo "==> Converting ..."
 rm -rf "$OUT_DIR"
-npx tsx "$ROOT/converter/src/cli.ts" convert "$INPUT" -o "$OUT_DIR"
+CONVERT_ARGS=""
+if [ -n "$CONVERT_FILE" ]; then
+  CONVERT_ARGS="--convert-file $CONVERT_FILE"
+fi
+npx tsx "$ROOT/converter/src/cli.ts" convert "$INPUT" -o "$OUT_DIR" $CONVERT_ARGS
 
 echo "==> Installing dependencies ..."
 cd "$OUT_DIR"
