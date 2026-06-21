@@ -120,12 +120,12 @@ ${code}
 
     if (extIds.length || svcIds.length) {
       let activationCode = ''
-      for (const extId of extIds) {
-        let varName = extId.replace(/[^a-z0-9]/gi, '_')
-        if (/^[0-9]/.test(varName)) varName = '_' + varName
+      if (extIds.length > 0) {
         activationCode += `\
-    const ${varName} = extensions.all.find(e => e.id === '${extId}')
-    if (${varName} && !${varName}.isActive) { await ${varName}.activate() }
+    for (const id of ${JSON.stringify(extIds)}) {
+      const ext = extensions.all.find(e => e.id === id)
+      if (ext && !ext.isActive) { await ext.activate() }
+    }
 `
       }
       for (const svc of svcIds) {
