@@ -434,4 +434,34 @@ describe('convert main flow', () => {
     expect(content).toContain('patched')
     expect(content).not.toContain('hello world')
   })
+
+  it('excludeDeps filters out specified dependencies', async () => {
+    writeInput('package.json', JSON.stringify({
+      name: 'filtered-ext',
+      dependencies: {
+        'runtime-pkg': '^1.0.0',
+        'unwanted-pkg': '^2.0.0',
+        '@unwanted/scope': '^3.0.0',
+      },
+      devDependencies: {
+        'dev-tool': '^4.0.0',
+      },
+    }))
+    writeInput('src/extension.ts', `import * as vscode from 'vscode'\nexport function activate() {}`)
+    const { convert } = await import('./convert.js')
+    await convert({
+      input: tmpdir,
+      output: outdir,
+      convert: [{
+        type: 'source',
+        transforms: ['import-mapping'],
+        excludeDeps: ['unwanted-pkg', '@unwanted', 'dev-tool'],
+      }],
+    })
+    const pkg = JSON.parse(fs.readFileSync(path.join(outdir, 'package.json'), 'utf-8'))
+    expect(pkg.dependencies['runtime-pkg']).toBe('^1.0.0')
+    expect(pkg.dependencies['unwanted-pkg']).toBeUndefined()
+    expect(pkg.dependencies['@unwanted/scope']).toBeUndefined()
+    expect(pkg.dependencies['dev-tool']).toBeUndefined()
+  })
 })

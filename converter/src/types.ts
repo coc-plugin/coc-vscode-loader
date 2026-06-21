@@ -76,6 +76,8 @@ export interface SourceStep {
   transforms: string[]
   entry?: string
   keepDeps?: string[] | Record<string, string>
+  /** Dependency names to exclude from the source extension's package.json */
+  excludeDeps?: string[]
   activationEvents?: string[]
   /** Plugin-specific text find/replace pairs applied after all transforms */
   patches?: Array<{ find: string; replace: string }>
