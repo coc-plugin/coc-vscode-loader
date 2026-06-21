@@ -1,3 +1,4 @@
+import { SyntaxKind } from 'ts-morph'
 import { Transform } from '../types.js'
 
 /**
@@ -14,7 +15,7 @@ import { Transform } from '../types.js'
 export const transformLanguageClient: Transform = (ctx) => {
   const { file } = ctx
 
-  file.getDescendantsOfKind(199 /* CallExpression */).forEach(call => {
+  file.getDescendantsOfKind(SyntaxKind.NewExpression).forEach(call => {
     const text = call.getText()
 
     // Match: new LanguageClient(...)

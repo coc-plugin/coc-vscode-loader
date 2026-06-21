@@ -245,7 +245,8 @@ export async function convert(opts: ConvertOptions): Promise<void> {
           )
           // .uri.fsPath → Uri.parse(...).fsPath (coc's uri is a file:// URI string, not a path)
           // Require starting with a letter/$/_ to avoid matching array indices like 0.uri.fsPath
-          content = content.replace(/([a-zA-Z_$][\w$]*(?:\.[\w$]+)*?)\.uri\.fsPath/g, 'Uri.parse($1.uri).fsPath')
+          // Support bracket notation (e.g. arr[0].uri.fsPath, workspaceFolders[0].uri.fsPath)
+          content = content.replace(/([a-zA-Z_$][\w$]*(?:\.[\w$]+|\[[^\]]*\])*?)\.uri\.fsPath/g, 'Uri.parse($1.uri).fsPath')
           changed = true
         }
 
@@ -280,10 +281,48 @@ export async function convert(opts: ConvertOptions): Promise<void> {
         injectCocImport('Uri', 'Uri.parse(')
         // Location.create(Uri.file(path), pos) → Location.create(path, Range.create(pos, pos))
         // coc's Location.create expects (string_uri, Range), not (Uri_object, Position)
-        content = content.replace(
-          /Location\.create\(Uri\.file\(([^)]+)\),\s*(\w+(?:\.\w+\([^)]*\))?)\)/g,
-          'Location.create($1, Range.create($2, $2))'
-        )
+        // Use balanced-paren matching for nested parentheses in both arguments
+        {
+          const locRe = /Location\.create\(Uri\.file\(/g
+          let locResult = ''
+          let locLastIdx = 0
+          let locMatch: RegExpExecArray | null
+          while ((locMatch = locRe.exec(content)) !== null) {
+            let depth = 1
+            let i = locMatch.index + locMatch[0].length
+            while (i < content.length && depth > 0) {
+              if (content[i] === '(') depth++
+              else if (content[i] === ')') depth--
+              i++
+            }
+            const fileArg = content.slice(locMatch.index + locMatch[0].length, i - 1)
+            // After ) of Uri.file(...), expect: , pos) to close Location.create(...)
+            // Use balanced-paren matching for position argument (may contain nested calls)
+            const afterUriFile = i
+            const rest = content.slice(afterUriFile)
+            const commaMatch = rest.match(/^,\s*/)
+            if (commaMatch) {
+              let posDepth = 1
+              let j = afterUriFile + commaMatch[0].length
+              while (j < content.length && posDepth > 0) {
+                if (content[j] === '(') posDepth++
+                else if (content[j] === ')') posDepth--
+                j++
+              }
+              const posArg = content.slice(afterUriFile + commaMatch[0].length, j - 1)
+              const end = j
+              locResult += content.slice(locLastIdx, locMatch.index)
+              locResult += `Location.create(${fileArg}, Range.create(${posArg}, ${posArg}))`
+              locLastIdx = end
+              locRe.lastIndex = end
+            } else {
+              locResult += content.slice(locLastIdx, i)
+              locLastIdx = i
+            }
+          }
+          locResult += content.slice(locLastIdx)
+          content = locResult
+        }
         injectCocImport('Range', 'Range.create(')
         // 11. Apply plugin-specific patches from registry config
         for (const step of steps) {

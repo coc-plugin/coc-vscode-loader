@@ -121,14 +121,16 @@ ${code}
     if (extIds.length || svcIds.length) {
       let activationCode = ''
       for (const extId of extIds) {
-        const varName = extId.replace(/[^a-z0-9]/gi, '_')
+        let varName = extId.replace(/[^a-z0-9]/gi, '_')
+        if (/^[0-9]/.test(varName)) varName = '_' + varName
         activationCode += `\
     const ${varName} = extensions.all.find(e => e.id === '${extId}')
     if (${varName} && !${varName}.isActive) { await ${varName}.activate() }
 `
       }
       for (const svc of svcIds) {
-        const varName = svc.replace(/[^a-z0-9]/gi, '_') + 'Svc'
+        let varName = svc.replace(/[^a-z0-9]/gi, '_') + 'Svc'
+        if (/^[0-9]/.test(varName)) varName = '_' + varName
         activationCode += `\
     const ${varName} = services.getService('${svc}')
     if (${varName}) { await ${varName}.start() }

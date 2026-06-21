@@ -10,19 +10,16 @@ async function applyLanguageClientTransform(source: string): Promise<string> {
 }
 
 describe('language-client transform', () => {
-  // Note: The transform uses getDescendantsOfKind(CallExpression) to find
-  // new LanguageClient(...), but new expressions are NewExpression, not CallExpression.
-  // This means the transform NEVER matches — it's a known bug (wrong SyntaxKind).
-  // The tests below document current (non-)behavior.
-
-  it('does NOT convert VS Code style {run, debug} due to SyntaxKind bug', async () => {
+  it('converts VS Code style {run, debug} to coc style', async () => {
     const input = `new LanguageClient('id', 'name', { run: { module: serverPath, transport: TransportKind.ipc }, debug: { module: serverPath } }, { documentSelector })`
     const result = await applyLanguageClientTransform(input)
-    // Transform doesn't match NewExpression nodes
-    expect(result).toBe(input)
+    expect(result).toBe(`new LanguageClient('id', 'name', {
+      module: serverPath,
+      transport: TransportKind.ipc
+    }, { documentSelector })`)
   })
 
-  it('does NOT handle run without transport due to SyntaxKind bug', async () => {
+  it('does NOT convert when debug is missing', async () => {
     const input = `new LanguageClient('id', 'name', { run: { module: serverPath } }, { documentSelector })`
     const result = await applyLanguageClientTransform(input)
     expect(result).toBe(input)

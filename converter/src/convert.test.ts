@@ -395,7 +395,7 @@ describe('convert main flow', () => {
     expect(definition).toContain('from "coc.nvim"')
     expect(definition).not.toContain('document.uri.fsPath')
     expect(definition).not.toContain(',,')
-    expect(definition).toMatch(/Location\.create\([^)]+,\s*Range\.create\(/)
+    expect(definition).toContain('Location.create(importPath, Range.create(Position.create(0, 0), Position.create(0, 0)))')
     expect(definition).not.toContain('Uri.file(')
     expect(definition).toMatch(/\bRange\b.*from\s['"]coc\.nvim['"]/)
   })

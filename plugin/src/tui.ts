@@ -137,8 +137,8 @@ export class TUI {
         zindex: 44,
       })
       this.backdropWinid = backdropWin.id
-      await nvim.call('nvim_win_set_option', [backdropWin.id, 'winhighlight', 'Normal:CocLoaderBackdrop'])
-      await nvim.call('nvim_win_set_option', [backdropWin.id, 'winblend', 60])
+      await nvim.call('nvim_set_option_value', ['winhighlight', 'Normal:CocLoaderBackdrop', { scope: 'local', win: backdropWin.id }])
+      await nvim.call('nvim_set_option_value', ['winblend', 60, { scope: 'local', win: backdropWin.id }])
     }
 
     const buf = await nvim.createNewBuffer(false, true)
@@ -156,20 +156,20 @@ export class TUI {
     })
     this.winid = win.id
 
-    await nvim.call('nvim_win_set_option', [this.winid, 'winhighlight', 'NormalFloat:CocLoaderNormal'])
-    await nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', false])
-    await nvim.call('nvim_buf_set_option', [this.bufnr, 'bufhidden', 'wipe'])
-    await nvim.call('nvim_buf_set_option', [this.bufnr, 'buftype', 'nofile'])
-    await nvim.call('nvim_buf_set_option', [this.bufnr, 'swapfile', false])
-    await nvim.call('nvim_buf_set_option', [this.bufnr, 'undolevels', -1])
-    await nvim.call('nvim_buf_set_option', [this.bufnr, 'filetype', 'coc-loader'])
-    await nvim.call('nvim_win_set_option', [this.winid, 'cursorline', true])
-    await nvim.call('nvim_win_set_option', [this.winid, 'number', false])
-    await nvim.call('nvim_win_set_option', [this.winid, 'relativenumber', false])
-    await nvim.call('nvim_win_set_option', [this.winid, 'wrap', false])
-    await nvim.call('nvim_win_set_option', [this.winid, 'signcolumn', 'no'])
-    await nvim.call('nvim_win_set_option', [this.winid, 'spell', false])
-    await nvim.call('nvim_win_set_option', [this.winid, 'foldenable', false])
+    await nvim.call('nvim_set_option_value', ['winhighlight', 'NormalFloat:CocLoaderNormal', { scope: 'local', win: this.winid }])
+    await nvim.call('nvim_set_option_value', ['modifiable', false, { scope: 'local', buf: this.bufnr }])
+    await nvim.call('nvim_set_option_value', ['bufhidden', 'wipe', { scope: 'local', buf: this.bufnr }])
+    await nvim.call('nvim_set_option_value', ['buftype', 'nofile', { scope: 'local', buf: this.bufnr }])
+    await nvim.call('nvim_set_option_value', ['swapfile', false, { scope: 'local', buf: this.bufnr }])
+    await nvim.call('nvim_set_option_value', ['undolevels', -1, { scope: 'local', buf: this.bufnr }])
+    await nvim.call('nvim_set_option_value', ['filetype', 'coc-loader', { scope: 'local', buf: this.bufnr }])
+    await nvim.call('nvim_set_option_value', ['cursorline', true, { scope: 'local', win: this.winid }])
+    await nvim.call('nvim_set_option_value', ['number', false, { scope: 'local', win: this.winid }])
+    await nvim.call('nvim_set_option_value', ['relativenumber', false, { scope: 'local', win: this.winid }])
+    await nvim.call('nvim_set_option_value', ['wrap', false, { scope: 'local', win: this.winid }])
+    await nvim.call('nvim_set_option_value', ['signcolumn', 'no', { scope: 'local', win: this.winid }])
+    await nvim.call('nvim_set_option_value', ['spell', false, { scope: 'local', win: this.winid }])
+    await nvim.call('nvim_set_option_value', ['foldenable', false, { scope: 'local', win: this.winid }])
 
     const exists = await nvim.call('exists', ['*CocConverterDispatch']) as number
     if (exists === 0) {

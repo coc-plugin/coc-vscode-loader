@@ -118,11 +118,12 @@ async function run(
       stderrBuf += text
       report(text)
     })
-    child.on('close', code => {
+    child.on('close', (code, signal) => {
       if (settled) return; settled = true
       clearTimeout(timer)
       if (pkgName) runningProcesses.delete(pkgName)
       if (code === 0) resolve()
+      else if (signal) reject(new Error(`${cmd} ${args.join(' ')} killed by signal ${signal}\n${stderrBuf.trim()}`))
       else reject(new Error(`${cmd} ${args.join(' ')} exited with code ${code}\n${stderrBuf.trim()}`))
     })
     child.on('error', (e) => { if (settled) return; settled = true; clearTimeout(timer); if (pkgName) runningProcesses.delete(pkgName); reject(e) })
@@ -680,7 +681,8 @@ export async function uninstallPackage(state: StateManager, name: string): Promi
 
     await withPkgJsonLock(async () => {
       const pkgPath = extensionsPkgPath()
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+      let pkg: Record<string, any>
+      try { pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) } catch { pkg = { dependencies: {} } }
       pkg.dependencies = pkg.dependencies || {}
       const depName = `coc-${name}`
       if (pkg.dependencies[depName]) {
@@ -790,10 +792,12 @@ async function runWithOutput(cmd: string, args: string[], cwd: string): Promise<
     let out = ''
     child.stdout.on('data', (d: Buffer) => { out += d.toString() })
     child.stderr.on('data', (d: Buffer) => { /* discard stderr to avoid corrupting output parsing */ })
-    child.on('close', code => {
+    child.on('close', (code, signal) => {
       if (settled) return; settled = true
       clearTimeout(timer)
-      code === 0 ? resolve(out.trim()) : reject(new Error(`exit ${code}`))
+      if (code === 0) resolve(out.trim())
+      else if (signal) reject(new Error(`exit signal ${signal}`))
+      else reject(new Error(`exit ${code}`))
     })
     child.on('error', (e) => { if (settled) return; settled = true; clearTimeout(timer); reject(e) })
   })

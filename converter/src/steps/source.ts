@@ -118,7 +118,7 @@ export const sourceGenerator: StepGenerator = {
       let needsRequireExtras = false
       code = code.replace(/require\(['"]vscode['"]\)/g, "require('coc.nvim')")
       code = code.replace(/(\w+)\.fileName\b/g, "Uri.parse($1.uri).fsPath")
-      code = code.replace(/(\w+(?:\.\w+)*?)\.uri\.fsPath/g, 'Uri.parse($1.uri).fsPath')
+      code = code.replace(/(\w+(?:\.\w+|\[[^\]]*\])*?)\.uri\.fsPath/g, 'Uri.parse($1.uri).fsPath')
       const hasUriDestructured = /(?:const|let|var)\s*\{[^}]*\bUri\b[^}]*\}\s*=\s*require\s*\(\s*['"]coc\.nvim['"]\s*\)/.test(code)
       if (code.includes('Uri.parse(') && !hasUriDestructured) {
         code = "const { Uri } = require('coc.nvim')\n" + code

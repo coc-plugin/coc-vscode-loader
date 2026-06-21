@@ -7,7 +7,7 @@ import { Transform } from '../types.js'
 function replaceBalanced(
   content: string,
   prefix: RegExp,
-  fn: (fullCall: string) => string,
+  fn: (fullCall: string, matchLen: number) => string,
 ): string {
   const re = new RegExp(prefix.source, 'g')
   let result = ''
@@ -22,7 +22,7 @@ function replaceBalanced(
       i++
     }
     const fullCall = content.slice(m.index, i)
-    result += content.slice(lastIdx, m.index) + fn(fullCall)
+    result += content.slice(lastIdx, m.index) + fn(fullCall, m[0].length)
     lastIdx = i
   }
   return result + content.slice(lastIdx)
@@ -159,8 +159,9 @@ export const transformImportMapping: Transform = (ctx) => {
   )
 
   // Replace StatusBar with a no-op mock so formatting works without status UI
+  // Match with or without constructor arguments (VS Code: new StatusBar(alignment, priority))
   newContent = newContent.replace(
-    /new\s+StatusBar\(\)/g,
+    /new\s+StatusBar\([^)]*\)/g,
     'new (class { update(){} hide(){} updateConfig(){} dispose(){} } as any)()',
   )
 
@@ -171,20 +172,10 @@ export const transformImportMapping: Transform = (ctx) => {
   )
 
   // Wrap new CodeAction() in try-catch (coc.nvim may not have CodeAction)
-  // Only when unambiguous: exactly one match each, in order
-  const caMatches = newContent.match(/const action = new CodeAction\(/g)
-  const raMatches = newContent.match(/return \[action\];/g)
-  if (caMatches?.length === 1 && raMatches?.length === 1 &&
-      newContent.indexOf('const action = new CodeAction(') < newContent.indexOf('return [action];')) {
-    newContent = newContent.replace(
-      /const action = new CodeAction\(/,
-      'let action; try { action = new CodeAction(',
-    )
-    newContent = newContent.replace(
-      /return \[action\];/,
-      '}catch(e){action={title:"",kind:""}};return [action];',
-    )
-  }
+  newContent = replaceBalanced(newContent, /new\s+CodeAction\(/, (fullCall, matchLen) => {
+    const inner = fullCall.slice(matchLen, -1)
+    return `((() => { try { return new CodeAction(${inner}) } catch { return { title: '', kind: '' } as any } })())`
+  })
 
   // window.createOutputChannel works in coc.nvim (workspace variant is deprecated)
   // no replacement needed

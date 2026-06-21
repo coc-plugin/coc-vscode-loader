@@ -168,17 +168,22 @@ function satisfiesVersion(required: string): boolean {
   const fullVersion = pluginVersion()
   // Pre-release versions: strip suffix, compare base. If equal, pre-release < release
   const baseVersion = fullVersion.replace(/-.*$/, '')
+  const requiredBase = required.replace(/-.*$/, '')
   const a = baseVersion.split('.').map(Number)
-  const b = required.replace(/-.*$/, '').split('.').map(Number)
+  const b = requiredBase.split('.').map(Number)
   for (let i = 0; i < Math.max(a.length, b.length); i++) {
     const va = a[i], vb = b[i]
     if (va === undefined || vb === undefined) break
-    if (isNaN(va) || isNaN(vb)) return true
+    if (isNaN(va) || isNaN(vb)) return false
     if (va > vb) return true
     if (va < vb) return false
   }
-  // If current version is pre-release, it's strictly less than the same base version
-  if (fullVersion.includes('-')) return false
+  // Both have same base version — check pre-release status
+  // If both are pre-release with same base, it's OK (they match)
+  // If current is pre-release but required is release, current < required
+  const currentPre = fullVersion.includes('-')
+  const requiredPre = required.includes('-')
+  if (currentPre && !requiredPre) return false
   return true
 }
 
