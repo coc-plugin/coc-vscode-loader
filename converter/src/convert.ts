@@ -86,6 +86,19 @@ export async function convert(opts: ConvertOptions): Promise<void> {
     ? JSON.parse(fs.readFileSync(origPkgPath, 'utf-8'))
     : {}
 
+  // When input is a subdirectory (subdir in registry) and its own package.json
+  // has no contributes, check parent dir's package.json — the root package.json
+  // is the real extension manifest while the subdir's may be a minimal client pkg.
+  if (!origPkg.contributes) {
+    const parentPkgPath = path.resolve(input, '..', 'package.json')
+    if (input !== path.resolve(input, '..') && fs.existsSync(parentPkgPath)) {
+      const parentPkg = JSON.parse(fs.readFileSync(parentPkgPath, 'utf-8'))
+      if (parentPkg.contributes) {
+        origPkg.contributes = parentPkg.contributes
+      }
+    }
+  }
+
   // 4. Create output directory
   if (fs.existsSync(output)) {
     fs.rmSync(output, { recursive: true })
