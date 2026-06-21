@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.5.6] - 2026-06-21
+
+### Fixed
+- **Error handling** — replace `console.error` + `process.exit(1)` with thrown errors; add try-catch around `package.json` parse; skip `.d.ts` during text replacements
+- **Cross-platform URI decoding** — fix `file://` URI decoding with `decodeURIComponent`; handle optional leading `/` in hover fallback
+- **Converter robustness** — balanced-parenthesis parsing for `registerDocumentFormatProvider`/`registerDocumentRangeFormatProvider`; graceful `file.replaceWithText()` failure handling; restrict severity regex to avoid false positives
+- **Registry resilience** — guard against clearing installed packages when remote registry returns empty; add `console.warn` on fetch failure
+- **Pipeline fixes** — fix platform placeholder comparison; use ``-delimited git log parsing for special chars; refactor `rimraf` into `spawnPromise` helper; surface task failures via `runConcurrent`
+- **TUI stability** — add `.catch()` to async calls to prevent unhandled rejections; fix typo `placehold` → `placeholder`
+- **`loader.list` output** — escape single quotes in package names
+- **Converter `contributes` fallback** — resolve `contributes` from parent `package.json` when subdirectory has none
+
+### Changed
+- **converter**: bump to v1.5.6
+- **plugin**: bump to v1.5.6
+
 ## [1.5.5] - 2026-06-20
 
 ### Added
