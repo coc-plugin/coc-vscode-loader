@@ -3,6 +3,8 @@ import { StateManager, PackageEntry, AppState } from './state'
 import { installPackage, uninstallPackage, updatePackage, checkUpdates, runConcurrent, cancelPackage } from './pipeline'
 import { updateRegistry, getPackage, ProgressCallback } from './registry'
 import { LineBuffer } from './renderer'
+import { EditorAPI, EditorBuffer } from './editor-api'
+import { NvimEditor } from './nvim-editor'
 
 const VERSION: string = (() => {
   try {
@@ -69,6 +71,7 @@ const CONFIG_HOME = (() => {
 })()
 
 export class TUI {
+  private editor: EditorAPI
   private bufnr: number = 0
   private winid: number = 0
   private ns: number = 0
@@ -86,31 +89,30 @@ export class TUI {
 
   constructor(state: StateManager) {
     this.state = state
+    this.editor = new NvimEditor()
   }
 
   async open() {
-    const nvim = workspace.nvim
-    this.ns = await nvim.createNamespace('coc-loader')
+    const editor = this.editor
+    this.ns = await editor.createNamespace('coc-loader')
 
     // Mason-style fixed highlight groups (default=true so users can override)
-    await nvim.command('highlight default CocLoaderHeader guibg=#DCA561 guifg=#222222 gui=bold')
-    await nvim.command('highlight default CocLoaderHeaderSec guibg=#56B6C2 guifg=#222222 gui=bold')
-    await nvim.command('highlight default CocLoaderTabActive guibg=#56B6C2 guifg=#222222 gui=bold')
-    await nvim.command('highlight default CocLoaderTabInactive guibg=#888888 guifg=#222222')
-    await nvim.command('highlight default CocLoaderHeading gui=bold')
-    await nvim.command('highlight default CocLoaderHighlight guifg=#56B6C2')
-    await nvim.command('highlight default CocLoaderMuted guifg=#888888')
-    await nvim.command('highlight default link CocLoaderError ErrorMsg')
-    await nvim.command('highlight default link CocLoaderNormal NormalFloat')
-    await nvim.command('highlight default link CocLoaderSearchMatch Search')
-    await nvim.command('highlight default CocLoaderWarning guifg=#DCA561')
-    await nvim.command('highlight default CocLoaderBackdrop guibg=#000000')
-    await nvim.command('highlight default CocLoaderHighlightBlock guibg=#56B6C2 guifg=#222222')
-    await nvim.command('highlight default CocLoaderMutedBlock guibg=#888888 guifg=#222222')
+    await editor.defineHighlight({ name: 'CocLoaderHeader', guibg: '#DCA561', guifg: '#222222', gui: 'bold' })
+    await editor.defineHighlight({ name: 'CocLoaderHeaderSec', guibg: '#56B6C2', guifg: '#222222', gui: 'bold' })
+    await editor.defineHighlight({ name: 'CocLoaderTabActive', guibg: '#56B6C2', guifg: '#222222', gui: 'bold' })
+    await editor.defineHighlight({ name: 'CocLoaderTabInactive', guibg: '#888888', guifg: '#222222' })
+    await editor.defineHighlight({ name: 'CocLoaderHeading', gui: 'bold' })
+    await editor.defineHighlight({ name: 'CocLoaderHighlight', guifg: '#56B6C2' })
+    await editor.defineHighlight({ name: 'CocLoaderMuted', guifg: '#888888' })
+    await editor.defineHighlightLink('CocLoaderError', 'ErrorMsg')
+    await editor.defineHighlightLink('CocLoaderNormal', 'NormalFloat')
+    await editor.defineHighlightLink('CocLoaderSearchMatch', 'Search')
+    await editor.defineHighlight({ name: 'CocLoaderWarning', guifg: '#DCA561' })
+    await editor.defineHighlight({ name: 'CocLoaderBackdrop', guibg: '#000000' })
+    await editor.defineHighlight({ name: 'CocLoaderHighlightBlock', guibg: '#56B6C2', guifg: '#222222' })
+    await editor.defineHighlight({ name: 'CocLoaderMutedBlock', guibg: '#888888', guifg: '#222222' })
 
-    const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
-    const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
-    const cmdheight = await nvim.call('nvim_get_option', ['cmdheight']) as number
+    const { lines: editorLines, columns: editorCols, cmdheight } = await editor.screenSize()
     const availLines = Math.max(1, editorLines - cmdheight)
     const height = Math.floor(availLines * 0.9)
     const width = Math.floor(editorCols * 0.8)
@@ -120,13 +122,13 @@ export class TUI {
     const col = Math.max(Math.floor((editorCols - width) / 2), 0)
 
     // Create backdrop (Mason-style dim overlay, requires termguicolors and non-transparent)
-    const termguicolors = await nvim.call('nvim_get_option', ['termguicolors']) as number
-    const normalHl = await nvim.call('nvim_get_hl', [0, { name: 'Normal' }]) as Record<string, any>
-    const isTransparent = normalHl && normalHl.bg === null
-    if (termguicolors === 1 && !isTransparent) {
-      const backdropBuf = await nvim.createNewBuffer(false, true)
+    const tc = await editor.termguicolors()
+    const bg = await editor.normalHlBg()
+    const isTransparent = bg === null
+    if (tc === 1 && !isTransparent) {
+      const backdropBuf = await editor.createScratchBuffer()
       this.backdropBufnr = backdropBuf.id
-      const backdropWin = await nvim.openFloatWindow(backdropBuf, false, {
+      const backdropWin = await editor.openFloatWindow(backdropBuf, false, {
         relative: 'editor',
         width: editorCols,
         height: editorLines,
@@ -138,14 +140,14 @@ export class TUI {
         zindex: 44,
       })
       this.backdropWinid = backdropWin.id
-      await nvim.call('nvim_set_option_value', ['winhighlight', 'Normal:CocLoaderBackdrop', { scope: 'local', win: backdropWin.id }])
-      await nvim.call('nvim_set_option_value', ['winblend', 60, { scope: 'local', win: backdropWin.id }])
+      await editor.setWindowOption(backdropWin, 'winhighlight', 'Normal:CocLoaderBackdrop')
+      await editor.setWindowOption(backdropWin, 'winblend', 60)
     }
 
-    const buf = await nvim.createNewBuffer(false, true)
+    const buf = await editor.createScratchBuffer()
     this.bufnr = buf.id
 
-    const win = await nvim.openFloatWindow(buf, true, {
+    const win = await editor.openFloatWindow(buf, true, {
       relative: 'editor',
       width,
       height,
@@ -157,24 +159,24 @@ export class TUI {
     })
     this.winid = win.id
 
-    await nvim.call('nvim_set_option_value', ['winhighlight', 'NormalFloat:CocLoaderNormal', { scope: 'local', win: this.winid }])
-    await nvim.call('nvim_set_option_value', ['modifiable', false, { scope: 'local', buf: this.bufnr }])
-    await nvim.call('nvim_set_option_value', ['bufhidden', 'wipe', { scope: 'local', buf: this.bufnr }])
-    await nvim.call('nvim_set_option_value', ['buftype', 'nofile', { scope: 'local', buf: this.bufnr }])
-    await nvim.call('nvim_set_option_value', ['swapfile', false, { scope: 'local', buf: this.bufnr }])
-    await nvim.call('nvim_set_option_value', ['undolevels', -1, { scope: 'local', buf: this.bufnr }])
-    await nvim.call('nvim_set_option_value', ['filetype', 'coc-loader', { scope: 'local', buf: this.bufnr }])
-    await nvim.call('nvim_set_option_value', ['cursorline', true, { scope: 'local', win: this.winid }])
-    await nvim.call('nvim_set_option_value', ['number', false, { scope: 'local', win: this.winid }])
-    await nvim.call('nvim_set_option_value', ['relativenumber', false, { scope: 'local', win: this.winid }])
-    await nvim.call('nvim_set_option_value', ['wrap', false, { scope: 'local', win: this.winid }])
-    await nvim.call('nvim_set_option_value', ['signcolumn', 'no', { scope: 'local', win: this.winid }])
-    await nvim.call('nvim_set_option_value', ['spell', false, { scope: 'local', win: this.winid }])
-    await nvim.call('nvim_set_option_value', ['foldenable', false, { scope: 'local', win: this.winid }])
+    await editor.setWindowOption(win, 'winhighlight', 'NormalFloat:CocLoaderNormal')
+    await editor.bufferSetOption(buf, 'modifiable', false)
+    await editor.bufferSetOption(buf, 'bufhidden', 'wipe')
+    await editor.bufferSetOption(buf, 'buftype', 'nofile')
+    await editor.bufferSetOption(buf, 'swapfile', false)
+    await editor.bufferSetOption(buf, 'undolevels', -1)
+    await editor.bufferSetOption(buf, 'filetype', 'coc-loader')
+    await editor.setWindowOption(win, 'cursorline', true)
+    await editor.setWindowOption(win, 'number', false)
+    await editor.setWindowOption(win, 'relativenumber', false)
+    await editor.setWindowOption(win, 'wrap', false)
+    await editor.setWindowOption(win, 'signcolumn', 'no')
+    await editor.setWindowOption(win, 'spell', false)
+    await editor.setWindowOption(win, 'foldenable', false)
 
-    const exists = await nvim.call('exists', ['*CocConverterDispatch']) as number
+    const exists = await editor.callFunction('exists', ['*CocConverterDispatch']) as number
     if (exists === 0) {
-      await nvim.command(`
+      await editor.executeCommand(`
         function! CocConverterDispatch(key) abort
           execute 'CocCommand loader._dispatch ' . a:key
         endfunction
@@ -194,10 +196,10 @@ export class TUI {
         callback: async () => {
           try {
             if (!this.winid) return
-            const curWin = await nvim.call('win_getid') as number
+            const curWin = await this.editor.callFunction('win_getid', []) as number
             if (curWin === this.winid) return
-            const curBuf = await nvim.call('winbufnr', [curWin]) as number
-            const bt = await nvim.call('getbufvar', [curBuf, '&buftype']) as string
+            const curBuf = await this.editor.callFunction('winbufnr', [curWin]) as number
+            const bt = await this.editor.callFunction('getbufvar', [curBuf, '&buftype']) as string
             if (bt !== 'nofile' && bt !== 'prompt' && bt !== 'help' && bt !== 'terminal' && bt !== 'quickfix') {
               await this.close()
             }
@@ -213,7 +215,7 @@ export class TUI {
         request: true,
         callback: async () => {
           if (!this._inSearchMode) return
-          const cmdline = await nvim.call('getcmdline') as string
+          const cmdline = await this.editor.callFunction('getcmdline', []) as string
           this.state.setSearchQuery(cmdline)
         }
       }),
@@ -223,7 +225,7 @@ export class TUI {
         callback: async () => {
           this._inSearchMode = false
           if (this.state.getState().searchQuery) {
-            try { await nvim.command('nohlsearch', true) } catch {}
+            try { await this.editor.executeCommand('nohlsearch', true) } catch {}
           }
         }
       }),
@@ -232,21 +234,19 @@ export class TUI {
         request: true,
         callback: async () => {
           if (!this.winid) return
-          const editorLines = await nvim.call('nvim_get_option', ['lines']) as number
-          const editorCols = await nvim.call('nvim_get_option', ['columns']) as number
-          const cmdheight = await nvim.call('nvim_get_option', ['cmdheight']) as number
+          const { lines: editorLines, columns: editorCols, cmdheight } = await this.editor.screenSize()
           const availLines = Math.max(1, editorLines - cmdheight)
           this.windowHeight = Math.floor(availLines * 0.9)
           this.windowWidth = Math.floor(editorCols * 0.8)
           const row = Math.max(Math.floor((availLines - this.windowHeight) / 2), 0)
           const col = Math.max(Math.floor((editorCols - this.windowWidth) / 2), 0)
           try {
-            nvim.pauseNotification()
-            nvim.call('nvim_win_set_config', [this.winid, { width: this.windowWidth, height: this.windowHeight, row, col }], true)
+            this.editor.pauseNotification()
+            this.editor.submit('nvim_win_set_config', [this.winid, { width: this.windowWidth, height: this.windowHeight, row, col }])
             if (this.backdropWinid) {
-              nvim.call('nvim_win_set_config', [this.backdropWinid, { width: editorCols, height: editorLines }], true)
+              this.editor.submit('nvim_win_set_config', [this.backdropWinid, { width: editorCols, height: editorLines }])
             }
-            await nvim.resumeNotification()
+            await this.editor.resumeNotification()
             await this.render()
           } catch {}
         }
@@ -276,8 +276,7 @@ export class TUI {
   }
 
   private async getCursorLine0(): Promise<number> {
-    const nvim = workspace.nvim
-    const cursor = await nvim.call('nvim_win_get_cursor', [this.winid]) as [number, number]
+    const cursor = await this.editor.windowGetCursor({ id: this.winid }) as [number, number]
     return cursor[0] - 1
   }
 
@@ -303,7 +302,7 @@ export class TUI {
       this._inSearchMode = true
       await this.render()
       setTimeout(() => {
-        if (this.winid) workspace.nvim.call('feedkeys', ['/', 'n']).catch(() => {})
+        if (this.winid) this.editor.callFunction('feedkeys', ['/', 'n']).catch(() => {})
       }, 16)
       return
     }
@@ -397,7 +396,6 @@ export class TUI {
   }
 
   private async setupKeymaps() {
-    const buf = workspace.nvim.createBuffer(this.bufnr)
     const entries: [string, string][] = [
       ['q', 'q'], ['<Esc>', 'esc'], ['?', 'question'], ['g?', 'question'],
       ['i', 'i'], ['u', 'u'], ['R', 'R'], ['U', 'U'], ['C', 'C'], ['c', 'c'], ['X', 'X'],
@@ -409,8 +407,9 @@ export class TUI {
       ['/', 'search'],
       ['<CR>', 'cr'],
     ]
+    const buf: EditorBuffer = { id: this.bufnr }
     for (const [vimKey, id] of entries) {
-      buf.setKeymap('n', vimKey, `<Cmd>call CocConverterDispatch("${id}")<CR>`, { silent: true, nowait: true })
+      this.editor.bufferSetKeymap(buf, 'n', vimKey, `<Cmd>call CocConverterDispatch("${id}")<CR>`)
     }
   }
 
@@ -420,15 +419,15 @@ export class TUI {
     for (const d of this.disposables) { d.dispose() }
     this.disposables = []
     if (this.backdropWinid) {
-      try { await workspace.nvim.call('nvim_win_close', [this.backdropWinid, true]) } catch {}
+      await this.editor.closeWindow({ id: this.backdropWinid }, true)
       this.backdropWinid = 0
     }
     if (this.winid) {
-      try { await workspace.nvim.call('nvim_win_close', [this.winid, true]) } catch {}
+      await this.editor.closeWindow({ id: this.winid }, true)
       this.winid = 0
     }
     if (needRestart) {
-      workspace.nvim.command('CocRestart', true)
+      this.editor.executeCommand('CocRestart', true)
     }
   }
 
@@ -441,12 +440,12 @@ export class TUI {
     this.rendering = true
     this.pendingRender = false
     try {
-      const nvim = workspace.nvim
+      const editor = this.editor
       const state = this.state.getState()
       const filtered = this.state.getFilteredPackages()
 
       // Save cursor line before render to restore position after
-      const prevCursor = await nvim.call('nvim_win_get_cursor', [this.winid]) as [number, number]
+      const prevCursor = await editor.windowGetCursor({ id: this.winid }) as [number, number]
 
       const result = state.showHelp
         ? this.renderHelp()
@@ -459,21 +458,21 @@ export class TUI {
         }
       }
 
-      nvim.pauseNotification()
+      editor.pauseNotification()
       try {
-        nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', true], true)
-        nvim.call('nvim_buf_clear_namespace', [this.bufnr, this.ns, 0, -1], true)
-        nvim.call('nvim_buf_set_lines', [this.bufnr, 0, -1, false, result.lines], true)
-        nvim.call('nvim_buf_set_option', [this.bufnr, 'modifiable', false], true)
+        editor.submit('nvim_buf_set_option', [this.bufnr, 'modifiable', true])
+        editor.submit('nvim_buf_clear_namespace', [this.bufnr, this.ns, 0, -1])
+        editor.submit('nvim_buf_set_lines', [this.bufnr, 0, -1, false, result.lines])
+        editor.submit('nvim_buf_set_option', [this.bufnr, 'modifiable', false])
         for (const h of result.highlights) {
-          nvim.call('nvim_buf_set_extmark', [this.bufnr, this.ns, h.line, h.colStart, {
+          editor.submit('nvim_buf_set_extmark', [this.bufnr, this.ns, h.line, h.colStart, {
             end_col: h.colEnd,
             hl_group: h.hlGroup,
             hl_mode: 'combine',
-          }], true)
+          }])
         }
       } finally {
-        await nvim.resumeNotification()
+        await editor.resumeNotification()
       }
 
       this.pkgLineMap = result.pkgLineMap
@@ -481,7 +480,7 @@ export class TUI {
       // Restore cursor to same line (clamped to new buffer size)
       if (!state.showHelp) {
         const restoreLine = Math.min(prevCursor[0], result.lines.length)
-        await nvim.call('nvim_win_set_cursor', [this.winid, [restoreLine, 0]])
+        await editor.windowSetCursor({ id: this.winid }, [restoreLine, 0])
       }
 
       // Trigger Mason-style typewriter header animation
