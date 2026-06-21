@@ -4,7 +4,7 @@ import { installPackage, uninstallPackage, updatePackage, checkUpdates, runConcu
 import { updateRegistry, getPackage, ProgressCallback } from './registry'
 import { LineBuffer } from './renderer'
 import { EditorAPI, EditorBuffer } from './editor-api'
-import { NvimEditor } from './nvim-editor'
+import { createEditor } from './editor-factory'
 
 const VERSION: string = (() => {
   try {
@@ -89,10 +89,10 @@ export class TUI {
 
   constructor(state: StateManager) {
     this.state = state
-    this.editor = new NvimEditor()
   }
 
   async open() {
+    this.editor = await createEditor()
     const editor = this.editor
     this.ns = await editor.createNamespace('coc-loader')
 
