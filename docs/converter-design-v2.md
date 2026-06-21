@@ -187,7 +187,7 @@ convert <input-vscode-ext> -o <output-dir>
   │     └─ snippets → 生成空壳 activate 函数
   │
   ├─ 6. 生成 package.json + esbuild.mjs
-  │     ├─ dependencies（仅 LSP 相关）
+  │     ├─ dependencies（仅 LSP 相关，支持 excludeDeps 过滤源扩展的 deps）
   │     ├─ activationEvents
   │     ├─ typescriptServerPlugins（ts-bridge 型）
   │     └─ esbuild external 自动注入

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.7] - 2026-06-21
+
+### Added
+- **`excludeDeps` field** — `SourceStep` now supports `excludeDeps: string[]` to filter out unwanted dependencies from source extensions. Supports prefix matching (e.g. `@wdio` matches `@wdio/cli`, `@wdio/local-runner`). Use with `keepDeps` to replace vendored/broken deps with proper npm versions.
+
+### Fixed
+- **`workspace.saveAll`** — added patch support for coc.nvim which lacks this API
+- **`workspaceFolders[N].uri.fsPath`** — converter regex didn't handle array-indexed access (`[0]`, `.find()`); added patches for workspaceResolver
+- **`window.activeTextEditor` polyfill** — status bar now shows immediately on startup (added `"*"` to activationEvents)
+
+### Changed
+- **converter**: bump to v1.5.7
+- **plugin**: bump to v1.5.7
+
 ## [1.5.6] - 2026-06-21
 
 ### Fixed
@@ -7,7 +21,7 @@
 - **Cross-platform URI decoding** — fix `file://` URI decoding with `decodeURIComponent`; handle optional leading `/` in hover fallback
 - **Converter robustness** — balanced-parenthesis parsing for `registerDocumentFormatProvider`/`registerDocumentRangeFormatProvider`; graceful `file.replaceWithText()` failure handling; restrict severity regex to avoid false positives
 - **Registry resilience** — guard against clearing installed packages when remote registry returns empty; add `console.warn` on fetch failure
-- **Pipeline fixes** — fix platform placeholder comparison; use ``-delimited git log parsing for special chars; refactor `rimraf` into `spawnPromise` helper; surface task failures via `runConcurrent`
+- **Pipeline fixes** — fix platform placeholder comparison; use backtick-delimited git log parsing for special chars; refactor `rimraf` into `spawnPromise` helper; surface task failures via `runConcurrent`
 - **TUI stability** — add `.catch()` to async calls to prevent unhandled rejections; fix typo `placehold` → `placeholder`
 - **`loader.list` output** — escape single quotes in package names
 - **Converter `contributes` fallback** — resolve `contributes` from parent `package.json` when subdirectory has none

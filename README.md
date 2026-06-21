@@ -8,10 +8,10 @@
 [![open issues](https://img.shields.io/github/issues/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader/issues)
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.5.5" alt="TUI preview" width="100%">
+  <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.5.6" alt="TUI preview" width="100%">
 </p>
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png?v=1.5.5" alt="Registry preview" width="100%">
+  <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png?v=1.5.6" alt="Registry preview" width="100%">
 </p>
 
 在 coc.nvim 中无缝运行 VS Code 扩展。

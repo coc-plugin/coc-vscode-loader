@@ -26,6 +26,7 @@ cd ~/.config/coc/extensions && npm install /path/to/coc-ext
 | Deno | Pure LSP | Binary server download |
 | TOML (Taplo) | Pure LSP | Binary server download |
 | Ansible | Pure LSP | npm package server + pip install |
+| Live Server | Direct API | Source transforms + patches (excludeDeps, workspace.saveAll, activeTextEditor polyfill) |
 | YAML | Pure LSP | npm package server |
 | Tailwind CSS | Pure LSP | npm package server, bin entry |
 | Biome | Pure LSP | Binary server download |
@@ -127,7 +128,7 @@ Input: VS Code extension directory
   │   └─ enum-offset         Comment on enum value offsets
   ├─ mark-unsupported  Replace/mark missing APIs (getWordRangeAtPosition, fileName, etc.)
   ├─ generate src/index.ts   Main entry (bridge / LanguageClient / direct templates)
-  ├─ generate package.json   Dependencies / esbuild external config
+  ├─ generate package.json   Dependencies / esbuild external config (excludeDeps filters source deps)
   ├─ generate esbuild.mjs    Build config + server TypeScript compilation
   └─ local server hover fallback  (only for relative-path servers)
 ```
@@ -157,8 +158,8 @@ See [../docs/converter-design-v2.md](../docs/converter-design-v2.md).
 ## Testing
 
 ```bash
-npm test                    # Unit tests (116 tests, 14 files) + coverage check
-npm run test:smoke          # Registry smoke test — converts all 121 entries
+npm test                    # Unit tests (118 tests, 14 files) + coverage check
+npm run test:smoke          # Registry smoke test — converts all 122 entries
 npm run test:watch          # Watch mode for development
 npm run check:tests         # Verify every source file has a matching test
 ```
@@ -169,8 +170,8 @@ npm run check:tests         # Verify every source file has a matching test
 |-----------|-------|----------------|
 | `transforms/import-mapping.test.ts` | 22 | All text-level replacements + real transform Uri injection |
 | `transforms/class-to-factory.test.ts` | 7 | `new Xxx()` → `Xxx.create()` / `TextEdit.replace()` |
-| `convert.test.ts` | 17 | Full conversion pipeline (text replacements, output generation, step orchestration, patches) |
-| `registry-validation.test.ts` | 12 | Registry.json schema (121 entries) |
+| `convert.test.ts` | 18 | Full conversion pipeline (text replacements, output generation, step orchestration, patches, excludeDeps) |
+| `registry-validation.test.ts` | 12 | Registry.json schema (122 entries) |
 | `scanner.test.ts` | 6 | API scanner detection |
 | `presets.test.ts` | 5 | Bridge preset definitions |
 | `transforms/language-client.test.ts` | 5 | LanguageClient AST adaptation |

@@ -348,6 +348,21 @@ npm install coc-vscode-loader    # or
 | [v1.5.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/4) | 2026-06 | Go/Cargo source install, `installToCoc` optimization, registry expansion |
 | [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | Stable ecosystem: 10+ plugins, full transform coverage |
 
+## `excludeDeps`（v1.5.7+）
+
+`excludeDeps` 用于从源扩展的 `dependencies`/`devDependencies` 中排除不需要的包名，配合 `keepDeps` 精确控制输出 `package.json` 的依赖。
+
+```json
+{
+  "type": "source",
+  "excludeDeps": ["vsls", "@wdio", "husky", "tslint", "live-server"],
+  "keepDeps": { "live-server": "^1.2.2", "http-shutdown": "^1.2.0" }
+}
+```
+
+- `excludeDeps` 是字符串数组，支持前缀匹配（如 `@wdio` 会排除 `@wdio/cli`、`@wdio/local-runner` 等）
+- `keepDeps` 中同名的 dep 会被重新加入，用于替换源扩展中错误的版本号或文件路径（如 `"file:lib\\live-server"`）
+
 ## keepDeps 版本解析策略（Converter v2.0）
 
 `keepDeps` 的版本解析采用三步降级：
