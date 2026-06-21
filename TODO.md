@@ -50,10 +50,11 @@
 
 ## Direct API (可能需要源码转换)
 
+- [x] `vscode-code-runner` — formulahendry/vscode-code-runner — 2026-06
 - [ ] `vscode-grammarly` — znck/grammarly — 2023-12
 - [ ] `vscode-graphviz` — joaompinto/vscode-graphviz — 2025-03
 - [ ] `vscode-import-cost` — wix/import-cost — 2024-03
-- [ ] `vscode-live-server` — ritwickdey/vscode-live-server — 2026-06
+- [x] `vscode-live-server` — ritwickdey/vscode-live-server — 2026-06
 - [ ] `vscode-markmap` — markmap/markmap-vscode — 2025-06
 - [ ] `vscode-quicktype` — quicktype/quicktype-vscode — 2024-04
 - [ ] `vscode-rest-client` — Huachao/vscode-restclient — 2026-04

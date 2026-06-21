@@ -170,12 +170,13 @@ converter 主流程在步骤执行后还会对所有输出源文件做一轮通�
 
 | 替换 | 原因 |
 |------|------|
-| `.fileName` → `Uri.parse($1.uri).fsPath` | coc 的 TextDocument 无 fileName 属性 |
+| `.fileName` → `Uri.parse($1.uri).fsPath` | coc 的 TextDocument 无 fileName 属性。加 `(?<![\w$])` negative lookbehind 避免匹配 `_document.fileName` |
 | `{ fileName } = doc` 解构拆分 | 同上，处理解构写法 |
-| `.uri.fsPath` → `Uri.parse($1.uri).fsPath` | coc 的 uri 是 file:// URI 字符串 |
+| `.uri.fsPath` → `Uri.parse($1.uri).fsPath` | coc 的 uri 是 file:// URI 字符串。要求首字符为 `[a-zA-Z_$]` 避免匹配 `0.uri.fsPath` |
 | `getWordRangeAtPosition` → 内联实现 | coc 无此 API |
 | `Location.create(Uri.file($1), $2)` → `Location.create($1, Range.create($2, $2))` | coc 的 Location.create 接受 `(string, Range)`，非 `(Uri, Position)` |
 | `Uri`/`Range` 自动注入 import | 命名空间 import 无法用解构注入，自动补 `import { Uri }`/`import { Range }` |
+| `(?:vscode\.)?workspace\.workspaceFolders` guard | 处理 `vscode.` 前缀，避免产生 `vscode.(...)` 语法错误 |
 
 ### 插件级文本补丁 `patches`（v1.4.2+）
 
@@ -537,6 +538,7 @@ Registry 条目示例：
 - [x] Go LSP (`vscode-go`) — 加入 registry，goPackages 支持自动 go install gopls
 - [x] `targetAssets` — serverBinary per-platform 资产映射，支持非标准平台命名
 - [x] `installToCoc` 优化 — 跳过 node_modules，选择性复制 + 重新 npm install
+- [x] Code Runner (`vscode-code-runner`) — 加入 registry, direct-api, 12 patches
 
 ## TUI design
 
@@ -582,8 +584,8 @@ Go/Cargo 编译缓存在 `build/.gopath/` 和 `build/.cargo-root/`，安装完�
 Every source file must have a corresponding `.test.ts` file. Run before pushing:
 
 ```bash
-npm test                    # Unit tests (116) + check-tests (no missing/empty tests)
-npm run test:smoke          # Registry smoke test (converts all 121 entries, validates output)
+npm test                    # Unit tests (117) + check-tests (no missing/empty tests)
+npm run test:smoke          # Registry smoke test (converts all 122 entries, validates output)
 ```
 
 **Pre-push hook** runs both. CI runs unit tests on push/PR (Node 20/22) and smoke test after.

@@ -4,11 +4,15 @@
 
 ### Added
 - **`excludeDeps` field** — `SourceStep` now supports `excludeDeps: string[]` to filter out unwanted dependencies from source extensions. Supports prefix matching (e.g. `@wdio` matches `@wdio/cli`, `@wdio/local-runner`). Use with `keepDeps` to replace vendored/broken deps with proper npm versions.
+- **Code Runner (`vscode-code-runner`)** — added to registry as `direct-api`, 12 source patches for coc compatibility (createTerminal, setContext, env.shell, lineAt, outputChannel dispose+recreate, etc.)
 
 ### Fixed
 - **`workspace.saveAll`** — added patch support for coc.nvim which lacks this API
 - **`workspaceFolders[N].uri.fsPath`** — converter regex didn't handle array-indexed access (`[0]`, `.find()`); added patches for workspaceResolver
 - **`window.activeTextEditor` polyfill** — status bar now shows immediately on startup (added `"*"` to activationEvents)
+- **`.fileName` regex** — added `(?<![\w$])` negative lookbehind to prevent matching `_document.fileName` as `document.fileName`, which caused `this._Uri.parse(document.uri).fsPath` mangling
+- **`.uri.fsPath` regex** — restricted first character to `[a-zA-Z_$]` to avoid matching `0.uri.fsPath` from array index access
+- **`workspace.workspaceFolders` guard** — added `(?:vscode\.)?` prefix to handle `vscode.workspace.workspaceFolders` without producing `vscode.(...)` syntax error
 
 ### Changed
 - **converter**: bump to v1.5.7

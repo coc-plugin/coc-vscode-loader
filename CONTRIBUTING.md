@@ -51,7 +51,7 @@ You want to run a VS Code extension on coc.nvim
 |------|-------------|---------|-----------------|
 | `pure-lsp` | Pure LSP via LanguageClient | Prisma, YAML | Yes (`language-client` step) |
 | `ts-bridge` | Depends on TS language server | Volar, Angular | Yes (`ts-bridge` preset) |
-| `direct-api` | Direct coc.nvim API calls, no language server | HTML CSS Support | Check if APIs are covered |
+| `direct-api` | Direct coc.nvim API calls, no language server | HTML CSS Support, Code Runner | Check if APIs are covered; use `patches` for API differences |
 | New type | None of the above | — | Need new bridge preset or transform |
 
 ### 2. Configure the `convert` field
@@ -99,7 +99,13 @@ The `convert` array in `registry.json` tells the converter what to do:
     {
       "type": "mark-unsupported"
     }
-  ]
+  ],
+  // Source step advanced fields (v1.4.2+ for patches, v1.5.7+ for excludeDeps):
+  "patches": [
+    { "find": "vscode\\.window\\.createTerminal\\(\"Code\"\\)", "replace": "await vscode.window.createTerminal({ name: 'Code' })" }
+  ],
+  "excludeDeps": ["@types/mocha", "typescript", "mocha"],
+  "keepDeps": { "micromatch": "^4.0.2", "tree-kill": "^1.2.2" }
 }
 ```
 
@@ -128,10 +134,10 @@ If your change adds or modifies a converter feature, update:
 ### 5. Verify
 
 ```bash
-# Run all unit tests (116 tests, 15 test files)
+# Run all unit tests (117 tests, 14 test files)
 npm test
 
-# Run registry smoke test (converts all 114 entries)
+# Run registry smoke test (converts all 128 entries)
 npm run test:smoke
 
 # Validate registry JSON format

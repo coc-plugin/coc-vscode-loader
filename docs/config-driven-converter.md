@@ -187,9 +187,9 @@ transforms 在 `source` 步骤中声明，只对扫描器检测到的文件生�
 #### 文本后处理（convert.ts）
 
 步骤执行后，convert.ts 对所有输出源文件执行以下文本替换：
-- `.fileName` → `Uri.parse($1.uri).fsPath`（coc 的 TextDocument 无 fileName 属性）
+- `.fileName` → `Uri.parse($1.uri).fsPath`（coc 的 TextDocument 无 fileName 属性）。加 `(?<![\w$])` negative lookbehind 避免匹配 `_document.fileName`
 - `const { fileName, ...rest } = doc` 解构 → 拆分为 `{ ...rest } = doc; const fileName = Uri.parse(doc.uri).fsPath`
-- `.uri.fsPath` → `Uri.parse($1.uri).fsPath`
+- `.uri.fsPath` → `Uri.parse($1.uri).fsPath`（coc 的 uri 是 file:// URI 字符串）。首字符限定为 `[a-zA-Z_$]` 避免匹配数组下标
 - `getWordRangeAtPosition` → 内联词边界计算
 
 引入 `Uri.parse()` 后自动将 `Uri` 补入 `from 'coc.nvim'` import。

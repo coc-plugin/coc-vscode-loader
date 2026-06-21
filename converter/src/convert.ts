@@ -228,7 +228,9 @@ export async function convert(opts: ConvertOptions): Promise<void> {
         const hasFileNameDestructuring = /(const|let|var)\s*\{[^}]*\bfileName\b[^}]*\}\s*=\s*(document|doc|textDocument)/.test(content)
         if (hasFileNameRef || hasFileNameDestructuring) {
           // .fileName → Uri.parse($1.uri).fsPath (coc's TextDocument#uri returns a file:// URI string)
-          content = content.replace(/(document|this\.document|textDocument|scope|doc)\.fileName/g, 'Uri.parse($1.uri).fsPath')
+          // Use negative lookbehind to avoid matching _document.fileName (where _document is a private property)
+          // and handle both this.document and this._document.
+          content = content.replace(/(?<![\w$])(this\._?document|textDocument|scope|doc|document)\.fileName/g, 'Uri.parse($1.uri).fsPath')
           // Handle destructuring: const { fileName, ...rest } = document/doc/textDocument
           content = content.replace(
             /(\s*)(const|let|var)\s*\{([^}]*)\}\s*=\s*(document|doc|textDocument)\s*;?\s*$/gm,
@@ -242,7 +244,8 @@ export async function convert(opts: ConvertOptions): Promise<void> {
             }
           )
           // .uri.fsPath → Uri.parse(...).fsPath (coc's uri is a file:// URI string, not a path)
-          content = content.replace(/(\w+(?:\.\w+)*?)\.uri\.fsPath/g, 'Uri.parse($1.uri).fsPath')
+          // Require starting with a letter/$/_ to avoid matching array indices like 0.uri.fsPath
+          content = content.replace(/([a-zA-Z_$][\w$]*(?:\.[\w$]+)*?)\.uri\.fsPath/g, 'Uri.parse($1.uri).fsPath')
           changed = true
         }
 

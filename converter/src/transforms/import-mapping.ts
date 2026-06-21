@@ -247,13 +247,14 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
 
   // Guard workspace.workspaceFolders bracket/property access (coc.nvim may return undefined).
   // Does not guard standalone references (e.g. `if (workspace.workspaceFolders)`) to preserve truthiness checks.
+  // Handle both workspace.workspaceFolders and vscode.workspace.workspaceFolders.
   newContent = newContent.replace(
-    /workspace\.workspaceFolders(?=\s*(?:\[|\.\w))/g,
+    /(?:vscode\.)?workspace\.workspaceFolders(?=\s*(?:\[|\.\w))/g,
     '(workspace.workspaceFolders || [])'
   )
   // Guard for-of iteration: `for (... of workspace.workspaceFolders)`
   newContent = newContent.replace(
-    /(of\s+)workspace\.workspaceFolders(?!\s*\?)/g,
+    /(of\s+)(?:vscode\.)?workspace\.workspaceFolders(?!\s*\?)/g,
     '$1(workspace.workspaceFolders || [])'
   )
 
