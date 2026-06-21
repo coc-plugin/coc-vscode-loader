@@ -48,6 +48,7 @@ const GENERIC_TAB_HELP = [
 const KEYMAP_ENTRIES: [string, string][] = [
   ['i', 'Install package'],
   ['u', 'Update package'],
+  ['R', 'Reinstall package'],
   ['U', 'Update all installed'],
   ['X', 'Uninstall package'],
   ['C', 'Check for updates'],
@@ -378,6 +379,7 @@ export class TUI {
 
     if (id === 'i' && entry.status === 'not-installed') { await installPackage(this.state, pkgName); return }
     if (id === 'u' && entry.status === 'installed') { await updatePackage(this.state, pkgName); return }
+    if (id === 'R' && entry.status === 'installed') { await uninstallPackage(this.state, pkgName); await installPackage(this.state, pkgName); return }
     if (id === 'X' && entry.status === 'installed') { await uninstallPackage(this.state, pkgName); return }
     if (id === 'cr') {
       if (['installing', 'updating', 'uninstalling', 'failed'].includes(entry.status)) {
@@ -398,7 +400,7 @@ export class TUI {
     const buf = workspace.nvim.createBuffer(this.bufnr)
     const entries: [string, string][] = [
       ['q', 'q'], ['<Esc>', 'esc'], ['?', 'question'], ['g?', 'question'],
-      ['i', 'i'], ['u', 'u'], ['U', 'U'], ['C', 'C'], ['c', 'c'], ['X', 'X'],
+      ['i', 'i'], ['u', 'u'], ['R', 'R'], ['U', 'U'], ['C', 'C'], ['c', 'c'], ['X', 'X'],
       ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5'],
       ['6', '6'], ['7', '7'], ['8', '8'], ['9', '9'],
       ['<C-c>', 'cancel'],
