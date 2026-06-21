@@ -326,6 +326,7 @@ export class StateManager {
     const installedSet = getInstalledSet()
     this.mutate(s => {
       const updated = getAllPackages()
+      if (updated.length === 0 && s.packages.length > 0) return  // don't clear on registry corruption
       const oldMap = new Map(s.packages.map(p => [p.info.name, p]))
       s.packages = updated.map(info => {
         const old = oldMap.get(info.name)

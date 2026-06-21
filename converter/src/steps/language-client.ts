@@ -40,7 +40,6 @@ export const languageClientGenerator: StepGenerator = {
 
       serverPathCode = `\
     let serverPath: string | undefined
-    let _mainEntry: string | undefined
     try {
       serverPath = require.resolve('${escapeStr(pkg)}')
     } catch {}
@@ -246,7 +245,7 @@ ${ls.verbose ? `      console.log('[${escapeStr(id)}] starting client')\n` : ''}
           if (!defs || defs.length === 0) return null
           const loc = defs[0]
           try {
-            const fpath = (loc.uri || '').replace(/^file:\\/\\//, '')
+            const fpath = decodeURIComponent((loc.uri || '').replace(/^file:\\/\\/\\/?/, ''))
             const lang = (fpath.match(/\\.(\\w+)$/) || [])[1] || 'text'
             const lines = require('fs').readFileSync(fpath, 'utf-8').split('\\n').slice(loc.range.start.line, loc.range.end.line + 1)
             const indent = lines.reduce((m: number, l: string) => { const s = l.match(/^(\\s*)/); return s ? Math.min(m, s[1].length) : m }, 999)

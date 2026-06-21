@@ -40,21 +40,18 @@ export async function convert(opts: ConvertOptions): Promise<void> {
   const { input, output, convert: steps, verbose } = opts
 
   if (!fs.existsSync(input)) {
-    console.error(`input not found: ${input}`)
-    process.exit(1)
+    throw new Error(`input not found: ${input}`)
   }
 
   if (!steps || steps.length === 0) {
-    console.error('no convert steps provided (use --convert)')
-    process.exit(1)
+    throw new Error('no convert steps provided (use --convert)')
   }
 
   // 1. Validate
   const knownTypes = getRegisteredStepTypes()
   for (const s of steps) {
     if (!knownTypes.includes(s.type)) {
-      console.error(`unknown step type: "${s.type}". Available: ${knownTypes.join(', ')}`)
-      process.exit(1)
+      throw new Error(`unknown step type: "${s.type}". Available: ${knownTypes.join(', ')}`)
     }
     if (isLanguageClientStep(s) && s.server.kind === 'binary') {
       if (s.server.binary?.asset) {
@@ -82,9 +79,14 @@ export async function convert(opts: ConvertOptions): Promise<void> {
 
   // 3. Read original package.json
   const origPkgPath = path.join(input, 'package.json')
-  const origPkg = fs.existsSync(origPkgPath)
-    ? JSON.parse(fs.readFileSync(origPkgPath, 'utf-8'))
-    : {}
+  let origPkg: Record<string, any>
+  try {
+    origPkg = fs.existsSync(origPkgPath)
+      ? JSON.parse(fs.readFileSync(origPkgPath, 'utf-8'))
+      : {}
+  } catch {
+    throw new Error(`invalid package.json at ${origPkgPath}`)
+  }
 
   // When input is a subdirectory (subdir in registry) and its own package.json
   // has no contributes, check parent dir's package.json — the root package.json
@@ -92,10 +94,12 @@ export async function convert(opts: ConvertOptions): Promise<void> {
   if (!origPkg.contributes) {
     const parentPkgPath = path.resolve(input, '..', 'package.json')
     if (input !== path.resolve(input, '..') && fs.existsSync(parentPkgPath)) {
-      const parentPkg = JSON.parse(fs.readFileSync(parentPkgPath, 'utf-8'))
-      if (parentPkg.contributes) {
-        origPkg.contributes = parentPkg.contributes
-      }
+      try {
+        const parentPkg = JSON.parse(fs.readFileSync(parentPkgPath, 'utf-8'))
+        if (parentPkg.contributes) {
+          origPkg.contributes = parentPkg.contributes
+        }
+      } catch {}
     }
   }
 
@@ -194,6 +198,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
     if (fs.existsSync(outputSrc)) {
       for (const fp of walkTsFiles(outputSrc)) {
         if (!fp.endsWith('.ts') && !fp.endsWith('.js')) continue
+        if (fp.endsWith('.d.ts')) continue
         let content = fs.readFileSync(fp, 'utf-8')
         let changed = false
 

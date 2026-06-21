@@ -220,14 +220,24 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   newContent = replaceBalanced(newContent, /window\.showOpenDialog\(/, () => 'void 0 as any')
 
   // Add priority 1 to document format providers (default 0 gets overridden by LanguageClient)
-  newContent = newContent.replace(
-    /registerDocumentFormatProvider\s*\(\s*(\w[\w.]*)\s*,\s*(\w[\w.]*)\s*,?\s*\)/g,
-    'registerDocumentFormatProvider($1, $2, 1)'
-  )
-  newContent = newContent.replace(
-    /registerDocumentRangeFormatProvider\s*\(\s*(\w[\w.]*)\s*,\s*(\w[\w.]*)\s*,?\s*\)/g,
-    'registerDocumentRangeFormatProvider($1, $2, 1)'
-  )
+  newContent = replaceBalanced(newContent, /registerDocumentFormatProvider\s*\(/, (call) => {
+    let depth = 0, argCount = 1
+    for (let i = call.indexOf('(') + 1; i < call.length - 1; i++) {
+      if (call[i] === '(') depth++
+      else if (call[i] === ')') depth--
+      else if (call[i] === ',' && depth === 0) argCount++
+    }
+    return argCount < 3 ? call.slice(0, -1) + ', 1)' : call
+  })
+  newContent = replaceBalanced(newContent, /registerDocumentRangeFormatProvider\s*\(/, (call) => {
+    let depth = 0, argCount = 1
+    for (let i = call.indexOf('(') + 1; i < call.length - 1; i++) {
+      if (call[i] === '(') depth++
+      else if (call[i] === ')') depth--
+      else if (call[i] === ',' && depth === 0) argCount++
+    }
+    return argCount < 3 ? call.slice(0, -1) + ', 1)' : call
+  })
 
   // authentication.getSession → undefined (coc.nvim has no auth API)
   newContent = replaceBalanced(newContent, /authentication\.getSession\s*\(/, () => 'undefined as any')

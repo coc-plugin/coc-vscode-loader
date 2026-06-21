@@ -84,6 +84,8 @@ export const transformProviderRegister: Transform = (ctx) => {
   }
 
   if (changed) {
-    file.replaceWithText(content)
+    try {
+      file.replaceWithText(content)
+    } catch {}
   }
 }

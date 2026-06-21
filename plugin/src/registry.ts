@@ -170,7 +170,6 @@ function satisfiesVersion(required: string): boolean {
   const baseVersion = fullVersion.replace(/-.*$/, '')
   const a = baseVersion.split('.').map(Number)
   const b = required.replace(/-.*$/, '').split('.').map(Number)
-  let allEqual = true
   for (let i = 0; i < Math.max(a.length, b.length); i++) {
     const va = a[i], vb = b[i]
     if (va === undefined || vb === undefined) break
@@ -178,8 +177,8 @@ function satisfiesVersion(required: string): boolean {
     if (va > vb) return true
     if (va < vb) return false
   }
-  // If base versions are equal and the current version is pre-release, it's strictly less
-  if (allEqual && fullVersion.includes('-')) return false
+  // If current version is pre-release, it's strictly less than the same base version
+  if (fullVersion.includes('-')) return false
   return true
 }
 

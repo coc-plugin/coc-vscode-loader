@@ -41,7 +41,9 @@ async function ensureRegistry(state: StateManager): Promise<void> {
   try {
     await updateRegistry()
     state.refreshPackages()
-  } catch {}
+  } catch {
+    console.warn('[coc-loader] ensureRegistry: failed to fetch registry (offline?)')
+  }
 }
 
 function resolvePackageName(state: StateManager, query: string): { regName: string; pkg: PackageEntry } | undefined {
@@ -307,8 +309,9 @@ export async function activate(context: ExtensionContext) {
           return
         }
         const shortNames = installed.map(p => p.info.name.replace(/^vscode-/, '')).sort()
-        const viml = `['${shortNames.join("', '")}']`
-        const lua = `{ '${shortNames.join("', '")}' }`
+        const escaped = shortNames.map(n => n.replace(/'/g, "'\"'\"'"))
+        const viml = `['${escaped.join("', '")}']`
+        const lua = `{ '${escaped.join("', '")}' }`
         await workspace.nvim.call('setreg', ['+', lua])
         cocWindow.showInformationMessage(
           `Installed (${shortNames.length}) — Lua: ${lua}  VimL: ${viml} (Lua copied to clipboard)`,

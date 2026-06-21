@@ -222,7 +222,7 @@ export class TUI {
         callback: async () => {
           this._inSearchMode = false
           if (this.state.getState().searchQuery) {
-            nvim.command('nohlsearch', true)
+            try { await nvim.command('nohlsearch', true) } catch {}
           }
         }
       }),
@@ -263,10 +263,10 @@ export class TUI {
     const onProgress: ProgressCallback = (msg) => {
       this.state.setStatusMessage(msg)
     }
-    updateRegistry(onProgress).then(() => {
+    updateRegistry(onProgress).then(async () => {
       this.state.setStatusMessage()
       this.state.refreshPackages()
-      this.render()
+      await this.render().catch(() => {})
       checkUpdates(this.state).catch(() => {})
     }).catch(() => {
       this.state.setStatusMessage('Failed to fetch remote registry (offline?)')
@@ -302,7 +302,7 @@ export class TUI {
       this._inSearchMode = true
       await this.render()
       setTimeout(() => {
-        if (this.winid) workspace.nvim.call('feedkeys', ['/', 'n'])
+        if (this.winid) workspace.nvim.call('feedkeys', ['/', 'n']).catch(() => {})
       }, 16)
       return
     }
@@ -322,7 +322,7 @@ export class TUI {
       const langs = this.state.getLanguages()
       if (langs.length === 0) return
       const picks = [...langs.map(l => ({ label: l })), { label: 'Clear filter' }]
-      const chosen = await cocWindow.showQuickPick(picks, { placehold: 'Select language filter' })
+      const chosen = await cocWindow.showQuickPick(picks, { placeholder: 'Select language filter' })
       if (chosen) {
         this.state.setLanguageFilter(chosen.label === 'Clear filter' ? null : chosen.label)
       }

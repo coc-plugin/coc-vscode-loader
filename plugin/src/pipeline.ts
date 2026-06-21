@@ -186,7 +186,7 @@ async function convertSource(
   const converterDir = path.resolve(path.dirname(path.dirname(cli)))
 
   // Install converter deps if missing (e.g. when installed from npm)
-  if (!fs.existsSync(path.join(converterDir, 'node_modules', 'commander'))) {
+  if (!fs.existsSync(path.join(converterDir, 'node_modules', '.bin', 'tsx'))) {
     onProgress(2, 5, 'Installing converter dependencies...', '')
     const log = (chunk: string) => onProgress(2, 5, chunk.trim(), '')
     await run('npm', [...npmInstallArgs(), '--omit=dev'], converterDir, log, undefined, name)
@@ -401,11 +401,12 @@ async function buildPackage(
   const rustTarget = `${rawArch}-${platformMap[platform] || platform}`
   const indexPath = path.join(build, 'lib', 'index.js')
   if (fs.existsSync(indexPath)) {
-    let code = fs.readFileSync(indexPath, 'utf-8')
+    const orig = fs.readFileSync(indexPath, 'utf-8')
+    let code = orig
     for (const [key, val] of [['platform', platform], ['arch', arch], ['raw-arch', rawArch], ['rust-target', rustTarget]] as [string, string][]) {
       code = code.replace(new RegExp(`\\{\\{${key}}}`, 'g'), val)
     }
-    if (code !== fs.readFileSync(indexPath, 'utf-8')) {
+    if (code !== orig) {
       fs.writeFileSync(indexPath, code)
     }
   }
@@ -520,7 +521,8 @@ async function buildPackage(
         if (fs.existsSync(archivePath)) await rimraf(archivePath)
       }
     } catch (e: any) {
-      onProgress(4, 5, `Warning: serverBinary setup failed (${e.message})`, 'install server binary manually')
+      throw new Error(`Failed to download language server binary: ${e.message}. ` +
+        `Check your network connection and try again.`)
     }
   }
 }
@@ -585,8 +587,11 @@ function metaPath(name: string): string {
 async function saveMeta(name: string): Promise<void> {
   const srcDir = sourceDir(name)
   try {
-    const log = await runWithOutput('git', ['-C', srcDir, 'log', '-1', '--format=%h|%s|%ar'], srcDir)
-    const [commit, msg, date] = log.split('|')
+    const log = await runWithOutput('git', ['-C', srcDir, 'log', '-1', '--format=%x00%h%x00%s%x00%ar'], srcDir)
+    const parts = log.split('\0')
+    const commit = parts[1] || ''
+    const msg = parts[2] || ''
+    const date = parts[3] || ''
     fs.writeFileSync(metaPath(name), JSON.stringify({ commit, msg, date, updatedAt: Date.now() }, null, 2))
   } catch { /* non-critical: commit tracking metadata */ }
 }
@@ -638,15 +643,19 @@ export async function installPackage(state: StateManager, name: string): Promise
   }
 }
 
-export function rimraf(dir: string): Promise<void> {
+function spawnPromise(cmd: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (!fs.existsSync(dir)) return resolve()
-    // chmod before rm to handle Go module cache (dirs are 0555 = unwritable, rm -rf fails)
-    try { execSync(`chmod -R u+w ${dir}`, { timeout: 10000 }) } catch {}
-    spawn('rm', ['-rf', dir], { stdio: 'ignore' })
-      .on('close', code => code === 0 ? resolve() : reject(new Error(`rm -rf exited ${code}`)))
-      .on('error', (e) => reject(e))
+    const child = spawn(cmd, args, { stdio: 'ignore' })
+    child.on('close', code => code === 0 ? resolve() : reject(new Error(`${cmd} exited ${code}`)))
+    child.on('error', reject)
   })
+}
+
+export async function rimraf(dir: string): Promise<void> {
+  if (!fs.existsSync(dir)) return
+  // chmod before rm to handle Go module cache (dirs are 0555 = unwritable, rm -rf fails)
+  try { await spawnPromise('chmod', ['-R', 'u+w', dir]) } catch {}
+  await spawnPromise('rm', ['-rf', dir])
 }
 
 function cpdir(src: string, dest: string): Promise<void> {
@@ -814,7 +823,8 @@ export async function runConcurrent<T extends string>(
     }).catch((e: any) => {
       failed++
       updateStats()
-      console.warn(`runConcurrent: ${e.message}`)
+      if (state) state.setStatusMessage(`[${failed} failed] ${item}: ${e.message}`)
+      else console.warn(`runConcurrent: ${e.message}`)
     }).finally(() => { pool.delete(p) })
     pool.add(p)
     if (pool.size >= concurrency) {
