@@ -59,7 +59,7 @@ jobs:
         working-directory: converter
 
       - name: Verify baseline integrity (detect unintended side effects)
-        run: npm run diff:check
+        run: npm run diff:check -- --verbose
         working-directory: converter
 
   smoke:
