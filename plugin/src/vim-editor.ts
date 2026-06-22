@@ -62,14 +62,16 @@ export class VimEditor implements EditorAPI {
       await this.nvim.command(`
         function! CocLoaderBatchRender(bufnr, lines, highlights) abort
           call setbufvar(a:bufnr, '&modifiable', 1)
-          call deletebufline(a:bufnr, 1, '$')
           call setbufline(a:bufnr, 1, a:lines)
+          call deletebufline(a:bufnr, len(a:lines) + 1, '$')
+          if !empty(a:highlights)
+            call prop_clear(1, len(a:lines), {'bufnr': a:bufnr})
+          endif
           call setbufvar(a:bufnr, '&modifiable', 0)
           for h in a:highlights
             call prop_add(h.line + 1, h.col + 1, {'length': h.length, 'type': h.hl_group, 'bufnr': a:bufnr})
           endfor
-          redraw
-          call feedkeys("", 'n')
+          call timer_start(0, {-> execute('redraw', '')})
         endfunction
       `)
     }
