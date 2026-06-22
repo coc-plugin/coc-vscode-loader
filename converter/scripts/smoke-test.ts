@@ -199,16 +199,32 @@ async function testOne(entry: RegistryEntry, presets: any): Promise<string | nul
  * Generates a single global declaration file with stubs for all external modules.
  */
 function checkTypeScript(outputDir: string, srcDir: string): string | null {
-  // Scan all TS files for external module imports
-  const externalMods = new Set<string>()
+  // Scan all TS files for external module imports and named imports
+  const externalMods = new Map<string, Set<string>>() // mod → set of named imports
+  // Matches `from 'x'`, `require('x')`, `from "x"`
   const importRe = /(?:from|require)\s*\(?\s*['"]([^'"]+)['"]\)?\s*/g
+  // Matches named imports: `import { X, Y } from 'mod'` (multi-line with `s` flag)
+  const namedRe = /import\s*\{\s*([^}]+)\s*\}\s*from\s*['"]([^'"]+)['"]/gs
   for (const f of fs.readdirSync(srcDir).filter(f => f.endsWith('.ts'))) {
     const content = fs.readFileSync(path.join(srcDir, f), 'utf-8')
     let m: RegExpExecArray | null
+    // Track module usage (including node:*)
     while ((m = importRe.exec(content)) !== null) {
       const mod = m[1]
-      if (!mod.startsWith('.') && !mod.startsWith('node:')) {
-        externalMods.add(mod)
+      if (!mod.startsWith('.')) {
+        if (!externalMods.has(mod)) externalMods.set(mod, new Set())
+      }
+    }
+    // Track named imports per module
+    namedRe.lastIndex = 0
+    while ((m = namedRe.exec(content)) !== null) {
+      const mod = m[2]
+      if (!mod.startsWith('.')) {
+        if (!externalMods.has(mod)) externalMods.set(mod, new Set())
+        m[1].split(',').forEach(name => {
+          const trimmed = name.trim().split(/\s+as\s+/)[0].trim()
+          if (trimmed) externalMods.get(mod)!.add(trimmed)
+        })
       }
     }
   }
@@ -226,8 +242,13 @@ function checkTypeScript(outputDir: string, srcDir: string): string | null {
     'declare namespace NodeJS { interface Process {} interface Module {} }',
     '',
   ]
-  for (const mod of externalMods) {
+  for (const [mod, named] of externalMods) {
     declLines.push(`declare module '${mod}' {`)
+    if (named.size > 0) {
+      for (const name of named) {
+        declLines.push(`  export const ${name}: any;`)
+      }
+    }
     declLines.push('  const _: any;')
     declLines.push('  export = _')
     declLines.push('}')
