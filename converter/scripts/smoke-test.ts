@@ -289,24 +289,25 @@ function checkTypeScript(outputDir: string, srcDir: string): string | null {
     })
     return null
   } catch (e: any) {
-    const stderr = (e.stderr || '').toString()
-    const stdout = (e.stdout || '').toString()
-    const all = stderr + stdout
-    // Filter to actual TS errors (skip informational messages)
-    const lines = all.split('\n').filter(l => l.includes('error TS'))
-    if (lines.length === 0) return 'tsc check failed (unknown error)'
-    // Deduplicate by error code and message (ignore position)
-    const seen = new Set<string>()
-    const unique: string[] = []
-    for (const l of lines) {
-      const key = l.replace(/\(\d+,\d+\)/g, '(pos)')
-      if (!seen.has(key)) {
-        seen.add(key)
-        unique.push(l.trim())
+    const stderr = (e.stderr || '').toString().trim()
+    const stdout = (e.stdout || '').toString().trim()
+    const raw = stderr + (stderr && stdout ? '\n' : '') + stdout
+    const lines = raw.split('\n').filter(l => l.includes('error TS'))
+    if (lines.length > 0) {
+      const seen = new Set<string>()
+      const unique: string[] = []
+      for (const l of lines) {
+        const key = l.replace(/\(\d+,\d+\)/g, '(pos)')
+        if (!seen.has(key)) { seen.add(key); unique.push(l.trim()) }
       }
+      return `tsc: ${unique.slice(0, 3).join('; ')}`
     }
-    const detail = unique.slice(0, 5).join('; ')
-    return `tsc: ${detail}`
+    // No "error TS" lines — capture exit info + raw output for debugging
+    const signal = e.signal || ''
+    const status = e.status ?? '?'
+    const snippet = raw.slice(0, 600).replace(/\n/g, '\\n')
+    const modCount = externalMods.size
+    return `tsc exit=${status} sig=${signal} mods=${modCount} out=[${snippet || 'empty'}]`
   } finally {
     try { fs.rmSync(tsconfigPath) } catch {}
     try { fs.rmSync(typingsPath) } catch {}
