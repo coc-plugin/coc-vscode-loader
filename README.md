@@ -102,14 +102,24 @@ Input → Steps pipeline (source → language-client → bridge → snippets)
 
 ### Testing
 
-Two test suites must pass before pushing:
+Three test suites, each catching different issues:
 
 ```bash
-npm test                    # Unit tests (117 tests) + test coverage check
-npm run test:smoke          # Registry smoke test (converts all 122 entries)
+npm test                    # Unit tests (162) + fixture tests + test coverage check
+npm run test:full           # Unit tests + registry baseline diff
+npm run test:smoke          # Registry smoke test (all 128 entries + tsc --noEmit)
 ```
 
-**Pre-push hook** — `git push` automatically runs both suites. Configure once:
+| Suite | What it catches | CI |
+|-------|----------------|----|
+| `npm test` | Transform/fixture correctness (fast, ~1s) | ✅ |
+| `npm run test:full` | Unintended side effects on all 128 registry entries | ❌ (manual) |
+| `npm run test:smoke` | Compiled output errors (tsc check) | ✅ |
+
+**Baseline diff** (`npm run diff:baseline` / `npm run diff:check`):
+Before changing converter code, snapshot current output; after changes, compare to detect which plugins are affected. See `AGENTS.md` for full workflow.
+
+**Pre-push hook** — `git push` automatically runs `npm test` + `npm run test:smoke`. Configure once:
 
 ```bash
 git config core.hooksPath .githooks
@@ -118,7 +128,10 @@ git config core.hooksPath .githooks
 
 Skip with `git push --no-verify` (use sparingly).
 
-**GitHub Actions CI** — unit tests run on push/PR (Node 20/22). Smoke test runs after unit passes with repo caching.
+**GitHub Actions CI** — three sequential jobs:
+1. `unit` (Node 20/22): unit tests + fixture tests
+2. `diff`: registry baseline check (detects unintended converter side effects)
+3. `smoke`: full registry conversion + tsc --noEmit
 
 ### Switch between local dev and npm release
 

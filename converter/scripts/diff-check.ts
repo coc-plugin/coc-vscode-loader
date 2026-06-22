@@ -5,6 +5,10 @@
  * Stores output file hashes in converter/baseline.json (committed to git).
  * CI runs `npm run diff:check` to verify converter changes don't break existing plugins.
  *
+ * Source repo commit hashes are stored alongside output hashes in the baseline.
+ * During check, entries whose source repo changed are SKIPPED (not failed) —
+ * only entries with the same source but different output are reported as regressions.
+ *
  * Usage:
  *   npm run diff:baseline       # Generate and update baseline.json
  *   npm run diff:check          # Compare current output against baseline (exit 1 if changed)
@@ -33,31 +37,67 @@ interface RegistryEntry {
   convert: any[]
 }
 
-/** Baseline format: { entryName: { fileRelPath: "sha256hex" } } */
-type Baseline = Record<string, Record<string, string>>
+/**
+ * Baseline entry per package.
+ * _source contains metadata about the source used to generate this baseline.
+ * All other keys are file-relative-path → sha256 hash.
+ */
+interface BaselineEntry {
+  _source?: { repo?: string; commit?: string }
+  [fileRel: string]: string | undefined | { repo?: string; commit?: string }
+}
+
+type Baseline = Record<string, BaselineEntry>
 
 function cacheDir(e: RegistryEntry): string {
   return path.join(CACHE_DIR, e.name.replace(/[^a-z0-9_-]/gi, '_'))
 }
 
-async function processEntry(entry: RegistryEntry, presets: any): Promise<{ name: string; error?: string; hashes?: Record<string, string> }> {
+/**
+ * Get the HEAD commit SHA of a git repo, or undefined if not a git repo.
+ */
+function getHeadCommit(repoDir: string): string | undefined {
+  try {
+    return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repoDir, stdio: 'pipe', encoding: 'utf-8' }).trim()
+  } catch {
+    return undefined
+  }
+}
+
+async function processEntry(entry: RegistryEntry, presets: any): Promise<{
+  name: string
+  error?: string
+  hashes?: Record<string, string>
+  sourceCommit?: string
+}> {
   const cachePath = cacheDir(entry)
   let inputDir: string | null = null
+  let rootDir: string | null = null // git root for getting commit
+  let sourceCommit: string | undefined
 
   if (fs.existsSync(cachePath) && fs.existsSync(path.join(cachePath, '.git'))) {
-    inputDir = cachePath
-    if (entry.source.subdir) inputDir = path.join(cachePath, entry.source.subdir)
+    rootDir = cachePath
+    // Fast incremental update
+    try {
+      execFileSync('git', ['fetch', '--depth', '1', 'origin'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
+      execFileSync('git', ['reset', '--hard', 'origin/HEAD'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
+    } catch {}
+    sourceCommit = getHeadCommit(rootDir)
+    inputDir = entry.source.subdir ? path.join(cachePath, entry.source.subdir) : cachePath
   } else if (entry.source.type === 'github' && entry.source.repo) {
     try {
       fs.mkdirSync(cachePath, { recursive: true })
       const url = `https://github.com/${entry.source.repo}.git`
       execFileSync('git', ['clone', '--depth', '1', '--single-branch', url, cachePath], { stdio: 'pipe', timeout: 300000 })
+      rootDir = cachePath
+      sourceCommit = getHeadCommit(rootDir)
       inputDir = entry.source.subdir ? path.join(cachePath, entry.source.subdir) : cachePath
     } catch (e: any) {
       return { name: entry.name, error: `source download: ${e.message}` }
     }
   } else if (entry.source.type === 'npm' && entry.source.package) {
     try {
+      // npm packages: no commit tracking
       const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'npm-'))
       execFileSync('npm', ['pack', entry.source.package], { cwd: tmp, stdio: 'pipe', timeout: 60000 })
       const tarball = fs.readdirSync(tmp).find(f => f.endsWith('.tgz'))
@@ -109,7 +149,7 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{ name:
   }
   collect(outputDir, '')
 
-  return { name: entry.name, hashes }
+  return { name: entry.name, hashes, sourceCommit }
 }
 
 async function processAll(registry: RegistryEntry[], presets: any, label: string): Promise<Baseline> {
@@ -132,7 +172,12 @@ async function processAll(registry: RegistryEntry[], presets: any, label: string
         failed++
         baseline[entry.name] = { _error: result.error }
       } else if (result.hashes) {
-        baseline[entry.name] = result.hashes
+        baseline[entry.name] = {
+          ...result.hashes,
+          _source: entry.source.repo
+            ? { repo: entry.source.repo, commit: result.sourceCommit }
+            : undefined,
+        }
       }
     })()
     pool.add(p)
@@ -156,10 +201,11 @@ async function baseline() {
 
   const baselineData = await processAll(registry, presets, 'baseline')
 
-  // Write baseline.json
   fs.writeFileSync(BASELINE_PATH, JSON.stringify(baselineData, null, 2))
   console.log(`\nBaseline written to ${path.relative(path.resolve(__dirname, '../..'), BASELINE_PATH)}`)
-  console.log(`  ${Object.keys(baselineData).length} entries, ${Object.values(baselineData).reduce((s, e) => s + Object.keys(e).length, 0)} files`)
+  const entryCount = Object.keys(baselineData).length
+  const fileCount = Object.values(baselineData).reduce((s, e) => s + Object.keys(e).length, 0)
+  console.log(`  ${entryCount} entries, ${fileCount} files`)
 }
 
 async function check() {
@@ -172,7 +218,6 @@ async function check() {
   const registry: RegistryEntry[] = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf-8'))
   const presets = fs.existsSync(PRESETS_PATH) ? JSON.parse(fs.readFileSync(PRESETS_PATH, 'utf-8')) : undefined
 
-  // Filter to entries that exist in baseline (skip new entries not yet baselined)
   const knownEntries = registry.filter(e => baseline[e.name] !== undefined)
   const newEntries = registry.filter(e => baseline[e.name] === undefined)
   if (newEntries.length > 0) {
@@ -184,30 +229,47 @@ async function check() {
 
   // Diff
   let changed = 0
+  let skipped = 0
   let failed = 0
   let unchanged = 0
-  const changes: Array<{ name: string; files: Array<{ rel: string; status: 'changed' | 'new' | 'missing' | 'error' }>; error?: string }> = []
+  const changes: Array<{ name: string; files: Array<{ rel: string; status: 'changed' | 'new' | 'missing' | 'error' | 'skipped' }>; error?: string }> = []
 
   for (const name of Object.keys(current)) {
-    const curFiles = current[name]
-    const baseFiles = baseline[name]
+    const curEntry = current[name]
+    const baseEntry = baseline[name]
 
-    if (curFiles._error) {
+    if (curEntry._error) {
       failed++
-      changes.push({ name, files: [], error: curFiles._error })
+      changes.push({ name, files: [], error: curEntry._error })
       continue
     }
 
+    // Check source repo consistency
+    const curSource = curEntry._source as { repo?: string; commit?: string } | undefined
+    const baseSource = baseEntry._source as { repo?: string; commit?: string } | undefined
+
+    if (baseSource?.commit && curSource?.commit !== baseSource.commit) {
+      // Source repo has changed since baseline was generated — skip comparison
+      skipped++
+      if (VERBOSE) {
+        console.log(`  ~ ${name} (source changed: ${baseSource.commit?.slice(0, 8)} → ${curSource?.commit?.slice(0, 8) || '?'})`)
+      }
+      continue
+    }
+
+    // Compare hashes
     const fileChanges: Array<{ rel: string; status: 'changed' | 'new' | 'missing' | 'error' }> = []
-    const allRels = new Set([...Object.keys(curFiles), ...Object.keys(baseFiles)])
+    const allRels = new Set([...Object.keys(curEntry), ...Object.keys(baseEntry)])
 
     for (const rel of allRels) {
-      if (rel === '_error') continue
-      if (curFiles[rel] && !baseFiles[rel]) {
+      if (rel === '_error' || rel === '_source') continue
+      const curHash = curEntry[rel] as string | undefined
+      const baseHash = baseEntry[rel] as string | undefined
+      if (curHash && !baseHash) {
         fileChanges.push({ rel, status: 'new' })
-      } else if (!curFiles[rel] && baseFiles[rel]) {
+      } else if (!curHash && baseHash) {
         fileChanges.push({ rel, status: 'missing' })
-      } else if (curFiles[rel] !== baseFiles[rel]) {
+      } else if (curHash !== baseHash) {
         fileChanges.push({ rel, status: 'changed' })
       }
     }
@@ -223,46 +285,38 @@ async function check() {
   // Report
   console.log(`\nResults:`)
   console.log(`  ${unchanged} unchanged`)
+  console.log(`  ${skipped} skipped (source repo changed)`)
   console.log(`  ${changed} changed`)
   console.log(`  ${failed} failed\n`)
 
-  if (changes.length > 0) {
-    // Count real content changes vs operational failures
-    const contentChanges = changes.filter(c => !c.error)
-    const operationalFailures = changes.filter(c => c.error)
-
-    if (operationalFailures.length > 0) {
-      console.log(`\nOperational issues (download errors, not output changes):`)
-      for (const c of operationalFailures) {
-        console.log(`  ⚠ ${c.name} — ${c.error}`)
-      }
-      console.log('')
-    }
-
-    if (contentChanges.length > 0) {
-      console.log('Output changes detected:')
-      for (const c of contentChanges) {
-        const icons = c.files.map(f =>
-          f.status === 'changed' ? '~' : f.status === 'new' ? '+' : f.status === 'missing' ? '-' : '?'
-        ).join('')
-        console.log(`  ${icons} ${c.name}`)
-        if (VERBOSE) {
-          for (const f of c.files) {
-            const icon = f.status === 'changed' ? '~' : f.status === 'new' ? '+' : '-'
-            console.log(`      ${icon} ${f.rel}`)
-          }
+  if (changed > 0) {
+    console.log('Output changes detected:')
+    for (const c of changes.filter(c => !c.error)) {
+      const icons = c.files.map(f =>
+        f.status === 'changed' ? '~' : f.status === 'new' ? '+' : '-'
+      ).join('')
+      console.log(`  ${icons} ${c.name}`)
+      if (VERBOSE) {
+        for (const f of c.files) {
+          const icon = f.status === 'changed' ? '~' : f.status === 'new' ? '+' : '-'
+          console.log(`      ${icon} ${f.rel}`)
         }
       }
-      console.log('')
-      console.log('⚠  Converter changes affect existing plugin output!')
-      console.log('   Review the changes above.')
-      console.log('   If intentional, update baseline: npm run diff:baseline')
-      console.log('')
-      process.exit(1)
     }
+    console.log('')
+    console.log('⚠  Converter changes affect existing plugin output!')
+    console.log('   Review the changes above.')
+    console.log('   If intentional, update baseline: npm run diff:baseline')
+    console.log('')
+    process.exit(1)
+  }
 
-    // Only operational failures, no content changes — this is OK (transient)
-    console.log('✓ No output changes detected (operational issues only).\n')
+  if (failed > 0) {
+    console.log('Operational issues (download errors, not output changes):')
+    for (const c of changes.filter(c => c.error)) {
+      console.log(`  ⚠ ${c.name} — ${c.error}`)
+    }
+    console.log('')
   }
 
   console.log('✓ All entries match baseline — no unintended side effects.\n')

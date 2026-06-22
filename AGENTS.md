@@ -588,11 +588,99 @@ Go/Cargo 编译缓存在 `build/.gopath/` 和 `build/.cargo-root/`，安装完�
 Every source file must have a corresponding `.test.ts` file. Run before pushing:
 
 ```bash
-npm test                    # Unit tests (117) + check-tests (no missing/empty tests)
-npm run test:smoke          # Registry smoke test (converts all 122 entries, validates output)
+npm test                    # Unit tests (162) + check-tests + fixture tests
+npm run test:full           # Unit tests + diff:check (registry baseline comparison)
+npm run test:smoke          # Registry smoke test (converts all 128 entries, validates output + tsc --noEmit)
 ```
 
-**Pre-push hook** runs both. CI runs unit tests on push/PR (Node 20/22) and smoke test after.
+**Pre-push hook** runs `npm test` + `npm run test:smoke`. CI runs unit tests on push/PR (Node 20/22), then diff check, then smoke test.
+
+### Fixture tests
+
+Per-transform input/output pairs in `converter/src/__fixtures__/<transform>/<case>/`:
+
+| Transform | Fixtures | What's tested |
+|-----------|----------|---------------|
+| `import-mapping` | 21 | `require('vscode')`, `createStatusBarItem`, `new CodeAction`, `workspace.isTrusted`, `window.activeTextEditor`, `editor.setDecorations`, `workspaceFolders` guard, etc. |
+| `class-to-factory` | 8 | `new Position`/`new TextEdit`/`new WorkspaceEdit` → factory calls |
+| `provider-register` | 6 | Provider renames, `registerCompletionItemProvider` signature adaptation |
+
+Add a new fixture: create `<case>/input.ts` + `<case>/output.ts` in the appropriate transform directory. The test is auto-discovered.
+
+After changing a transform's implementation, regenerate fixture outputs:
+```bash
+npx tsx scripts/gen-fixtures.ts
+```
+
+### Pipeline fixtures
+
+Full `convert()` pipeline tests in `converter/src/__fixtures__/pipeline/<case>/`.
+Tests `convert.ts` text replacements (`.uri.fsPath`, `Location.create`, `getWordRangeAtPosition`, WorkspaceEdit polyfill, etc.) on realistic multi-pattern source files.
+
+After changing `convert.ts` text replacements:
+```bash
+npx tsx scripts/gen-pipeline-fixtures.ts
+```
+
+### Registry baseline diff (`converter/baseline.json`)
+
+**Purpose**: Detect unintended side effects when changing converter code. Stores SHA-256 hashes of every converted output file for all 128 registry entries.
+
+**Workflow**:
+
+```bash
+# Before changing converter code — capture current output
+npm run diff:baseline
+
+# Change converter code (transforms, text replacements, etc.)
+
+# Check what changed
+npm run diff:check
+# → Reports which entries differ from baseline, and which files changed
+# → Exits 1 only if REAL output changes detected (download errors ignored)
+
+# If changes are intended (e.g. you fixed a bug)
+npm run diff:baseline     # Update baseline
+git add converter/baseline.json
+git commit -m "..."
+
+# If changes are unintended
+# → Review and fix your converter code
+```
+
+**How it works**:
+- `diff:baseline` — converts all 128 entries, hashes all output `.ts`/`.js`/`package.json`/`esbuild.mjs` files with SHA-256, writes to `converter/baseline.json`
+- `diff:check` — reconverts entries, compares hashes against stored baseline, reports differences
+- Source repos cached in `~/.cache/coc-converter-smoke/`
+
+**Source commit tracking** (prevents false positives in CI):
+Each baseline entry stores the source repo's `HEAD` commit hash in `_source.commit`.
+When `diff:check` runs, it compares the current source commit against the stored one.
+If the source repo has changed (upstream `main` advanced), the entry is **skipped** — not failed.
+Only entries whose source is exactly the same as when baseline was generated are compared.
+
+```json
+{
+  "vscode-prettier": {
+    "_source": { "repo": "prettier/prettier-vscode", "commit": "abc123def..." },
+    "src/index.ts": "sha256hash..."
+  }
+}
+```
+
+**CI integration**:
+- `diff` job runs after `unit`, before `smoke`
+- Shares repo cache with `smoke` job
+- Fails CI only if converter changes affect entries with the same source code
+- Entries whose source repo changed since baseline → skipped (not failure)
+- Download errors (transient network issues) → skipped (not failure)
+
+**When baseline becomes stale** (upstream plugin repos changed):
+```bash
+npm run diff:baseline     # Refresh baseline with current source
+git add converter/baseline.json
+git commit -m "chore: update baseline"
+```
 
 ### check-tests enforcement
 
