@@ -359,33 +359,31 @@ Mason 在 `max_concurrent_installers = 4` 的限制下，超出并发数的安�
 
 coc-loader 的 `runConcurrent()` 同样限制并发数为 3（可通过参数调整），超出部分显示在 Queued 区，安装开始后自动移入 Installing。
 
-### 7.2 取消安装 (❌ coc-loader 缺失)
+### 7.2 取消安装 (✅ coc-loader 已实现)
 
 Mason 支持 `<C-c>` 取消正在安装或队列中的包。内部通过 `InstallHandle:terminate()` 终止子进程。
 
-coc-loader 的 handler 不检测也不支持取消。正在运行的 `git clone` / `npm install` / `npx tsx` 无法通过 UI 中断。
+coc-loader 同样支持 `<C-c>` 取消安装/更新/卸载，通过 `cancelPackage()` 中断运行中的子进程。
 
-### 7.3 语言筛选 (△ coc-loader 只有 stub)
+### 7.3 语言筛选 (✅ coc-loader 已实现)
 
 Mason 的 `<C-f>` 调用 `vim.ui.select()` 弹出语言选择器，选中后页面只显示该语言的包，且 Header 下方会多一行 `Language Filter: <lang> press <Esc> to clear`。
 
-coc-loader 的 `handleKey('language-filter')` 仅显示 "not yet implemented"。
+coc-loader 同样支持 `<C-f>`，通过 `cocWindow.showQuickPick()` 弹出语言选择器，选中后过滤包列表。Header 显示 `(search mode)` 标记。
 
-### 7.4 搜索模式 (❌ coc-loader 缺失)
+### 7.4 搜索模式 (✅ coc-loader 已实现)
 
 Mason 利用 Neovim 原生的 `/` 搜索命令 (`CmdLineEnter`/`CmdLineLeave` autocmd)，进入搜索模式后：
 - 包行尾显示 `(keywords: ...)` 灰色关键词
 - `<Esc>` 清除搜索
 - Header 显示 `(search mode, press <Esc> to clear)`
 
-coc-loader 有 `/` 搜索实现（`setSearchQuery` + `appendHighlightedText`），但也只做到了文本高亮，没有搜索模式的 UI 变化（搜索关键词提示等）。实际上这已经可以工作，因为没有像 Mason 那样显式的 "search mode" 状态变化。
-
-实际上更仔细看，coc-loader 确实有搜索功能：
-- tui.ts setupKeymaps 里没有注册 `/` 键
-- 但 state.ts 有 `setSearchQuery` 和 `getFilteredPackages` 搜索过滤逻辑
-- 搜索功能的入口似乎缺失
-
-所以: 搜索过滤逻辑存在，但没有在 TUI 中注册 `/` 键，无法触发。
+coc-loader 已注册 `/` 键，支持完整的搜索功能：
+- Header 显示 `(search mode)` 标记
+- 包行尾显示 `(keywords: ...)` 灰色关键词
+- 搜索命中高亮（`CocLoaderSearchMatch`）
+- Neovim：`CmdLineChanged` 实时搜索
+- Vim：调用 `input()` 弹出对话框
 
 ### 7.5 空 section "No packages." (❌ coc-loader 缺失)
 

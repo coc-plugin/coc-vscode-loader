@@ -6,6 +6,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader/stargazers)
 [![last commit](https://img.shields.io/github/last-commit/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader)
 [![open issues](https://img.shields.io/github/issues/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader/issues)
+[![Editor](https://img.shields.io/badge/editor-Neovim%200.8%2B%20%7C%20Vim%209.0%2B-blue)]()
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.5.6" alt="TUI preview" width="100%">
@@ -14,7 +15,7 @@
   <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png?v=1.5.6" alt="Registry preview" width="100%">
 </p>
 
-在 coc.nvim 中无缝运行 VS Code 扩展。
+在 coc.nvim 中无缝运行 VS Code 扩展。支持 **Neovim 0.8+** 和 **Vim 9.0+**。
 
 [![Browse Registry](https://img.shields.io/badge/🌐_Browse_Available_Extensions-coc--plugin.github.io-blue?style=for-the-badge)](https://coc-plugin.github.io/coc-vscode-registry/)
 
@@ -157,6 +158,13 @@ cd plugin && npm run build  # build plugin only
 - **Linux** ✅ Fully supported
 - **macOS** ✅ Fully supported
 - **Windows** ❌ Not supported (no planned support)
+
+### Editor
+
+| Editor | TUI | Notes |
+|--------|-----|-------|
+| **Neovim** 0.8+ | ✅ 完整浮窗 + extmark | 推荐，完整 Mason 风格体验 |
+| **Vim** 9.0+ | ✅ 拆分窗口 + prop_add | 底部拆分窗口，无 backdrop 遮罩，无实时搜索 |
 
 ### External commands
 

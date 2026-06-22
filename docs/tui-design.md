@@ -171,3 +171,23 @@ Tab 格式: ` (N) Name `，活跃=青色背景块，不活跃=灰色背景块。
 | `plugin/src/pipeline.ts` | 安装/更新/卸载流程 |
 | `plugin/src/registry.ts` | Registry 获取 + 缓存 + 版本过滤 |
 | `plugin/src/index.ts` | CocCommand 注册 + 生命周期 |
+| `plugin/src/editor-api.ts` | EditorAPI 抽象接口 |
+| `plugin/src/nvim-editor.ts` | Neovim 后端（浮窗 + extmark，0.8+） |
+| `plugin/src/vim-editor.ts` | Vim 后端（拆分窗口 + prop_add，9.0+） |
+| `plugin/src/editor-factory.ts` | 自动检测 `has('nvim')` → 选择后端 |
+
+## 多编辑器支持
+
+Neovim（0.8+）和 Vim（9.0+）使用不同的渲染后端，通过 `EditorAPI` 接口隔离：
+
+| 特性 | Neovim (0.8+) | Vim (9.0+) |
+|------|---------------|-------------|
+| 窗口类型 | 浮动窗口（居中） | 底部拆分窗口 |
+| 高亮方式 | `nvim_buf_set_extmark` | `prop_add` + `prop_type_add` |
+| 批处理 | `nvim_pause_notification` + `nvim_call_atomic` | 单次 `nvim.call('CocLoaderBatchRender', ...)` |
+| 遮罩层 | 半透明 backdrop | 不支持（拆分窗口无需要） |
+| 搜索 | `CmdLineChanged` 实时搜索 | `input()` 对话框 |
+| 自动关闭 | `WinEnter` autocmd | 用户手动 q |
+| 布局 | 浮窗居中，80%×90% | 底部 60% 高度拆分窗口 |
+
+详见 [`docs/editor-api-design.md`](./editor-api-design.md)。

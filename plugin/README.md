@@ -4,7 +4,8 @@
 
 VS Code extension → coc.nvim plugin loader with TUI package manager.
 
-Install/update/uninstall converted VS Code extensions via a floating terminal UI.
+Install/update/uninstall converted VS Code extensions via a terminal UI.
+Supports **Neovim 0.8+** (floating window + extmark) and **Vim 9.0+** (split window + text properties).
 
 ## Install
 
@@ -105,6 +106,10 @@ On next `:CocRestart`, the plugin will fetch the registry and install any missin
 | `src/registry.ts` | Remote registry fetch + disk cache |
 | `src/pipeline.ts` | Real install/update/uninstall flow (git + npx tsx + npm + node + cp). Handles local servers (copies `server/` dir, installs deps), binary server download, Go/Cargo source-compiled servers, pip install. |
 | `src/renderer.ts` | LineBuffer render engine (inspired by lazy.nvim) |
+| `src/editor-api.ts` | Editor abstraction interface |
+| `src/nvim-editor.ts` | Neovim backend (float window + extmark) |
+| `src/vim-editor.ts` | Vim backend (split window + text properties) |
+| `src/editor-factory.ts` | Auto-detects `has('nvim')` → picks the right backend |
 
 ## Build
 

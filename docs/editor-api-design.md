@@ -7,7 +7,7 @@
 ## 状态
 
 - ✅ **Phase 1 完成** — `editor-api.ts`（接口）+ `nvim-editor.ts`（Neovim 实现）+ `tui.ts` 迁移
-- ⏳ **Phase 2** — Vim 拆分窗口实现（`vim-editor.ts`）
+- ✅ **Phase 2 完成** — Vim 拆分窗口实现（`vim-editor.ts`）
 - ❌ ~~Phase 3 — Vim 9 popup 实现~~：设计评审后废弃，参见下方 Vim popup 分析
 
 ### 最低版本
@@ -15,7 +15,7 @@
 | 编辑器 | 最低版本 | UI 级别 | 实现 |
 |--------|---------|---------|------|
 | Neovim | 0.8.0+ | 完整浮窗 + extmark | `nvim-editor.ts` |
-| Vim | 9.0+ | 底部拆分窗口 + text property | `vim-editor.ts`（TODO） |
+| Vim | 9.0+ | 底部拆分窗口 + text property | `vim-editor.ts` |
 
 ---
 
@@ -104,6 +104,18 @@ export interface HighlightDef {
 export interface EditorWindow { id: number }
 export interface EditorBuffer { id: number }
 
+export interface HighlightRange {
+  line: number
+  hlGroup: string
+  colStart: number
+  colEnd: number
+}
+
+export interface BatchRenderInput {
+  lines: string[]
+  highlights: HighlightRange[]
+}
+
 export interface EditorAPI {
   // ── 生命周期 ──
   init(): Promise<void>
@@ -121,6 +133,9 @@ export interface EditorAPI {
   bufferSetOption(buf: EditorBuffer, key: string, value: any): Promise<void>
   bufferSetKeymap(buf: EditorBuffer, mode: string, lhs: string, rhs: string,
     opts?: { silent?: boolean; nowait?: boolean }): Promise<void>
+
+  // ── 批渲染（单次 RPC 完成全帧渲染，Vim 性能关键）──
+  batchRender(buf: EditorBuffer, ns: number, input: BatchRenderInput): Promise<void>
 
   // ── 浮窗 ──
   openFloatWindow(buf: EditorBuffer, focus: boolean,
@@ -172,7 +187,7 @@ export interface EditorAPI {
 | backdrop 检测 + 创建 | **跳过**（`_supportsBackdrop = false`） | Vim 无 backdrop |
 | 主浮窗 `nvim_open_win(zindex:45)` | `:botright Nnew` + `buffer buf.id` | 拆分窗口初始化 |
 | 设 buffer 选项：modifiable/bufhidden/buftype/swapfile/undolevels/filetype | 同（`setbufvar(&...)`） | 无差异 |
-| 设窗口选项：cursorline/number/relativenumber/wrap/signcolumn/spell/foldenable | 同（`setwinvar(&...)`） | 无差异 |
+| 设窗口选项：cursorline/number/relativenumber/wrap/signcolumn/spell/foldenable | **跳过 cursorline**（Vim 下 cursorline 覆盖 prop_add 颜色，header/tab 行不可见） | Vim 下不设 cursorline |
 | 定义 `CocConverterDispatch` 函数 | 同 | VimL 兼容 |
 | `setupKeymaps()` 19 个缓冲映射 | 同 | `nnoremap <buffer>` 兼容 |
 | `state.subscribe()` | 同 | 纯 JS |
@@ -217,19 +232,15 @@ export interface EditorAPI {
 
 ### 渲染 pipeline：render()
 
+当前 render() 使用 `editor.batchRender()` 统一路径，Vim 和 Neovim 各自在实现中优化。
+
 | 步骤 | Neovim 实现 | Vim 实现 | 差异 |
 |------|------------|---------|------|
 | 互斥锁 | `if (rendering)` → `pendingRender = true` | 同 | 无 |
-| 保存光标 | `editor.windowGetCursor(win)` | 同 → `getcurpos()` | `VimEditor` 内部转换 |
+| 保存光标 | `editor.windowGetCursor(win)` | 同 | 无 |
 | `renderHelp()` / `renderPackageList()` | 纯逻辑 | 同 | 无 |
 | 裁剪高亮 | `filter + clamp colStart/colEnd` | 同 | 无 |
-| pauseNotification | `nvim.pauseNotification()` — 开始 batch | **`_batchMode = true`** — 入队模式 | Vim 实现自己的批处理 |
-| `modifiable = true` | `submit('nvim_buf_set_option')` | `editor.bufferSetOption(buf, 'modifiable', true)` → 入队 | 批处理入队 |
-| 清空缓冲区 | `submit('nvim_buf_clear_namespace', ...)` | `editor.bufferClearNamespace(buf, ns)` → 入队 | 批处理入队 |
-| 写内容 | `submit('nvim_buf_set_lines', ...)` | `editor.bufferSetLines(buf, lines)` → **直接入队 VimL 脚本** | 批处理直接生成脚本 |
-| `modifiable = false` | `submit('nvim_buf_set_option')` | `editor.bufferSetOption(...)` → 入队 | 批处理入队 |
-| 高亮 | `submit('nvim_buf_set_extmark', ...)` 循环 | `editor.bufferSetExtmark(buf, ns, l, c, opts)` 循环 → **入队 prop_add** | 批处理入队 |
-| resumeNotification | `await nvim.resumeNotification()` — 原子执行 | **合并所有入队命令为 `|` 分隔的脚本，一次 `nvim.command()` 执行** | Vim 需要模拟批处理 |
+| batchRender | `pauseNotification()` + `submit()` 多条 + `resumeNotification()` → `nvim_call_atomic` | **一次 `nvim.call('CocLoaderBatchRender', ...)`** 传递结构化数据 | Vim 用预注册 VimL function |
 | 恢复光标 | `editor.windowSetCursor(win, pos)` | 同 | 无 |
 | 帮助动画 | 60ms 间隔 re-render | 同 | 无 |
 
@@ -258,7 +269,7 @@ export interface EditorAPI {
 | 精确列范围 | `nvim_buf_set_extmark(buf, ns, line, colStart, {end_col, hl_group})` | `prop_add(line+1, colStart+1, {length: colSpan, type: hl_group, bufnr: buf.id})` |
 | 1-index | Neovim 0-index 行/列 | Vim 1-index 行/列 |
 | `combine` 模式 | `hl_mode: 'combine'` — 叠加上层语法高亮 | **无影响** — TUI buffer 是 scratch buffer（`filetype=coc-loader`），无语法高亮层，`combine` 无意义 |
-| 清理 | `nvim_buf_clear_namespace(buf, ns, 0, -1)` | `prop_clear(1, -1, {bufnr: buf.id})` — 不能按 namespace 过滤 |
+| 清理 | `nvim_buf_clear_namespace(buf, ns, 0, -1)` | `prop_clear(1, len(lines), {bufnr: buf.id})` — 不能按 namespace 过滤 |
 | 跨行 | `end_col` 在同一行内 | `end_lnum` / `end_col` 支持跨行 |
 
 **⚠️ 参数签名注意**：`prop_add` 是 `(lnum, col, {dict})`，不是 `(bufnr, lnum, {dict})`。
@@ -267,7 +278,7 @@ export interface EditorAPI {
 
 `prop_clear` 同理：`prop_clear(lnum_start, lnum_end, {bufnr?})`
 
-**渲染策略**：每次 render 先 `prop_clear(1, -1, {bufnr: buf.id})` 清除旧 props，再 `setbufline()` 写入内容，最后 `prop_add()` 添加新高亮。
+**渲染策略**（最终）：每次 render 先 `setbufline()` 写入内容，再 `deletebufline()` 删多余行，然后 `prop_clear(1, len(lines), ...)` 清除旧 props，最后 `prop_add()` 添加新高亮。先写后删避免 buffer 闪空。
 
 **prop_type_add 重入**：TUI 可被多次 open/close（用户退出后重新 `:CocCommand loader.open`）。每次都调用 14 次 `prop_type_add` 会因"类型已存在"报错。需在 `defineHighlight` 中先检查：
 
@@ -361,74 +372,46 @@ if (this._supportsBackdrop) {
 ### VimEditor 类（实际实现）
 
 ```typescript
-// vim-editor.ts (简化，核心逻辑)
+// vim-editor.ts (关键部分)
 
 export class VimEditor implements EditorAPI {
-  private nvim = workspace.nvim
-  private scratchBuffers = new Set<number>()
-  private mainWindowId = 0
-  private _batchMode = false           // 批处理模式
-  private _batchCommands: string[] = []  // 批处理队列
+  // ...
 
-  // vcall — 统一调用入口，处理 Vim9 def 的 E1031 void 返回值问题
-  private async vcall(name: string, args: any[]): Promise<any> {
-    if (this._batchMode) {                   // 批处理模式下直接入队
-      this._batchCommands.push(this.cmd(name, args))
-      return null
-    }
-    try {
-      return await this.nvim.call(name, args)
-    } catch (e) {
-      const msg = String(e)
-      if (msg.includes('E1031')) {           // void 返回值 → 降级到 command
-        await this.nvim.command(this.cmd(name, args))
-        return null
-      }
-      if (msg.includes('E474') || msg.includes('E957') || msg.includes('E1210')) {
-        return null                          // 非关键错误静默忽略
-      }
-      throw e
+  async init(): Promise<void> {
+    this.mainWindowId = await this.vcall('win_getid', [])
+    // 注册批量渲染函数（仅一次）
+    const exists = await this.vcall('exists', ['*CocLoaderBatchRender']) as number
+    if (exists === 0) {
+      await this.nvim.command(`
+        function! CocLoaderBatchRender(bufnr, lines, highlights) abort
+          call setbufvar(a:bufnr, '&modifiable', 1)
+          call setbufline(a:bufnr, 1, a:lines)
+          call deletebufline(a:bufnr, len(a:lines) + 1, '$')
+          if !empty(a:highlights)
+            call prop_clear(1, len(a:lines), {'bufnr': a:bufnr})
+          endif
+          call setbufvar(a:bufnr, '&modifiable', 0)
+          for h in a:highlights
+            call prop_add(h.line + 1, h.col + 1, {'length': h.length, 'type': h.hl_group, 'bufnr': a:bufnr})
+          endfor
+          call timer_start(0, {-> execute('redraw', '')})
+        endfunction
+      `)
     }
   }
 
-  // 批量提交方法
-  pauseNotification(): void {
-    this._batchMode = true
-    this._batchCommands = []
+  // 批量渲染 — 一次 RPC 传结构化数据，避免 VimL | 拼接
+  async batchRender(buf: EditorBuffer, _ns: number, input: BatchRenderInput): Promise<void> {
+    const highlights = input.highlights
+      .filter(h => h.colEnd > h.colStart)
+      .map(h => ({
+        line: h.line, col: h.colStart,
+        length: h.colEnd - h.colStart, hl_group: h.hlGroup,
+      }))
+    await this.vcall('CocLoaderBatchRender', [buf.id, input.lines, highlights])
   }
 
-  async resumeNotification(): Promise<void> {
-    this._batchMode = false
-    const cmds = this._batchCommands
-    this._batchCommands = []
-    if (cmds.length === 0) return
-    // 合并为 | 分隔的单条 command，大幅减少 RPC 往返
-    await this.nvim.command(cmds.join(' | '))
-  }
-
-  // 各 setter 方法在批处理模式下直接入队 VimL 脚本
-  async bufferSetLines(buf: EditorBuffer, lines: string[]): Promise<void> {
-    if (this._batchMode) {
-      this._batchCommands.push(`call setbufline(${buf.id}, 1, [${encode(lines)}])`)
-      return
-    }
-    // 非批处理模式：直接 RPC 调用
-    await this.vcall('setbufline', [buf.id, 1, lines])
-  }
-
-  async bufferSetExtmark(buf: EditorBuffer, ns: number, line: number, col: number,
-    opts: { end_col: number; hl_group: string; hl_mode: string }): Promise<void> {
-    if (this._batchMode) {
-      this._batchCommands.push(`call prop_add(${line+1},${col+1},...`)
-      return
-    }
-    await this.vcall('prop_add', [line + 1, col + 1, { ... }])
-  }
-
-  // ── 批量通知 ──
-  pauseNotification(): void { /* 见上方批处理实现 */ }
-  submit(method: string, args: any[]): void { /* 兼容旧接口 */ }
-  async resumeNotification(): Promise<void> { /* 见上方批处理实现 */ }
+  // 保留旧的 batch 接口（pauseNotification/submit/resumeNotification）做兼容
 }
 ```
 
@@ -436,39 +419,19 @@ export class VimEditor implements EditorAPI {
 
 ## tui.ts 修改清单
 
-### render() 方法（核心修改）
+### render() 方法（最终方案）
+
+render() 中不再手动操作 pauseNotification/submit/resumeNotification，改用统一的 `batchRender()`：
 
 ```typescript
-// 当前代码 - 直接 submit nvim_* API
-editor.pauseNotification()
-editor.submit('nvim_buf_set_option', [this.bufnr, 'modifiable', true])
-editor.submit('nvim_buf_clear_namespace', [this.bufnr, this.ns, 0, -1])
-editor.submit('nvim_buf_set_lines', [this.bufnr, 0, -1, false, result.lines])
-editor.submit('nvim_buf_set_option', [this.bufnr, 'modifiable', false])
-for (const h of result.highlights) {
-  editor.submit('nvim_buf_set_extmark', [this.bufnr, this.ns, h.line, h.colStart, {
-    end_col: h.colEnd, hl_group: h.hlGroup, hl_mode: 'combine',
-  }])
-}
-await editor.resumeNotification()
+await editor.batchRender({ id: this.bufnr }, this.ns, {
+  lines: result.lines,
+  highlights: result.highlights,
+})
 ```
 
-改为：
-
-```typescript
-const buf = { id: this.bufnr }
-editor.pauseNotification()   // Neovim: batch start; Vim: no-op
-editor.bufferSetOption(buf, 'modifiable', true)
-editor.bufferClearNamespace(buf, this.ns)
-editor.bufferSetLines(buf, result.lines)
-editor.bufferSetOption(buf, 'modifiable', false)
-for (const h of result.highlights) {
-  editor.bufferSetExtmark(buf, this.ns, h.line, h.colStart, {
-    end_col: h.colEnd, hl_group: h.hlGroup, hl_mode: 'combine',
-  })
-}
-await editor.resumeNotification()  // Neovim: batch flush; Vim: no-op
-```
+- Neovim: `NvimEditor.batchRender()` 内部使用 `pauseNotification()` + `submit()` 多条 + `resumeNotification()` → `nvim_call_atomic`
+- Vim: `VimEditor.batchRender()` 内部一次 `nvim.call('CocLoaderBatchRender', ...)` 传递结构化数据
 
 ### init/dispose 生命周期
 
@@ -619,7 +582,8 @@ editor.setWindowConfig({ id: this.winid }, { height: newHeight, width: newWidth,
 | CmdLineLeave hook | 配合 CmdLineChanged, 不需要 |
 | 浮窗居中 | 改为底部拆分窗口 |
 | extmark `hl_mode: 'combine'` 叠加 | Vim prop_add 不支持叠加 |
-| `nvim_call_atomic` 批处理 | Vim 无等价物，改为直接执行 |
+| `nvim_call_atomic` 批处理 | Vim 无等价物，改为 `batchRender()` 单次 RPC |
+| cursorline（拆分窗口） | Vim 的 cursorline 覆盖 prop_add 颜色，且无法用 winhighlight 局部修改 |
 
 ### 功能覆盖总表
 
@@ -695,7 +659,48 @@ Vim 9.2 的 `def` 函数中通过 `call()` 调用部分内置函数时，返回�
 `setwinvar(winId, '&winhighlight', 'CocLoaderNormal')` → E474 (Invalid argument)。
 Vim 拆分窗口使用标准 Normal 高亮，无需 `winhighlight`。Vim 也不存在 `NormalFloat` 高亮组。
 
-### 渲染性能优化
+导致的连锁问题：也无法用 `winhighlight` 修改 `CursorLine` 高亮，所以 Vim 下必须跳过 `cursorline`。
 
-`nvim.call()` 每次调用是一次 RPC 往返。TUI 每帧渲染可能生成 100+ 个 `prop_add` 调用。
-通过 `pauseNotification()` 批处理机制，将所有操作合并为一条 `|` 分隔的 `nvim.command()` 调用，1 次 RPC 往返完成整个渲染。
+### 渲染性能优化（V2：batchRender）
+
+初始方案：将所有 VimL 命令用 `|` 拼接为一条 `nvim.command()` 调用 → Vim 解析超长命令串 + 逐条解释执行，**Vim 仍然很慢**。
+
+最终方案：`batchRender()` 一次 `nvim.call('CocLoaderBatchRender', ...)` 传递 JS 数据结构（list of lines + list of highlight dicts），Vim 函数内部循环执行。单次 RPC 往返，无字符串解析开销。
+
+### setbufline vs deletebufline 顺序（避免闪烁）
+
+```vim
+" ❌ 先删后写 → buffer 中间变空 → 屏幕闪烁
+call deletebufline(buf, 1, '$')
+call setbufline(buf, 1, lines)
+
+" ✅ 先写后删 → buffer 始终有内容 → 无闪烁
+call setbufline(buf, 1, lines)
+call deletebufline(buf, len(lines) + 1, '$')
+```
+
+### redraw 触发策略（避免 flicker）
+
+`feedkeys("", 'n')` 强制 Vim 进入主循环，导致每帧都全屏重绘 → 闪烁。改为 `timer_start(0, {-> execute('redraw', '')})`：
+
+- 不在函数内直接 `redraw`（Vim 在 RPC handler 中不执行 pending redraw）
+- 不强制中断主循环
+- 注册 0ms 计时器，**等外层 RPC 完成、Vim 回到主循环后**自动执行一次 `redraw`
+
+### cursorline 在 Vim 拆分窗口中不适用
+
+Vim 的 `cursorline` 用 `CursorLine` 高亮覆盖整行背景，`prop_add` 的文本颜色被盖住，导致 header/tab 行在光标悬停时不可见。
+
+- Neovim：extmark 与 `cursorline` 分层不同，不受影响
+- Vim：拆分窗口不支持 `winhighlight`（E474），无法局部修改 `CursorLine`
+- **修复**：Vim 下跳过 `cursorline`，靠光标自身定位
+
+### prop_clear 行数参数
+
+`prop_clear(1, "$", {bufnr})` → E1210 (Number required)。不能用 `$` 表示"到最后一行"。三种可行方式：
+
+| 方式 | 说明 |
+|------|------|
+| `prop_clear(1, line_count, {bufnr})` | 使用已知行数（如 `len(lines)`） |
+| `prop_clear(1, line('$', bufnr), {bufnr})` | 运行时查询末行号 |
+| `prop_clear(1, -1, {bufnr})` | `-1` 在部分版本中表示"到最后" |

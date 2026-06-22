@@ -3,6 +3,7 @@
 ## [1.5.7] - 2026-06-21
 
 ### Added
+- **Vim 9.0+ support** — TUI now works in Vim (split window + text properties) in addition to Neovim (floating window + extmark). Auto-detects editor at runtime. New `EditorAPI` abstraction layer with `NvimEditor` / `VimEditor` backends, `batchRender()` single-RPC Vim render, `timer_start(0, ...)` deferred redraw. Covers 83/86 features with identical 19 keymaps.
 - **`excludeDeps` field** — `SourceStep` now supports `excludeDeps: string[]` to filter out unwanted dependencies from source extensions. Supports prefix matching (e.g. `@wdio` matches `@wdio/cli`, `@wdio/local-runner`). Use with `keepDeps` to replace vendored/broken deps with proper npm versions.
 - **Code Runner (`vscode-code-runner`)** — added to registry as `direct-api`, 12 source patches for coc compatibility (createTerminal, setContext, env.shell, lineAt, outputChannel dispose+recreate, etc.)
 
