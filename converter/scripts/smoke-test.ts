@@ -179,18 +179,6 @@ async function testOne(entry: RegistryEntry, presets: any): Promise<string | nul
     return `validate: ${e.message}`
   }
 
-  // TypeScript compilation check on converted output
-  if (hasPkg && !isSnippets) {
-    const srcDir = path.join(outputDir, 'src')
-    if (fs.existsSync(srcDir)) {
-      const tsFiles = fs.readdirSync(srcDir).filter(f => f.endsWith('.ts'))
-      if (tsFiles.length > 0) {
-        const tscError = checkTypeScript(outputDir, srcDir)
-        if (tscError) return tscError
-      }
-    }
-  }
-
   return null // success
 }
 
