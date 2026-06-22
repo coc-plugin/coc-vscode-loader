@@ -81,6 +81,7 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
     try {
       execFileSync('git', ['fetch', '--depth', '1', 'origin'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
       execFileSync('git', ['reset', '--hard', 'origin/HEAD'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
+      execFileSync('git', ['clean', '-fd'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
     } catch {}
     sourceCommit = getHeadCommit(rootDir)
     inputDir = entry.source.subdir ? path.join(cachePath, entry.source.subdir) : cachePath
