@@ -258,7 +258,10 @@ function checkTypeScript(outputDir: string, srcDir: string): string | null {
     'declare namespace NodeJS { interface Process {} interface Module {} }',
     'declare type Thenable<T> = PromiseLike<T>',
     'declare interface ImportMeta { env: Record<string, any> }',
-    'declare var Buffer: { from(data: string, encoding?: string): any; isBuffer(obj: any): boolean; [key: string]: any };',
+    'interface _Buffer { from(data: string, encoding?: string): any; isBuffer(obj: any): boolean; [key: string]: any }',
+    'declare var Buffer: _Buffer;',
+    'type Buffer = _Buffer;',
+    'declare type BufferEncoding = \'ascii\' | \'utf8\' | \'utf-8\' | \'utf16le\' | \'ucs2\' | \'ucs-2\' | \'base64\' | \'base64url\' | \'latin1\' | \'binary\' | \'hex\';',
     'declare function suite(name: string, fn: () => void): void;',
     'declare function test(name: string, fn: () => void): void;',
     'declare function describe(name: string, fn: () => void): void;',
@@ -271,29 +274,23 @@ function checkTypeScript(outputDir: string, srcDir: string): string | null {
   ]
   for (const [mod, named] of externalMods) {
     declLines.push(`declare module '${mod}' {`)
-    if (named.size > 0) {
-      // Always add common types that are often accessed via namespace (vscode.X)
-      if (mod === 'coc.nvim') {
-        const commonTypes = ['QuickPickItem', 'QuickInput', 'TextDocument', 'OutputChannel', 'Terminal',
-          'WorkspaceFolder', 'Disposable', 'TextEdit', 'WorkspaceEdit', 'Position', 'Range',
-          'Selection', 'CodeAction', 'CompletionItem', 'CompletionItemKind', 'Diagnostic',
-          'ExtensionContext', 'Uri', 'WorkspaceConfiguration',
-          'workspace', 'window', 'commands', 'languages', 'services', 'extensions',
-          'AuthenticationSession']
-        for (const t of commonTypes) {
-          if (!named.has(t)) {
-            declLines.push(`  export declare const ${t}: any;`)
-            declLines.push(`  export type ${t} = any;`)
-          }
-        }
-      }
-      for (const name of named) {
-        declLines.push(`  export declare const ${name}: any;`)
-        declLines.push(`  export type ${name} = any;`)
-      }
+    const names = new Set(named)
+    // Always add common types that are often accessed via namespace (vscode.X, url.URL, etc.)
+    if (mod === 'coc.nvim') {
+      const commonTypes = ['QuickPickItem', 'QuickInput', 'TextDocument', 'OutputChannel', 'Terminal',
+        'WorkspaceFolder', 'Disposable', 'TextEdit', 'WorkspaceEdit', 'Position', 'Range',
+        'Selection', 'CodeAction', 'CompletionItem', 'CompletionItemKind', 'Diagnostic',
+        'ExtensionContext', 'Uri', 'WorkspaceConfiguration',
+        'workspace', 'window', 'commands', 'languages', 'services', 'extensions',
+        'AuthenticationSession']
+      for (const t of commonTypes) names.add(t)
+    }
+    for (const n of names) {
+      declLines.push(`  export declare const ${n}: any;`)
+      declLines.push(`  export type ${n} = any;`)
     }
     declLines.push('  const _: any;')
-    declLines.push('  export = _')
+    declLines.push('  export = _;')
     declLines.push('}')
     declLines.push('')
   }
@@ -321,7 +318,7 @@ function checkTypeScript(outputDir: string, srcDir: string): string | null {
   }, null, 2))
 
   try {
-    execFileSync('npx', ['--package', 'typescript', 'tsc', '--project', tsconfigPath, '--noEmit', '--strict', 'false', '--skipLibCheck'], {
+    execFileSync('npx', ['--package', 'typescript', 'tsc', '--project', tsconfigPath, '--noEmit', '--skipLibCheck'], {
       cwd: outputDir,
       stdio: 'pipe',
       timeout: 60000,
@@ -333,8 +330,8 @@ function checkTypeScript(outputDir: string, srcDir: string): string | null {
     const stdout = (e.stdout || '').toString()
     const all = stderr + stdout
     let lines = all.split('\n').filter(l => l.includes('error TS'))
-    // TS2347/TS2693/TS2840 are false positives from `any` stubs — skip them
-    lines = lines.filter(l => !l.includes('error TS2347') && !l.includes('error TS2693') && !l.includes('error TS2840'))
+    // TS2347/TS2693/TS2840/TS2503 are false positives from `any` stubs — skip them
+    lines = lines.filter(l => !l.includes('error TS2347') && !l.includes('error TS2693') && !l.includes('error TS2840') && !l.includes('error TS2503'))
     if (lines.length === 0) return null
     const seen = new Set<string>()
     const unique: string[] = []
