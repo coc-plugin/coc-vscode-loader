@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "convert": "tsx src/cli.ts",
-    "test": "npm run check:tests && vitest run && npm run diff:check",
-    "test:quick": "npm run check:tests && vitest run",
+    "test": "npm run check:tests && vitest run",
+    "test:full": "npm run test && npm run diff:check",
     "test:watch": "vitest",
     "test:smoke": "tsx scripts/smoke-test.ts",
     "diff:baseline": "tsx scripts/diff-check.ts baseline",

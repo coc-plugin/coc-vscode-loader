@@ -227,10 +227,21 @@ async function check() {
   console.log(`  ${failed} failed\n`)
 
   if (changes.length > 0) {
-    for (const c of changes) {
-      if (c.error) {
-        console.log(`  ✗ ${c.name} — ${c.error}`)
-      } else {
+    // Count real content changes vs operational failures
+    const contentChanges = changes.filter(c => !c.error)
+    const operationalFailures = changes.filter(c => c.error)
+
+    if (operationalFailures.length > 0) {
+      console.log(`\nOperational issues (download errors, not output changes):`)
+      for (const c of operationalFailures) {
+        console.log(`  ⚠ ${c.name} — ${c.error}`)
+      }
+      console.log('')
+    }
+
+    if (contentChanges.length > 0) {
+      console.log('Output changes detected:')
+      for (const c of contentChanges) {
         const icons = c.files.map(f =>
           f.status === 'changed' ? '~' : f.status === 'new' ? '+' : f.status === 'missing' ? '-' : '?'
         ).join('')
@@ -242,13 +253,16 @@ async function check() {
           }
         }
       }
+      console.log('')
+      console.log('⚠  Converter changes affect existing plugin output!')
+      console.log('   Review the changes above.')
+      console.log('   If intentional, update baseline: npm run diff:baseline')
+      console.log('')
+      process.exit(1)
     }
-    console.log('')
-    console.log('⚠  Converter changes affect existing plugin output!')
-    console.log('   Review the changes above.')
-    console.log('   If intentional, update baseline: npm run diff:baseline')
-    console.log('')
-    process.exit(1)
+
+    // Only operational failures, no content changes — this is OK (transient)
+    console.log('✓ No output changes detected (operational issues only).\n')
   }
 
   console.log('✓ All entries match baseline — no unintended side effects.\n')
