@@ -37,6 +37,8 @@ export interface PackageInfo {
   cargoPackages?: Array<{ crate: string; binary?: string } | string>  // Rust crates to install via cargo install, e.g. [{crate: "nil", binary: "nil"}]
   /** v2.0 config-driven conversion steps */
   convert?: any[]          // Array of ConvertStep, passed as --convert JSON to CLI
+  /** User-visible installation notes/hints displayed in TUI detail popup */
+  notes?: string
 }
 
 function pluginVersion(): string {
