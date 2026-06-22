@@ -40,6 +40,7 @@ export const languageClientGenerator: StepGenerator = {
 
       serverPathCode = `\
     let serverPath: string | undefined
+    let _mainEntry: string | undefined
     try {
       serverPath = require.resolve('${escapeStr(pkg)}')
     } catch {}

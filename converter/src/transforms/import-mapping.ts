@@ -132,6 +132,14 @@ export const transformImportMapping: Transform = (ctx) => {
     /(?<!\w)\bimport\(/g,
     'require(',
   )
+  // Fix typeof require(...) → typeof import(...) (typeof import is valid TS type syntax)
+  newContent = newContent.replace(/typeof\s+require\(/g, 'typeof import(')
+  // Fix require('coc.nvim').Type → import('coc.nvim').Type (dynamic import type syntax)
+  // This restores TS type expressions like `scope?: import("vscode").Uri` that became invalid `require()`
+  newContent = newContent.replace(
+    /require\(['"]coc\.nvim['"]\)\.(\w+)/g,
+    "import('coc.nvim').$1"
+  )
 
   // Convert createStatusBarItem(name, alignment, priority) → createStatusBarItem(priority)
   // Use balanced paren to handle nested calls in name argument
@@ -183,6 +191,7 @@ export const transformImportMapping: Transform = (ctx) => {
   // Polyfill window.activeTextEditor (VS Code API, not in coc.nvim)
   if (newContent.includes('window.activeTextEditor')) {
     newContent = `\
+import { workspace } from 'coc.nvim'
 if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   try {
     Object.defineProperty(window, 'activeTextEditor', {
@@ -203,12 +212,40 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   newContent = newContent.replace(/window\.onDidChangeActiveTextEditor/g, 'workspace.onDidOpenTextDocument')
 
   // languages.createLanguageStatusItem → no-op (coc.nvim doesn't have this)
-  newContent = replaceBalanced(newContent, /languages\.createLanguageStatusItem\(/, () =>
+  newContent = replaceBalanced(newContent, /(?:vscode\.)?languages\.createLanguageStatusItem\(/, () =>
     '({ dispose(){}, text: "", command: void 0, name: "", accessibilityInformation: void 0, severity: void 0 }) as any'
   )
 
   // window.showOpenDialog → not available in coc, return undefined
-  newContent = replaceBalanced(newContent, /window\.showOpenDialog\(/, () => 'void 0 as any')
+  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showOpenDialog\(/, () => 'void 0 as any')
+
+  // window.createOutputChannel(name) → workspace.createOutputChannel(name) (coc.nvim has this)
+  // Preserve optional vscode. prefix (used with import * as vscode)
+  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.createOutputChannel\(/,
+    (fullCall, matchLen) => {
+      const rest = fullCall.slice(matchLen)
+      const hasVscPrefix = fullCall.startsWith('vscode.')
+      // vscode.window.createOutputChannel → vscode.workspace.createOutputChannel
+      // window.createOutputChannel → workspace.createOutputChannel
+      return (hasVscPrefix ? 'vscode.' : '') + 'workspace.createOutputChannel(' + rest
+    })
+
+  // window.showInformationMessage / showWarningMessage / showErrorMessage → window.showMessage
+  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showInformationMessage\(/, (call) => {
+    const inner = call.slice(call.indexOf('(') + 1, -1)
+    const hasVscPrefix = call.startsWith('vscode.')
+    return (hasVscPrefix ? 'vscode.' : '') + `window.showMessage(${inner}, 'info')`
+  })
+  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showWarningMessage\(/, (call) => {
+    const inner = call.slice(call.indexOf('(') + 1, -1)
+    const hasVscPrefix = call.startsWith('vscode.')
+    return (hasVscPrefix ? 'vscode.' : '') + `window.showMessage(${inner}, 'warning')`
+  })
+  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showErrorMessage\(/, (call) => {
+    const inner = call.slice(call.indexOf('(') + 1, -1)
+    const hasVscPrefix = call.startsWith('vscode.')
+    return (hasVscPrefix ? 'vscode.' : '') + `window.showMessage(${inner}, 'error')`
+  })
 
   // Add priority 1 to document format providers (default 0 gets overridden by LanguageClient)
   newContent = replaceBalanced(newContent, /registerDocumentFormatProvider\s*\(/, (call) => {
@@ -240,13 +277,13 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   // Does not guard standalone references (e.g. `if (workspace.workspaceFolders)`) to preserve truthiness checks.
   // Handle both workspace.workspaceFolders and vscode.workspace.workspaceFolders.
   newContent = newContent.replace(
-    /((?:vscode\.)?)workspace\.workspaceFolders(?=\s*(?:\[|\.\w))/g,
+    /(?<![$\w.#])((?:vscode\.)?)workspace\.workspaceFolders(?=\s*(?:\[|\.\w))/g,
     '($1workspace.workspaceFolders || [])'
   )
   // Guard for-of iteration: `for (... of workspace.workspaceFolders)`
   // Preserve optional vscode. prefix in replacement.
   newContent = newContent.replace(
-    /(of\s+)((?:vscode\.)?)workspace\.workspaceFolders(?!\s*\?)/g,
+    /(?<![$\w.#])(of\s+)((?:vscode\.)?)workspace\.workspaceFolders(?!\s*\?)/g,
     '$1($2workspace.workspaceFolders || [])'
   )
 
@@ -272,6 +309,45 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   }
   ensureCocImport('workspace')
   ensureCocImport('Uri')
+
+  // Deduplicate: merge import + import type from same module (yaml, stylelint)
+  // e.g. `import { workspace } from 'coc.nvim'\nimport type { workspace } from 'coc.nvim'`
+  // Merge duplicate imports from same module (yaml duplicate workspace)
+  {
+    // Collect all coc.nvim import statements (no trailing ; or whitespace in match)
+    const importLines: Array<{ full: string; idx: number; typeOnly: boolean; names: string[] }> = []
+    const dupRe = /import\s+(?:type\s+)?\{\s*([^}]+?)\s*\}\s*from\s*['"]coc\.nvim['"]/g
+    let dm: RegExpExecArray | null
+    while ((dm = dupRe.exec(newContent)) !== null) {
+      importLines.push({
+        full: dm[0], idx: dm.index, typeOnly: dm[0].startsWith('import type'),
+        names: dm[1].split(',').map((s: string) => s.trim()),
+      })
+    }
+    if (importLines.length > 1) {
+      const valNames = new Set<string>()
+      const typeNames = new Set<string>()
+      for (const il of importLines) {
+        if (il.typeOnly) il.names.forEach(n => typeNames.add(n))
+        else il.names.forEach(n => valNames.add(n))
+      }
+      for (const n of valNames) typeNames.delete(n)
+      // Build replacement: up to 2 lines (value + type)
+      const parts: string[] = []
+      if (valNames.size > 0) parts.push(`import { ${[...valNames].join(', ')} } from 'coc.nvim'`)
+      if (typeNames.size > 0) parts.push(`import type { ${[...typeNames].join(', ')} } from 'coc.nvim'`)
+      const replacement = parts.join('\n')
+      // Delete all imports from coc.nvim, keeping semicolons and newlines intact
+      // Process in reverse order to keep indices valid
+      for (let i = importLines.length - 1; i >= 0; i--) {
+        const after = importLines[i].idx + importLines[i].full.length
+        const rest = newContent.slice(after)
+        const trailing = rest.match(/^(;[ \t]*)?(?:\r?\n|$)/)
+        const eat = trailing ? trailing[0].length : 0
+        newContent = newContent.slice(0, importLines[i].idx) + (i === 0 ? replacement + '\n' : '') + newContent.slice(after + eat)
+      }
+    }
+  }
 
   if (newContent !== content) {
     file.replaceWithText(newContent)

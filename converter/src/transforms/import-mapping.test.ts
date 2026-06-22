@@ -65,9 +65,9 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   // window.onDidChangeActiveTextEditor → workspace.onDidOpenTextDocument
   content = content.replace(/window\.onDidChangeActiveTextEditor/g, 'workspace.onDidOpenTextDocument')
 
-  // languages.createLanguageStatusItem(...) → no-op
+  // languages.createLanguageStatusItem(...) → no-op (with optional vscode. prefix)
   content = content.replace(
-    /languages\.createLanguageStatusItem\([^)]+\)/g,
+    /(?:vscode\.)?languages\.createLanguageStatusItem\([^)]+\)/g,
     '({ dispose(){}, text: "", command: void 0, name: "", accessibilityInformation: void 0, severity: void 0 }) as any',
   )
 
@@ -216,6 +216,11 @@ describe('import-mapping text replacements', () => {
   it('preserves vscode. prefix when guarding workspace.workspaceFolders for-of iteration', () => {
     const result = applyImportMapping('for (const f of vscode.workspace.workspaceFolders)')
     expect(result).toContain('(vscode.workspace.workspaceFolders || []))')
+  })
+
+  it('replaces vscode.languages.createLanguageStatusItem with no-op', () => {
+    const result = applyImportMapping('vscode.languages.createLanguageStatusItem("test", document)')
+    expect(result).toContain('dispose(){}')
   })
 
   it('handles nested parentheses in createLanguageStatusItem', () => {

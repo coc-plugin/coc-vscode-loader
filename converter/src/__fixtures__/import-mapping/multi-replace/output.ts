@@ -1,3 +1,4 @@
+import { workspace, window, languages } from 'coc.nvim'
 if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   try {
     Object.defineProperty(window, 'activeTextEditor', {
@@ -11,7 +12,6 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
     });
   } catch {}
 }
-import { workspace, window, languages } from 'coc.nvim'
 const bar = window.createStatusBarItem( 100)
 const trusted = true
 const action = ((() => { try { return new CodeAction('fix') } catch { return { title: '', kind: '' } as any } })())

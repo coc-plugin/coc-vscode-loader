@@ -339,7 +339,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
           // This avoids matching Map.set() or other .set() calls
           {
             const setResult = content.replace(
-              /(\w+(?:\.\w+)*)\.set\s*\(\s*([^,)]*?\buri\b[^,)]*?)\s*,\s*([^)]+)\s*\)/g,
+              /(\w+(?:\.\w+)*)\.set\s*\(\s*((?:\w+\.)?\buri\b)\s*,\s*([^)]+)\s*\)/g,
               '$1.changes[$2] = $3'
             )
             if (setResult !== content) {
