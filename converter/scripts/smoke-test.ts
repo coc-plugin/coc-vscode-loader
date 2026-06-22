@@ -275,6 +275,7 @@ function checkTypeScript(outputDir: string, srcDir: string): string | null {
       resolveJsonModule: true,
       types: [],
       baseUrl: outputDir,
+      ignoreDeprecations: '6.0',
     },
     include: ['src/**/*.ts', 'smoke-check.d.ts'],
   }, null, 2))
