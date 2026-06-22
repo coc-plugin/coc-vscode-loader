@@ -12,6 +12,7 @@
     "pr": "bash scripts/create-pr.sh",
     "test": "npm run test:converter",
     "test:converter": "cd converter && npm test",
+    "test:quick": "cd converter && npm run test:quick",
     "test:smoke": "cd converter && npm run test:smoke",
     "diff:baseline": "cd converter && npm run diff:baseline",
     "diff:check": "cd converter && npm run diff:check",

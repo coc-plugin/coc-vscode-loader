@@ -25,15 +25,18 @@ jobs:
       - name: Fetch registry
         run: git clone --depth 1 --single-branch https://github.com/coc-plugin/coc-vscode-registry.git coc-vscode-registry
 
+      - name: Cache source repos (for diff check against baseline)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/coc-converter-smoke
+          key: smoke-cache-${{ hashFiles('converter/src/**') }}
+          restore-keys: smoke-cache-
+
       - name: Install dependencies
         run: npm ci
         working-directory: converter
 
-      - name: Check test coverage
-        run: npm run check:tests
-        working-directory: converter
-
-      - name: Run unit tests
+      - name: Check test coverage + run tests + verify baseline
         run: npm test
         working-directory: converter
 
