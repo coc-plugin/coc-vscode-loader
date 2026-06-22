@@ -272,11 +272,11 @@ coc 使用 LSP 协议风格（值从 1 开始），而 vscode 多数枚举从 0 
 
 ### 4.2 消息对话框
 
-| API | VS Code | coc.nvim | 差异 |
-|-----|---------|----------|------|
-| showInformationMessage | 有 (4 overloads) | 有 (2 overloads) | coc 缺少 MessageOptions 变体 |
-| showWarningMessage | 有 (4 overloads) | 有 (2 overloads) | 同上 |
-| showErrorMessage | 有 (4 overloads) | 有 (2 overloads) | 同上 |
+| API | VS Code | coc.nvim | 差异 | 自动转换 |
+|-----|---------|----------|------|----------|
+| showInformationMessage | 有 (4 overloads) | 有 (2 overloads) | coc 缺少 MessageOptions 变体 | converter 转为 `showMessage(msg, 'info')` |
+| showWarningMessage | 有 (4 overloads) | 有 (2 overloads) | 同上 | converter 转为 `showMessage(msg, 'warning')` |
+| showErrorMessage | 有 (4 overloads) | 有 (2 overloads) | 同上 | converter 转为 `showMessage(msg, 'error')` |
 
 ### 4.3 输入/选择
 
@@ -297,9 +297,9 @@ coc 使用 LSP 协议风格（值从 1 开始），而 vscode 多数枚举从 0 
 
 ### 4.5 输出通道
 
-| API | VS Code | coc.nvim | 差异 |
-|-----|---------|----------|------|
-| createOutputChannel(name, languageId?) | 有 (2 params) | 有 (1 param) | coc 没有 `languageId` 参数, 无 LogOutputChannel |
+| API | VS Code | coc.nvim | 差异 | 自动转换 |
+|-----|---------|----------|------|----------|
+| createOutputChannel(name, languageId?) | 有 (2 params) | 有 (1 param) | coc 没有 `languageId` 参数, 无 LogOutputChannel | converter 将 `window.createOutputChannel` → `workspace.createOutputChannel` |
 | OutputChannel.replace() | 有 | **无** | — |
 | OutputChannel.clear() | `clear()` | `clear(keep?: number)` | coc 可保留 N 行 |
 
@@ -437,7 +437,7 @@ coc 使用 LSP 协议风格（值从 1 开始），而 vscode 多数枚举从 0 
 | setTextDocumentLanguage() | 有 | **无** | — |
 | match(selector, document) | 有 | 有 | coc 用 `TextDocumentMatch` 替代 `TextDocument` |
 | createDiagnosticCollection | 有 | 有 | **相同** |
-| createLanguageStatusItem | 有 | **无** | — |
+| createLanguageStatusItem | 有 | **无** | — (converter 替换为 no-op，支持 `vscode.` 前缀) |
 | getDiagnostics / onDidChangeDiagnostics | 有 | **无** (coc 在 `diagnosticManager` 提供, 事件名为 `onDidRefresh`) | 位置/命名不同 |
 
 ### 6.2 Provider 注册函数

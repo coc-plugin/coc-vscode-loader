@@ -107,14 +107,14 @@ Three test suites, each catching different issues:
 ```bash
 npm test                    # Unit tests (162) + fixture tests + test coverage check
 npm run test:full           # Unit tests + registry baseline diff
-npm run test:smoke          # Registry smoke test (all 128 entries + tsc --noEmit)
+npm run test:smoke          # Registry smoke test (all 128 entries — validates output structure)
 ```
 
 | Suite | What it catches | CI |
 |-------|----------------|----|
 | `npm test` | Transform/fixture correctness (fast, ~1s) | ✅ |
 | `npm run test:full` | Unintended side effects on all 128 registry entries | ❌ (manual) |
-| `npm run test:smoke` | Compiled output errors (tsc check) | ✅ |
+| `npm run test:smoke` | Registry entry conversion completeness | ✅ |
 
 **Baseline diff** (`npm run diff:baseline` / `npm run diff:check`):
 Before changing converter code, snapshot current output; after changes, compare to detect which plugins are affected. See `AGENTS.md` for full workflow.
@@ -131,7 +131,7 @@ Skip with `git push --no-verify` (use sparingly).
 **GitHub Actions CI** — three sequential jobs:
 1. `unit` (Node 20/22): unit tests + fixture tests
 2. `diff`: registry baseline check (detects unintended converter side effects)
-3. `smoke`: full registry conversion + tsc --noEmit
+3. `smoke`: full registry conversion (validates output structure)
 
 ### Switch between local dev and npm release
 

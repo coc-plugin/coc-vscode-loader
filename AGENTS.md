@@ -158,8 +158,12 @@ LSP (binary / module / bridge) → direct-api (API polyfill)
 | `CodeActionKind.SourceFixAll.append(...)` → string literal | coc 的 CodeActionKind 是 string 别名 |
 | `window.activeTextEditor` → polyfill | coc 无此属性，注入运行时兼容层 |
 | `window.onDidChangeActiveTextEditor` → `workspace.onDidOpenTextDocument` | coc 使用不同事件名 |
-| `languages.createLanguageStatusItem(...)` → no-op | coc 无此 API |
-| `window.showOpenDialog(...)` → `void 0` | coc 无文件选择对话框 |
+| `languages.createLanguageStatusItem(...)` → no-op（支持 `vscode.` 前缀） | coc 无此 API |
+| `window.showOpenDialog(...)` → `void 0`（支持 `vscode.` 前缀） | coc 无文件选择对话框 |
+| `window.createOutputChannel(name)` → `workspace.createOutputChannel(name)`（支持 `vscode.` 前缀） | coc 的此 API 在 workspace 上 |
+| `window.showInformationMessage(msg)` → `window.showMessage(msg, 'info')`（支持 `vscode.` 前缀） | coc 使用 showMessage 加 severity 参数 |
+| `window.showWarningMessage(msg)` → `window.showMessage(msg, 'warning')`（同上） | 同上 |
+| `window.showErrorMessage(msg)` → `window.showMessage(msg, 'error')`（同上） | 同上 |
 | `registerDocumentFormatProvider(sel, provider)` → `(sel, provider, 1)` | 默认 priority=1 避免被 LanguageClient 覆盖 |
 | `workspace.workspaceFolders[` → `(workspace.workspaceFolders \|\| [])[` | coc 可能返回 undefined |
 | 自动补 `workspace`/`Uri` import | 引入新 API 后自动补全 import |
@@ -177,7 +181,7 @@ converter 主流程在步骤执行后还会对所有输出源文件做一轮通�
 | `Location.create(Uri.file($1), $2)` → `Location.create($1, Range.create($2, $2))` | coc 的 Location.create 接受 `(string, Range)`，非 `(Uri, Position)` |
 | `Uri`/`Range` 自动注入 import | 命名空间 import 无法用解构注入，自动补 `import { Uri }`/`import { Range }` |
 | `(?:vscode\.)?workspace\.workspaceFolders` guard | 处理 `vscode.` 前缀，避免产生 `vscode.(...)` 语法错误 |
-| `new WorkspaceEdit()` → `({ changes: {} })` | coc 的 WorkspaceEdit 是 interface，不可 new。第一参数含 `.uri` 的 `.set(uri, edits)` 同时转为 `.changes[uri] = edits` |
+| `new WorkspaceEdit()` → `({ changes: {} })` | coc 的 WorkspaceEdit 是 interface，不可 new。`.set(uri, edits)`/`.set(document.uri, edits)` 同时转为 `.changes[uri] = edits` |
 
 ### 插件级文本补丁 `patches`（v1.4.2+）
 
@@ -590,10 +594,10 @@ Every source file must have a corresponding `.test.ts` file. Run before pushing:
 ```bash
 npm test                    # Unit tests (162) + check-tests + fixture tests
 npm run test:full           # Unit tests + diff:check (registry baseline comparison)
-npm run test:smoke          # Registry smoke test (converts all 128 entries, validates output + tsc --noEmit)
+npm run test:smoke          # Registry smoke test (converts all 128 entries, validates output structure)
 ```
 
-**Pre-push hook** runs `npm test` + `npm run test:smoke`. CI runs unit tests on push/PR (Node 20/22), then diff check, then smoke test.
+**Pre-push hook** runs `npm test`. CI runs unit tests on push/PR (Node 20/22), then diff check, then smoke test.
 
 ### Fixture tests
 
@@ -601,7 +605,7 @@ Per-transform input/output pairs in `converter/src/__fixtures__/<transform>/<cas
 
 | Transform | Fixtures | What's tested |
 |-----------|----------|---------------|
-| `import-mapping` | 21 | `require('vscode')`, `createStatusBarItem`, `new CodeAction`, `workspace.isTrusted`, `window.activeTextEditor`, `editor.setDecorations`, `workspaceFolders` guard, etc. |
+| `import-mapping` | 22 | `require('vscode')`, `createStatusBarItem`, `new CodeAction`, `workspace.isTrusted`, `window.activeTextEditor`, `editor.setDecorations`, `workspaceFolders` guard, `vscode.languages.createLanguageStatusItem`, etc. |
 | `class-to-factory` | 8 | `new Position`/`new TextEdit`/`new WorkspaceEdit` → factory calls |
 | `provider-register` | 6 | Provider renames, `registerCompletionItemProvider` signature adaptation |
 

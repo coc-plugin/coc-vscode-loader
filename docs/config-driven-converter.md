@@ -539,7 +539,7 @@ import { LanguageClient, TransportKind, services } from 'coc.nvim'
 
 Prettier 使用 `source` 步骤直接转换 prettier-vscode 的源码（而非 bridge 生成器）。`import-mapping` 的文本替换层处理了其特有的 API：
 - `window.activeTextEditor` → runtime polyfill
-- `languages.createLanguageStatusItem` → no-op
+- `languages.createLanguageStatusItem` → no-op（支持 `vscode.` 前缀）
 - `registerDocumentFormatProvider(sel, provider, 1)` → priority=1 避免被 tsserver 覆盖
 - `{ fileName } = doc` 解构拆分 → convert.ts 通用处理
 

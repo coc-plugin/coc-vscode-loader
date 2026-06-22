@@ -99,9 +99,9 @@
 | `window.onDidChangeTextEditorOptions` | — | vscode 独有 |
 | `window.showTextDocument` | — | vscode 独有 |
 | `window.createTextEditorDecorationType` | — | vscode 独有（coc 用 BufferHighlight） |
-| `window.showInformationMessage` | `window.showInformationMessage` | ≈ coc 少 MessageOptions overload |
-| `window.showWarningMessage` | `window.showWarningMessage` | ≈ 同上 |
-| `window.showErrorMessage` | `window.showErrorMessage` | ≈ 同上 |
+| `window.showInformationMessage` | `window.showMessage` | converter 自动转为 `showMessage(msg, 'info')` |
+| `window.showWarningMessage` | `window.showMessage` | converter 自动转为 `showMessage(msg, 'warning')` |
+| `window.showErrorMessage` | `window.showMessage` | converter 自动转为 `showMessage(msg, 'error')` |
 | `window.showQuickPick` | `window.showQuickPick` | 相同 |
 | `window.showWorkspaceFolderPick` | — | vscode 独有 |
 | `window.showInputBox` | — | vscode 独有（coc 用 requestInput） |
@@ -109,9 +109,9 @@
 | `window.createInputBox` | `window.createInputBox` | ≈ 签名完全不同 |
 | `window.showOpenDialog` | — | vscode 独有，converter 替换为 `void 0` |
 | `window.showSaveDialog` | — | vscode 独有 |
-| `window.createOutputChannel(name, languageId?)` | `window.createOutputChannel(name)` | ≈ coc 少 languageId（`workspace` 上的已废弃） |
+| `window.createOutputChannel(name, languageId?)` | `workspace.createOutputChannel(name)` | converter 自动将 window → workspace，coc 无 languageId 参数 |
 | `window.createStatusBarItem(id, alignment?, priority?)` | `window.createStatusBarItem(priority?, option?)` | ≈ 参数不同，converter 丢弃前两个参数 |
-| `languages.createLanguageStatusItem` | — | vscode 独有，converter 替换为 no-op |
+| `languages.createLanguageStatusItem` | — | vscode 独有，converter 替换为 no-op（支持 `vscode.` 前缀） |
 | `window.setStatusBarMessage` | — | vscode 独有 |
 | `window.withProgress` | `window.withProgress` | ≈ Thenable vs Promise |
 | `window.createTreeView` | `window.createTreeView` | 相同 |
@@ -129,7 +129,7 @@
 | `languages.getLanguages` | — | vscode 独有（coc 用 workspace.languageIds） |
 | `languages.setTextDocumentLanguage` | — | vscode 独有 |
 | `languages.setLanguageConfiguration` | — | vscode 独有 |
-| `languages.createLanguageStatusItem` | — | vscode 独有，converter 替换为 no-op |
+| `languages.createLanguageStatusItem` | — | vscode 独有，converter 替换为 no-op（支持 `vscode.` 前缀） |
 | `languages.registerDocumentFormattingEditProvider` | `languages.registerDocumentFormatProvider` | ≈ 命名不同，converter 默认加 priority=1 |
 | `languages.registerDocumentRangeFormattingEditProvider` | `languages.registerDocumentRangeFormatProvider` | ≈ 同上 |
 | `languages.getDiagnostics` | — | vscode 独有 |

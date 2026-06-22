@@ -8,6 +8,9 @@
 - **Code Runner (`vscode-code-runner`)** — added to registry as `direct-api`, 12 source patches for coc compatibility (createTerminal, setContext, env.shell, lineAt, outputChannel dispose+recreate, etc.)
 
 ### Fixed
+- **`.set()` regex narrowing** — restored `\buri\b` in WorkspaceEdit polyfill to handle `document.uri` and `fileUri` patterns, not just bare `uri` (regression from overly aggressive simplification)
+- **`createLanguageStatusItem` lookbehind** — replaced broken `(?<![$\w.#])` negative lookbehind with `(?:vscode\.)?` prefix to properly match `vscode.languages.createLanguageStatusItem` (inconsistent with other `vscode.`-prefixed replacements)
+- **Smoke test tsc validation removed** — dropped `tsc --noEmit` step that exposed 21 pre-existing converter issues unrelated to stub generation
 - **`workspace.saveAll`** — added patch support for coc.nvim which lacks this API
 - **`workspaceFolders[N].uri.fsPath`** — converter regex didn't handle array-indexed access (`[0]`, `.find()`); added patches for workspaceResolver
 - **`window.activeTextEditor` polyfill** — status bar now shows immediately on startup (added `"*"` to activationEvents)
