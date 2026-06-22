@@ -216,45 +216,21 @@ function checkTypeScript(outputDir: string, srcDir: string): string | null {
   if (externalMods.size === 0) return null
 
   // Build a single catch-all declaration file
-  const declLines: string[] = []
+  const declLines: string[] = [
+    '// Node.js globals',
+    'declare var process: any;',
+    'declare var __dirname: string;',
+    'declare var require: NodeRequire;',
+    'declare var module: NodeModule;',
+    'declare var __filename: string;',
+    'declare namespace NodeJS { interface Process {} interface Module {} }',
+    '',
+  ]
   for (const mod of externalMods) {
-    // Collect named import identifiers used from this module
-    const exports = new Set<string>()
-    for (const f of fs.readdirSync(srcDir).filter(f => f.endsWith('.ts'))) {
-      const content = fs.readFileSync(path.join(srcDir, f), 'utf-8')
-      const re = new RegExp(`import\\s+(?:type\\s+)?\\{([^}]*)\\}\\s*from\\s*['"]${escapeRegex(mod)}['"]`, 'g')
-      let nm: RegExpExecArray | null
-      while ((nm = re.exec(content)) !== null) {
-        for (const n of nm[1].split(',')) {
-          const name = n.trim().split(/\s+as\s+/).pop()?.trim()
-          if (name) exports.add(name)
-        }
-      }
-    }
-    // Also handle import * as X from 'mod'; X.Y usage
-    for (const f of fs.readdirSync(srcDir).filter(f => f.endsWith('.ts'))) {
-      const content = fs.readFileSync(path.join(srcDir, f), 'utf-8')
-      const nsRe = new RegExp(`import\\s+\\*\\s+as\\s+(\\w+)\\s+from\\s*['"]${escapeRegex(mod)}['"]`, 'g')
-      let nm: RegExpExecArray | null
-      while ((nm = nsRe.exec(content)) !== null) {
-        exports.add(nm[1])
-      }
-    }
-
-    if (exports.size > 0) {
-      // Named exports
-      declLines.push(`declare module '${mod}' {`)
-      for (const e of exports) {
-        declLines.push(`  export let ${e}: any;`)
-      }
-      declLines.push('}')
-    } else {
-      // Default export or require-style
-      declLines.push(`declare module '${mod}' {`)
-      declLines.push('  const _: any;')
-      declLines.push('  export = _')
-      declLines.push('}')
-    }
+    declLines.push(`declare module '${mod}' {`)
+    declLines.push('  const _: any;')
+    declLines.push('  export = _')
+    declLines.push('}')
     declLines.push('')
   }
 
