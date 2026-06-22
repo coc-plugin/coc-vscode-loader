@@ -240,13 +240,14 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   // Does not guard standalone references (e.g. `if (workspace.workspaceFolders)`) to preserve truthiness checks.
   // Handle both workspace.workspaceFolders and vscode.workspace.workspaceFolders.
   newContent = newContent.replace(
-    /(?:vscode\.)?workspace\.workspaceFolders(?=\s*(?:\[|\.\w))/g,
-    '(workspace.workspaceFolders || [])'
+    /((?:vscode\.)?)workspace\.workspaceFolders(?=\s*(?:\[|\.\w))/g,
+    '($1workspace.workspaceFolders || [])'
   )
   // Guard for-of iteration: `for (... of workspace.workspaceFolders)`
+  // Preserve optional vscode. prefix in replacement.
   newContent = newContent.replace(
-    /(of\s+)(?:vscode\.)?workspace\.workspaceFolders(?!\s*\?)/g,
-    '$1(workspace.workspaceFolders || [])'
+    /(of\s+)((?:vscode\.)?)workspace\.workspaceFolders(?!\s*\?)/g,
+    '$1($2workspace.workspaceFolders || [])'
   )
 
   // Ensure workspace/Uri is imported from coc.nvim when introduced by replacements

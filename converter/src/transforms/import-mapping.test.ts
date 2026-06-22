@@ -90,10 +90,15 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   // editor.setDecorations(...) → no-op comment
   content = content.replace(/editor\.setDecorations\s*\([^)]+\)/g, '/* setDecorations */')
 
-  // workspace.workspaceFolders[...] → (workspace.workspaceFolders || [])[...]
+  // Guard workspace.workspaceFolders with or without vscode. prefix
   content = content.replace(
-    /workspace\.workspaceFolders(?=\[)/g,
-    '(workspace.workspaceFolders || [])',
+    /((?:vscode\.)?)workspace\.workspaceFolders(?=\s*(?:\[|\.\w))/g,
+    '($1workspace.workspaceFolders || [])',
+  )
+  // Guard for-of iteration
+  content = content.replace(
+    /(of\s+)((?:vscode\.)?)workspace\.workspaceFolders(?!\s*\?)/g,
+    '$1($2workspace.workspaceFolders || [])',
   )
 
   return content
@@ -198,9 +203,19 @@ describe('import-mapping text replacements', () => {
     expect(result).not.toContain('workspace.workspaceFolders[0]')
   })
 
-  it('does not guard workspace.workspaceFolders without index access', () => {
+  it('guards workspace.workspaceFolders for-of iteration', () => {
     const result = applyImportMapping('for (const f of workspace.workspaceFolders)')
-    expect(result).toContain('workspace.workspaceFolders)')
+    expect(result).toContain('(workspace.workspaceFolders || []))')
+  })
+
+  it('preserves vscode. prefix when guarding workspace.workspaceFolders index access', () => {
+    const result = applyImportMapping('const folder = vscode.workspace.workspaceFolders[0]')
+    expect(result).toContain('(vscode.workspace.workspaceFolders || [])[0]')
+  })
+
+  it('preserves vscode. prefix when guarding workspace.workspaceFolders for-of iteration', () => {
+    const result = applyImportMapping('for (const f of vscode.workspace.workspaceFolders)')
+    expect(result).toContain('(vscode.workspace.workspaceFolders || []))')
   })
 
   it('handles nested parentheses in createLanguageStatusItem', () => {
