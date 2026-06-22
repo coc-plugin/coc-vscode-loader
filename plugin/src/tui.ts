@@ -173,7 +173,7 @@ export class TUI {
     await editor.bufferSetOption(buf, 'swapfile', false)
     await editor.bufferSetOption(buf, 'undolevels', -1)
     await editor.bufferSetOption(buf, 'filetype', 'coc-loader')
-    await editor.setWindowOption(win, 'cursorline', true)
+    if (!this._isVim) await editor.setWindowOption(win, 'cursorline', true)
     await editor.setWindowOption(win, 'number', false)
     await editor.setWindowOption(win, 'relativenumber', false)
     await editor.setWindowOption(win, 'wrap', false)
