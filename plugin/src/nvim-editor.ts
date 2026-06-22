@@ -1,7 +1,7 @@
 import { workspace } from 'coc.nvim'
 import {
   EditorAPI, EditorBuffer, EditorWindow,
-  FloatWinConfig, HighlightDef,
+  FloatWinConfig, HighlightDef, BatchRenderInput,
 } from './editor-api'
 
 export class NvimEditor implements EditorAPI {
@@ -51,6 +51,27 @@ export class NvimEditor implements EditorAPI {
       silent: opts?.silent !== false,
       nowait: opts?.nowait !== false,
     })
+  }
+
+  // ── Batched render ──
+
+  async batchRender(buf: EditorBuffer, ns: number, input: BatchRenderInput): Promise<void> {
+    this.pauseNotification()
+    try {
+      this.submit('nvim_buf_set_option', [buf.id, 'modifiable', true])
+      this.submit('nvim_buf_clear_namespace', [buf.id, ns, 0, -1])
+      this.submit('nvim_buf_set_lines', [buf.id, 0, -1, false, input.lines])
+      this.submit('nvim_buf_set_option', [buf.id, 'modifiable', false])
+      for (const h of input.highlights) {
+        this.submit('nvim_buf_set_extmark', [buf.id, ns, h.line, h.colStart, {
+          end_col: h.colEnd,
+          hl_group: h.hlGroup,
+          hl_mode: 'combine',
+        }])
+      }
+    } finally {
+      await this.resumeNotification()
+    }
   }
 
   // ── Float window ──

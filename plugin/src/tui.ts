@@ -84,6 +84,8 @@ export class TUI {
   private _helpAnimChars = 0
   private _helpAnimating = false
   private _inSearchMode = false
+  private _isVim = false
+  private _supportsBackdrop = false
   private backdropBufnr: number = 0
   private backdropWinid: number = 0
 
@@ -94,6 +96,9 @@ export class TUI {
   async open() {
     this.editor = await createEditor()
     const editor = this.editor
+    await editor.init()
+    const isNvim = await editor.callFunction('has', ['nvim']) as number
+    this._isVim = isNvim !== 1
     this.ns = await editor.createNamespace('coc-loader')
 
     // Mason-style fixed highlight groups (default=true so users can override)
@@ -122,10 +127,12 @@ export class TUI {
     const col = Math.max(Math.floor((editorCols - width) / 2), 0)
 
     // Create backdrop (Mason-style dim overlay, requires termguicolors and non-transparent)
+    // Vim 拆分窗口不支持 backdrop，跳过
     const tc = await editor.termguicolors()
     const bg = await editor.normalHlBg()
     const isTransparent = bg === null
-    if (tc === 1 && !isTransparent) {
+    this._supportsBackdrop = !this._isVim && tc === 1 && !isTransparent
+    if (this._supportsBackdrop) {
       const backdropBuf = await editor.createScratchBuffer()
       this.backdropBufnr = backdropBuf.id
       const backdropWin = await editor.openFloatWindow(backdropBuf, false, {
@@ -189,46 +196,51 @@ export class TUI {
       this.render().catch(() => {})
     })
 
-    this.disposables.push(
-      workspace.registerAutocmd({
-        event: 'WinEnter',
-        request: true,
-        callback: async () => {
-          try {
-            if (!this.winid) return
-            const curWin = await this.editor.callFunction('win_getid', []) as number
-            if (curWin === this.winid) return
-            const curBuf = await this.editor.callFunction('winbufnr', [curWin]) as number
-            const bt = await this.editor.callFunction('getbufvar', [curBuf, '&buftype']) as string
-            if (bt !== 'nofile' && bt !== 'prompt' && bt !== 'help' && bt !== 'terminal' && bt !== 'quickfix') {
-              await this.close()
-            }
-          } catch {}
-        }
-      })
-    )
-
-    // Mason-style real-time search via CmdLine
-    this.disposables.push(
-      workspace.registerAutocmd({
-        event: 'CmdLineChanged',
-        request: true,
-        callback: async () => {
-          if (!this._inSearchMode) return
-          const cmdline = await this.editor.callFunction('getcmdline', []) as string
-          this.state.setSearchQuery(cmdline)
-        }
-      }),
-      workspace.registerAutocmd({
-        event: 'CmdLineLeave',
-        request: true,
-        callback: async () => {
-          this._inSearchMode = false
-          if (this.state.getState().searchQuery) {
-            try { await this.editor.executeCommand('nohlsearch', true) } catch {}
+    if (!this._isVim) {
+      this.disposables.push(
+        workspace.registerAutocmd({
+          event: 'WinEnter',
+          request: true,
+          callback: async () => {
+            try {
+              if (!this.winid) return
+              const curWin = await this.editor.callFunction('win_getid', []) as number
+              if (curWin === this.winid) return
+              const curBuf = await this.editor.callFunction('winbufnr', [curWin]) as number
+              const bt = await this.editor.callFunction('getbufvar', [curBuf, '&buftype']) as string
+              if (bt !== 'nofile' && bt !== 'prompt' && bt !== 'help' && bt !== 'terminal' && bt !== 'quickfix') {
+                await this.close()
+              }
+            } catch {}
           }
-        }
-      }),
+        })
+      )
+
+      // Mason-style real-time search via CmdLine (Neovim only)
+      this.disposables.push(
+        workspace.registerAutocmd({
+          event: 'CmdLineChanged',
+          request: true,
+          callback: async () => {
+            if (!this._inSearchMode) return
+            const cmdline = await this.editor.callFunction('getcmdline', []) as string
+            this.state.setSearchQuery(cmdline)
+          }
+        }),
+        workspace.registerAutocmd({
+          event: 'CmdLineLeave',
+          request: true,
+          callback: async () => {
+            this._inSearchMode = false
+            if (this.state.getState().searchQuery) {
+              try { await this.editor.executeCommand('nohlsearch', true) } catch {}
+            }
+          }
+        }),
+      )
+    }
+
+    this.disposables.push(
       workspace.registerAutocmd({
         event: 'VimResized',
         request: true,
@@ -241,12 +253,17 @@ export class TUI {
           const row = Math.max(Math.floor((availLines - this.windowHeight) / 2), 0)
           const col = Math.max(Math.floor((editorCols - this.windowWidth) / 2), 0)
           try {
-            this.editor.pauseNotification()
-            this.editor.submit('nvim_win_set_config', [this.winid, { width: this.windowWidth, height: this.windowHeight, row, col }])
-            if (this.backdropWinid) {
-              this.editor.submit('nvim_win_set_config', [this.backdropWinid, { width: editorCols, height: editorLines }])
+            const win: EditorWindow = { id: this.winid }
+            if (!this._isVim) {
+              this.editor.pauseNotification()
+              this.editor.submit('nvim_win_set_config', [this.winid, { width: this.windowWidth, height: this.windowHeight, row, col }])
+              if (this.backdropWinid) {
+                this.editor.submit('nvim_win_set_config', [this.backdropWinid, { width: editorCols, height: editorLines }])
+              }
+              await this.editor.resumeNotification()
+            } else {
+              await this.editor.setWindowConfig(win, { height: this.windowHeight })
             }
-            await this.editor.resumeNotification()
             await this.render()
           } catch {}
         }
@@ -299,11 +316,16 @@ export class TUI {
     if (id === 'question') { this.state.toggleHelp(); return }
     if (id === 'search') {
       if (s.showHelp) return
-      this._inSearchMode = true
-      await this.render()
-      setTimeout(() => {
-        if (this.winid) this.editor.callFunction('feedkeys', ['/', 'n']).catch(() => {})
-      }, 16)
+      if (this._isVim) {
+        const raw = await this.editor.callFunction('input', ['Search: ', '']) as string
+        this.state.setSearchQuery(raw || '')
+      } else {
+        this._inSearchMode = true
+        await this.render()
+        setTimeout(() => {
+          if (this.winid) this.editor.callFunction('feedkeys', ['/', 'n']).catch(() => {})
+        }, 16)
+      }
       return
     }
 
@@ -426,6 +448,7 @@ export class TUI {
       await this.editor.closeWindow({ id: this.winid }, true)
       this.winid = 0
     }
+    await this.editor.dispose()
     if (needRestart) {
       this.editor.executeCommand('CocRestart', true)
     }
@@ -458,22 +481,7 @@ export class TUI {
         }
       }
 
-      editor.pauseNotification()
-      try {
-        editor.submit('nvim_buf_set_option', [this.bufnr, 'modifiable', true])
-        editor.submit('nvim_buf_clear_namespace', [this.bufnr, this.ns, 0, -1])
-        editor.submit('nvim_buf_set_lines', [this.bufnr, 0, -1, false, result.lines])
-        editor.submit('nvim_buf_set_option', [this.bufnr, 'modifiable', false])
-        for (const h of result.highlights) {
-          editor.submit('nvim_buf_set_extmark', [this.bufnr, this.ns, h.line, h.colStart, {
-            end_col: h.colEnd,
-            hl_group: h.hlGroup,
-            hl_mode: 'combine',
-          }])
-        }
-      } finally {
-        await editor.resumeNotification()
-      }
+      await editor.batchRender({ id: this.bufnr }, this.ns, { lines: result.lines, highlights: result.highlights })
 
       this.pkgLineMap = result.pkgLineMap
 

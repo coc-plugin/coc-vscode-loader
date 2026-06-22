@@ -223,13 +223,13 @@ export interface EditorAPI {
 | 保存光标 | `editor.windowGetCursor(win)` | 同 → `getcurpos()` | `VimEditor` 内部转换 |
 | `renderHelp()` / `renderPackageList()` | 纯逻辑 | 同 | 无 |
 | 裁剪高亮 | `filter + clamp colStart/colEnd` | 同 | 无 |
-| pauseNotification | `nvim.pauseNotification()` | no-op | Vim 无 atomic batch |
-| `modifiable = true` | `submit('nvim_buf_set_option')` | `editor.bufferSetOption(buf, 'modifiable', true)` | 抽象化调用 |
-| 清空缓冲区 | `submit('nvim_buf_clear_namespace', [bufnr, ns, 0, -1])` | `editor.bufferClearNamespace(buf, ns)` | 抽象化调用 |
-| 写内容 | `submit('nvim_buf_set_lines', [bufnr, 0, -1, false, lines])` | `editor.bufferSetLines(buf, lines)` | 抽象化调用 |
-| `modifiable = false` | `submit('nvim_buf_set_option')` | `editor.bufferSetOption(...)` | 抽象化调用 |
-| 高亮 | `submit('nvim_buf_set_extmark', [bufnr, ns, l, c, {...}])` 循环 | `editor.bufferSetExtmark(buf, ns, l, c, opts)` 循环 | 抽象化调用 |
-| resumeNotification | `await nvim.resumeNotification()` | no-op | Vim 无 atomic batch |
+| pauseNotification | `nvim.pauseNotification()` — 开始 batch | **`_batchMode = true`** — 入队模式 | Vim 实现自己的批处理 |
+| `modifiable = true` | `submit('nvim_buf_set_option')` | `editor.bufferSetOption(buf, 'modifiable', true)` → 入队 | 批处理入队 |
+| 清空缓冲区 | `submit('nvim_buf_clear_namespace', ...)` | `editor.bufferClearNamespace(buf, ns)` → 入队 | 批处理入队 |
+| 写内容 | `submit('nvim_buf_set_lines', ...)` | `editor.bufferSetLines(buf, lines)` → **直接入队 VimL 脚本** | 批处理直接生成脚本 |
+| `modifiable = false` | `submit('nvim_buf_set_option')` | `editor.bufferSetOption(...)` → 入队 | 批处理入队 |
+| 高亮 | `submit('nvim_buf_set_extmark', ...)` 循环 | `editor.bufferSetExtmark(buf, ns, l, c, opts)` 循环 → **入队 prop_add** | 批处理入队 |
+| resumeNotification | `await nvim.resumeNotification()` — 原子执行 | **合并所有入队命令为 `|` 分隔的脚本，一次 `nvim.command()` 执行** | Vim 需要模拟批处理 |
 | 恢复光标 | `editor.windowSetCursor(win, pos)` | 同 | 无 |
 | 帮助动画 | 60ms 间隔 re-render | 同 | 无 |
 
@@ -358,217 +358,77 @@ if (this._supportsBackdrop) {
 - 窗口选项：`cursorline=true`, `number=false`, `relativenumber=false`, `wrap=false`, `signcolumn=no`, `spell=false`, `foldenable=false`
 - buffer 类型：`buftype=nofile`, `bufhidden=wipe`, `swapfile=false`, `undolevels=-1`, `filetype=coc-loader`
 
-### VimEditor 类
+### VimEditor 类（实际实现）
 
 ```typescript
-// vim-editor.ts
+// vim-editor.ts (简化，核心逻辑)
 
 export class VimEditor implements EditorAPI {
   private nvim = workspace.nvim
   private scratchBuffers = new Set<number>()
   private mainWindowId = 0
-  private _propTypesInitialized = false
+  private _batchMode = false           // 批处理模式
+  private _batchCommands: string[] = []  // 批处理队列
 
-  // ── 生命周期 ──
-
-  async init(): Promise<void> {
-    this.mainWindowId = await this.nvim.call('win_getid') as number
-  }
-
-  async dispose(): Promise<void> {
-    for (const bufId of this.scratchBuffers) {
-      try { await this.nvim.call('execute', [`silent! bdelete! ${bufId}`]) } catch {}
+  // vcall — 统一调用入口，处理 Vim9 def 的 E1031 void 返回值问题
+  private async vcall(name: string, args: any[]): Promise<any> {
+    if (this._batchMode) {                   // 批处理模式下直接入队
+      this._batchCommands.push(this.cmd(name, args))
+      return null
     }
-    this.scratchBuffers.clear()
-    try { await this.nvim.call('win_gotoid', [this.mainWindowId]) } catch {}
+    try {
+      return await this.nvim.call(name, args)
+    } catch (e) {
+      const msg = String(e)
+      if (msg.includes('E1031')) {           // void 返回值 → 降级到 command
+        await this.nvim.command(this.cmd(name, args))
+        return null
+      }
+      if (msg.includes('E474') || msg.includes('E957') || msg.includes('E1210')) {
+        return null                          // 非关键错误静默忽略
+      }
+      throw e
+    }
   }
 
-  // ── 命名空间 ──
-
-  async createNamespace(_name: string): Promise<number> {
-    return 1  // Vim 无 namespace，固定值
+  // 批量提交方法
+  pauseNotification(): void {
+    this._batchMode = true
+    this._batchCommands = []
   }
 
-  // ── 缓冲区 ──
-
-  async createScratchBuffer(): Promise<EditorBuffer> {
-    const bufId = await this.nvim.call('bufadd', ['']) as number
-    await this.nvim.call('bufload', [bufId])
-    await this.nvim.call('setbufvar', [bufId, '&buftype', 'nofile'])
-    this.scratchBuffers.add(bufId)
-    return { id: bufId }
+  async resumeNotification(): Promise<void> {
+    this._batchMode = false
+    const cmds = this._batchCommands
+    this._batchCommands = []
+    if (cmds.length === 0) return
+    // 合并为 | 分隔的单条 command，大幅减少 RPC 往返
+    await this.nvim.command(cmds.join(' | '))
   }
 
+  // 各 setter 方法在批处理模式下直接入队 VimL 脚本
   async bufferSetLines(buf: EditorBuffer, lines: string[]): Promise<void> {
-    // Vim 行号 1-indexed
-    await this.nvim.call('setbufline', [buf.id, 1, lines])
-    // 如果新内容比旧 buffer 短，删除多余行
-    const info = await this.nvim.call('getbufinfo', [buf.id]) as any[]
-    const oldCount = info[0]?.line_count ?? 0
-    if (oldCount > lines.length) {
-      await this.nvim.call('deletebufline', [buf.id, lines.length + 1, oldCount])
+    if (this._batchMode) {
+      this._batchCommands.push(`call setbufline(${buf.id}, 1, [${encode(lines)}])`)
+      return
     }
+    // 非批处理模式：直接 RPC 调用
+    await this.vcall('setbufline', [buf.id, 1, lines])
   }
 
-  async bufferClearNamespace(buf: EditorBuffer, _ns: number): Promise<void> {
-    // 清除所有文本和 prop。setbufline([ ]) 不保证清空，先 deletebufline
-    await this.nvim.call('deletebufline', [buf.id, 1, '$'])
-    // prop_clear(lnum_start, lnum_end, {bufnr}) — 不是 (bufnr, lnum, ...)
-    await this.nvim.call('prop_clear', [1, -1, { bufnr: buf.id }])
-  }
-
-  async bufferSetExtmark(buf: EditorBuffer, _ns: number, line: number, col: number,
+  async bufferSetExtmark(buf: EditorBuffer, ns: number, line: number, col: number,
     opts: { end_col: number; hl_group: string; hl_mode: string }): Promise<void> {
-    const length = opts.end_col - col
-    if (length <= 0) return
-    // prop_add(lnum, col, {dict}) — 注意参数顺序：行号、列号不是 bufnr
-    await this.nvim.call('prop_add', [line + 1, col + 1, {
-      length,
-      type: opts.hl_group,
-      bufnr: buf.id,
-    }])
-  }
-
-  async bufferSetOption(buf: EditorBuffer, key: string, value: any): Promise<void> {
-    await this.nvim.call('setbufvar', [buf.id, `&${key}`, value])
-  }
-
-  async bufferSetKeymap(buf: EditorBuffer, mode: string, lhs: string, rhs: string,
-    opts?: { silent?: boolean; nowait?: boolean }): Promise<void> {
-    const parts: string[] = []
-    if (opts?.silent !== false) parts.push('<silent>')
-    if (opts?.nowait !== false) parts.push('<nowait>')
-    parts.push('<buffer>')
-    parts.push(lhs)
-    parts.push(rhs)
-    await this.nvim.call('execute', [`${mode}noremap ${parts.join(' ')}`])
-  }
-
-  // ── 窗口 ──
-
-  async openFloatWindow(buf: EditorBuffer, _focus: boolean,
-    config: FloatWinConfig): Promise<EditorWindow> {
-    // 底部创建拆分窗口
-    await this.nvim.call('execute', [`botright ${config.height}new`])
-    const winId = await this.nvim.call('win_getid') as number
-    await this.nvim.call('execute', [`buffer ${buf.id}`])
-    // Vim 无 NormalFloat，winhighlight 仅设置 CocLoaderNormal
-    // (CocLoaderNormal 在 defineHighlightLink 中链接到 Normal)
-    await this.nvim.call('setwinvar', [winId, '&winhighlight', 'CocLoaderNormal'])
-    return { id: winId }
-  }
-
-  async setWindowConfig(win: EditorWindow, config: Partial<FloatWinConfig>): Promise<void> {
-    const prev = await this.nvim.call('win_getid') as number
-    await this.nvim.call('win_gotoid', [win.id])
-    if (config.height !== undefined) {
-      await this.nvim.call('execute', [`resize ${config.height}`])
+    if (this._batchMode) {
+      this._batchCommands.push(`call prop_add(${line+1},${col+1},...`)
+      return
     }
-    if (prev !== win.id) await this.nvim.call('win_gotoid', [prev])
-  }
-
-  async setWindowOption(win: EditorWindow, key: string, value: any): Promise<void> {
-    await this.nvim.call('setwinvar', [win.id, `&${key}`, value])
-  }
-
-  async closeWindow(win: EditorWindow, _force: boolean): Promise<void> {
-    try { await this.nvim.call('execute', [`silent! ${win.id}close!`]) } catch {}
-  }
-
-  // ── 光标 ──
-
-  async windowGetCursor(win: EditorWindow): Promise<[number, number]> {
-    const prev = await this.nvim.call('win_getid') as number
-    await this.nvim.call('win_gotoid', [win.id])
-    const pos = await this.nvim.call('getcurpos', []) as number[]
-    if (prev !== win.id) await this.nvim.call('win_gotoid', [prev])
-    return [pos[1], pos[2] - 1]  // Vim 1-indexed → 0-indexed
-  }
-
-  async windowSetCursor(win: EditorWindow, pos: [number, number]): Promise<void> {
-    const prev = await this.nvim.call('win_getid') as number
-    await this.nvim.call('win_gotoid', [win.id])
-    await this.nvim.call('cursor', [pos[0], pos[1] + 1])
-    if (prev !== win.id) await this.nvim.call('win_gotoid', [prev])
-  }
-
-  // ── 高亮定义 ──
-
-  async defineHighlight(hl: HighlightDef): Promise<void> {
-    let cmd = `highlight default ${hl.name}`
-    if (hl.guibg) cmd += ` guibg=${hl.guibg}`
-    if (hl.guifg) cmd += ` guifg=${hl.guifg}`
-    if (hl.gui) cmd += ` gui=${hl.gui}`
-    await this.nvim.command(cmd)
-    // prop type 仅创建一次（防止 TUI 多次 open/close）
-    const existing = await this.nvim.call('prop_type_get', [hl.name]) as any
-    if (!existing || Object.keys(existing).length === 0) {
-      try { await this.nvim.call('prop_type_add', [hl.name, { highlight: hl.name }]) } catch {}
-    }
-  }
-
-  async defineHighlightLink(hl: string, link: string): Promise<void> {
-    // Vim 无 NormalFloat 等 Neovim 专有 highlight group，跳过这些 link
-    // (对应组已被 highlight default 定义，直接用其颜色)
-    const targetExists = await this.nvim.call('hlget', [link]) as any[]
-    if (targetExists.length === 0) return
-    await this.nvim.command(`highlight default link ${hl} ${link}`)
-    const existing = await this.nvim.call('prop_type_get', [hl]) as any
-    if (!existing || Object.keys(existing).length === 0) {
-      try { await this.nvim.call('prop_type_add', [hl, { highlight: hl }]) } catch {}
-    }
-  }
-
-  // ── 屏幕信息 ──
-
-  async screenSize(): Promise<{ lines: number; columns: number; cmdheight: number }> {
-    const [editorLines, editorCols, cmdheight] = await Promise.all([
-      this.nvim.call('getwinvar', [0, '&lines']) as Promise<number>,
-      this.nvim.call('getwinvar', [0, '&columns']) as Promise<number>,
-    ])  // Vim 的 &lines/&columns 要直接从全局读取
-    const ch = await this.nvim.call('get', ['&cmdheight']) as number
-    return { lines: editorLines, columns: editorCols, cmdheight: ch }
-  }
-
-  async termguicolors(): Promise<number> {
-    return this.nvim.call('get', ['&termguicolors']) as Promise<number>
-  }
-
-  async normalHlBg(): Promise<number | null> {
-    // Vim: hlget('Normal') → [{ctermfg, ctermbg, guifg, guibg, ...}]
-    const hl = await this.nvim.call('hlget', ['Normal']) as any[]
-    const bg = hl[0]?.guibg ?? null
-    if (!bg) return null
-    // 将 '#RRGGBB' 转为数字（与 Neovim 行为一致）
-    return parseInt(bg.replace('#', ''), 16)
-  }
-
-  // ── 命令 / 函数 ──
-
-  async executeCommand(cmd: string, truncate?: boolean): Promise<void> {
-    await this.nvim.command(cmd, truncate)
-  }
-
-  async callFunction(name: string, args: any[]): Promise<any> {
-    return this.nvim.call(name, args)
+    await this.vcall('prop_add', [line + 1, col + 1, { ... }])
   }
 
   // ── 批量通知 ──
-
-  pauseNotification(): void { /* no-op */ }
-
-  submit(method: string, args: any[]): void {
-    // Vim 不支持 atomic batch，立即执行
-    this.nvim.call(method, args, true).catch(() => {})
-  }
-
-  async resumeNotification(): Promise<void> { /* no-op */ }
-
-  // ── 原始 API ──
-
-  async call(method: string, args: any[]): Promise<any> {
-    return this.nvim.call(method, args)
-  }
+  pauseNotification(): void { /* 见上方批处理实现 */ }
+  submit(method: string, args: any[]): void { /* 兼容旧接口 */ }
+  async resumeNotification(): Promise<void> { /* 见上方批处理实现 */ }
 }
 ```
 
@@ -803,3 +663,39 @@ describe('VimEditor', () => {
   it('resumeNotification is no-op', async () => { /* no-op */ })
 })
 ```
+
+---
+
+## Implementation Lessons
+
+实际实现过程中发现的关键问题：
+
+### Vim9 def → legacy interop：E1031 void 返回值
+
+Vim 9.2 的 `def` 函数中通过 `call()` 调用部分内置函数时，返回值会变为 void，导致 `E1031: Cannot use void value`。
+
+**受影响函数**：`setbufvar`、`setwinvar`、`bufload`、`prop_type_add`、`setbufline`、`deletebufline`、`prop_add`、`prop_clear`、`cursor`、`win_gotoid`
+
+**不受影响函数**：`win_getid`、`bufadd`、`has`、`eval`、`hlget`、`prop_type_get`、`getbufinfo`、`getcurpos`
+
+**修复**：`vcall` 包装器在收到 E1031 后自动将调用转为 `nvim.command('call Func(...)')` 绕过。
+
+### getbufinfo 字段名差异
+
+| 含义 | Neovim | Vim |
+|------|--------|-----|
+| buffer 行数 | `line_count` | `linecount` |
+
+### prop_clear 不支持 `"$"` 作结束行
+
+`prop_clear(1, "$", {bufnr})` → E1210 (Number required)。`$` 在 Ex 命令中表示 EOF，在函数调用中只是字符 `$`。且 `deletebufline(1, '$')` 删除所有行后，prop 也随之消失，`prop_clear` 多余。
+
+### winhighlight 在 Vim 拆分窗口中不适用
+
+`setwinvar(winId, '&winhighlight', 'CocLoaderNormal')` → E474 (Invalid argument)。
+Vim 拆分窗口使用标准 Normal 高亮，无需 `winhighlight`。Vim 也不存在 `NormalFloat` 高亮组。
+
+### 渲染性能优化
+
+`nvim.call()` 每次调用是一次 RPC 往返。TUI 每帧渲染可能生成 100+ 个 `prop_add` 调用。
+通过 `pauseNotification()` 批处理机制，将所有操作合并为一条 `|` 分隔的 `nvim.command()` 调用，1 次 RPC 往返完成整个渲染。

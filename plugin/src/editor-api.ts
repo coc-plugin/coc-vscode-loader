@@ -33,6 +33,11 @@ export interface EditorBuffer {
   id: number
 }
 
+export interface BatchRenderInput {
+  lines: string[]
+  highlights: HighlightRange[]
+}
+
 export interface EditorAPI {
   init(): Promise<void>
   dispose(): Promise<void>
@@ -47,6 +52,9 @@ export interface EditorAPI {
   bufferSetExtmark(buf: EditorBuffer, ns: number, line: number, col: number, opts: { end_col: number; hl_group: string; hl_mode: string }): Promise<void>
   bufferSetOption(buf: EditorBuffer, key: string, value: any): Promise<void>
   bufferSetKeymap(buf: EditorBuffer, mode: string, lhs: string, rhs: string, opts?: { silent?: boolean; nowait?: boolean }): Promise<void>
+
+  // Batched render (one RPC call for entire render, critical for Vim performance)
+  batchRender(buf: EditorBuffer, ns: number, input: BatchRenderInput): Promise<void>
 
   // Float window
   openFloatWindow(buf: EditorBuffer, focus: boolean, config: FloatWinConfig): Promise<EditorWindow>
