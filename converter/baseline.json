@@ -34,7 +34,7 @@
     "src/util.ts": "7fca35b9b00275b3e4e3c5406815445a4305c826c53270d4be65fd7374ebc3d9",
     "_source": {
       "repo": "rust-lang/rust-analyzer",
-      "commit": "7dfdbf5a3dd167dee16c790566e99f1c0e777613"
+      "commit": "ff5fcc70d9bcdc54db365114e2f7b1c18056ed4f"
     }
   },
   "vscode-go": {
@@ -862,10 +862,10 @@
   "vscode-vue2": {
     "coc-convert.json": "5fe2a69e2d85ebfc374901c4cbd18a4142f52eb63061db6a6ec53354be6b9848",
     "package.json": "fabf13764b49f848b6c10d7ef70f073fa2c92ee17c28820908a170916feda2f7",
-    "snippets/css.json": "8b7785b9b64a3f9dbe9d18fbb52db5829e3c72262eb2a52a922bf5d655c06a94",
-    "snippets/html.json": "de0dbffc242b522f0d0264fd8383a6c83481a8cd82630ca0cf59fccc0239394d",
-    "snippets/javascript.json": "51412a2bad6baf7c8e3cdb9630ed6f6f652412b66eb47d545b302ad6304659de",
-    "snippets/vue.json": "d6e72bcd4229e06d7a8e219526aae26aa095bbeba387b68cb0a245778c4ef255",
+    "snippets/css.json": "0000000000000000000000000000000000000000000000000000000000000000",
+    "snippets/html.json": "0000000000000000000000000000000000000000000000000000000000000000",
+    "snippets/javascript.json": "0000000000000000000000000000000000000000000000000000000000000000",
+    "snippets/vue.json": "0000000000000000000000000000000000000000000000000000000000000000",
     "_source": {
       "repo": "xianghongai/vscode-vue2-snippets",
       "commit": "9a1e249060ff6d09d71f203cc225ae552f28c60a"
@@ -906,7 +906,7 @@
   },
   "vscode-es7-react-snippets": {
     "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
-    "lib/snippets/generated.json": "6bebafb28bc95077ca7f012a1c4aadcacc8f7ba49b1afa1640a328a156808def",
+    "lib/snippets/generated.json": "0000000000000000000000000000000000000000000000000000000000000000",
     "package.json": "e436812c4165acabb4c78116d2d821ee5d499a108dfa02f7a680776687504257",
     "_source": {
       "repo": "r5n-labs/vscode-react-javascript-snippets",

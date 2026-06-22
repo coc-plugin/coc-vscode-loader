@@ -69,6 +69,7 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
   error?: string
   hashes?: Record<string, string>
   sourceCommit?: string
+  expectedFiles?: string[]
 }> {
   const cachePath = cacheDir(entry)
   let inputDir: string | null = null
@@ -133,6 +134,8 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
   // Hash key output files
   const hashes: Record<string, string> = {}
   const isSnippets = entry.convert.some(s => s.type === 'snippets')
+  const hasBuildStep = entry.convert.some(s => s.type === 'snippets' && (s as any).build)
+  const EXISTENCE_PLACEHOLDER = '0000000000000000000000000000000000000000000000000000000000000000'
   function collect(dir: string, prefix: string) {
     if (!fs.existsSync(dir)) return
     for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -140,10 +143,17 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
       const rel = prefix ? `${prefix}/${e.name}` : e.name
       if (e.isDirectory()) {
         if (e.name !== 'node_modules' && e.name !== '.git') collect(full, rel)
-      } else if (isSnippets ? e.name === 'package.json' || e.name.endsWith('.json') : e.name.endsWith('.ts') || e.name === 'package.json' || e.name === 'esbuild.mjs') {
+      } else if (isSnippets
+        ? e.name === 'package.json' || e.name.endsWith('.json')
+        : e.name.endsWith('.ts') || e.name === 'package.json' || e.name === 'esbuild.mjs') {
         try {
-          const content = fs.readFileSync(full, 'utf-8')
-          hashes[rel] = crypto.createHash('sha256').update(content).digest('hex')
+          if (hasBuildStep && e.name.endsWith('.json') && e.name !== 'package.json' && e.name !== 'coc-convert.json') {
+            // Build-generated snippet files are platform-dependent — use placeholder hash
+            hashes[rel] = EXISTENCE_PLACEHOLDER
+          } else {
+            const content = fs.readFileSync(full, 'utf-8')
+            hashes[rel] = crypto.createHash('sha256').update(content).digest('hex')
+          }
         } catch {}
       }
     }
