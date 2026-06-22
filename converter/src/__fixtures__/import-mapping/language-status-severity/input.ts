@@ -1,0 +1,1 @@
+const sev = LanguageStatusSeverity.Information

@@ -1,0 +1,1 @@
+languages.registerColorProvider(selector, provider)

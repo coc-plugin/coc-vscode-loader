@@ -1,0 +1,1 @@
+languages.registerCodeActionsProvider(selector, provider)

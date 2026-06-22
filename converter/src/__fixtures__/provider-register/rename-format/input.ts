@@ -1,0 +1,1 @@
+languages.registerDocumentFormattingEditProvider(selector, provider)

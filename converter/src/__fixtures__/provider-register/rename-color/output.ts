@@ -1,0 +1,1 @@
+languages.registerDocumentColorProvider(selector, provider)

@@ -1,0 +1,1 @@
+editor.setDecorations(decorationType, ranges)

@@ -1,0 +1,1 @@
+window.onDidChangeActiveTextEditor(handler)

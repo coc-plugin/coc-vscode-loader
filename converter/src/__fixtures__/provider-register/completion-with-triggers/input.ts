@@ -1,0 +1,1 @@
+languages.registerCompletionItemProvider(selector, provider, '.', '"', "'")

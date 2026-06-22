@@ -10,7 +10,7 @@ function walk(dir: string): string[] {
   const files: string[] = []
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const p = join(dir, entry.name)
-    if (entry.isDirectory() && entry.name !== 'node_modules' && !entry.name.startsWith('.')) {
+    if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== '__fixtures__' && !entry.name.startsWith('.')) {
       files.push(...walk(p))
     } else if (entry.isFile() && entry.name.endsWith('.ts')) {
       files.push(p)

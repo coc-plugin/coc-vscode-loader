@@ -1,0 +1,1 @@
+const editor = window.activeTextEditor

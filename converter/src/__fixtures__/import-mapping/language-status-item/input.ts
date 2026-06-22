@@ -1,0 +1,1 @@
+languages.createLanguageStatusItem('test', document)

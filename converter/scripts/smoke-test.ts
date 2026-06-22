@@ -15,7 +15,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
-import { execFileSync } from 'child_process'
+import { execFileSync, execSync } from 'child_process'
 import { convert } from '../src/convert.js'
 import { fileURLToPath } from 'url'
 
@@ -179,7 +179,141 @@ async function testOne(entry: RegistryEntry, presets: any): Promise<string | nul
     return `validate: ${e.message}`
   }
 
+  // TypeScript compilation check on converted output
+  if (hasPkg && !isSnippets) {
+    const srcDir = path.join(outputDir, 'src')
+    if (fs.existsSync(srcDir)) {
+      const tsFiles = fs.readdirSync(srcDir).filter(f => f.endsWith('.ts'))
+      if (tsFiles.length > 0) {
+        const tscError = checkTypeScript(outputDir, srcDir)
+        if (tscError) return tscError
+      }
+    }
+  }
+
   return null // success
+}
+
+/**
+ * Run tsc --noEmit on the output directory to catch compilation errors.
+ * Generates a single global declaration file with stubs for all external modules.
+ */
+function checkTypeScript(outputDir: string, srcDir: string): string | null {
+  // Scan all TS files for external module imports
+  const externalMods = new Set<string>()
+  const importRe = /(?:from|require)\s*\(?\s*['"]([^'"]+)['"]\)?\s*/g
+  for (const f of fs.readdirSync(srcDir).filter(f => f.endsWith('.ts'))) {
+    const content = fs.readFileSync(path.join(srcDir, f), 'utf-8')
+    let m: RegExpExecArray | null
+    while ((m = importRe.exec(content)) !== null) {
+      const mod = m[1]
+      if (!mod.startsWith('.') && !mod.startsWith('node:')) {
+        externalMods.add(mod)
+      }
+    }
+  }
+
+  if (externalMods.size === 0) return null
+
+  // Build a single catch-all declaration file
+  const declLines: string[] = []
+  for (const mod of externalMods) {
+    // Collect named import identifiers used from this module
+    const exports = new Set<string>()
+    for (const f of fs.readdirSync(srcDir).filter(f => f.endsWith('.ts'))) {
+      const content = fs.readFileSync(path.join(srcDir, f), 'utf-8')
+      const re = new RegExp(`import\\s+(?:type\\s+)?\\{([^}]*)\\}\\s*from\\s*['"]${escapeRegex(mod)}['"]`, 'g')
+      let nm: RegExpExecArray | null
+      while ((nm = re.exec(content)) !== null) {
+        for (const n of nm[1].split(',')) {
+          const name = n.trim().split(/\s+as\s+/).pop()?.trim()
+          if (name) exports.add(name)
+        }
+      }
+    }
+    // Also handle import * as X from 'mod'; X.Y usage
+    for (const f of fs.readdirSync(srcDir).filter(f => f.endsWith('.ts'))) {
+      const content = fs.readFileSync(path.join(srcDir, f), 'utf-8')
+      const nsRe = new RegExp(`import\\s+\\*\\s+as\\s+(\\w+)\\s+from\\s*['"]${escapeRegex(mod)}['"]`, 'g')
+      let nm: RegExpExecArray | null
+      while ((nm = nsRe.exec(content)) !== null) {
+        exports.add(nm[1])
+      }
+    }
+
+    if (exports.size > 0) {
+      // Named exports
+      declLines.push(`declare module '${mod}' {`)
+      for (const e of exports) {
+        declLines.push(`  export let ${e}: any;`)
+      }
+      declLines.push('}')
+    } else {
+      // Default export or require-style
+      declLines.push(`declare module '${mod}' {`)
+      declLines.push('  const _: any;')
+      declLines.push('  export = _')
+      declLines.push('}')
+    }
+    declLines.push('')
+  }
+
+  const typingsPath = path.join(outputDir, 'smoke-check.d.ts')
+  fs.writeFileSync(typingsPath, declLines.join('\n'))
+
+  const tsconfigPath = path.join(outputDir, 'tsconfig.check.json')
+  fs.writeFileSync(tsconfigPath, JSON.stringify({
+    compilerOptions: {
+      target: 'ES2022',
+      module: 'commonjs',
+      strict: false,
+      skipLibCheck: true,
+      noEmit: true,
+      moduleResolution: 'node',
+      allowSyntheticDefaultImports: true,
+      esModuleInterop: true,
+      resolveJsonModule: true,
+      types: [],
+      baseUrl: outputDir,
+    },
+    include: ['src/**/*.ts', 'smoke-check.d.ts'],
+  }, null, 2))
+
+  try {
+    execFileSync('npx', ['tsc', '--project', tsconfigPath, '--noEmit', '--strict', 'false', '--skipLibCheck'], {
+      cwd: outputDir,
+      stdio: 'pipe',
+      timeout: 60000,
+      shell: true,
+    })
+    return null
+  } catch (e: any) {
+    const stderr = (e.stderr || '').toString()
+    const stdout = (e.stdout || '').toString()
+    const all = stderr + stdout
+    // Filter to actual TS errors (skip informational messages)
+    const lines = all.split('\n').filter(l => l.includes('error TS'))
+    if (lines.length === 0) return 'tsc check failed (unknown error)'
+    // Deduplicate by error code and message (ignore position)
+    const seen = new Set<string>()
+    const unique: string[] = []
+    for (const l of lines) {
+      const key = l.replace(/\(\d+,\d+\)/g, '(pos)')
+      if (!seen.has(key)) {
+        seen.add(key)
+        unique.push(l.trim())
+      }
+    }
+    const detail = unique.slice(0, 5).join('; ')
+    return `tsc: ${detail}`
+  } finally {
+    try { fs.rmSync(tsconfigPath) } catch {}
+    try { fs.rmSync(typingsPath) } catch {}
+  }
+}
+
+function escapeRegex(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 async function main() {

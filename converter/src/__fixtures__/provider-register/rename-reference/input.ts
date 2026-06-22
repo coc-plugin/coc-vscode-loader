@@ -1,0 +1,1 @@
+languages.registerReferenceProvider(selector, provider)
