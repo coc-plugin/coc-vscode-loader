@@ -2,7 +2,7 @@
 /**
  * Registry baseline diff tool.
  *
- * Stores output file hashes in coc-vscode-registry/baseline.json (committed to git).
+ * Stores output file hashes in converter/baseline.json (committed to git).
  * CI runs `npm run diff:check` to verify converter changes don't break existing plugins.
  *
  * Usage:
@@ -20,7 +20,7 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REGISTRY_PATH = path.resolve(__dirname, '../../coc-vscode-registry/registry.json')
-const BASELINE_PATH = path.resolve(__dirname, '../../coc-vscode-registry/baseline.json')
+const BASELINE_PATH = path.resolve(__dirname, '../baseline.json')
 const PRESETS_PATH = path.resolve(__dirname, '../../coc-vscode-registry/presets.json')
 const CACHE_DIR = path.join(os.homedir(), '.cache', 'coc-converter-smoke')
 const TEST_OUTPUT = path.join(os.tmpdir(), 'coc-diff-output')
