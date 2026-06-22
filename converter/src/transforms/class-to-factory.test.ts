@@ -17,6 +17,11 @@ function applyClassToFactory(source: string): string {
   )
 
   content = content.replace(
+    /\bnew\s+WorkspaceEdit\s*\(\s*\)/g,
+    '({ changes: {} })',
+  )
+
+  content = content.replace(
     /const\s+(\w+)\s*=\s*CompletionItem\.create\(([^,]+),\s*([^)]+)\)/g,
     (_, varName, label, kind) => {
       return `const ${varName} = CompletionItem.create(${label}); ${varName}.kind = ${kind}`
@@ -51,6 +56,12 @@ describe('class-to-factory transform', () => {
   it('converts CompletionItem.create(label, kind) with split', () => {
     const result = applyClassToFactory('const item = CompletionItem.create("test", 1)')
     expect(result).toContain('const item = CompletionItem.create("test"); item.kind = 1')
+  })
+
+  it('converts new WorkspaceEdit() to plain object', () => {
+    const result = applyClassToFactory('const we = new WorkspaceEdit()')
+    expect(result).toContain('({ changes: {} })')
+    expect(result).not.toContain('new WorkspaceEdit()')
   })
 
   it('does not convert arbitrary new expressions', () => {

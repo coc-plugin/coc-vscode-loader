@@ -138,7 +138,7 @@ LSP (binary / module / bridge) → direct-api (API polyfill)
 | Transform | What it does |
 |-----------|-------------|
 | `import-mapping` | `from 'vscode'` → `from 'coc.nvim'` + text-level API polyfills |
-| `class-to-factory` | `new Xxx()` → `Xxx.create()`, `new TextEdit()` → `TextEdit.replace()` |
+| `class-to-factory` | `new Xxx()` → `Xxx.create()`, `new TextEdit()` → `TextEdit.replace()`, `new WorkspaceEdit()` → `({ changes: {} })` |
 | `provider-register` | Adapt provider registration signatures |
 | `enum-offset` | Comment on enum value differences |
 | `language-client` | LanguageClient signature adaptation |
@@ -177,6 +177,7 @@ converter 主流程在步骤执行后还会对所有输出源文件做一轮通�
 | `Location.create(Uri.file($1), $2)` → `Location.create($1, Range.create($2, $2))` | coc 的 Location.create 接受 `(string, Range)`，非 `(Uri, Position)` |
 | `Uri`/`Range` 自动注入 import | 命名空间 import 无法用解构注入，自动补 `import { Uri }`/`import { Range }` |
 | `(?:vscode\.)?workspace\.workspaceFolders` guard | 处理 `vscode.` 前缀，避免产生 `vscode.(...)` 语法错误 |
+| `new WorkspaceEdit()` → `({ changes: {} })` | coc 的 WorkspaceEdit 是 interface，不可 new。第一参数含 `.uri` 的 `.set(uri, edits)` 同时转为 `.changes[uri] = edits` |
 
 ### 插件级文本补丁 `patches`（v1.4.2+）
 
@@ -232,6 +233,7 @@ converter 主流程在步骤执行后还会对所有输出源文件做一轮通�
 | VS Code | coc.nvim | 原因 |
 |---------|----------|------|
 | `new TextEdit(range, text)` | `TextEdit.replace(range, text)` | coc 的 TextEdit 是 interface，只有 `TextEdit.replace/insert/del` |
+| `new WorkspaceEdit()` | `({ changes: {} })` | coc 的 WorkspaceEdit 是 interface，不可 new |
 
 通过 `NAMESPACE_MAP` 配置（`class-to-factory.ts`），新增类型只需添加一行映射：
 
@@ -240,6 +242,8 @@ const NAMESPACE_MAP: Record<string, string> = {
   'TextEdit': 'TextEdit.replace',
 }
 ```
+
+`WorkspaceEdit` 不是通过 `NAMESPACE_MAP` 处理，而是在 `class-to-factory.ts` 和 `convert.ts` 的文本回退中做文本级替换：`new WorkspaceEdit()` → `({ changes: {} })`，同时 `.set(uri, edits)` → `.changes[uri] = edits`（在 `convert.ts` 的通用文本替换阶段）。
 
 **Bridge preset system** (`converter/src/presets.ts` + `converter/src/steps/bridge.ts` + `coc-vscode-registry/presets.json`):
 - Bridge logic is not used for source-based plugins

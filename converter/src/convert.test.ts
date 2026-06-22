@@ -415,6 +415,27 @@ describe('convert main flow', () => {
     expect(content).not.toContain(',,')
   })
 
+  it('converts new WorkspaceEdit() and .set() to plain object and changes assignment', async () => {
+    writeInput('package.json', JSON.stringify({ name: 'test-ext' }))
+    writeInput('src/extension.ts', [
+      `import * as vscode from 'vscode'`,
+      `const we = new WorkspaceEdit();`,
+      `we.set(document.uri, edits);`,
+      `action.edit = we;`,
+    ].join('\n'))
+    const { convert } = await import('./convert.js')
+    await convert({
+      input: tmpdir,
+      output: outdir,
+      convert: [{ type: 'source', transforms: ['import-mapping'] }],
+    })
+    const content = fs.readFileSync(path.join(outdir, 'src', 'extension.ts'), 'utf-8')
+    expect(content).not.toContain('new WorkspaceEdit')
+    expect(content).not.toContain('.set(')
+    expect(content).toContain('({ changes: {} })')
+    expect(content).toContain('.changes[document.uri] = edits')
+  })
+
   it('applies plugin-specific patches from source step config', async () => {
     writeInput('package.json', JSON.stringify({ name: 'patched-ext' }))
     writeInput('src/extension.ts', `import * as vscode from 'vscode'\nconst x = 'hello world'`)

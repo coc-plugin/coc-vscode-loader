@@ -49,6 +49,10 @@ export const transformClassToFactory: Transform = (ctx) => {
     /\bnew\s+TextEdit\s*\(/g,
     'TextEdit.replace(',
   )
+  text = text.replace(
+    /\bnew\s+WorkspaceEdit\s*\(\s*\)/g,
+    '({ changes: {} })',
+  )
 
   // CompletionItem.create(label, kind) → item = CompletionItem.create(label); item.kind = kind
   // Uses balanced paren matching to safely handle any expression in kind argument (e.g. ternary)

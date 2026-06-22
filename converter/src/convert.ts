@@ -324,6 +324,31 @@ export async function convert(opts: ConvertOptions): Promise<void> {
           content = locResult
         }
         injectCocImport('Range', 'Range.create(')
+
+        // WorkspaceEdit polyfill: new WorkspaceEdit() → plain object (coc has interface, not class)
+        // And .set(uri, edits) → .changes[uri] = edits
+        // Wrap in a single block so when the file uses WorkspaceEdit, both replacements apply together
+        if (content.includes('WorkspaceEdit') || content.includes('.set(')) {
+          // new WorkspaceEdit() → ({ changes: {} }) — not constructable in coc.nvim
+          if (/\bnew\s+WorkspaceEdit\s*\(\s*\)/.test(content)) {
+            content = content.replace(/\bnew\s+WorkspaceEdit\s*\(\s*\)/g, '({ changes: {} })')
+            changed = true
+          }
+          // .set(uri, edits) → .changes[uri] = edits
+          // Only match .set() with a first arg that contains .uri (URI references are always strings in coc)
+          // This avoids matching Map.set() or other .set() calls
+          {
+            const setResult = content.replace(
+              /(\w+(?:\.\w+)*)\.set\s*\(\s*([^,)]*?\buri\b[^,)]*?)\s*,\s*([^)]+)\s*\)/g,
+              '$1.changes[$2] = $3'
+            )
+            if (setResult !== content) {
+              content = setResult
+              changed = true
+            }
+          }
+        }
+
         // 11. Apply plugin-specific patches from registry config
         for (const step of steps) {
           if (step.type === 'source') {
