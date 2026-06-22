@@ -13,6 +13,8 @@
     "test": "npm run test:converter",
     "test:converter": "cd converter && npm test",
     "test:smoke": "cd converter && npm run test:smoke",
+    "diff:baseline": "cd converter && npm run diff:baseline",
+    "diff:check": "cd converter && npm run diff:check",
     "postinstall": "git config core.hooksPath .githooks 2>/dev/null; echo 'pre-push hook configured'"
   },
   "repository": {

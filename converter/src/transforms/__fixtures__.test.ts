@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import * as fs from 'fs'
 import * as path from 'path'
+import * as os from 'os'
 import { Project, ScriptKind } from 'ts-morph'
 import { transformImportMapping } from './import-mapping.js'
 import { transformClassToFactory } from './class-to-factory.js'
@@ -87,4 +88,92 @@ for (const transformName of transforms) {
       })
     }
   })
+}
+
+// ---- Pipeline fixtures (full convert() flow) ----
+
+interface PipelineCase {
+  name: string
+  inputDir: string
+}
+
+function loadPipelineCases(): PipelineCase[] {
+  const dir = path.join(FIXTURES_DIR, 'pipeline')
+  if (!fs.existsSync(dir)) return []
+  return fs.readdirSync(dir, { withFileTypes: true })
+    .filter(e => e.isDirectory())
+    .filter(e => {
+      const inputPkg = path.join(dir, e.name, 'package.json')
+      const inputSrc = path.join(dir, e.name, 'src')
+      const expectedSrc = path.join(dir, e.name, 'expected', 'src')
+      return fs.existsSync(inputPkg) && fs.existsSync(inputSrc) && fs.existsSync(expectedSrc)
+    })
+    .map(e => ({ name: e.name, inputDir: path.join(dir, e.name) }))
+}
+
+const pipelineCases = loadPipelineCases()
+
+if (pipelineCases.length > 0) {
+  describe('pipeline fixtures', () => {
+    let tmpdir: string
+    let outdir: string
+
+    beforeEach(() => {
+      tmpdir = fs.mkdtempSync(path.join(os.tmpdir(), 'pipeline-test-'))
+      outdir = path.join(tmpdir, 'output')
+    })
+
+    afterEach(() => {
+      fs.rmSync(tmpdir, { recursive: true, force: true })
+    })
+
+    for (const c of pipelineCases) {
+      it(c.name, async () => {
+        // Copy fixture input to temp input dir
+        const inputPath = path.join(tmpdir, 'input')
+        fs.cpSync(c.inputDir, inputPath, { recursive: true })
+        // Remove expected/ from temp (it's metadata, not source)
+        const expectedDir = path.join(inputPath, 'expected')
+        if (fs.existsSync(expectedDir)) fs.rmSync(expectedDir, { recursive: true })
+
+        const { convert } = await import('../convert.js')
+        await convert({
+          input: inputPath,
+          output: outdir,
+          convert: [{ type: 'source', transforms: ['import-mapping'] }],
+        })
+
+        // Compare output files with expected files
+        const expectedRoot = path.join(c.inputDir, 'expected')
+        const outputFiles = walkRelativeFiles(outdir)
+        const expectedFiles = walkRelativeFiles(expectedRoot)
+
+        // Check all expected files exist in output
+        for (const rel of expectedFiles) {
+          expect(outputFiles).toContain(rel)
+          const expectedContent = fs.readFileSync(path.join(expectedRoot, rel), 'utf-8').replace(/\n$/, '')
+          const actualContent = fs.readFileSync(path.join(outdir, rel), 'utf-8').replace(/\n$/, '')
+          expect(actualContent).toBe(expectedContent)
+        }
+      })
+    }
+  })
+}
+
+function walkRelativeFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) return []
+  const files: string[] = []
+  function walk(d: string, rel: string) {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const full = path.join(d, e.name)
+      const relPath = rel ? `${rel}/${e.name}` : e.name
+      if (e.isDirectory()) {
+        walk(full, relPath)
+      } else {
+        files.push(relPath)
+      }
+    }
+  }
+  walk(dir, '')
+  return files
 }
