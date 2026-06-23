@@ -382,15 +382,21 @@ export async function activate(context: ExtensionContext) {
   Promise.resolve().then(() => {
     const affected = autoCheck()
     if (affected.length > 0) {
-      const names = affected.map(e => e.name.replace(/^vscode-/, '')).join(', ')
-      state.mutate(s => {
-        for (const p of s.packages) {
-          p.hasChanged = affected.some(e => e.name === p.info.name)
-        }
-      })
-      cocWindow.showInformationMessage(
-        `[coc-loader] ${affected.length} plugin(s) changed since upgrade: ${names}. Run :CocCommand loader.reinstall to apply.`
+      const installedNames = new Set(
+        state.getState().packages.filter(p => p.status === 'installed').map(p => p.info.name)
       )
+      const relevant = affected.filter(e => installedNames.has(e.name))
+      if (relevant.length > 0) {
+        const names = relevant.map(e => e.name.replace(/^vscode-/, '')).join(', ')
+        state.mutate(s => {
+          for (const p of s.packages) {
+            p.hasChanged = relevant.some(e => e.name === p.info.name)
+          }
+        })
+        cocWindow.showInformationMessage(
+          `[coc-loader] ${relevant.length} plugin(s) changed since upgrade: ${names}. Run :CocCommand loader.reinstall to apply.`
+        )
+      }
     }
   }).catch(() => {})
 
