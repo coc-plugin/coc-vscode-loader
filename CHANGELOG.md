@@ -19,6 +19,7 @@
 - **Ansible LSP locale** — set `LC_ALL=C.UTF-8` as fallback to prevent locale-related errors in Python subprocesses spawned by ansible language server
 - **`window.createOutputChannel` mapping removed** — `import-mapping` no longer remaps `window.createOutputChannel` to `workspace.createOutputChannel`, since coc.nvim supports `window.createOutputChannel` natively (and `workspace.createOutputChannel` was deprecated)
 - **`vscode.` prefix in workspaceFolders guard** — `workspace.workspaceFolders` guard now correctly preserves the `vscode.` prefix when present (e.g., `vscode.workspace.workspaceFolders[0]` stays as `(vscode.workspace.workspaceFolders || [])[0]` instead of stripping the prefix)
+- **`showInformationMessage` severity** — changed from `'info'` to `'more'` since coc.nvim's `MsgTypes` only accepts `'error' | 'warning' | 'more'` (`'info'` was invalid, causing all messages to show as error/red)
 
 ### Changed
 - **CI pipeline**: `diff` job separated from `unit` tests — unit tests (fast) run first, then diff check, then smoke test. Transient network errors in diff no longer block test results
