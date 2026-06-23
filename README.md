@@ -30,9 +30,8 @@
 > ```vim
 > :CocUpdate coc-vscode-loader   " Update to latest
 > :CocCommand loader.open        " Then press R on each installed package
-> " Or clean cache and reinstall from scratch:
-> :CocCommand loader.cleanCache
-> :CocCommand loader.install <name>
+> " Or reinstall from scratch:
+> :CocCommand loader.reinstall <name>
 > ```
 >
 > **Failure to keep the loader + all plugins in sync is the #1 source of reported issues.**
@@ -208,7 +207,6 @@ These must be installed and available on `PATH`:
 | `tar` / `gunzip` | Binary server extraction | |
 | `python3` | Pip package installation (e.g. ansible-lint) | Only if plugin requires pip packages |
 | `pip` (via `python3 -m pip`) | Python dependency installation | Only if plugin requires pip packages |
-| `npx` | Runs converter CLI (`npx tsx`) | |
 
 All commands are pre-installed on typical macOS/Linux development machines or available via the system package manager (`apt`, `brew`, etc.).
 
@@ -234,8 +232,6 @@ Yes! See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full workflow. In short:
 1. Add an entry to the [registry repo](https://github.com/coc-plugin/coc-vscode-registry)
 2. Run `npm test` + `npm run test:smoke` to verify
 3. Submit a PR
-
----
 
 ---
 

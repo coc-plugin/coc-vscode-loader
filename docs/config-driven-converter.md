@@ -658,7 +658,7 @@ Prettier 使用 `source` 步骤直接转换 prettier-vscode 的源码（而非 b
 - [x] 添加 `source` 代码生成器（copy + transforms + esbuild）
 - [x] 添加 `bridge` 代码生成器（preset 系统）
 - [x] 添加 `mark-unsupported` 代码生成器
-- [ ] 添加 `snippets` 代码生成器（v1.2.6+）
+- [x] 添加 `snippets` 代码生成器（v1.2.6+）
 - [x] 添加步骤验证逻辑
 - [x] 删除 `detectServerModules` 等启发式函数
 - [x] 删除 pipeline 中的正则后处理（documentSelector、activationEvents、bin-walking 等）

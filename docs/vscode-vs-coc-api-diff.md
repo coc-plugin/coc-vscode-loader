@@ -260,9 +260,9 @@ coc 使用 LSP 协议风格（值从 1 开始），而 vscode 多数枚举从 0 
 
 | API | VS Code | coc.nvim | 差异 |
 |-----|---------|----------|------|
-| activeTextEditor | 有 | 有 | 相同 |
-| visibleTextEditors | 有 | 有 | 相同 |
-| onDidChangeActiveTextEditor | 有 | 有 | 相同 |
+| activeTextEditor | 有 | **无** | converter 注入 polyfill 使用 `workspace.getDocument()` 近似 |
+| visibleTextEditors | 有 | **无** | vscode 独有 |
+| onDidChangeActiveTextEditor | 有 | **无** | converter 替换为 `workspace.onDidOpenTextDocument` |
 | onDidChangeVisibleTextEditors | 有 | 有 | 相同 |
 | **onDidChangeTextEditorSelection** | 有 | **无** | — |
 | **onDidChangeTextEditorVisibleRanges** | 有 | **无** | — |

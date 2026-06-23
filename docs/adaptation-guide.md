@@ -46,7 +46,7 @@ registry.json 条目                    coc-vscode-loader 版本
 | `workspaceFolders[0].uri.fsPath` — converter 正则不覆盖 `[0]` | 额外 patch |
 | `.find(...).uri.fsPath` — 同上 | 额外 patch |
 | 依赖污染 — 原扩展有 20+ devDeps + vsls | `excludeDeps` 过滤 + `keepDeps` 指定 runtime 依赖 |
-| 状态栏 Ociton 图标 | patch 替换为 Unicode 符号（● Go Live / ● Port / ◌） |
+| 状态栏 Octicon 图标 | patch 替换为 Unicode 符号（● Go Live / ● Port / ◌） |
 | 激活时机 — `onCommand` 导致状态栏不显示 | `activationEvents` 加 `"*"` |
 
 ### 关键配置片段

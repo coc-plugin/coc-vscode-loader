@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext): void {
 import { ExtensionContext, workspace, window } from 'coc.nvim'
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  // coc 的 activate 是 async
+  // coc 的 activate 支持 async（也支持 sync，用 async 更安全）
   context.subscriptions.push(
     workspace.registerAutocmd({
       event: 'BufEnter',
@@ -33,7 +33,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
 ```
 
 **差异：**
-- vscode 的 `activate` 可返回 `void`；coc 返回 `Promise<void>`
+- vscode 的 `activate` 可返回 `void`；coc 两者都支持，通常用 `Promise<void>`
 - vscode 用 `workspace.onDid*` 事件；coc 用 `registerAutocmd` 注册 vim 事件
 - vscode 的 `ExtensionContext` 含 `subscriptions: Disposable[]`；coc 同
 

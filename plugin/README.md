@@ -88,7 +88,7 @@ On next `:CocRestart`, the plugin will fetch the registry and install any missin
 - **Pip install** — auto-installs Python packages via `pip` for plugins that need them (e.g. ansible-lint)
 - **Auto-fetch registry** — remote registry fetched in background when TUI opens, no manual refresh needed
 - **Virtual scrolling** — `j`/`k` smooth scroll through packages, handles 100k+ registry entries
-- **Incremental cache** — source/ keeps git repo, updates via git pull only
+- **Incremental cache** — source/ keeps git repo, updates via git fetch + reset
 - **Commit tracking** — records commit SHA after install, visible in detail view
 - **Update check** — `C` key compares against remote HEAD, shows `↑` when outdated
 - **Auto restart** — `:CocRestart` triggered automatically on close when changes detected
@@ -105,7 +105,7 @@ On next `:CocRestart`, the plugin will fetch the registry and install any missin
 
 | File | Description |
 |------|-------------|
-| `src/index.ts` | Plugin entry + 8 CocCommands |
+| `src/index.ts` | Plugin entry + 9 CocCommands |
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache |

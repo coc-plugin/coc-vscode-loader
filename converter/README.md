@@ -110,16 +110,14 @@ npm install ChuYanLon/coc-tsserver --legacy-peer-deps
 | `goPackages` | Pipeline 执行 `go install`，`GOBIN` 指向 `server/` | `["golang.org/x/tools/gopls@latest"]` |
 | `cargoPackages` | Pipeline 执行 `cargo install --root`，从临时目录复制二进制到 `server/` | `[{ "crate": "nil", "binary": "nil" }]` |
 
-详见 [AGENTS.md](../AGENTS.md#gopackages--cargopackagesv150).
-
-详见 [AGENTS.md](../AGENTS.md#%E6%8F%92%E4%BB%B6%E7%BA%A7%E6%96%87%E6%9C%AC%E8%A1%A5%E4%B8%81-patchessource-step).
+详见 [AGENTS.md](../AGENTS.md#gopackages--cargopackagesv150)（goPackages/cargoPackages）和 [AGENTS.md](../AGENTS.md#%E6%8F%92%E4%BB%B6%E7%BA%A7%E6%96%87%E6%9C%AC%E8%A1%A5%E4%B8%81-patchessource-step)（patches）。
 
 ## Architecture
 
 ```
 Input: VS Code extension directory
   │
-  ├─ scanner        Analyze API → detect plugin type
+  ├─ scanner        Detect files using VS Code API (`from 'vscode'` / `require('vscode')`)
   ├─ transforms/    AST transforms
   │   ├─ import-mapping      from 'vscode' → from 'coc.nvim'
   │   ├─ class-to-factory    new Xxx() → Xxx.create() / TextEdit.replace()
@@ -135,31 +133,28 @@ Input: VS Code extension directory
 
 ## Bridge preset system
 
-Bridge logic is preset-driven rather than hardcoded:
+Bridge logic lives in `converter/src/steps/bridge.ts`, driven by `BRIDGE_TEMPLATES`:
 
 ```typescript
-// presets.ts - all bridge presets defined here
-const PRESETS = {
-  'ts-bridge': {
-    notification: 'tsserver/request',
-    responseNotification: 'tsserver/response',
-    handler: { type: 'command', command: 'typescript.tsserverRequest' },
+// bridge.ts - all bridge templates defined here
+const BRIDGE_TEMPLATES = {
+  'tsserver-forward': (opts) => ({
+    code: `client.onNotification('tsserver/request', ...)`,
+    injectExts: opts.extensions || [],
+    injectSvcs: opts.services || [],
+    callAfter: 'registerBridge(context, client)',
     extraDeps: ['typescript'],
-  },
-  // future: python-bridge, rust-bridge, etc.
+  }),
 }
 ```
 
-`convert.ts` only calls `getActivePresets()` + `generateBridgeCode()`, it never touches bridge logic directly.
-Adding a new bridge type = add a new preset in `presets.ts`, no changes to main flow.
-
-See [../docs/converter-design-v2.md](../docs/converter-design-v2.md).
+Bridge presets are defined in [`coc-vscode-registry/presets.json`](https://github.com/coc-plugin/coc-vscode-registry/blob/main/presets.json) and map to safe, audited templates in `bridge.ts`. Adding a new bridge type = add template in `bridge.ts` + entry in `presets.json`. See [../docs/converter-design-v2.md](../docs/converter-design-v2.md).
 
 ## Testing
 
 ```bash
-npm test                    # Unit tests (118 tests, 14 files) + coverage check
-npm run test:smoke          # Registry smoke test — converts all 122 entries
+npm test                    # Unit tests (162) + fixture tests + test coverage check
+npm run test:smoke          # Registry smoke test (all 128 entries — validates output structure)
 npm run test:watch          # Watch mode for development
 npm run check:tests         # Verify every source file has a matching test
 ```
@@ -171,12 +166,11 @@ npm run check:tests         # Verify every source file has a matching test
 | `transforms/import-mapping.test.ts` | 22 | All text-level replacements + real transform Uri injection |
 | `transforms/class-to-factory.test.ts` | 7 | `new Xxx()` → `Xxx.create()` / `TextEdit.replace()` |
 | `convert.test.ts` | 18 | Full conversion pipeline (text replacements, output generation, step orchestration, patches, excludeDeps) |
-| `registry-validation.test.ts` | 12 | Registry.json schema (122 entries) |
+| `registry-validation.test.ts` | 12 | Registry.json schema validation |
 | `scanner.test.ts` | 6 | API scanner detection |
-| `presets.test.ts` | 5 | Bridge preset definitions |
 | `transforms/language-client.test.ts` | 5 | LanguageClient AST adaptation |
 
-**Smoke test** — `npm run test:smoke` clones all 121 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
+**Smoke test** — `npm run test:smoke` clones all 128 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
 
 ```bash
 # Force re-clone all repos
@@ -193,7 +187,6 @@ src/
 ├── cli.ts                  CLI entry
 ├── convert.ts              Main flow + template generation + API replacement
 ├── scanner.ts              API scanner
-├── presets.ts              Bridge preset definitions
 ├── types.ts                Type definitions
 ├── steps/
 │   ├── index.ts            Step registry
@@ -210,7 +203,7 @@ src/
     ├── strip-volar.ts      Volar framework stripping
     └── enum-offset.ts      Enum value offset annotations
 scripts/
-├── smoke-test.ts           Registry smoke test (114 entries)
+├── smoke-test.ts           Registry smoke test (128 entries)
 └── check-tests.ts          Test coverage enforcement
 ```
 
@@ -258,5 +251,5 @@ Known VS Code API source locations:
 - **Bin entry fallback** — auto-detect and prefer `package.json` bin entry
 - **Auto esbuild external injection** — detected server packages marked as external
 - **Auto TS bridge injection** — `typescriptServerPlugins` + `tsserver/request` forwarding
-- **Plugin classification** — auto-detect TS bridge / pure LSP / direct API
+- **Plugin classification** — determined by registry `type` field, no auto-detection needed
 - **Missing API handling** — polyfill where possible, mark TODO otherwise
