@@ -216,19 +216,16 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
     '({ dispose(){}, text: "", command: void 0, name: "", accessibilityInformation: void 0, severity: void 0 }) as any'
   )
 
+  // languages.match → no-op (not available in coc.nvim, assume match)
+  newContent = replaceBalanced(newContent, /(?:vscode\.)?languages\.match\(/, () =>
+    '1 /* languages.match not in coc */ '
+  )
+
   // window.showOpenDialog → not available in coc, return undefined
   newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showOpenDialog\(/, () => 'void 0 as any')
 
-  // window.createOutputChannel(name) → workspace.createOutputChannel(name) (coc.nvim has this)
-  // Preserve optional vscode. prefix (used with import * as vscode)
-  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.createOutputChannel\(/,
-    (fullCall, matchLen) => {
-      const rest = fullCall.slice(matchLen)
-      const hasVscPrefix = fullCall.startsWith('vscode.')
-      // vscode.window.createOutputChannel → vscode.workspace.createOutputChannel
-      // window.createOutputChannel → workspace.createOutputChannel
-      return (hasVscPrefix ? 'vscode.' : '') + 'workspace.createOutputChannel(' + rest
-    })
+  // window.createOutputChannel(name) — coc.nvim supports this directly (no mapping needed)
+  // workspace.createOutputChannel was deprecated in coc.nvim
 
   // window.showInformationMessage / showWarningMessage / showErrorMessage → window.showMessage
   newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showInformationMessage\(/, (call) => {

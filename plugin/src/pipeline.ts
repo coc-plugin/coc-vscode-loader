@@ -283,11 +283,7 @@ async function buildPackage(
 
   // Run postinstall if present (some extensions download servers here)
   onProgress(3, 5, 'Running postinstall...', 'npm run postinstall')
-  try {
-    await run('npm', ['run', 'postinstall', '--if-present'], build, npmLog, undefined, name)
-  } catch (e: any) {
-    onProgress(3, 5, `Warning: postinstall failed (${e.message})`, 'may affect plugin functionality')
-  }
+  await run('npm', ['run', 'postinstall', '--if-present'], build, npmLog, undefined, name)
   // Install pip packages if configured in registry
   if (info.pipPackages?.length) {
     const pipLog = (chunk: string) => onProgress(3, 5, chunk.trim(), '')
@@ -331,15 +327,10 @@ async function buildPackage(
       const goLog = (chunk: string) => onProgress(3, 5, chunk.trim(), '')
       const gopath = path.join(build, '.gopath')
       const gocache = path.join(build, '.gocache')
-      try {
-        onProgress(3, 5, `Installing Go package: ${pkg}`, `go install ${pkg}`)
-        await run('go', ['install', pkg], build, goLog, { GOPATH: gopath, GOBIN: serverDir, GOCACHE: gocache }, name)
-      } catch (e: any) {
-        onProgress(3, 5, `Warning: go install failed (${e.message})`, '')
-      } finally {
-        await rimraf(gopath).catch(() => {})
-        await rimraf(gocache).catch(() => {})
-      }
+      onProgress(3, 5, `Installing Go package: ${pkg}`, `go install ${pkg}`)
+      await run('go', ['install', pkg], build, goLog, { GOPATH: gopath, GOBIN: serverDir, GOCACHE: gocache }, name)
+      await rimraf(gopath).catch(() => {})
+      await rimraf(gocache).catch(() => {})
     }
   }
 
@@ -353,18 +344,13 @@ async function buildPackage(
       const binName = typeof cp === 'string' ? cp : (cp.binary || cp.crate)
       onProgress(3, 5, `Installing Cargo package: ${crate}`, `cargo install ${crate}`)
       const tmpRoot = path.join(build, '.cargo-root')
-      try {
-        await run('cargo', ['install', crate, '--root', tmpRoot], build, cargoLog, undefined, name)
-        const src = path.join(tmpRoot, 'bin', binName)
-        if (fs.existsSync(src)) {
-          fs.copyFileSync(src, path.join(serverDir, binName))
-          fs.chmodSync(path.join(serverDir, binName), 0o755)
-        }
-      } catch (e: any) {
-        onProgress(3, 5, `Warning: cargo install failed (${e.message})`, '')
-      } finally {
-        await rimraf(tmpRoot).catch(() => {})
+      await run('cargo', ['install', crate, '--root', tmpRoot], build, cargoLog, undefined, name)
+      const src = path.join(tmpRoot, 'bin', binName)
+      if (fs.existsSync(src)) {
+        fs.copyFileSync(src, path.join(serverDir, binName))
+        fs.chmodSync(path.join(serverDir, binName), 0o755)
       }
+      await rimraf(tmpRoot).catch(() => {})
     }
   }
 
