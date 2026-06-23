@@ -727,7 +727,7 @@
     "src/PrettierCodeActionProvider.ts": "35352072dde7aa12d270608ba4a0ed015e57c0aa67d946458a4831bfda24a893",
     "src/PrettierDynamicInstance.ts": "e06705c17eb37181b72801caa09e3c253721debc63b9d41134084579609c1421",
     "src/PrettierEditProvider.ts": "5bedba9d5e5eaef8337cad7a3a90603a6a5d53a6b59e248e132ab8901a8c9195",
-    "src/PrettierEditService.ts": "9f70887733abffd633281fa4b6e9e3a7789fcdbaddf7077b60143b4a63d1b30d",
+    "src/PrettierEditService.ts": "39bd3b090d45680f0d3e9f246355bf1adfd08684493e4e31e7c2131e1853beca",
     "src/StatusBar.ts": "b5f59755ec82df29f312560ae22c21ca7420d63e1b652b1e57b819cf8dcba31f",
     "src/TemplateService.ts": "58ca06c63a5cedcaea420ccc6b4c6206d346eb93e5ce39c838234d1168762be0",
     "src/commands.ts": "8c6c34239cff6a0cc1977c5042b035806421edc231421259078ee483ee1f22a0",
