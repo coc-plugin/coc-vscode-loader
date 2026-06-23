@@ -153,6 +153,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
     // Normalize LANG: coc.nvim's getLocale() splits by '.' and may return en_US (invalid for Intl.Collator)
     const _rawLang = process.env.LANG || '';
     if (_rawLang.includes('_')) process.env.LANG = _rawLang.replace(/_/g, '-');
+    // Workaround: ansible LSP spawns Python subprocesses that need valid locale
+    if (!process.env.LC_ALL) process.env.LC_ALL = 'C.UTF-8';
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] activate() called')\n` : ''}${serverPathCode}
     if (!serverPath && !_mainEntry) {
 ${ls.verbose ? `    console.log('[${escapeStr(id)}] serverPath undefined')\n` : ''}\
