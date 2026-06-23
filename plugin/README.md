@@ -10,7 +10,7 @@ Supports **Neovim 0.8+** (floating window + extmark) and **Vim 9.0+** (split win
 > **⚠️ IMPORTANT: Keep Updated**
 > Each release includes critical converter fixes. Outdated versions silently produce broken plugins.
 > **After updating, reinstall all extensions** — old conversion output is not patched automatically.
-> Run `:CocCommand loader.open` → press `U` to update all installed plugins.
+> Run `:CocCommand loader.open` → press `R` on each installed package to reapply the converter.
 
 ## Install
 
