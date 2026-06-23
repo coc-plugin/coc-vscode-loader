@@ -11,7 +11,7 @@
 :CocCommand loader.uninstall vscode-volar   ← 卸载
 ```
 
-> 当前版本: **v1.5.8** — 见 [CHANGELOG.md](../CHANGELOG.md)
+> 当前版本: **v1.5.9** — 见 [CHANGELOG.md](../CHANGELOG.md)
 > 注册表: **128 条目**，覆盖 pure-lsp、direct-api、ts-bridge、snippets 四类
 
 ---
@@ -231,7 +231,7 @@ convert <input-vscode-ext> -o <output-dir> --convert <json>
 
 ## 七、当前状态
 
-### 已实现（v1.5.8）
+### 已实现（v1.5.9）
 
 | 模块 | 位置 | 内容 |
 |------|------|------|

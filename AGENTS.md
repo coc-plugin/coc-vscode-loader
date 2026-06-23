@@ -269,7 +269,7 @@ const NAMESPACE_MAP: Record<string, string> = {
 
 | File | Description |
 |------|-------------|
-| `src/index.ts` | Plugin entry + 10 CocCommands |
+| `src/index.ts` | Plugin entry + 11 CocCommands |
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache + version compatibility filter |
@@ -724,4 +724,4 @@ When updating images in `README.md` (e.g. `plugin/assets/tui-preview.png`), GitH
 <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=<version>">
 ```
 
-Use the current version number (e.g. `v=1.5.8`) as the parameter value so it changes with each release. Do NOT use timestamps or random values — version numbers are meaningful and auto-increment.
+Use the current version number (e.g. `v=1.5.9`) as the parameter value so it changes with each release. Do NOT use timestamps or random values — version numbers are meaningful and auto-increment.

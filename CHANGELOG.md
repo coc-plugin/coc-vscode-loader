@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.5.9] - 2026-06-24
+
+### Added
+- **Cross-version change detection** — `plugin/src/baseline.ts` SHA-256 baseline comparison system that detects which installed plugins are affected by converter changes after upgrading coc-vscode-loader, replacing the previous "reinstall everything" workflow with a targeted approach.
+  - `loader.whatChanged` command — shows cross-version diff with file-level granularity for installed plugins only
+  - Persisted `[changed]` markers (`changed-markers.json`) survive full nvim restarts
+  - Startup auto-check: compares current baseline against saved snapshot on version change, marks affected plugins `[changed]` in TUI, and notifies the user
+  - `clearChangedMarker()` called on install/update/reinstall to clear stale markers
+  - Snapshot + marker atomicity: markers are only persisted when snapshot write succeeds
+
+### Fixed
+- **Persistence across nvim restart** — `[changed]` markers written to `changed-markers.json` instead of in-memory only, restored by `autoCheck()` on every startup including same-version restarts
+
+### Changed
+- **plugin**: bump to v1.5.9
+
 ## [1.5.8] - 2026-06-23
 
 ### Added
