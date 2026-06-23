@@ -1,8 +1,10 @@
 # VS Code Extension API vs coc.nvim API 完整对比
 
 对比依据：
-- VS Code: `src/vscode-dts/vscode.d.ts` (21235 行)
-- coc.nvim: `typings/index.dts` (13327 行)
+- VS Code: [`docs/types/vscode.d.ts`](./types/vscode.d.ts) (21235 行)
+- coc.nvim: [`docs/types/coc.d.ts`](./types/coc.d.ts) (13327 行)
+
+> 类型文件每日自动同步自 [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)，请勿手动编辑。
 
 ---
 
@@ -299,7 +301,7 @@ coc 使用 LSP 协议风格（值从 1 开始），而 vscode 多数枚举从 0 
 
 | API | VS Code | coc.nvim | 差异 | 自动转换 |
 |-----|---------|----------|------|----------|
-| createOutputChannel(name, languageId?) | 有 (2 params) | 有 (1 param) | coc 没有 `languageId` 参数, 无 LogOutputChannel | converter 将 `window.createOutputChannel` → `workspace.createOutputChannel` |
+| createOutputChannel(name, languageId?) | 有 (2 params) | 有 (1 param) | coc 没有 `languageId` 参数, 无 LogOutputChannel。coc 原生支持 `window.createOutputChannel`，无需转换 |
 | OutputChannel.replace() | 有 | **无** | — |
 | OutputChannel.clear() | `clear()` | `clear(keep?: number)` | coc 可保留 N 行 |
 
@@ -650,3 +652,21 @@ coc 有大量 vim/neovim 集成的 API，这些在 vscode 中不存在：
 | 编辑器操作 | ★★★ 较难 | decoration/selection/编辑 API 完全不同 |
 | UI 组件 | ★★★★ 很难 | statusbar/outputChannel/terminal 有但签名不同；treeview/quckpick 兼容但差异多 |
 | 完整缺失功能 | ★★★★★ 无法直接迁移 | debug/notebook/scm/tests/chat/webview/customEditor/authentication |
+
+### converter 覆盖范围
+
+coc-vscode-loader 的 `import-mapping` transform + `convert.ts` 文本替换层提供了大量自动适配。转换器会处理：
+
+- `window.show{Information,Warning,ErrorMessage}` → `Promise.resolve(window.showMessage(msg, severity))`
+- `window.activeTextEditor` → polyfill 使用 `workspace.getDocument()`
+- `window.onDidChangeActiveTextEditor` → `workspace.onDidOpenTextDocument`
+- `window.createOutputChannel` → `workspace.createOutputChannel`（丢弃 languageId）
+- `workspace.isTrusted` → `true` 
+- `languages.createLanguageStatusItem` → no-op
+- `languages.match` → `1`（始终返回 truthy）
+- `authentication.getSession` → `undefined as any`
+- `.uri.fsPath` → `Uri.parse(uri).fsPath`
+- `.fileName` → `Uri.parse(doc.uri).fsPath`
+- `getWordRangeAtPosition` → 内联实现
+- `Location.create(Uri.file(x), y)` → `Location.create(x, Range.create(y, y))`
+- `new WorkspaceEdit()` → `({ changes: {} })` + `.set()` → `.changes[]`

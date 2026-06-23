@@ -302,8 +302,9 @@
   ]
 }
 
-// coc — 支持（需要 coc-tsserver 含 PR #493，合并前使用我们的 fork）
-// 安装: cd ~/.config/coc/extensions && npm install ChuYanLon/coc-tsserver
+// coc — 支持需要 coc-tsserver 配合
+// ⚠️ PR #493 未合并，需手动安装 fork 版本:
+//   cd ~/.config/coc/extensions && npm install ChuYanLon/coc-tsserver
 "contributes": {
   "typescriptServerPlugins": [
     {
@@ -314,6 +315,8 @@
   ]
 }
 // coc-tsserver 启动时自动加载这些插件（globalPlugins + pluginPaths）
+// PR (#493) 为 coc-tsserver 添加了 globalPlugins 支持 + typescript.tsserverRequest 命令
+// 合并前需要保持使用 fork 版本
 ```
 
 ### 3.12 authentication 认证

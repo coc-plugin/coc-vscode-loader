@@ -34,7 +34,7 @@ cd ~/.config/coc/extensions && npm install /path/to/coc-ext
 | Prettier | Direct API | Source transforms |
 | Svelte | Pure LSP | npm package server |
 | Astro | Pure LSP | npm package server |
-| Lua | Pure LSP | npm package server |
+| Lua | Pure LSP | Binary server download |
 | gitignore | Direct API | Source transforms |
 | CSS Peek | Pure LSP | Local server (TypeScript source in `server/`) |
 | Angular Language Service | Pure LSP | npm package server (`@angular/language-server`), `binName` + `args` with `{pluginDir}` |
@@ -52,7 +52,8 @@ See the [registry](https://github.com/coc-plugin/coc-vscode-registry) for the fu
 |------|-------------|----------|---------|
 | **TS bridge** | Language plugins depending on TypeScript LSP | Generate `tsserver/request` bridge + `typescriptServerPlugins` | Volar |
 | **Pure LSP** | Standard LSP using LanguageClient | Generate LanguageClient entry + server dependency injection | Prisma |
-| **Direct API** | Direct coc.nvim API calls (no LanguageClient) | Keep original `extension.ts` as entry, no bridge | HTML CSS Support |
+| **Direct API** | Direct coc.nvim API calls (no LanguageClient) | Source transforms, keep original extension.ts | HTML CSS Support |
+| **Snippets** | 纯 VS Code Snippets（无代码） | 复制 JSON 文件 + 生成空壳入口 | vue-snippets |
 
 TS bridge plugins require a modified coc-tsserver ([PR #493](https://github.com/neoclide/coc-tsserver/pull/493)):
 
@@ -117,18 +118,41 @@ npm install ChuYanLon/coc-tsserver --legacy-peer-deps
 ```
 Input: VS Code extension directory
   │
-  ├─ scanner        Detect files using VS Code API (`from 'vscode'` / `require('vscode')`)
-  ├─ transforms/    AST transforms
-  │   ├─ import-mapping      from 'vscode' → from 'coc.nvim'
-  │   ├─ class-to-factory    new Xxx() → Xxx.create() / TextEdit.replace()
-  │   ├─ provider-register   Adapt provider registration signatures
-  │   ├─ language-client     Adapt LanguageClient signatures
-  │   └─ enum-offset         Comment on enum value offsets
-  ├─ mark-unsupported  Replace/mark missing APIs (getWordRangeAtPosition, fileName, etc.)
-  ├─ generate src/index.ts   Main entry (bridge / LanguageClient / direct templates)
-  ├─ generate package.json   Dependencies / esbuild external config (excludeDeps filters source deps)
-  ├─ generate esbuild.mjs    Build config + server TypeScript compilation
-  └─ local server hover fallback  (only for relative-path servers)
+  ├─ 1. Scanner    Detect files using VS Code API (`from 'vscode'` / `require('vscode')`)
+  │
+  ├─ 2. Steps pipeline (逐步骤执行，每个步骤注册为 generator)
+  │   ├─ language-client    Generate LanguageClient (module/binary server)
+  │   ├─ source             Copy + apply transforms (见下方)
+  │   ├─ bridge             Generate bridge code (BRIDGE_TEMPLATES)
+  │   ├─ snippets           Copy snippets JSON + 生成空壳 activate()
+  │   └─ mark-unsupported   Remove unsupported API calls
+  │
+  │   source 内部调用的 transforms:
+  │   ├─ import-mapping     from 'vscode' → from 'coc.nvim' + 文本 polyfills
+  │   ├─ class-to-factory   new Xxx() → Xxx.create() / TextEdit.replace()
+  │   ├─ provider-register  Adapt provider registration signatures
+  │   ├─ enum-offset        Comment on enum value offsets
+  │   └─ strip-volar        Remove Volar framework imports
+  │
+  ├─ 3. Text replacements (convert.ts 对所有输出文件执行)
+  │   ├─ .fileName → Uri.parse($1.uri).fsPath
+  │   ├─ .uri.fsPath → Uri.parse($1.uri).fsPath
+  │   ├─ getWordRangeAtPosition → inline polyfill
+  │   ├─ Location.create(Uri.file(x), y) → Location.create(x, Range.create(y, y))
+  │   ├─ new WorkspaceEdit() → ({ changes: {} })
+  │   ├─ .set(uri, edits) → .changes[uri] = edits
+  │   └─ 自动注入 Uri/Range import
+  │
+  ├─ 4. Plugin patches   Registry 中声明的 per-entry find/replace
+  │
+  ├─ 5. Generate output files
+  │   ├─ src/index.ts + src/bridge.ts（language-client / bridge 生成）
+  │   ├─ package.json（dependencies, activationEvents, typescriptServerPlugins）
+  │   ├─ esbuild.mjs（含 server TypeScript 编译）
+  │   ├─ coc-convert.json（转换元信息）
+  │   └─ server-patches.json（server 编译后补丁）
+  │
+  └─ 6. Output coc plugin directory + 转换报告
 ```
 
 ## Bridge preset system
@@ -153,7 +177,7 @@ Bridge presets are defined in [`coc-vscode-registry/presets.json`](https://githu
 ## Testing
 
 ```bash
-npm test                    # Unit tests (162) + fixture tests + test coverage check
+npm test                    # Unit tests (165) + fixture tests + test coverage check
 npm run test:smoke          # Registry smoke test (all 128 entries — validates output structure)
 npm run test:watch          # Watch mode for development
 npm run check:tests         # Verify every source file has a matching test
@@ -163,12 +187,23 @@ npm run check:tests         # Verify every source file has a matching test
 
 | Test file | Tests | What it covers |
 |-----------|-------|----------------|
-| `transforms/import-mapping.test.ts` | 22 | All text-level replacements + real transform Uri injection |
-| `transforms/class-to-factory.test.ts` | 7 | `new Xxx()` → `Xxx.create()` / `TextEdit.replace()` |
-| `convert.test.ts` | 18 | Full conversion pipeline (text replacements, output generation, step orchestration, patches, excludeDeps) |
+| `transforms/import-mapping.test.ts` | 25 | All text-level replacements + real transform Uri injection |
+| `transforms/class-to-factory.test.ts` | 11 | `new Xxx()` → `Xxx.create()` / `TextEdit.replace()` |
+| `convert.test.ts` | 21 | Full conversion pipeline (text replacements, output generation, step orchestration, patches, excludeDeps) |
 | `registry-validation.test.ts` | 12 | Registry.json schema validation |
 | `scanner.test.ts` | 6 | API scanner detection |
+| `steps/language-client.test.ts` | — | LanguageClient code generation |
+| `steps/bridge.test.ts` | — | Bridge template generation |
+| `steps/snippets.test.ts` | — | Snippets conversion |
+| `steps/source.test.ts` | — | Source step + transforms |
+| `steps/mark-unsupported.test.ts` | — | Mark unsupported step |
+| `transforms/provider-register.test.ts` | — | Provider register transform |
+| `transforms/enum-offset.test.ts` | — | Enum offset transform |
 | `transforms/language-client.test.ts` | 5 | LanguageClient AST adaptation |
+| `transforms/strip-volar.test.ts` | — | Volar framework stripping |
+| `transforms/__fixtures__.test.ts` | — | Auto-discovered fixture tests |
+
+> 总计 **165 tests** (15 files)，覆盖全部 5 种步骤生成器和 5 种 transform。
 
 **Smoke test** — `npm run test:smoke` clones all 128 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
 
@@ -196,12 +231,11 @@ src/
 │   ├── bridge.ts           Bridge preset code generation
 │   └── mark-unsupported.ts Unsupported API marking
 └── transforms/
-    ├── import-mapping.ts   Import replacement
+    ├── import-mapping.ts   Import replacement + 文本 polyfills
     ├── class-to-factory.ts new Xxx() → Xxx.create()
     ├── provider-register.ts Provider signature fixes
-    ├── language-client.ts   LanguageClient AST adaptation
-    ├── strip-volar.ts      Volar framework stripping
-    └── enum-offset.ts      Enum value offset annotations
+    ├── enum-offset.ts      Enum value offset annotations
+    └── strip-volar.ts      Volar framework stripping
 scripts/
 ├── smoke-test.ts           Registry smoke test (128 entries)
 └── check-tests.ts          Test coverage enforcement
@@ -223,9 +257,9 @@ Each source file has a corresponding `.test.ts` with unit tests — see [Testing
 | CompletionItem.create | `new CompletionItem(label, kind)` | `CompletionItem.create(label)` + `item.kind = kind` | kind set separately |
 | Trigger characters | `" "` (string) | `[" "]` (array) | Rest param → array |
 | CompletionItemKind enum | `Value = 11`, `Enum = 12` | `Value = 12`, `Enum = 13` | Offset by 1, symbols auto-adapt |
-| documentSelector | `[{ language: 'xxx' }]` | Same | Auto-infer from package.json |
-| getWordRangeAtPosition | `document.getWordRangeAtPosition()` | Not available | Inline word boundary calculation |
-| fileName | `document.fileName` | Not available | Replace with `document.uri` |
+| documentSelector | `[{ language: 'xxx' }]` | Same | 从 registry `languages` 字段生成 |
+| getWordRangeAtPosition | `document.getWordRangeAtPosition()` | Not available | Inline word boundary polyfill |
+| fileName | `document.fileName` | Not available | `Uri.parse(doc.uri).fsPath` |
 | Location.create | `Location(Uri.file(path), pos)` | `Location(path, Range.create(pos, pos))` | convert.ts: auto‑wrap pos in Range |
 | createTextEditorDecorationType | `window.createTextEditorDecorationType()` | Not available | Mark TODO |
 | createWebviewPanel | `window.createWebviewPanel()` | Not available | Mark TODO |
@@ -234,22 +268,17 @@ Each source file has a corresponding `.test.ts` with unit tests — see [Testing
 
 When a VS Code API has no coc.nvim equivalent, the approach is:
 
-1. Find the [VS Code source](https://github.com/microsoft/vscode) implementation
-2. Evaluate complexity:
-   - **Simple** (e.g. `getWordRangeAtPosition`) → inline polyfill
-   - **Complex** (e.g. decoration, webview) → mark TODO with explanation
-3. Polyfill using existing coc APIs where possible, avoid new dependencies
-
-Known VS Code API source locations:
-- `getWordRangeAtPosition` → `src/vs/editor/common/core/wordHelper.ts`
-- `TextDocument.fileName` → coc uses `document.uri` instead (`DocumentUri = string`)
-- Decoration system → `src/vs/editor/common/viewModel/viewDecorations.ts`
+1. **文本级 polyfill**（在 `import-mapping.ts` 的 `textPolyfills` 中声明）→ 如 `showMessage`、`activeTextEditor`、`workspace.isTrusted`
+2. **通用文本替换**（在 `convert.ts` 的文本替换层处理）→ 如 `.fileName`、`.uri.fsPath`、`getWordRangeAtPosition`
+3. **Per-entry patches**（registry 的 `patches` 字段）→ 对特定插件做精确替换
+4. **不可移植 API**（`mark-unsupported` 步骤）→ 标记 `/* TODO: <explanation> */`（webview、decoration、自定义编辑器等）
 
 ## Key design decisions
 
-- **Zero hardcoding** — server package names auto-detected from source
-- **Bin entry fallback** — auto-detect and prefer `package.json` bin entry
-- **Auto esbuild external injection** — detected server packages marked as external
-- **Auto TS bridge injection** — `typescriptServerPlugins` + `tsserver/request` forwarding
+- **Config-driven** — server packages explicitly declared in registry `convert` config, no auto-detection
+- **Bin entry fallback** — `entry: "bin"` auto-resolves `bin` field at runtime; `require.resolve` 自动回退到 `pkg/package.json`
+- **Auto esbuild external injection** — configured server packages marked as external
+- **Auto TS bridge injection** — `typescriptServerPlugins` + `tsserver/request` forwarding via bridge step
 - **Plugin classification** — determined by registry `type` field, no auto-detection needed
-- **Missing API handling** — polyfill where possible, mark TODO otherwise
+- **Missing API handling** — polyfill where possible (showMessage, activeTextEditor, fileName), mark TODO otherwise (webview, decoration)
+- **Baseline diff system** — SHA-256 输出文件指纹库，检测 converter 变更的非预期影响

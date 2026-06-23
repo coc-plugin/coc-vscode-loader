@@ -102,13 +102,18 @@ This repo contains two parts:
 ### Converter architecture
 
 ```
-Input → Steps pipeline (source → language-client → bridge → snippets)
-      → AST transforms (import / class-to-factory / provider-register / enum-offset)
-      → Text replacements (getWordRangeAtPosition / fileName / Uri polyfills)
-      → Mark unsupported code (decoration / webview / tree data provider / env.openExternal)
-      → Generate entry point (bridge code / LanguageClient / keep original extension.ts)
-      → Generate package.json + esbuild external injection
-      → Output coc plugin directory + migration report
+Input → Scanner (detect `from 'vscode'` / `require('vscode')` files)
+      → Steps pipeline (5 registered generators):
+      │   ├─ language-client  → LanguageClient 代码 (module/binary server)
+      │   ├─ source           → Copy + 5 AST transforms (import-mapping, class-to-factory,
+      │   │                      provider-register, enum-offset, strip-volar)
+      │   ├─ bridge           → Bridge code from BRIDGE_TEMPLATES (tsserver-forward)
+      │   ├─ snippets         → Copy snippets JSON + 空壳入口
+      │   └─ mark-unsupported → Remove unsupported API calls
+      → Text replacements (.fileName, .uri.fsPath, getWordRangeAtPosition, WorkspaceEdit)
+      → Plugin patches (per-entry find/replace from registry)
+      → Generate package.json + esbuild.mjs + server-patches.json
+      → Output coc plugin directory
 ```
 
 ---
@@ -120,7 +125,7 @@ Input → Steps pipeline (source → language-client → bridge → snippets)
 Three test suites, each catching different issues:
 
 ```bash
-npm test                    # Unit tests (162) + fixture tests + test coverage check
+npm test                    # Unit tests (165) + fixture tests + test coverage check
 npm run test:full           # Unit tests + registry baseline diff
 npm run test:smoke          # Registry smoke test (all 128 entries — validates output structure)
 ```
@@ -185,7 +190,7 @@ cd plugin && npm run build  # build plugin only
 ### OS
 - **Linux** ✅ Fully supported
 - **macOS** ✅ Fully supported
-- **Windows** ❌ Not supported (no planned support)
+- **Windows** ❌ Not supported (计划中有兼容方案，参见 [`docs/windows-compatibility.md`](./docs/windows-compatibility.md)，但目前 pipeline 仍依赖 Unix shell 命令)
 
 ### Editor
 

@@ -30,7 +30,7 @@ External commands required at runtime:
 
 ## Registry 添加规则
 
-`coc-vscode-registry/registry.json` 是一个扁平数组（当前 122 条），按技术含量从高到低排列，同组内按 `name` 字母序插入。
+`coc-vscode-registry/registry.json` 是一个扁平数组（当前 128 条），按技术含量从高到低排列，同组内按 `name` 字母序插入。
 
 ### 排列逻辑
 
@@ -58,7 +58,7 @@ LSP (binary / module / bridge) → direct-api (API polyfill)
 11. PHP                      — intelephense (module)
 12. Config/Shell/Infra       — lua, yaml, prisma, ansible, bash-language-server, docker, taplo
 13. Formatter                — prettier-vscode (direct-api)
-14. Other tools              — gitignore (direct-api), shellcheck (direct-api)
+14. Other tools              — gitignore (direct-api)
 ```
 
 ### snippets 段插入位置
@@ -250,10 +250,10 @@ const NAMESPACE_MAP: Record<string, string> = {
 
 `WorkspaceEdit` 不是通过 `NAMESPACE_MAP` 处理，而是在 `class-to-factory.ts` 和 `convert.ts` 的文本回退中做文本级替换：`new WorkspaceEdit()` → `({ changes: {} })`，同时 `.set(uri, edits)` → `.changes[uri] = edits`（在 `convert.ts` 的通用文本替换阶段）。
 
-**Bridge preset system** (`converter/src/presets.ts` + `converter/src/steps/bridge.ts` + `coc-vscode-registry/presets.json`):
+**Bridge preset system** (`converter/src/steps/bridge.ts` + `coc-vscode-registry/presets.json`):
 - Bridge logic is not used for source-based plugins
 - Currently only `ts-bridge` preset exists for TypeScript bridge plugins (Volar)
-- Adding a new bridge type: add preset definition in `converter/src/presets.ts`, code template in `converter/src/steps/bridge.ts` `BRIDGE_TEMPLATES`, and entry in [`coc-vscode-registry/presets.json`](https://github.com/coc-plugin/coc-vscode-registry/blob/main/presets.json)
+- Adding a new bridge type: add template in `converter/src/steps/bridge.ts` `BRIDGE_TEMPLATES`, and entry in [`coc-vscode-registry/presets.json`](https://github.com/coc-plugin/coc-vscode-registry/blob/main/presets.json)
 
 ## coc-tsserver PR
 
@@ -269,12 +269,16 @@ const NAMESPACE_MAP: Record<string, string> = {
 
 | File | Description |
 |------|-------------|
-| `src/index.ts` | Plugin entry + 8 CocCommands |
+| `src/index.ts` | Plugin entry + 9 CocCommands |
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache + version compatibility filter |
 | `src/pipeline.ts` | Real install/update/uninstall flow (git / npx tsx / npm / node / cp) + pip install + go install + cargo install + binary server download + code patching (documentSelector, client.start guard) |
 | `src/renderer.ts` | LineBuffer render engine (inspired by lazy.nvim) |
+| `src/editor-api.ts` | Editor abstraction interface (Nvim/Vim backends) |
+| `src/editor-factory.ts` | Editor backend auto-detection + instantiation |
+| `src/nvim-editor.ts` | Neovim backend (floating window + extmark) |
+| `src/vim-editor.ts` | Vim backend (split window + text properties) |
 
 ### Version compatibility (minPluginVersion)
 
@@ -355,7 +359,7 @@ npm install coc-vscode-loader    # or
 |-----------|--------|-------------|
 | [v1.3.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/1) | 2026-06 | Registry expansion: PHP Intelephense, Rust Analyzer, ESLint |
 | [v1.4.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/2) | 2026-08 | More transforms, bridge presets, registry expansion |
-| [v1.5.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/4) | 2026-06 | Go/Cargo source install, `installToCoc` optimization, registry expansion |
+| [v1.5.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/4) | 2026-09 | Go/Cargo source install, `installToCoc` optimization, registry expansion |
 | [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | Stable ecosystem: 10+ plugins, full transform coverage |
 
 ## `excludeDeps`（v1.5.7+）
@@ -541,17 +545,17 @@ Registry 条目示例：
 - [x] JavaScript extension support (`.js` file copy + text-level replacements, `require('vscode')` → `require('coc.nvim')`)
 - [x] Language-client step `initializationOptions` field (tsdk for Volar-based servers)
 - [x] `snippets` step type — 纯 snippets 扩展自动转换
-- [x] 20 snippet extensions 已录入 registry
+- [x] 92 snippet extensions 已录入 registry
 - [x] Local server support — `server.package` 支持相对路径，自动编译 `server/` TypeScript、pipeline 自动拷贝
 - [x] Pyright (`vscode-pyright`) — 加入 registry，module kind 自动安装 pyright npm 包
 - [x] Go LSP (`vscode-go`) — 加入 registry，goPackages 支持自动 go install gopls
 - [x] `targetAssets` — serverBinary per-platform 资产映射，支持非标准平台命名
 - [x] `installToCoc` 优化 — 跳过 node_modules，选择性复制 + 重新 npm install
-- [x] Code Runner (`vscode-code-runner`) — 加入 registry, direct-api, 12 patches
+- [x] Code Runner (`vscode-code-runner`) — 加入 registry, direct-api, 11 patches
 
 ## TUI design
 
-TUI 完全参照 Mason.nvim 的视觉风格和交互设计，目标 1:1 一致。详见 [`docs/tui-design.md`](./docs/tui-design.md)。
+TUI 完全参照 Mason.nvim 的视觉风格和交互设计，目标 1:1 一致。
 
 关键设计决策：
 - Mason 色彩精确复制（金色 #DCA561 + 青色 #56B6C2 + 灰色 #888888）
@@ -593,7 +597,7 @@ Go/Cargo 编译缓存在 `build/.gopath/` 和 `build/.cargo-root/`，安装完�
 Every source file must have a corresponding `.test.ts` file. Run before pushing:
 
 ```bash
-npm test                    # Unit tests (162) + check-tests + fixture tests
+npm test                    # Unit tests (165) + check-tests + fixture tests
 npm run test:full           # Unit tests + diff:check (registry baseline comparison)
 npm run test:smoke          # Registry smoke test (converts all 128 entries, validates output structure)
 ```
@@ -666,7 +670,7 @@ Only entries whose source is exactly the same as when baseline was generated are
 
 ```json
 {
-  "vscode-prettier": {
+  "vscode-prettier-vscode": {
     "_source": { "repo": "prettier/prettier-vscode", "commit": "abc123def..." },
     "src/index.ts": "sha256hash..."
   }

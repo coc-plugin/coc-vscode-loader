@@ -7,8 +7,13 @@
 | `switch.sh local` | 自动写入 `extensions/package.json` dependencies，coc 可发现插件 |
 | `registry.ts` | 自动检测本地开发模式，使用 `coc-vscode-registry/registry.json` |
 | `minPluginVersion` | registry 扩展支持 `minPluginVersion` 字段，未发布版本对老用户不可见 |
-| `server.args` (module kind) | 新增 `args` 字段支持 module kind LSP 启动参数（v1.4.3+），支持 `{dir}` 和 `{pluginDir}` 占位符 |
-| `binaryPath` 自动推导 | 未指定时从 asset 模板名提取（`deno-{{rust-target}}.zip` → `deno`）|
+| `server.args` (module kind) | `args` 字段支持 module kind LSP 启动参数（v1.4.3+），支持 `{dir}` 和 `{pluginDir}` 占位符 |
+| `binaryPath` 字段 | 指定压缩包内二进制文件路径，未指定时默认使用包名 |
+| `targetAssets` | per-platform 二进制资产映射（v1.5.0+），支持非标准平台命名（如 clangd 用 `mac` 而非 `darwin`）|
+| `server.patches` | server 编译后文本补丁（v1.4.5+），通过 `server-patches.json` + esbuild prebuild 段执行 |
+| `goPackages` / `cargoPackages` | Go/Rust 源码编译安装 LSP（v1.5.0+），`go install` / `cargo install --root` |
+| `excludeDeps` / `keepDeps` | 精确控制输出 `package.json` 依赖（v1.5.7+），排除/保留指定依赖 |
+| Registry 条目 | 当前 **128 条**（29 pure-lsp, 1 ts-bridge, 6 direct-api, 92 snippets）|
 
 ### 版本兼容机制
 
@@ -16,15 +21,17 @@
 registry.json 条目                    coc-vscode-loader 版本
 ┌─────────────────────┐               ┌──────────────────┐
 │ name: "deno"        │               │ package.json     │
-│ minPluginVersion:    │──比对────→    │ version: 1.1.1   │
+│ minPluginVersion:    │──比对────→    │ version: 1.5.8   │
 │   "1.1.2"           │               │                  │
 └─────────────────────┘               └──────────────────┘
 
-1.1.1 < 1.1.2 → 隐藏，用户看不到 Deno
-1.1.2 >= 1.1.2 → 显示，用户可以安装
+1.1.2 <= 1.5.8 → 显示，用户可以安装
+1.6.0 > 1.5.8 → 隐藏，用户看不到
 ```
 
 这样可以在 registry 提前提交新扩展，等发版后用户自动可见。
+
+当前版本: **v1.5.8**（参见 `converter/package.json` 和 `plugin/package.json`）。
 
 ---
 

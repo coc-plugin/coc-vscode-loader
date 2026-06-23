@@ -109,7 +109,7 @@
 | `window.createInputBox` | `window.createInputBox` | ≈ 签名完全不同 |
 | `window.showOpenDialog` | — | vscode 独有，converter 替换为 `void 0` |
 | `window.showSaveDialog` | — | vscode 独有 |
-| `window.createOutputChannel(name, languageId?)` | `workspace.createOutputChannel(name)` | converter 自动将 window → workspace，coc 无 languageId 参数 |
+| `window.createOutputChannel(name, languageId?)` | `window.createOutputChannel(name)` | coc 原生支持，无 languageId 参数 |
 | `window.createStatusBarItem(id, alignment?, priority?)` | `window.createStatusBarItem(priority?, option?)` | ≈ 参数不同，converter 丢弃前两个参数 |
 | `languages.createLanguageStatusItem` | — | vscode 独有，converter 替换为 no-op（支持 `vscode.` 前缀） |
 | `window.setStatusBarMessage` | — | vscode 独有 |

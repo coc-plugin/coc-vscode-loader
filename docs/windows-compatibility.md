@@ -356,7 +356,7 @@ function cocExtensionsDir() {
 ### 9.1 单元测试通过
 
 ```bash
-npm test                    # 117 tests
+npm test                    # 165 tests (15 test files)
 npm run test:smoke          # 128 registry entries
 ```
 

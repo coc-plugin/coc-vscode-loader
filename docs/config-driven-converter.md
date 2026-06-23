@@ -179,10 +179,11 @@ transforms 在 `source` 步骤中声明，只对扫描器检测到的文件生�
 
 | transform | 说明 |
 |-----------|------|
-| `import-mapping` | `from 'vscode'` → `from 'coc.nvim'` |
+| `import-mapping` | `from 'vscode'` → `from 'coc.nvim'` + 文本 polyfills（showMessage、createStatusBarItem 等） |
 | `enum-offset` | 添加 enum 值差异注释 |
 | `class-to-factory` | `new SomeClass()` → `SomeClass.create()` |
 | `provider-register` | 适配 provider 注册签名 |
+| `strip-volar` | 移除 Volar 特有的框架导入（如 `@vue/vscode-snippets`、`@vue/vue-language-core` 等），仅在 Volar 条目中使用 |
 
 #### 文本后处理（convert.ts）
 
@@ -475,24 +476,37 @@ import { LanguageClient, TransportKind, services } from 'coc.nvim'
 
 ```json
 {
-  "name": "volar",
+  "name": "vscode-volar",
   "displayName": "Volar (Vue)",
-  "description": "Vue language support",
+  "description": "Vue language support — template/script/style IntelliSense",
   "type": "ts-bridge",
   "languages": ["vue"],
   "categories": ["LSP", "TypeScript"],
+  "minPluginVersion": "1.2.0",
+  "notes": "Vue IntelliSense requires coc-tsserver-dev (not coc-tsserver) due to an unmerged PR for globalPlugins support. See: https://github.com/neoclide/coc-tsserver/pull/493",
   "convert": [
     {
       "type": "bridge",
       "preset": "ts-bridge"
     },
     {
+      "type": "language-client",
+      "server": {
+        "kind": "module",
+        "package": "@vue/language-server",
+        "entry": "main"
+      },
+      "languages": ["vue"]
+    },
+    {
       "type": "source",
-      "transforms": ["import-mapping"]
+      "transforms": ["import-mapping", "strip-volar"]
     }
   ]
 }
 ```
+
+Volar 使用三个步骤：`bridge` 生成 TypeScript 桥接代码，`language-client` 创建 LanguageClient 连接 Vue 语言服务器，`source` 转换剩余源码（使用 `strip-volar` 移除 Volar 特有的框架导入）。
 
 ### HTML CSS Support
 
@@ -669,16 +683,18 @@ Prettier 使用 `source` 步骤直接转换 prettier-vscode 的源码（而非 b
 - [x] 为全部 7 个现有插件添加 `convert` 配置
 - [x] 逐个验证生成的插件能正常工作（Prisma ✅ Volar ✅ Deno ✅ Taplo ✅ Lua ✅ Ansible ✅ HTML CSS ✅）
 
-### Phase 3: 测试（待办）
+### Phase 3: 测试（已完成 ✅）
 
 - [x] 创建 `scripts/test-regression.sh`（36 项测试，覆盖全部步骤类型和 edge cases）
-- [ ] 遍历 registry，对每个条目执行：
-      clone → convert → npm install → esbuild → require 验证
-- [ ] CI：每次 PR 自动跑回归测试
+- [x] 165 个单元测试（15 files），含 fixture 测试
+- [x] 烟雾测试（`test:smoke`）：全量转换 128 registry 条目，验证输出结构
+- [x] Baseline diff（`diff:check`）：输出文件 SHA-256 指纹对比，检测非预期变更
+- [x] `check-tests` 强制：每个源文件必须有对应 `.test.ts` 且包含至少一个 `it()`
+- [x] 预提交 hook 自动跑 `npm test`
 
 ### 待修复
 
-- [ ] `keepDeps` 第 3 步 workspace root 查找
+- [ ] `keepDeps` 第 3 步 workspace root 查找（monorepo 场景）
 - [ ] `keepDeps` 解析失败时报错而非静默返回
 - [ ] `multiRoot` 支持多 workspace folder
 - [ ] CI 验证规则中 registry 条目的校验（`npm view` server 包存在性等）

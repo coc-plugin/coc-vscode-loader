@@ -105,7 +105,7 @@ On next `:CocRestart`, the plugin will fetch the registry and install any missin
 
 | File | Description |
 |------|-------------|
-| `src/index.ts` | Plugin entry + 9 CocCommands |
+| `src/index.ts` | Plugin entry + 10 CocCommands |
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache |
