@@ -274,7 +274,7 @@ coc 使用 LSP 协议风格（值从 1 开始），而 vscode 多数枚举从 0 
 
 | API | VS Code | coc.nvim | 差异 | 自动转换 |
 |-----|---------|----------|------|----------|
-| showInformationMessage | 有 (4 overloads) | 有 (2 overloads) | coc 缺少 MessageOptions 变体 | converter 转为 `showMessage(msg, 'info')` |
+| showInformationMessage | 有 (4 overloads) | 有 (2 overloads) | coc 缺少 MessageOptions 变体，coc 的 MsgTypes 为 `'error'\|'warning'\|'more'` | converter 转为 `showMessage(msg, 'more')` |
 | showWarningMessage | 有 (4 overloads) | 有 (2 overloads) | 同上 | converter 转为 `showMessage(msg, 'warning')` |
 | showErrorMessage | 有 (4 overloads) | 有 (2 overloads) | 同上 | converter 转为 `showMessage(msg, 'error')` |
 

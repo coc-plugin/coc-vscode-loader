@@ -99,7 +99,7 @@
 | `window.onDidChangeTextEditorOptions` | — | vscode 独有 |
 | `window.showTextDocument` | — | vscode 独有 |
 | `window.createTextEditorDecorationType` | — | vscode 独有（coc 用 BufferHighlight） |
-| `window.showInformationMessage` | `window.showMessage` | converter 自动转为 `showMessage(msg, 'info')` |
+| `window.showInformationMessage` | `window.showMessage` | converter 自动转为 `showMessage(msg, 'more')` |
 | `window.showWarningMessage` | `window.showMessage` | converter 自动转为 `showMessage(msg, 'warning')` |
 | `window.showErrorMessage` | `window.showMessage` | converter 自动转为 `showMessage(msg, 'error')` |
 | `window.showQuickPick` | `window.showQuickPick` | 相同 |
