@@ -228,21 +228,25 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   // workspace.createOutputChannel was deprecated in coc.nvim
 
   // window.showInformationMessage / showWarningMessage / showErrorMessage → window.showMessage
-  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showInformationMessage\(/, (call) => {
+  // coc.nvim's showMessage returns void, wrap in Promise.resolve to support .then() chaining
+  // Extra args (buttons) are discarded since coc.nvim doesn't support them
+  const showMessageWrap = (call: string, severity: string) => {
     const inner = call.slice(call.indexOf('(') + 1, -1)
     const hasVscPrefix = call.startsWith('vscode.')
-    return (hasVscPrefix ? 'vscode.' : '') + `window.showMessage(${inner}, 'info')`
-  })
-  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showWarningMessage\(/, (call) => {
-    const inner = call.slice(call.indexOf('(') + 1, -1)
-    const hasVscPrefix = call.startsWith('vscode.')
-    return (hasVscPrefix ? 'vscode.' : '') + `window.showMessage(${inner}, 'warning')`
-  })
-  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showErrorMessage\(/, (call) => {
-    const inner = call.slice(call.indexOf('(') + 1, -1)
-    const hasVscPrefix = call.startsWith('vscode.')
-    return (hasVscPrefix ? 'vscode.' : '') + `window.showMessage(${inner}, 'error')`
-  })
+    const prefix = hasVscPrefix ? 'vscode.' : ''
+    // Extract first argument only (the message), split by top-level commas only
+    let depth = 0, firstArg = ''
+    for (const ch of inner) {
+      if (ch === '(' || ch === '{' || ch === '[') depth++
+      else if (ch === ')' || ch === '}' || ch === ']') depth--
+      else if (ch === ',' && depth === 0) break
+      firstArg += ch
+    }
+    return `${prefix}Promise.resolve(${prefix}window.showMessage(${firstArg.trim()}, '${severity}'))`
+  }
+  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showInformationMessage\(/, (call) => showMessageWrap(call, 'info'))
+  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showWarningMessage\(/, (call) => showMessageWrap(call, 'warning'))
+  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showErrorMessage\(/, (call) => showMessageWrap(call, 'error'))
 
   // Add priority 1 to document format providers (default 0 gets overridden by LanguageClient)
   newContent = replaceBalanced(newContent, /registerDocumentFormatProvider\s*\(/, (call) => {
