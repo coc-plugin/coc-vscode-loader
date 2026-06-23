@@ -244,7 +244,7 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
     }
     return `${prefix}Promise.resolve(${prefix}window.showMessage(${firstArg.trim()}, '${severity}'))`
   }
-  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showInformationMessage\(/, (call) => showMessageWrap(call, 'info'))
+  newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showInformationMessage\(/, (call) => showMessageWrap(call, 'more'))
   newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showWarningMessage\(/, (call) => showMessageWrap(call, 'warning'))
   newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showErrorMessage\(/, (call) => showMessageWrap(call, 'error'))
 

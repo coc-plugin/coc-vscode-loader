@@ -161,7 +161,7 @@ LSP (binary / module / bridge) → direct-api (API polyfill)
 | `window.onDidChangeActiveTextEditor` → `workspace.onDidOpenTextDocument` | coc 使用不同事件名 |
 | `languages.createLanguageStatusItem(...)` → no-op（支持 `vscode.` 前缀） | coc 无此 API |
 | `window.showOpenDialog(...)` → `void 0`（支持 `vscode.` 前缀） | coc 无文件选择对话框 |
-| `window.showInformationMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'info'))`（支持 `vscode.` 前缀） | coc 使用 showMessage 加 severity 参数，包裹 Promise.resolve 保持 `.then()` 链式调用 |
+| `window.showInformationMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'more'))`（支持 `vscode.` 前缀） | coc 使用 showMessage 加 severity 参数（`'error'`/`'warning'`/`'more'`），包裹 Promise.resolve 保持 `.then()` 链式调用 |
 | `window.showWarningMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'warning'))`（同上） | 同上，自动剥离多余参数（按钮、选项等） |
 | `window.showErrorMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'error'))`（同上） | 同上 |
 | `languages.match(...)` → `1` | coc 无此 API，返回 truthy 值假设匹配 |
