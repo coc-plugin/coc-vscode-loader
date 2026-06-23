@@ -160,16 +160,17 @@ export function autoCheck(): WhatChangedEntry[] {
   // Version changed: full comparison
   const result = whatChanged()
   const changed = result.changed.filter(e => e.status === 'changed')
-  if (changed.length > 0) {
+  // Save snapshot first — only write markers if snapshot persisted successfully,
+  // to keep markers and snapshot in sync across restarts
+  const snapshotSaved = saveSnapshot()
+  if (snapshotSaved && changed.length > 0) {
     // Merge with existing markers — don't clear stale markers from previous
     // version comparisons (e.g. pre-release → release with same baseline)
     const existing = readChangedMarkers()
     const merged = [...new Set([...existing, ...changed.map(e => e.name)])]
     writeChangedMarkers(merged)
   }
-  // Save snapshot so this check fires only once per upgrade
-  saveSnapshot()
-  return changed
+  return snapshotSaved ? changed : []
 }
 
 export function markChecked(): void {
