@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.5.8] - 2026-06-23
+
+### Added
+- **Registry baseline diff system (`diff:baseline` / `diff:check`)** — SHA-256 hash-based golden file system for detecting unintended converter side effects across all 128 registry entries. Committed `converter/baseline.json` stores output hashes per entry. `npm run diff:check` compares current conversion output against baseline, `npm run diff:baseline` updates it.
+  - **Source commit tracking**: Each baseline entry stores the source repo's HEAD commit. `diff:check` skips entries whose source repo has advanced upstream — only entries with identical source code are compared, preventing false positives from upstream changes
+  - **Build-generated snippet handling**: Snippet entries with build steps use a placeholder hash for platform-dependent JSON files, preventing false mismatches across systems
+  - **Cache cleanup**: `git clean -fd` after `git reset` removes stale build artifacts from cached source repos
+  - **CI integration**: Separate `diff` job in CI pipeline (after `unit`, before `smoke`), with `--verbose` flag. Download errors are reported as warnings (not failures); only real output changes cause exit code 1
+- **`notes` field in registry** — `PackageInfo` now supports optional `notes` field for user-visible installation hints displayed in TUI detail popup (e.g., manual steps, caveats, post-install instructions)
+- **`languages.match` polyfill** — added no-op polyfill (`return 1`) to `import-mapping` transform for coc.nvim compatibility
+- **Build failure on subprocess errors** — npm postinstall, go install, and cargo install failures now cause hard build errors instead of being silently swallowed (was hiding real install failures)
+- **Pipeline fixture tests** — 7 end-to-end fixture cases testing full `convert()` pipeline text replacements (`.uri.fsPath`, `Location.create`, `getWordRangeAtPosition`, WorkspaceEdit, etc.)
+- **Windows compatibility plan** — comprehensive `docs/windows-compatibility.md` analyzing cross-platform barriers with phased remediation plan
+
+### Fixed
+- **`showMessage` Promise return** — refactored into single `showMessageWrap` helper that wraps `window.showMessage()` in `Promise.resolve(...)` to preserve `.then()` chaining for converted plugins. Extra arguments (action buttons, modal options) are now properly stripped using depth-aware parsing of nested parens/braces/brackets
+- **Ansible LSP locale** — set `LC_ALL=C.UTF-8` as fallback to prevent locale-related errors in Python subprocesses spawned by ansible language server
+- **`window.createOutputChannel` mapping removed** — `import-mapping` no longer remaps `window.createOutputChannel` to `workspace.createOutputChannel`, since coc.nvim supports `window.createOutputChannel` natively (and `workspace.createOutputChannel` was deprecated)
+- **`vscode.` prefix in workspaceFolders guard** — `workspace.workspaceFolders` guard now correctly preserves the `vscode.` prefix when present (e.g., `vscode.workspace.workspaceFolders[0]` stays as `(vscode.workspace.workspaceFolders || [])[0]` instead of stripping the prefix)
+
+### Changed
+- **CI pipeline**: `diff` job separated from `unit` tests — unit tests (fast) run first, then diff check, then smoke test. Transient network errors in diff no longer block test results
+- **converter**: bump to v1.5.8
+- **plugin**: bump to v1.5.8
+
 ## [1.5.7] - 2026-06-21
 
 ### Added

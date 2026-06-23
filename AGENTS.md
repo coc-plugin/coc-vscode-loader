@@ -111,6 +111,7 @@ LSP (binary / module / bridge) → direct-api (API polyfill)
 | `pipPackages` | pure-lsp | Python pip 依赖，pipeline 自动安装 |
 | `goPackages` | pure-lsp | Go 包，pipeline 执行 `go install` 编译到 `server/` |
 | `cargoPackages` | pure-lsp | Rust crate，pipeline 执行 `cargo install --root` 编译后复制到 `server/` |
+| `notes` | 全部 | 用户可见的安装提示，显示在 TUI 详情弹窗中（如手动步骤或注意事项） |
 
 ### convert 字段说明
 
@@ -160,10 +161,10 @@ LSP (binary / module / bridge) → direct-api (API polyfill)
 | `window.onDidChangeActiveTextEditor` → `workspace.onDidOpenTextDocument` | coc 使用不同事件名 |
 | `languages.createLanguageStatusItem(...)` → no-op（支持 `vscode.` 前缀） | coc 无此 API |
 | `window.showOpenDialog(...)` → `void 0`（支持 `vscode.` 前缀） | coc 无文件选择对话框 |
-| `window.createOutputChannel(name)` → `workspace.createOutputChannel(name)`（支持 `vscode.` 前缀） | coc 的此 API 在 workspace 上 |
-| `window.showInformationMessage(msg)` → `window.showMessage(msg, 'info')`（支持 `vscode.` 前缀） | coc 使用 showMessage 加 severity 参数 |
-| `window.showWarningMessage(msg)` → `window.showMessage(msg, 'warning')`（同上） | 同上 |
-| `window.showErrorMessage(msg)` → `window.showMessage(msg, 'error')`（同上） | 同上 |
+| `window.showInformationMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'info'))`（支持 `vscode.` 前缀） | coc 使用 showMessage 加 severity 参数，包裹 Promise.resolve 保持 `.then()` 链式调用 |
+| `window.showWarningMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'warning'))`（同上） | 同上，自动剥离多余参数（按钮、选项等） |
+| `window.showErrorMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'error'))`（同上） | 同上 |
+| `languages.match(...)` → `1` | coc 无此 API，返回 truthy 值假设匹配 |
 | `registerDocumentFormatProvider(sel, provider)` → `(sel, provider, 1)` | 默认 priority=1 避免被 LanguageClient 覆盖 |
 | `workspace.workspaceFolders[` → `(workspace.workspaceFolders \|\| [])[` | coc 可能返回 undefined |
 | 自动补 `workspace`/`Uri` import | 引入新 API 后自动补全 import |
@@ -717,4 +718,4 @@ When updating images in `README.md` (e.g. `plugin/assets/tui-preview.png`), GitH
 <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=<version>">
 ```
 
-Use the current version number (e.g. `v=1.5.5`) as the parameter value so it changes with each release. Do NOT use timestamps or random values — version numbers are meaningful and auto-increment.
+Use the current version number (e.g. `v=1.5.8`) as the parameter value so it changes with each release. Do NOT use timestamps or random values — version numbers are meaningful and auto-increment.
