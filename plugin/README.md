@@ -7,6 +7,11 @@ VS Code extension → coc.nvim plugin loader with TUI package manager.
 Install/update/uninstall converted VS Code extensions via a terminal UI.
 Supports **Neovim 0.8+** (floating window + extmark) and **Vim 9.0+** (split window + text properties).
 
+> **⚠️ IMPORTANT: Keep Updated**
+> Each release includes critical converter fixes. Outdated versions silently produce broken plugins.
+> **After updating, reinstall all extensions** — old conversion output is not patched automatically.
+> Run `:CocCommand loader.open` → press `U` to update all installed plugins.
+
 ## Install
 
 ```vim
