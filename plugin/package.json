@@ -52,6 +52,7 @@
     "onCommand:loader.list",
     "onCommand:loader.cleanCache",
     "onCommand:loader.updateRegistry",
+    "onCommand:loader.whatChanged",
     "onCommand:loader._dispatch"
   ],
   "contributes": {
@@ -95,6 +96,10 @@
       {
         "command": "loader._dispatch",
         "title": ""
+      },
+      {
+        "command": "loader.whatChanged",
+        "title": "Show cross-version impact analysis"
       }
     ]
   }

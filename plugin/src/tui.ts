@@ -658,6 +658,11 @@ export class TUI {
         buf.append('  ', undefined)
         buf.append(`Press U to update ${updatable.length} package(s)`, 'CocLoaderWarning')
       }
+      const changed = entries.filter(e => e.hasChanged)
+      if (changed.length > 0) {
+        buf.append('  ', undefined)
+        buf.append(`${changed.length} changed — reinstall recommended`, 'CocLoaderWarning')
+      }
     }
     buf.nl()
     for (const entry of entries) {
@@ -692,6 +697,10 @@ export class TUI {
     // Mason-style update indicator
     if (entry.hasUpdate && entry.status === 'installed') {
       buf.append(' [update]', 'CocLoaderWarning')
+    }
+    // Changed-after-upgrade indicator
+    if (entry.hasChanged && entry.status === 'installed') {
+      buf.append(' [changed]', 'CocLoaderWarning')
     }
     // Mason-style keywords in search mode
     if ((this._inSearchMode || this.state.getState().searchQuery) && entry.info.languages.length > 0) {

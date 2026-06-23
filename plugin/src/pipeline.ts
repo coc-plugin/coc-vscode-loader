@@ -1,5 +1,6 @@
 import { StateManager } from './state'
 import { getPackage, PackageInfo } from './registry'
+import { clearChangedMarker } from './baseline'
 import { spawn, execFile, execSync } from 'child_process'
 import { window as cocWindow } from 'coc.nvim'
 import * as path from 'path'
@@ -617,9 +618,11 @@ export async function installPackage(state: StateManager, name: string): Promise
             p.commitDate = meta.date
             p.updated = true
             p.hasUpdate = false
+            p.hasChanged = false
           }
         })
       }
+      clearChangedMarker(name)
     } catch { /* non-critical: commit display */ }
   } catch (e: any) {
       // Check if user cancelled via <C-c> (TUI set status to 'not-installed')
@@ -718,8 +721,9 @@ export async function updatePackage(state: StateManager, name: string): Promise<
       await saveMeta(name)
       state.mutate(s => {
         const p = s.packages.find(p => p.info.name === name)
-        if (p) p.hasUpdate = false
+        if (p) { p.hasUpdate = false; p.hasChanged = false }
       })
+      clearChangedMarker(name)
       cocWindow.showInformationMessage(`coc-${name} is already up to date`)
       return
     }
@@ -730,6 +734,7 @@ export async function updatePackage(state: StateManager, name: string): Promise<
     state.setDirty()
     state.setPackageStatus(name, 'installed')
     cocWindow.showInformationMessage(`coc-${name} updated`)
+    clearChangedMarker(name)
     // Update commit in state and clear update flag
     try {
       const meta = JSON.parse(fs.readFileSync(metaPath(name), 'utf-8'))
@@ -742,6 +747,7 @@ export async function updatePackage(state: StateManager, name: string): Promise<
             p.commitDate = meta.date
             p.updated = true
             p.hasUpdate = false
+            p.hasChanged = false
           }
         })
       }

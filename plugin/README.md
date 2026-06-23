@@ -9,8 +9,8 @@ Supports **Neovim 0.8+** (floating window + extmark) and **Vim 9.0+** (split win
 
 > **⚠️ IMPORTANT: Keep Updated**
 > Each release includes critical converter fixes. Outdated versions silently produce broken plugins.
-> **After updating, reinstall all extensions** — old conversion output is not patched automatically.
-> Run `:CocCommand loader.open` → press `R` on each installed package to reapply the converter.
+> **After updating, the loader auto-detects which plugins changed** — look for `[changed]` markers in the TUI and reinstall only those.
+> Run `:CocCommand loader.open` → check for `[changed]` markers → press `R` on marked plugins.
 
 ## Install
 
@@ -61,6 +61,7 @@ npm install coc-vscode-loader
 | `:CocCommand loader.uninstallAll` | Uninstall all (with confirmation) |
 | `:CocCommand loader.updateRegistry` | Fetch latest registry from remote |
 | `:CocCommand loader.cleanCache` | Clean build cache for all packages |
+| `:CocCommand loader.whatChanged` | Cross-version impact analysis |
 | `:CocCommand loader.list` | List installed packages (copied to clipboard) |
 
 ## Global Extensions (auto-install)
@@ -91,6 +92,7 @@ On next `:CocRestart`, the plugin will fetch the registry and install any missin
 - **Incremental cache** — source/ keeps git repo, updates via git fetch + reset
 - **Commit tracking** — records commit SHA after install, visible in detail view
 - **Update check** — `C` key compares against remote HEAD, shows `↑` when outdated
+- **Cross-version impact** — `:CocCommand loader.whatChanged` compares baseline between versions, shows which installed plugins need reinstall
 - **Auto restart** — `:CocRestart` triggered automatically on close when changes detected
 - **Manual registry update** — `:CocCommand loader.updateRegistry` also available for re-fetch
 - **Detail popup** — `<CR>` opens centered float window with package info or live install log (syntax highlighted, auto-scroll to latest)
@@ -98,6 +100,7 @@ On next `:CocRestart`, the plugin will fetch the registry and install any missin
 - **Concurrency limit** — max 3 parallel operations for `U` (Update All)
 - **Desktop notifications** — `showInformationMessage` on install/update/uninstall complete
 - **Auto-check updates** — silent check on startup, notifies only when updates found
+- **Cross-version change detection** — on startup after upgrade, silently detects which installed plugins' output files changed, marks them `[changed]` in TUI, and notifies the user
 - **Cache cleanup** — `:CocCommand loader.cleanCache` removes build artifacts
 - **Export package list** — `:CocCommand loader.list` copies installed package names to clipboard
 
@@ -105,7 +108,7 @@ On next `:CocRestart`, the plugin will fetch the registry and install any missin
 
 | File | Description |
 |------|-------------|
-| `src/index.ts` | Plugin entry + 10 CocCommands |
+| `src/index.ts` | Plugin entry + 11 CocCommands |
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache |

@@ -25,12 +25,12 @@
 >
 > coc-vscode-loader is under active development. Each release includes critical bug fixes, converter improvements, and registry updates. **Always use the latest version** — running an outdated version will silently produce broken plugin conversions (e.g., formatters that don't format, wrong notification colors, or language servers that fail to start).
 >
-> When updating to a new version, **all previously installed extensions must be reinstalled** — converter fixes only apply at conversion time, and source repos may not have new commits to trigger an automatic update.
+> When updating, the loader **automatically detects which installed plugins changed** — affected plugins are marked `[changed]` in the TUI. Only those need reinstalling, not everything.
 >
 > ```vim
 > :CocUpdate coc-vscode-loader   " Update to latest
-> :CocCommand loader.open        " Then press R on each installed package
-> " Or reinstall from scratch:
+> :CocCommand loader.open        " Check for [changed] markers, press R on those
+> " Or reinstall a specific plugin:
 > :CocCommand loader.reinstall <name>
 > ```
 >

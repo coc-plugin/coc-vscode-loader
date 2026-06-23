@@ -25,6 +25,7 @@ export interface PackageEntry {
   commitDate?: string
   updated?: boolean
   hasUpdate?: boolean
+  hasChanged?: boolean
   progress?: string
   progressLog: string[]
   expanded: boolean
@@ -159,6 +160,7 @@ export class StateManager {
           pkg.progress = undefined
           pkg.progressLog = []
           pkg.error = undefined
+          pkg.hasChanged = false
         }
       }
     })

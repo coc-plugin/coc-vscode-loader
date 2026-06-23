@@ -243,7 +243,7 @@ convert <input-vscode-ext> -o <output-dir> --convert <json>
 | bridge preset 系统 | `converter/src/steps/bridge.ts` | BRIDGE_TEMPLATES + presets.json 驱动 |
 | Pipeline | `plugin/src/pipeline.ts` | git clone, convert, npm install, esbuild, binary download, pip/go/cargo install, installToCoc |
 | TUI | `plugin/src/tui.ts` | Mason 风格浮动窗口，9 个 tab，filter/sort/search，内联日志 |
-| 10 个 CocCommand | `plugin/src/index.ts` | 9 用户命令 (open/install/uninstall/update/reinstall/uninstallAll/updateRegistry/cleanCache/list) + 1 内部 (dispatch) |
+| 11 个 CocCommand | `plugin/src/index.ts` | 10 用户命令 (open/install/uninstall/update/reinstall/uninstallAll/updateRegistry/cleanCache/list/whatChanged) + 1 内部 (dispatch) |
 | 128 个 registry 条目 | coc-vscode-registry/registry.json | 29 pure-lsp + 1 ts-bridge + 6 direct-api + 92 snippets，覆盖 LSP、Formatter、Linter、Completion |
 | Baseline 差异系统 | `converter/baseline.json` | SHA-256 输出文件指纹 + diff:check |
 

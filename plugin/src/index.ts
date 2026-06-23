@@ -3,6 +3,7 @@ import { createInitialState, StateManager, PackageEntry } from './state'
 import { TUI } from './tui'
 import { installPackage, uninstallPackage, updatePackage, runConcurrent, checkUpdates, rimraf } from './pipeline'
 import { updateRegistry, findPackage } from './registry'
+import { whatChanged, saveSnapshot, autoCheck } from './baseline'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
@@ -323,6 +324,40 @@ export async function activate(context: ExtensionContext) {
   )
 
   context.subscriptions.push(
+    commands.registerCommand('loader.whatChanged', async () => {
+      try {
+        await ensureRegistry(state)
+        const result = whatChanged()
+        if (!result.changed.length && result.oldVersion === '(none)') {
+          cocWindow.showInformationMessage(`[coc-loader] Baseline snapshot saved (v${result.newVersion}). Run again after next upgrade to see changes.`)
+          return
+        }
+        const installedNames = new Set(
+          state.getState().packages.filter(p => p.status === 'installed').map(p => p.info.name)
+        )
+        const relevant = result.changed.filter(e => installedNames.has(e.name))
+        if (relevant.length === 0) {
+          cocWindow.showInformationMessage(`[coc-loader] No changes detected for your installed plugins (v${result.oldVersion} → v${result.newVersion})`)
+          return
+        }
+        const lines: string[] = [`[coc-loader] Cross-version impact (v${result.oldVersion} → v${result.newVersion}):`]
+        for (const entry of relevant) {
+          if (entry.status === 'new') {
+            lines.push(`${entry.name}  + new (${entry.totalFiles} files)`)
+          } else {
+            const fileList = entry.files.map(f => f.file).join(', ')
+            lines.push(`${entry.name}  ~ ${entry.files.length}/${entry.totalFiles} files changed: ${fileList}`)
+          }
+          lines.push(`  ⚠ Reinstall recommended`)
+        }
+        cocWindow.showInformationMessage(lines.join('\n'))
+      } catch (e: unknown) {
+        cocWindow.showErrorMessage(`loader.whatChanged: ${safeMsg(e)}`)
+      }
+    })
+  )
+
+  context.subscriptions.push(
     commands.registerCommand('loader._dispatch', async (key: string) => {
       if (currentTUI) {
         await currentTUI.handleKey(key)
@@ -340,6 +375,22 @@ export async function activate(context: ExtensionContext) {
   ]).then(count => {
     if (count > 0) {
       cocWindow.showInformationMessage(`[coc-loader] ${count} package(s) have updates. Open TUI and press U to update.`)
+    }
+  }).catch(() => {})
+
+  // Auto-detect cross-version changes on startup (silent, only notifies if plugins are affected)
+  Promise.resolve().then(() => {
+    const affected = autoCheck()
+    if (affected.length > 0) {
+      const names = affected.map(e => e.name.replace(/^vscode-/, '')).join(', ')
+      state.mutate(s => {
+        for (const p of s.packages) {
+          p.hasChanged = affected.some(e => e.name === p.info.name)
+        }
+      })
+      cocWindow.showInformationMessage(
+        `[coc-loader] ${affected.length} plugin(s) changed since upgrade: ${names}. Run :CocCommand loader.reinstall to apply.`
+      )
     }
   }).catch(() => {})
 

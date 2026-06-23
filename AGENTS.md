@@ -269,7 +269,7 @@ const NAMESPACE_MAP: Record<string, string> = {
 
 | File | Description |
 |------|-------------|
-| `src/index.ts` | Plugin entry + 9 CocCommands |
+| `src/index.ts` | Plugin entry + 10 CocCommands |
 | `src/tui.ts` | TUI window management + rendering + key dispatch |
 | `src/state.ts` | State management (debounced rendering) |
 | `src/registry.ts` | Remote registry fetch + disk cache + version compatibility filter |
@@ -310,6 +310,7 @@ Registry entries can specify `minPluginVersion` (e.g. `"1.1.2"`) to require a mi
 - **Global extensions**: `g:coc_loader_global_extensions` auto-installs extensions on activation
 - **Smart name resolution**: `findPackage()` matches by exact name, displayName, or auto-prepends `vscode-` prefix
 - **Auto-check updates**: silent check on startup, notifies only when updates found
+- **Cross-version change detection**: on startup after upgrade, compares packaged `baseline.json` against saved snapshot, marks affected plugins with `[changed]` in TUI and notifies user
 - **Cache cleanup**: `loader.cleanCache` removes source/build directories
 - **Export package list**: `loader.list` copies installed package names to clipboard
 
@@ -325,6 +326,7 @@ Registry entries can specify `minPluginVersion` (e.g. `"1.1.2"`) to require a mi
 | `:CocCommand loader.uninstallAll` | Uninstall all (with confirm) |
 | `:CocCommand loader.updateRegistry` | Fetch latest registry from remote |
 | `:CocCommand loader.cleanCache` | Clean build cache for all packages |
+| `:CocCommand loader.whatChanged` | Cross-version impact analysis |
 | `:CocCommand loader.list` | List installed packages and copy to clipboard |
 
 ### Build
