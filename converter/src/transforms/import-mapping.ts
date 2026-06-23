@@ -249,24 +249,14 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
   newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showErrorMessage\(/, (call) => showMessageWrap(call, 'error'))
 
   // Add priority 1 to document format providers (default 0 gets overridden by LanguageClient)
-  newContent = replaceBalanced(newContent, /registerDocumentFormatProvider\s*\(/, (call) => {
-    let depth = 0, argCount = 1
-    for (let i = call.indexOf('(') + 1; i < call.length - 1; i++) {
-      if (call[i] === '(') depth++
-      else if (call[i] === ')') depth--
-      else if (call[i] === ',' && depth === 0) argCount++
-    }
+  // Handles trailing commas: (sel, provider,) → counted as 2 args, (sel, provider, 1) → 3 args
+  function addPriority1(call: string): string {
+    const args = call.slice(call.indexOf('(') + 1, -1).trimEnd().replace(/,+\s*$/, '')
+    const argCount = args ? args.split(',').length : 0
     return argCount < 3 ? call.slice(0, -1) + ', 1)' : call
-  })
-  newContent = replaceBalanced(newContent, /registerDocumentRangeFormatProvider\s*\(/, (call) => {
-    let depth = 0, argCount = 1
-    for (let i = call.indexOf('(') + 1; i < call.length - 1; i++) {
-      if (call[i] === '(') depth++
-      else if (call[i] === ')') depth--
-      else if (call[i] === ',' && depth === 0) argCount++
-    }
-    return argCount < 3 ? call.slice(0, -1) + ', 1)' : call
-  })
+  }
+  newContent = replaceBalanced(newContent, /registerDocumentFormatProvider\s*\(/, addPriority1)
+  newContent = replaceBalanced(newContent, /registerDocumentRangeFormatProvider\s*\(/, addPriority1)
 
   // authentication.getSession → undefined (coc.nvim has no auth API)
   newContent = replaceBalanced(newContent, /authentication\.getSession\s*\(/, () => 'undefined as any')
