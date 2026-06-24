@@ -5,7 +5,7 @@
     "src/index.ts": "8d9be2c97cff5d4f24937deee8229c3029aa692af58697e5134e047695cb6022",
     "_source": {
       "repo": "clangd/vscode-clangd",
-      "commit": "9951714a0ed120c4b7e20e203e3dbcafe651435a"
+      "commit": "e4e2586d30ef92c869b53168e020f766ee82e1be"
     }
   },
   "vscode-rust-analyzer": {
@@ -52,7 +52,7 @@
     "src/index.ts": "00ce855e7ed1f384bef27eaa68cd60307593ce0b44ed75ab25534f6ab71541c2",
     "_source": {
       "repo": "gleam-lang/vscode-gleam",
-      "commit": "1617a103f908a95fd42c565e7122b70d71846b10"
+      "commit": "1aa610135f1b3f3835109b3ccf0985a12445fba1"
     }
   },
   "vscode-pyright": {
@@ -61,7 +61,7 @@
     "src/index.ts": "21f17bca573f292f7e4eddaf2cc23791e5131d03d4b190ae343c62d807fa7549",
     "_source": {
       "repo": "microsoft/pyright",
-      "commit": "11f5588478c780337dadb7571eb65c2f0cc87aa4"
+      "commit": "9e036b2b04082e3f0f10e9a79b10ddc9cea95eb8"
     }
   },
   "vscode-ruff": {
@@ -234,9 +234,9 @@
     }
   },
   "vscode-svelte": {
-    "esbuild.mjs": "daa389bdb58d7db14eae6ce9968416ecc7d1ec683782ff76ddd5f70f6ec4f4b4",
-    "package.json": "dc19bc34b217d04f56afd9aa9554642bedd9c375b62b49f65785293396add476",
-    "src/CompiledCodeContentProvider.ts": "208302464abc7661bb5f04bb222b9fcac2f6022f48fc64ab25799e7034345655",
+    "esbuild.mjs": "9daa6ba8505b7d00f4a798d937b3fc539d653e4eaeca33c19dd994b98fd73e26",
+    "package.json": "6c44b4d36a70904be50a9e00fad4c8fff8b5a940167cb64010405a01f6f4cf78",
+    "src/CompiledCodeContentProvider.ts": "bdc034c7ec0c1383a6936c46f5eb36626b108002e690330578061ceb87c7f536",
     "src/extension.ts": "70fa0b660cbde1d4f7e084735158cfddf5bf6466c8a9b0c373f666ec0218cd69",
     "src/html/autoClose.ts": "05ef3ba58862da49708cabc4a8b9c04c08a789ad82cc1f21fdd7c54802ef5d3c",
     "src/html/htmlEmptyTagsShared.ts": "f96130b4963e68097656e182932e825d870e6e6e0da173c9e78e21207e2f0dce",
@@ -261,11 +261,11 @@
     "src/typescript/configurationMiddleware.ts": "5fcd14e819a5083cda7bc109de397c46fe51c03f2aa8d196fe7f90a48f291f35",
     "src/typescript/findComponentReferences.ts": "3c2589c3219656337ba75770e8526ac2ca10211c8c59db9187389c49a3cdf965",
     "src/typescript/findFileReferences.ts": "49ab95d7ba76f21c87e8b30a77fe4474b337443f93099218482519a4b34b93fb",
-    "src/utils.ts": "98f5a993dc32d374b7ceb441820e68d08b1162cc64b9c61b9a811c5093fdd9ca",
+    "src/utils.ts": "da6f0c1762e82891da1dbff5bc599a1b23202b0752bbdda101fc5db9548ba251",
     "src/version.ts": "63477116394a4dfcfa67edc6df81814d00bd4e6c5cd0baffdf807eecf0fe53ac",
     "_source": {
       "repo": "sveltejs/language-tools",
-      "commit": "459d031b4fafd558fc015e1cb37826aa691f2fa3"
+      "commit": "4e52661b846427157c721241ef026806c5405776"
     }
   },
   "vscode-astro": {
@@ -487,7 +487,7 @@
     "src/features/lightspeed/providers/google.ts": "276861a4a5fee25bb418f218ec7baa64d6efc0071bc1f686b06a91d9522cbd08",
     "src/features/lightspeed/providers/rhcustom.ts": "351330d59c618e0aa40dbab94a6c5f287d1abe586bc3c5aa406a121efa95f174",
     "src/features/lightspeed/statusBar.ts": "43478c202a3e8305a96cb376eae6274f02ba58a228013dcd6a767cdc966a0086",
-    "src/features/lightspeed/utils/data.ts": "02bdd7669efbf048e07726ff3545f47c7d1062a29d15caf994fb277785813f14",
+    "src/features/lightspeed/utils/data.ts": "e82626aa29e6d1bc7db795ed7bc94b82feba25ab2f402a0a044553b4ebc260cd",
     "src/features/lightspeed/utils/errors.ts": "2298a85d8e4dce697439f44dba7a02da1c776eae5240178701826fa45a773bb8",
     "src/features/lightspeed/utils/explanationUtils.ts": "87e2be6f754771d9f00ed77a7a915f1b792d3cd45dafcec59bb5d2c7205217b0",
     "src/features/lightspeed/utils/getRoleNameFromFilePath.ts": "f91052384465985fdf667d7fc8fbfb140b7769010261b1219299498c6579f438",
@@ -549,7 +549,7 @@
     "src/webviewHtml.ts": "bf4c4ca6d5224e022e4cd6fe4eef4ebab585b4d314701e39bce68710f3509e55",
     "_source": {
       "repo": "ansible/vscode-ansible",
-      "commit": "4a9446e74e12e17d02115426d40a3ade53beb077"
+      "commit": "295c9343fc5efd5c64c217f406cc3fb159789e57"
     }
   },
   "vscode-bash-language-server": {
@@ -654,6 +654,60 @@
       "commit": "402f861143dc6473b5c04db7b7ceceac1ae3e166"
     }
   },
+  "vscode-html-ls": {
+    "esbuild.mjs": "2521f9623a80a7dad2f85b2ebf5181137450dcb7b6bd012ac4b2571b52e8e586",
+    "package.json": "111010432827aae2dd3a4e1db3e13dccbe9aab49a4f1a3aae0c1e9ed1f944956",
+    "src/client/src/autoInsertion.ts": "66b699bc8bdf9a3ab930e7e0650e17e70191f2dc15e9da0a82ad544f45653d22",
+    "src/client/src/browser/htmlClientMain.ts": "30b9f4f2cc583249ddb64575d911492e29f8dd38260934ad1bf33017334fd942",
+    "src/client/src/customData.ts": "53706fd008237b9fe5aaea65972e43beecee3f9837f3b806066fc34feeafaee1",
+    "src/client/src/htmlClient.ts": "81d8af2cf3a89b2bfa479d9f25cdb9f923f23b8487ab43b18f15794264591c36",
+    "src/client/src/languageParticipants.ts": "59e4c4ef814405d0f13803bfb71f1b83293964ee3ae497658cf9ee90f5ea5d56",
+    "src/client/src/node/htmlClientMain.ts": "05481e192c72cd1f04a5244550aa153a0d2bcf0d664a735a1d9d85ed0fbbdf8b",
+    "src/client/src/node/nodeFs.ts": "42c128fcbb3c81dddd1f1b7358ee9f4c7f1cfadbde9177d3d669b5a498e0d49b",
+    "src/client/src/requests.ts": "c94112d286893a3ece3d8c678e6f606bbbfa48ae753d2865f3b3764272b8fbcf",
+    "src/index.ts": "1bf5f088e88be0e88a9026d251b3437e4d65b6168af0d378f5644e89de8a0998",
+    "src/server/lib/jquery.d.ts": "a7643a906bd7427edcb32bdabd4e5006ab32ea8becb2f2e24e280cbe04e3805e",
+    "src/server/src/browser/htmlServerMain.ts": "7b91cb569142f9a7d104e177ee980f26577e5a5f5c78b5d482ddf5243eb3b493",
+    "src/server/src/browser/htmlServerWorkerMain.ts": "6cf779c6f929af8c080ab3a47af5f84df835b09ae1d4b6b3eb85a53fff10f1d6",
+    "src/server/src/customData.ts": "71c245f25574cdaf748908d66a9a19060ec73a697fa0dc21c22cd3443f260c7f",
+    "src/server/src/htmlServer.ts": "2806d337aa60c1dbc2082bb1144c49c65234d804dc0721160cd5e68077670229",
+    "src/server/src/languageModelCache.ts": "063ec82a07e94e7bc2197050b27155a5beca9d4c6b019ce4c957e01a54295781",
+    "src/server/src/modes/cssMode.ts": "579949a581fb74ae5a438d0d6c30e038eae268df5fadbb8d0ffae155c48bb7a0",
+    "src/server/src/modes/embeddedSupport.ts": "96334d237bd0a93886dd1350d231726543d12752a14742a6208cb1084361e387",
+    "src/server/src/modes/formatting.ts": "0dd140cc4b64721cd454d25be7d0fb3e72bbcff9155f8045767fcd81d1784327",
+    "src/server/src/modes/htmlFolding.ts": "7c0a166d1da0c721eb3f1fc91d0bbba01a6762b45f57cf8ea4cecb2d65b2ebc4",
+    "src/server/src/modes/htmlMode.ts": "aff7dfaf4dade09fee33e2730be87a6250836a5d38aef533de9032711ce06ac6",
+    "src/server/src/modes/javascriptLibs.ts": "56fba3f1bb3a5a23f9c97ca705beed192296e28eeaa2d5cd28b34e13b0f53453",
+    "src/server/src/modes/javascriptMode.ts": "8a68d46cbb1e5803f0f0df3f85146ba57bd0d545443e68ef5a94fe233daf63d3",
+    "src/server/src/modes/javascriptSemanticTokens.ts": "7b936047026a72614f70be9590c11c49f8743771b4905bb3a6606a5217cd9947",
+    "src/server/src/modes/languageModes.ts": "d9e6503c0ee9cd0314e9ba5b6985495ab1ee21a512204e1bf64a9842b2b44704",
+    "src/server/src/modes/selectionRanges.ts": "2f81d43a414fa27996d70f231c2b29cac2b2961c42e1831d2361117e6042dfc3",
+    "src/server/src/modes/semanticTokens.ts": "6fab408f6c7fb4193ccbae1d8e9317728ac41c359804fb09477b992a3e4edb85",
+    "src/server/src/node/htmlServerMain.ts": "5d6a1bad66efa6013e250e13f657acfe1f17753fe67136f4b420f1bd0cece5f1",
+    "src/server/src/node/htmlServerNodeMain.ts": "97c48184214e6738119a03b85179be2246b797c2a09f7b8ecfb2b632e339eef9",
+    "src/server/src/node/nodeFs.ts": "74e4c502362ebba5f209a4e877901d15d436610d3e6719142d5a1df3852d4952",
+    "src/server/src/requests.ts": "4318bc2ba1a72eb3525e3923ca266ba819e99b1cad097ebe927fdf953b6d3cfe",
+    "src/server/src/test/completions.test.ts": "dbb245137450b4408a8d38faae89617cc288bf2fcc1cc2ae17c8c5579b3853b5",
+    "src/server/src/test/documentContext.test.ts": "34c7edb965720f64a27d44e332e73921df118c2639ab2ebb73f16114cc8011bc",
+    "src/server/src/test/embedded.test.ts": "1a0642e6edf41c17b599eb7baae014cd2fe78d260571de2c5e5efd2c0de32c12",
+    "src/server/src/test/folding.test.ts": "b09f64ee6886014d7e4097297751786cc5baa9f3a2e207fd8b7b0dc122a2b952",
+    "src/server/src/test/formatting.test.ts": "ac24a30333f658c4c82b20f4e94b2f87ad77d299242f20e94e38fc034f1da5a6",
+    "src/server/src/test/hover.test.ts": "6ae3bf0d8eb08138bc88a3977ff8ba1c06402d0c6aeb12b770a9e7955c22d01d",
+    "src/server/src/test/rename.test.ts": "3c73d5f2a8568f488b4c04825909ae10a4220d8d9555a27760e18cbc42cd5419",
+    "src/server/src/test/selectionRanges.test.ts": "acd625ef5faaea3b1480ac102a1f272fc22bb437c869f528a7061fc541f17fb3",
+    "src/server/src/test/semanticTokens.test.ts": "b09c520a4229fe971acfd11d4722ffc021951ee8f7493e18843f98570277f6ca",
+    "src/server/src/test/words.test.ts": "8d3432b31b4a9f69b3dfd074920389acc523c55c1da8e34877c0184bf7415f2f",
+    "src/server/src/utils/arrays.ts": "fd0c3990422ded99b480f42f18a56cce1d94b6535651c791c9f691c8795f8763",
+    "src/server/src/utils/documentContext.ts": "7ae74db3945036bf1d59e1ab96cc3866f17b113864c51d33dc26598e552a8b4a",
+    "src/server/src/utils/positions.ts": "d6d417ae4fc846016b9de9a9a6090dd4b063c2bf8558672dcb6845ab701656e7",
+    "src/server/src/utils/runner.ts": "daf2a8aad93d8f560b649ffc110580ff27e0348cc8112a66a5c4a792398300e0",
+    "src/server/src/utils/strings.ts": "b5c399d7f18e4b5704d4dca8beefa527b29e9fc653639610d48ecc75b33dca19",
+    "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
+    "_source": {
+      "repo": "microsoft/vscode",
+      "commit": "8d5908d6e6060bdc1303f5336b91286d05fda3c6"
+    }
+  },
   "vscode-marksman": {
     "esbuild.mjs": "7e061714429ec5a88cce2f77765f90f1a167dd4fc31a0516edd6c6cbd9a6340c",
     "package.json": "90d9cb1b982044189c750b3528b5d673b92785aecca2984984f08fa820503fa0",
@@ -669,7 +723,7 @@
     "src/index.ts": "7d22c73a6605c39d28d71d8a3d7e9ed682d65df9eb38b4a06a0791b5a6233942",
     "_source": {
       "repo": "Myriad-Dreamin/tinymist",
-      "commit": "88d6dea5a28e4e9542df1cd4f615e260213c4e4f"
+      "commit": "6603494a20a711bd84000800d3e40eddec9ac1d6"
     }
   },
   "vscode-texlab": {

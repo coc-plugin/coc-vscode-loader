@@ -117,7 +117,7 @@ Plugins not belonging to any existing group are placed at the end of the corresp
 
 `convert` is an array, executed in order:
 
-- **`language-client`** — generates `src/index.ts`, creates a LanguageClient to connect to the language server. Applies to `pure-lsp` type. `server.kind` can be `module` (npm package) or `binary` (executable). Binary type requires `server.binary` (repo/asset/binaryPath) and optional `args`.
+- **`language-client`** — generates `src/index.ts`, creates a LanguageClient to connect to the language server. Applies to `pure-lsp` type. `server.kind` can be `module` (npm package) or `binary` (executable). Binary type requires `server.binary` (repo/asset/binaryPath) and optional `args`. Extra options: `autoInsertion` (boolean, default false) generates auto-quote/auto-close code via `html/autoInsert` custom LSP request; `semanticTokens` (boolean, default false) generates semantic tokens provider via `html/semanticTokenLegend` / `html/semanticTokens` custom requests.
 - **`source`** — applies transforms like import-mapping to TypeScript source. Optional; preserves part of the original extension's functionality.
 - **`bridge`** — bridge preset (currently only `ts-bridge` for Volar).
 - **`snippets`** — pure Snippets extension, copies snippets JSON files and generates a stub `src/index.ts`.

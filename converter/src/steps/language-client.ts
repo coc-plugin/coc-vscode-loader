@@ -230,7 +230,63 @@ ${ls.verbose ? `      console.log('[${escapeStr(id)}] multiRoot mode')\n` : ''}\
 ${ls.verbose ? `      console.log('[${escapeStr(id)}] starting client')\n` : ''}\
       client.start()
       clients = [client]
+    }\
+${ls.autoInsertion ? `
+    // Auto-insertion: auto-close tags and auto-quote attributes (html/autoInsert)
+    {
+      const _client = client
+      const _triggerChars = ['=', '>']
+      let _busy = false
+      context.subscriptions.push(
+        workspace.onDidChangeTextDocument(async (e) => {
+          if (_busy) return
+          if (![${languages.map((l: string) => `'${l}'`).join(', ')}].includes(e.textDocument.languageId)) return
+          const changes = e.textChanges || []
+          if (changes.length === 0) return
+          const last = changes[changes.length - 1]
+          if (last.rangeLength > 0 || !_triggerChars.includes(last.text)) return
+          _busy = true
+          try {
+            const pos = { line: last.range.end.line, character: last.range.end.character }
+            const kind = last.text === '=' ? 'autoQuote' : 'autoClose'
+            const result = await _client.sendRequest<any>('html/autoInsert', {
+              kind,
+              textDocument: { uri: e.textDocument.uri.toString() },
+              position: pos,
+            }).catch(() => null)
+            if (result) {
+              await workspace.applyEdit({
+                changes: { [e.textDocument.uri.toString()]: [{ range: { start: pos, end: pos }, newText: result }] }
+              }, 'html-auto-insert')
+            }
+          } finally { _busy = false }
+        })
+      )
     }
+` : ''}\
+${ls.semanticTokens ? `
+    // Semantic tokens
+    {
+      const _client = client
+      _client.sendRequest<any>('html/semanticTokenLegend').catch(() => null).then(legend => {
+        if (!legend) return
+        context.subscriptions.push(
+          languages.registerDocumentSemanticTokensProvider(
+            ${docSelectorCode},
+            {
+              provideDocumentSemanticTokens: async (doc: any) => {
+                const params = { textDocument: { uri: doc.uri.toString() } }
+                const data = await _client.sendRequest<any>('html/semanticTokens', params).catch(() => null)
+                if (!data) return null
+                return { data: new Uint32Array(data) }
+              },
+            },
+            { tokenTypes: legend.types, tokenModifiers: legend.modifiers }
+          )
+        )
+      })
+    }
+` : ''}
 
     // Local server hover fallback: try server hover first, fallback to building from definition
     ${isLocal ? `const hoverLanguages = [${languages.map((l: string) => `'${l}'`).join(', ')}]

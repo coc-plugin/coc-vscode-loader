@@ -69,6 +69,14 @@ export interface LanguageClientStep {
    *  Uses LanguageClient middleware to patch insertText/textEdit.
    *  Default: true */
   autoParentheses?: boolean
+  /** Enable auto-insertion features (auto-close tags, auto-quote attributes).
+   *  Registers onType formatting provider for '=' and '>' characters,
+   *  sends custom 'html/autoInsert' request to server. */
+  autoInsertion?: boolean
+  /** Enable semantic tokens highlighting.
+   *  Registers DocumentSemanticTokensProvider that sends custom
+   *  'html/semanticTokens' / 'html/semanticTokenLegend' requests. */
+  semanticTokens?: boolean
 }
 
 export interface SourceStep {
