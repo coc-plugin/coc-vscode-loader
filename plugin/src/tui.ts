@@ -511,11 +511,10 @@ export class TUI {
     const state = this.state.getState()
     const tab = state.categoryFilter || 'All'
     // Centered header like main interface
-    const headerText = 'coc-loader help'
-    const showLen = this._helpAnimChars
-    const display = headerText.slice(0, showLen)
+    const headerText = ' coc-loader help '
+    const display = headerText.slice(0, this._helpAnimChars)
     const textLen = Buffer.from(display).length
-    let pad = Math.floor((this.windowWidth - textLen) / 2) - 2
+    let pad = Math.floor((this.windowWidth - textLen) / 2)
     if (pad < 2) pad = 2
     if (pad > 0) buf.append(' '.repeat(pad), undefined)
     buf.append(display, 'CocLoaderHeader')
@@ -579,7 +578,7 @@ export class TUI {
 
   private async animateHelpHeader() {
     this._helpAnimating = true
-    const headerText = 'coc-loader help'
+    const headerText = ' coc-loader help '
     for (let i = 1; i <= headerText.length && this._helpAnimating; i++) {
       await new Promise(r => setTimeout(r, 60))
       if (!this._helpAnimating || !this.winid) break
