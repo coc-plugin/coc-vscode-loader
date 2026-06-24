@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.6.1] - 2026-06-24
+
+### Added
+- **Loader self-update notification in TUI** — on TUI open, checks npm registry for newer coc-vscode-loader version. Shows `↑ vX.Y.Z` in header when available.
+- **Updated TUI preview screenshot** — refreshed `plugin/assets/tui-preview.png` for v1.6.x.
+
+### Fixed
+- **`[update]` false positive for mono-repo entries** — `checkUpdates` used `remote.substring(0, 7) !== live.commit` but `%h` can produce >7 char abbreviations. Fixed to `startsWith` comparison and `%H` for full hash storage.
+- **Help header padding** — `coc-loader help` now has balanced spacing inside gold background.
+
+### Changed
+- **TUI header** — removed version number from header to avoid screenshot churn on every release.
+- **plugin**: bump to v1.6.1
+- **converter**: bump to v1.6.1
+
 ## [1.6.0] - 2026-06-24
 
 ### Added
