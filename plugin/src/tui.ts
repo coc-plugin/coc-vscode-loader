@@ -88,6 +88,7 @@ export class TUI {
   private _supportsBackdrop = false
   private backdropBufnr: number = 0
   private backdropWinid: number = 0
+  latestLoaderVersion: string | null = null
 
   constructor(state: StateManager) {
     this.state = state
@@ -284,7 +285,7 @@ export class TUI {
     updateRegistry(onProgress).then(async () => {
       this.state.setStatusMessage()
       this.state.refreshPackages()
-      await this.render().catch(() => {})
+      checkLoaderVersion().then(v => { this.latestLoaderVersion = v; this.render().catch(() => {}) }).catch(() => {})
       checkUpdates(this.state).catch(() => {})
     }).catch(() => {
       this.state.setStatusMessage('Failed to fetch remote registry (offline?)')
@@ -597,11 +598,16 @@ export class TUI {
 
     // Centered header + key hint
     const searchSuffix = state.searchQuery ? ' (search mode)' : ''
-    const hdrLine = `coc-loader v${VERSION}${searchSuffix}`
+    let hdrLine = `coc-loader v${VERSION}${searchSuffix}`
+    if (this.latestLoaderVersion) hdrLine += `  [v${this.latestLoaderVersion}]`
     const hdrLen = Buffer.from(hdrLine).length
     const hdrPad = Math.max(0, Math.floor((this.windowWidth - hdrLen) / 2) - 2)
     if (hdrPad > 0) buf.append(' '.repeat(hdrPad), undefined)
-    buf.append(hdrLine, 'CocLoaderHeader')
+    buf.append(`coc-loader v${VERSION}${searchSuffix}`, 'CocLoaderHeader')
+    if (this.latestLoaderVersion) {
+      buf.append('  ↑ ', 'CocLoaderHighlight')
+      buf.append(`v${this.latestLoaderVersion}`, 'CocLoaderHighlight')
+    }
     buf.nl()
     const hintLine = 'press g? for help'
     const hintLen = Buffer.from(hintLine).length
@@ -625,6 +631,7 @@ export class TUI {
       }
     }
     buf.nl()
+
     buf.nl()
 
     const queuedNames = state.queuedNames || []
@@ -828,6 +835,16 @@ interface TuiRenderResult {
   pkgLineMap: Map<number, string>
   logLines: Set<number>
   highlights: { line: number; hlGroup: string; colStart: number; colEnd: number }[]
+}
+
+async function checkLoaderVersion(): Promise<string | null> {
+  try {
+    const res = await fetch('https://registry.npmjs.org/coc-vscode-loader/latest')
+    if (!res.ok) return null
+    const data = await res.json() as { version: string }
+    if (data.version !== VERSION) return data.version
+  } catch {}
+  return null
 }
 
 function sourceStr(source: { type: string; repo?: string; package?: string; subdir?: string }): string {

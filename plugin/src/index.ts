@@ -406,6 +406,17 @@ export async function activate(context: ExtensionContext) {
   }
 }
 
+async function checkLoaderVersion(): Promise<string | null> {
+  try {
+    const res = await fetch('https://registry.npmjs.org/coc-vscode-loader/latest')
+    if (!res.ok) return null
+    const data = await res.json() as { version: string }
+    const current = pluginVersion()
+    if (data.version !== current) return data.version
+  } catch {}
+  return null
+}
+
 export async function deactivate(): Promise<void> {
   await closeCurrentTUI()
 }
