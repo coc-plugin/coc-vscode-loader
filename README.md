@@ -9,7 +9,7 @@
 [![Editor](https://img.shields.io/badge/editor-Neovim%200.8%2B%20%7C%20Vim%209.0%2B-blue)]()
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.6.0" alt="TUI preview" width="100%">
+  <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.6.0a" alt="TUI preview" width="100%">
 </p>
 <p align="center">
   <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png?v=1.6.0" alt="Registry preview" width="100%">
