@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.6.0] - 2026-06-24
+
+### Added
+- **`autoInsertion` option for language-client step** — generates auto-close tag and auto-quote attribute handlers via `html/autoInsert` custom LSP request. Controlled by `autoInsertion` boolean field in registry's `language-client` step config.
+- **`semanticTokens` option for language-client step** — generates `DocumentSemanticTokensProvider` registration with server-provided legend and token data. Controlled by `semanticTokens` boolean field in registry's `language-client` step config.
+- **`initializationOptions` documented** — string field for passing JS object expressions (e.g., `{ provideFormatter: true }`) to LanguageClient on init.
+
+### Changed
+- **All Chinese documentation and comments translated to English** — AGENTS.md, converter README, docs/ files, plugin source comments fully anglicized for broader maintainer accessibility.
+- **converter**: bump to v1.6.0 (synced with plugin version)
+- **plugin**: bump to v1.6.0
+
+### Registry Updates
+- `vscode-css-ls` — added to baseline
+- `vscode-html-ls` — added to baseline with autoInsertion + semanticTokens support
+
 ## [1.5.9] - 2026-06-24
 
 ### Added
