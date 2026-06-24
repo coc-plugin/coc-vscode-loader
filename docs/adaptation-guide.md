@@ -1,62 +1,62 @@
-# 扩展适配评估指南
+# Extension Adaptation Assessment Guide
 
-## 开发环境完善
+## Development Environment Improvements
 
-| 改动 | 说明 |
+| Change | Description |
 |------|------|
-| `switch.sh local` | 自动写入 `extensions/package.json` dependencies，coc 可发现插件 |
-| `registry.ts` | 自动检测本地开发模式，使用 `coc-vscode-registry/registry.json` |
-| `minPluginVersion` | registry 扩展支持 `minPluginVersion` 字段，未发布版本对老用户不可见 |
-| `server.args` (module kind) | `args` 字段支持 module kind LSP 启动参数（v1.4.3+），支持 `{dir}` 和 `{pluginDir}` 占位符 |
-| `binaryPath` 字段 | 指定压缩包内二进制文件路径，未指定时默认使用包名 |
-| `targetAssets` | per-platform 二进制资产映射（v1.5.0+），支持非标准平台命名（如 clangd 用 `mac` 而非 `darwin`）|
-| `server.patches` | server 编译后文本补丁（v1.4.5+），通过 `server-patches.json` + esbuild prebuild 段执行 |
-| `goPackages` / `cargoPackages` | Go/Rust 源码编译安装 LSP（v1.5.0+），`go install` / `cargo install --root` |
-| `excludeDeps` / `keepDeps` | 精确控制输出 `package.json` 依赖（v1.5.7+），排除/保留指定依赖 |
-| Registry 条目 | 当前 **128 条**（29 pure-lsp, 1 ts-bridge, 6 direct-api, 92 snippets）|
+| `switch.sh local` | Automatically writes to `extensions/package.json` dependencies, making the plugin discoverable by coc |
+| `registry.ts` | Automatically detects local development mode, uses `coc-vscode-registry/registry.json` |
+| `minPluginVersion` | Registry entries support the `minPluginVersion` field, unpublished versions are invisible to old users |
+| `server.args` (module kind) | `args` field supports module kind LSP launch parameters (v1.4.3+), supports `{dir}` and `{pluginDir}` placeholders |
+| `binaryPath` field | Specifies the binary file path inside the archive, defaults to the package name when not specified |
+| `targetAssets` | Per-platform binary asset mapping (v1.5.0+), supports non-standard platform naming (e.g., clangd uses `mac` instead of `darwin`) |
+| `server.patches` | Server post-compilation text patches (v1.4.5+), executed via `server-patches.json` + esbuild prebuild section |
+| `goPackages` / `cargoPackages` | Go/Rust source compilation LSP installation (v1.5.0+), `go install` / `cargo install --root` |
+| `excludeDeps` / `keepDeps` | Precisely controls output `package.json` dependencies (v1.5.7+), excludes/retains specified dependencies |
+| Registry entries | Currently **128 entries** (29 pure-lsp, 1 ts-bridge, 6 direct-api, 92 snippets) |
 
-### 版本兼容机制
+### Version Compatibility Mechanism
 
 ```
-registry.json 条目                    coc-vscode-loader 版本
+registry.json entry                    coc-vscode-loader version
 ┌─────────────────────┐               ┌──────────────────┐
 │ name: "deno"        │               │ package.json     │
-│ minPluginVersion:    │──比对────→    │ version: 1.5.8   │
+│ minPluginVersion:    │──compare──→   │ version: 1.5.8   │
 │   "1.1.2"           │               │                  │
 └─────────────────────┘               └──────────────────┘
 
-1.1.2 <= 1.5.8 → 显示，用户可以安装
-1.6.0 > 1.5.8 → 隐藏，用户看不到
+1.1.2 <= 1.5.8 → visible, user can install
+1.6.0 > 1.5.8 → hidden, user cannot see
 ```
 
-这样可以在 registry 提前提交新扩展，等发版后用户自动可见。
+This allows submitting new extensions to the registry in advance; they become visible to users automatically after release.
 
-当前版本: **v1.5.8**（参见 `converter/package.json` 和 `plugin/package.json`）。
+Current version: **v1.5.8** (see `converter/package.json` and `plugin/package.json`).
 
 ---
 
-## 实战案例：Live Server (`direct-api`)
+## Practical Case: Live Server (`direct-api`)
 
-### 扩展概况
-- 仓库: `ritwickdey/vscode-live-server`
-- 类型: `direct-api`（纯 Node.js HTTP 服务器，无 LSP）
-- 核心逻辑: 启动带 WebSocket live reload 的 HTTP 服务器
+### Extension Overview
+- Repository: `ritwickdey/vscode-live-server`
+- Type: `direct-api` (pure Node.js HTTP server, no LSP)
+- Core logic: Starts an HTTP server with WebSocket live reload
 
-### 转换难点及处理
+### Conversion Challenges and Solutions
 
-| 难点 | 处理 |
+| Challenge | Solution |
 |------|------|
-| `LiveShareHelper` — VS Live Share 集成 | 3 个 patches 移除 import/instantiation/dispose |
-| `StatusBarAlignment` — coc 无此类型 | 移除 import，修改 `createStatusBarItem(100)` |
-| `workspace.saveAll()` — coc 无此 API | patch 注释掉 |
-| `window.activeTextEditor.document.fileName` — coc 无 activeTextEditor | converter polyfill + 额外 URI patch |
-| `workspaceFolders[0].uri.fsPath` — converter 正则不覆盖 `[0]` | 额外 patch |
-| `.find(...).uri.fsPath` — 同上 | 额外 patch |
-| 依赖污染 — 原扩展有 20+ devDeps + vsls | `excludeDeps` 过滤 + `keepDeps` 指定 runtime 依赖 |
-| 状态栏 Octicon 图标 | patch 替换为 Unicode 符号（● Go Live / ● Port / ◌） |
-| 激活时机 — `onCommand` 导致状态栏不显示 | `activationEvents` 加 `"*"` |
+| `LiveShareHelper` — VS Live Share integration | 3 patches to remove import/instantiation/dispose |
+| `StatusBarAlignment` — coc has no such type | Remove import, modify `createStatusBarItem(100)` |
+| `workspace.saveAll()` — coc has no such API | Comment it out with a patch |
+| `window.activeTextEditor.document.fileName` — coc has no activeTextEditor | converter polyfill + additional URI patch |
+| `workspaceFolders[0].uri.fsPath` — converter regex doesn't cover `[0]` | Additional patch |
+| `.find(...).uri.fsPath` — Same as above | Additional patch |
+| Dependency pollution — original extension has 20+ devDeps + vsls | `excludeDeps` filter + `keepDeps` specify runtime dependencies |
+| Status bar Octicon icon | Patch replaced with Unicode symbols (● Go Live / ● Port / ◌) |
+| Activation timing — `onCommand` causes status bar not to show | `activationEvents` add `"*"` |
 
-### 关键配置片段
+### Key Configuration Snippet
 
 ```json
 {
@@ -70,9 +70,9 @@ registry.json 条目                    coc-vscode-loader 版本
 }
 ```
 
-### 现状
-- 构建: ✅ 转换 → npm install → esbuild 全链路通过
-- 运行时: ✅ 服务器启动（`http://127.0.0.1:5500`）、live reload、状态栏显示均正常
+### Current Status
+- Build: ✅ Conversion → npm install → esbuild full pipeline passes
+- Runtime: ✅ Server startup (`http://127.0.0.1:5500`), live reload, status bar display all work normally
 
-> 最后更新: 2026-06-21
-> 分析方法: 逐扩展阅读 GitHub 源码 + 实际运行 `converter convert` → `npm install` → `node esbuild.mjs` 全链路验证
+> Last updated: 2026-06-21
+> Analysis method: Read GitHub source code per extension + actually run `converter convert` → `npm install` → `node esbuild.mjs` full pipeline verification

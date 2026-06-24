@@ -3,7 +3,7 @@
 ## Pure LSP
 
 - [ ] `vscode-nginx-conf` — ahmadalli/vscode-nginx-conf (direct-api) — 2024-03
-  > 阻塞: `Uri.joinPath`、`ExtensionMode` 等 API coc 无对应，需要加 converter polyfill 或 patches
+  > Blocked: `Uri.joinPath`, `ExtensionMode` and other APIs have no coc.nvim equivalent; needs converter polyfill or patches
 - [ ] `vscode-black-formatter` — microsoft/vscode-black-formatter (module) — 2026-06
 - [ ] `vscode-mypy` — microsoft/vscode-mypy (module) — 2026-06
 - [ ] `vscode-htmlhint` — HTMLHint/vscode-htmlhint (module) — 2026-06
@@ -48,7 +48,7 @@
 - [ ] `vscode-tidal` — kindohm/vscode-tidalcycles (module) — 2022-12
 - [ ] `vscode-wolfram` — kenkangxgwe/vscode-lsp-wl (binary) — 2023-03
 
-## Direct API (可能需要源码转换)
+## Direct API (may require source conversion)
 
 - [x] `vscode-code-runner` — formulahendry/vscode-code-runner — 2026-06
 - [ ] `vscode-grammarly` — znck/grammarly — 2023-12

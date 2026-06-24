@@ -53,7 +53,7 @@ See the [registry](https://github.com/coc-plugin/coc-vscode-registry) for the fu
 | **TS bridge** | Language plugins depending on TypeScript LSP | Generate `tsserver/request` bridge + `typescriptServerPlugins` | Volar |
 | **Pure LSP** | Standard LSP using LanguageClient | Generate LanguageClient entry + server dependency injection | Prisma |
 | **Direct API** | Direct coc.nvim API calls (no LanguageClient) | Source transforms, keep original extension.ts | HTML CSS Support |
-| **Snippets** | 纯 VS Code Snippets（无代码） | 复制 JSON 文件 + 生成空壳入口 | vue-snippets |
+| **Snippets** | Pure VS Code Snippets (no code) | Copy JSON files + generate stub entry | vue-snippets |
 
 TS bridge plugins require a modified coc-tsserver ([PR #493](https://github.com/neoclide/coc-tsserver/pull/493)):
 
@@ -64,21 +64,21 @@ npm install ChuYanLon/coc-tsserver --legacy-peer-deps
 
 ## Local server support
 
-当 language server 是源码中本地子目录（非 npm 包），可在 `server.package` 使用相对路径：
+When the language server is a local subdirectory in the source code (not an npm package), use a relative path in `server.package`:
 
 ```json
 { "kind": "module", "package": "../server/out/server" }
 ```
 
-自动处理：
-- 简化代码生成（无 bin walking）
-- esbuild.mjs 自动安装 `@types/node` + 编译 server TypeScript
-- pipeline 自动拷贝 server 目录
-- 注册 hover fallback provider
+Auto-handles:
+- Simplified code generation (no bin walking)
+- esbuild.mjs auto-installs `@types/node` + compiles server TypeScript
+- pipeline auto-copies server directory
+- Registers hover fallback provider
 
 ### Server patches (`server.patches`, v1.4.5+)
 
-对 local server 编译后的 JS 输出文件做文本替换，适用于修复 server 端 behavior（如禁用 pull diagnostics、注入事件钩子等）。通过 registry 的 `server.patches` 声明：
+Applies text replacements to compiled JS output of a local server, suitable for fixing server-side behavior (e.g. disabling pull diagnostics, injecting event hooks). Declared via registry `server.patches`:
 
 ```json
 {
@@ -97,21 +97,21 @@ npm install ChuYanLon/coc-tsserver --legacy-peer-deps
 }
 ```
 
-- `file`：相对于 `server/out/` 的文件路径
-- `find`：RegExp 源的转义后字符串（与 `new RegExp(find, 'g')` 兼容）
-- `replace`：替换文本
-- 所有 patch 通过 `server-patches.json` 写入 build 目录，由 `esbuild.mjs` prebuild 段在构建时读取执行
+- `file`: Path relative to `server/out/`
+- `find`: Escaped RegExp source string (compatible with `new RegExp(find, 'g')`)
+- `replace`: Replacement text
+- All patches written to `server-patches.json` in build directory, read and executed by `esbuild.mjs` prebuild section
 
 ## Source-compiled server support (v1.5.0+)
 
-当 language server 是 Go 或 Rust 项目时，pipeline 可用源码编译安装：
+When the language server is a Go or Rust project, the pipeline can compile from source:
 
-| 字段 | 机制 | 示例 |
+| Field | Mechanism | Example |
 |------|------|------|
-| `goPackages` | Pipeline 执行 `go install`，`GOBIN` 指向 `server/` | `["golang.org/x/tools/gopls@latest"]` |
-| `cargoPackages` | Pipeline 执行 `cargo install --root`，从临时目录复制二进制到 `server/` | `[{ "crate": "nil", "binary": "nil" }]` |
+| `goPackages` | Pipeline runs `go install`, `GOBIN` points to `server/` | `["golang.org/x/tools/gopls@latest"]` |
+| `cargoPackages` | Pipeline runs `cargo install --root`, copies binary from temp dir to `server/` | `[{ "crate": "nil", "binary": "nil" }]` |
 
-详见 [AGENTS.md](../AGENTS.md#gopackages--cargopackagesv150)（goPackages/cargoPackages）和 [AGENTS.md](../AGENTS.md#%E6%8F%92%E4%BB%B6%E7%BA%A7%E6%96%87%E6%9C%AC%E8%A1%A5%E4%B8%81-patchessource-step)（patches）。
+See [AGENTS.md](../AGENTS.md#gopackages--cargopackages-v150) (goPackages/cargoPackages) and [AGENTS.md](../AGENTS.md#plugin-specific-text-patches-patches-v142) (patches).
 
 ## Architecture
 
@@ -120,39 +120,39 @@ Input: VS Code extension directory
   │
   ├─ 1. Scanner    Detect files using VS Code API (`from 'vscode'` / `require('vscode')`)
   │
-  ├─ 2. Steps pipeline (逐步骤执行，每个步骤注册为 generator)
+  ├─ 2. Steps pipeline (executed in order, each step registered as generator)
   │   ├─ language-client    Generate LanguageClient (module/binary server)
-  │   ├─ source             Copy + apply transforms (见下方)
+  │   ├─ source             Copy + apply transforms (see below)
   │   ├─ bridge             Generate bridge code (BRIDGE_TEMPLATES)
-  │   ├─ snippets           Copy snippets JSON + 生成空壳 activate()
+  │   ├─ snippets           Copy snippets JSON + generate stub activate()
   │   └─ mark-unsupported   Remove unsupported API calls
   │
-  │   source 内部调用的 transforms:
-  │   ├─ import-mapping     from 'vscode' → from 'coc.nvim' + 文本 polyfills
+  │   Transforms called inside source step:
+  │   ├─ import-mapping     from 'vscode' → from 'coc.nvim' + text polyfills
   │   ├─ class-to-factory   new Xxx() → Xxx.create() / TextEdit.replace()
   │   ├─ provider-register  Adapt provider registration signatures
   │   ├─ enum-offset        Comment on enum value offsets
   │   └─ strip-volar        Remove Volar framework imports
   │
-  ├─ 3. Text replacements (convert.ts 对所有输出文件执行)
+  ├─ 3. Text replacements (convert.ts applies to all output files)
   │   ├─ .fileName → Uri.parse($1.uri).fsPath
   │   ├─ .uri.fsPath → Uri.parse($1.uri).fsPath
   │   ├─ getWordRangeAtPosition → inline polyfill
   │   ├─ Location.create(Uri.file(x), y) → Location.create(x, Range.create(y, y))
   │   ├─ new WorkspaceEdit() → ({ changes: {} })
   │   ├─ .set(uri, edits) → .changes[uri] = edits
-  │   └─ 自动注入 Uri/Range import
+  │   └─ Auto-inject Uri/Range import
   │
-  ├─ 4. Plugin patches   Registry 中声明的 per-entry find/replace
+  ├─ 4. Plugin patches   Per-entry find/replace declared in registry
   │
   ├─ 5. Generate output files
-  │   ├─ src/index.ts + src/bridge.ts（language-client / bridge 生成）
-  │   ├─ package.json（dependencies, activationEvents, typescriptServerPlugins）
-  │   ├─ esbuild.mjs（含 server TypeScript 编译）
-  │   ├─ coc-convert.json（转换元信息）
-  │   └─ server-patches.json（server 编译后补丁）
+  │   ├─ src/index.ts + src/bridge.ts (language-client / bridge generated)
+  │   ├─ package.json (dependencies, activationEvents, typescriptServerPlugins)
+  │   ├─ esbuild.mjs (includes server TypeScript compilation)
+  │   ├─ coc-convert.json (conversion metadata)
+  │   └─ server-patches.json (server post-compilation patches)
   │
-  └─ 6. Output coc plugin directory + 转换报告
+  └─ 6. Output coc plugin directory + conversion report
 ```
 
 ## Bridge preset system
@@ -203,7 +203,7 @@ npm run check:tests         # Verify every source file has a matching test
 | `transforms/strip-volar.test.ts` | — | Volar framework stripping |
 | `transforms/__fixtures__.test.ts` | — | Auto-discovered fixture tests |
 
-> 总计 **165 tests** (15 files)，覆盖全部 5 种步骤生成器和 5 种 transform。
+> Total **165 tests** (15 files), covering all 5 step generators and 5 transforms.
 
 **Smoke test** — `npm run test:smoke` clones all 128 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
 
@@ -231,7 +231,7 @@ src/
 │   ├── bridge.ts           Bridge preset code generation
 │   └── mark-unsupported.ts Unsupported API marking
 └── transforms/
-    ├── import-mapping.ts   Import replacement + 文本 polyfills
+    ├── import-mapping.ts   Import replacement + text polyfills
     ├── class-to-factory.ts new Xxx() → Xxx.create()
     ├── provider-register.ts Provider signature fixes
     ├── enum-offset.ts      Enum value offset annotations
@@ -257,7 +257,7 @@ Each source file has a corresponding `.test.ts` with unit tests — see [Testing
 | CompletionItem.create | `new CompletionItem(label, kind)` | `CompletionItem.create(label)` + `item.kind = kind` | kind set separately |
 | Trigger characters | `" "` (string) | `[" "]` (array) | Rest param → array |
 | CompletionItemKind enum | `Value = 11`, `Enum = 12` | `Value = 12`, `Enum = 13` | Offset by 1, symbols auto-adapt |
-| documentSelector | `[{ language: 'xxx' }]` | Same | 从 registry `languages` 字段生成 |
+| documentSelector | `[{ language: 'xxx' }]` | Same | Generated from registry `languages` field |
 | getWordRangeAtPosition | `document.getWordRangeAtPosition()` | Not available | Inline word boundary polyfill |
 | fileName | `document.fileName` | Not available | `Uri.parse(doc.uri).fsPath` |
 | Location.create | `Location(Uri.file(path), pos)` | `Location(path, Range.create(pos, pos))` | convert.ts: auto‑wrap pos in Range |
@@ -268,17 +268,17 @@ Each source file has a corresponding `.test.ts` with unit tests — see [Testing
 
 When a VS Code API has no coc.nvim equivalent, the approach is:
 
-1. **文本级 polyfill**（在 `import-mapping.ts` 的 `textPolyfills` 中声明）→ 如 `showMessage`、`activeTextEditor`、`workspace.isTrusted`
-2. **通用文本替换**（在 `convert.ts` 的文本替换层处理）→ 如 `.fileName`、`.uri.fsPath`、`getWordRangeAtPosition`
-3. **Per-entry patches**（registry 的 `patches` 字段）→ 对特定插件做精确替换
-4. **不可移植 API**（`mark-unsupported` 步骤）→ 标记 `/* TODO: <explanation> */`（webview、decoration、自定义编辑器等）
+1. **Text-level polyfill** (declared in `import-mapping.ts` `textPolyfills`) → e.g. `showMessage`, `activeTextEditor`, `workspace.isTrusted`
+2. **Generic text replacement** (handled in `convert.ts` text replacement layer) → e.g. `.fileName`, `.uri.fsPath`, `getWordRangeAtPosition`
+3. **Per-entry patches** (registry `patches` field) → precise find/replace for specific plugins
+4. **Non-portable API** (`mark-unsupported` step) → annotate with `/* TODO: <explanation> */` (webview, decoration, custom editors, etc.)
 
 ## Key design decisions
 
 - **Config-driven** — server packages explicitly declared in registry `convert` config, no auto-detection
-- **Bin entry fallback** — `entry: "bin"` auto-resolves `bin` field at runtime; `require.resolve` 自动回退到 `pkg/package.json`
+- **Bin entry fallback** — `entry: "bin"` auto-resolves `bin` field at runtime; `require.resolve` auto-falls back to `pkg/package.json`
 - **Auto esbuild external injection** — configured server packages marked as external
 - **Auto TS bridge injection** — `typescriptServerPlugins` + `tsserver/request` forwarding via bridge step
 - **Plugin classification** — determined by registry `type` field, no auto-detection needed
 - **Missing API handling** — polyfill where possible (showMessage, activeTextEditor, fileName), mark TODO otherwise (webview, decoration)
-- **Baseline diff system** — SHA-256 输出文件指纹库，检测 converter 变更的非预期影响
+- **Baseline diff system** — SHA-256 output file fingerprint database, detects unintended converter side effects

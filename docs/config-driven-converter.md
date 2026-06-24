@@ -1,25 +1,25 @@
 # Converter v2.0 — Config-driven architecture
 
-> 将转换器从启发式正则引擎重构为声明式配置驱动引擎。
+> Refactoring the converter from a heuristic regex engine to a declarative, config-driven engine.
 
-## 问题
+## Problem
 
-当前转换器（v1.x）用正则扫描整个项目源码来猜测插件的结构：
+The current converter (v1.x) uses regexes to scan the entire project source code to guess the plugin's structure:
 
-- `detectServerModules` 在所有 `.ts` 文件中搜索包含 "server" 或 "lsp" 的字符串
-- 猜哪些 npm 包是 language server
-- 猜用 `main` 还是 `bin` 作为入口
-- Pipeline 再用更多正则去后处理生成的代码
+- `detectServerModules` searches all `.ts` files for strings containing "server" or "lsp"
+- Guesses which npm packages are language servers
+- Guesses whether to use `main` or `bin` as the entry point
+- Pipeline then uses more regexes to post-process the generated code
 
-结果是：改一个插件的规则可能影响其他插件，加新插件靠运气。
+The result: changing one plugin's rules can affect other plugins, and adding new plugins depends on luck.
 
-## 方案：配置驱动
+## Solution: Config-driven
 
-每个 registry 条目声明一个 `convert` 字段（步骤数组），精确描述如何转换这个插件。转换器按声明执行，不做任何猜测。
+Each registry entry declares a `convert` field (array of steps) that precisely describes how to convert this plugin. The converter executes according to the declaration without making any guesses.
 
-配置通过 pipeline 传递给 converter：pipeline 从 registry 读取 `convert`，以 `--convert <JSON>` 参数传给 CLI。converter 不再自己扫描或猜测。
+The configuration is passed to the converter via the pipeline: the pipeline reads `convert` from the registry and passes it to the CLI as the `--convert <JSON>` argument. The converter no longer scans or guesses on its own.
 
-`type` 字段（`pure-lsp`、`ts-bridge`、`direct-api`）在 `convert` 存在时仅用于 TUI 显示和分类，不再影响转换行为。
+The `type` field (`pure-lsp`, `ts-bridge`, `direct-api`) is only used for TUI display and categorization when `convert` is present; it no longer affects conversion behavior.
 
 ```jsonc
 {
@@ -32,23 +32,23 @@
 }
 ```
 
-## 转换步骤
+## Conversion steps
 
-每个 `convert` 是一个步骤数组，按顺序执行。步骤类型：
+Each `convert` is an array of steps executed in order. Step types:
 
-| 类型 | 功能 |
-|------|------|
-| `language-client` | 生成 LanguageClient 代码 |
-| `source` | 复制源文件 + 应用 transforms |
-| `bridge` | 生成桥接代码（仅用于有不可移植 API 的插件，如 Volar） |
-| `mark-unsupported` | 标记不支持的功能 |
-| `snippets` | 转换纯 Snippets 扩展（v1.2.6+，参见 AGENTS.md） |
+| Type | Function |
+|------|----------|
+| `language-client` | Generate LanguageClient code |
+| `source` | Copy source files + apply transforms |
+| `bridge` | Generate bridge code (only for plugins with non-portable APIs, such as Volar) |
+| `mark-unsupported` | Mark unsupported features |
+| `snippets` | Convert pure Snippets extensions (v1.2.6+, see AGENTS.md) |
 
 ---
 
 ### `language-client`
 
-生成 coc.nvim 的 LanguageClient，连接 language server。
+Generates a coc.nvim LanguageClient that connects to the language server.
 
 ```json
 {
@@ -65,31 +65,31 @@
 }
 ```
 
-`id` 用于区分多个 LanguageClient 实例。默认值为插件名（`origPkg.name`），当插件需要启动多个 server 时，每个 `language-client` 步骤应指定不同的 `id`。
+`id` is used to distinguish multiple LanguageClient instances. It defaults to the plugin name (`origPkg.name`). When a plugin needs to start multiple servers, each `language-client` step should specify a different `id`.
 
 #### server.kind
 
-| kind | 说明 | 生成的 LanguageClient 参数 |
-|------|------|--------------------------|
-| `module` | Node.js 模块，require() 后 spawn | `{ module: serverPath, transport }`，支持 `args`（v1.4.3+）生成 `{ module: serverPath, transport, args }` |
-| `binary` | 独立可执行文件 | `{ command: serverPath, args }`（不传 transport，LanguageClient 默认使用 stdio） |
+| kind | Description | Generated LanguageClient parameters |
+|------|-------------|-------------------------------------|
+| `module` | Node.js module, spawn after require() | `{ module: serverPath, transport }`, supports `args` (v1.4.3+) to generate `{ module: serverPath, transport, args }` |
+| `binary` | Standalone executable | `{ command: serverPath, args }` (no transport passed; LanguageClient defaults to stdio) |
 
-`module` 支持 `transport` 参数（`ipc` 或 `stdio`），生成 `{ module: serverPath, transport: TransportKind.ipc }`。`binary` 不支持 `transport` 参数——`command` 模式默认使用 stdio，传 transport 会导致某些 server（如 Deno）收到意外的 `--stdio` 参数。
+`module` supports the `transport` parameter (`ipc` or `stdio`), generating `{ module: serverPath, transport: TransportKind.ipc }`. `binary` does not support the `transport` parameter — `command` mode defaults to stdio, and passing transport may cause some servers (like Deno) to receive unexpected `--stdio` arguments.
 
 #### server.entry
 
-| entry | 说明 |
-|-------|------|
-| `"main"`（默认） | `require.resolve(server.package)` → 用 package.json 的 main 字段 |
-| `"bin"` | 从入口路径反推 package.json，读取 bin 字段。先尝试 `require.resolve(pkg)`，失败时自动回退到 `require.resolve(pkg/package.json)` |
+| entry | Description |
+|-------|-------------|
+| `"main"` (default) | `require.resolve(server.package)` → uses package.json's main field |
+| `"bin"` | Reverse-engineer package.json from the entry path, read the bin field. First tries `require.resolve(pkg)`, automatically falls back to `require.resolve(pkg/package.json)` on failure |
 
-`entry: "bin"` 解决 Prisma 问题：包的 `main` 字段指向库入口（不可 spawn），`bin` 字段指向实际服务器入口。生成的代码在**运行时**通过主入口路径反向查找 package.json 来解析 `bin` 字段，而不是使用 `require.resolve('pkg/package.json')`——因为现代 npm 包的 `exports` 字段可能阻止 `package.json` 子路径的解析。
+`entry: "bin"` solves the Prisma problem: the package's `main` field points to the library entry (not spawnable), while the `bin` field points to the actual server entry. The generated code resolves the `bin` field at **runtime** by reverse-looking up package.json from the main entry path, rather than using `require.resolve('pkg/package.json')` — because modern npm packages' `exports` field may block `package.json` subpath resolution.
 
-`entry: "bin"` 也支持没有 `main` 字段的包（如 `@tailwindcss/language-server`），自动回退到 `require.resolve('pkg/package.json')`。
+`entry: "bin"` also supports packages without a `main` field (such as `@tailwindcss/language-server`), automatically falling back to `require.resolve('pkg/package.json')`.
 
 #### server.binName
 
-当包的 `bin` 字段包含多个入口时，用 `binName` 指定具体使用哪一个。不指定时默认取第一个。
+When a package's `bin` field contains multiple entries, use `binName` to specify which one to use. When not specified, defaults to the first one.
 
 ```json
 {
@@ -100,9 +100,9 @@
 }
 ```
 
-`@tailwindcss/language-server` 的 `bin` 字段有两个入口：`css-language-server` 和 `tailwindcss-language-server`，通过 `binName` 选择功能完整的 `tailwindcss-language-server`。
+`@tailwindcss/language-server`'s `bin` field has two entries: `css-language-server` and `tailwindcss-language-server`. Use `binName` to select the fully-featured `tailwindcss-language-server`.
 
-#### server.binary（仅 binary kind）
+#### server.binary (binary kind only)
 
 ```json
 "binary": {
@@ -112,59 +112,59 @@
 }
 ```
 
-Pipeline 负责下载、解压、放置到 `build/server/`。
+Pipeline handles downloading, extracting, and placing into `build/server/`.
 
-##### 模板变量
+##### Template variables
 
-`asset` 和 `binaryPath` 支持以下模板变量，由 pipeline 在下载时替换：
+`asset` and `binaryPath` support the following template variables, replaced by the pipeline during download:
 
-| 变量 | 说明 | 示例值 |
-|------|------|--------|
-| `{{version}}` | GitHub release 版本号（不含 v 前缀） | `1.45.0` |
-| `{{platform}}` | 当前操作系统平台 | `darwin` / `linux` / `win32` |
-| `{{arch}}` | CPU 架构 | `x64` / `arm64` |
-| `{{rust-target}}` | Rust 编译目标三元组 | `x86_64-apple-darwin` / `x86_64-unknown-linux-gnu` / `aarch64-apple-darwin` |
+| Variable | Description | Example value |
+|----------|-------------|---------------|
+| `{{version}}` | GitHub release version number (without v prefix) | `1.45.0` |
+| `{{platform}}` | Current OS platform | `darwin` / `linux` / `win32` |
+| `{{arch}}` | CPU architecture | `x64` / `arm64` |
+| `{{rust-target}}` | Rust compile target triple | `x86_64-apple-darwin` / `x86_64-unknown-linux-gnu` / `aarch64-apple-darwin` |
 
-`{{rust-target}}` 由 `{{platform}}` + `{{arch}}` 映射得出，适用于 Rust 项目发布的 binary assets。
+`{{rust-target}}` is derived from the mapping of `{{platform}}` + `{{arch}}` and is suitable for binary assets published by Rust projects.
 
 #### server.args
 
-传给 server 的 CLI 参数。用于 binary kind（默认）和 module kind（v1.4.3+）。例如 Deno: `["lsp"]`、Taplo: `["lsp", "stdio"]`、Angular: `["--ngProbeLocations", "{pluginDir}"]`。
+CLI arguments passed to the server. Used for binary kind (default) and module kind (v1.4.3+). For example Deno: `["lsp"]`, Taplo: `["lsp", "stdio"]`, Angular: `["--ngProbeLocations", "{pluginDir}"]`.
 
-##### 占位符（module kind 专用，v1.4.3+）
+##### Placeholders (module kind only, v1.4.3+)
 
-| 占位符 | 运行时值 | 说明 |
-|--------|----------|------|
-| `{dir}` | `__dirname` | 编译后的输出目录 |
-| `{pluginDir}` | `require('path').resolve(__dirname, '..')` | 插件根目录 |
+| Placeholder | Runtime value | Description |
+|-------------|---------------|-------------|
+| `{dir}` | `__dirname` | Compiled output directory |
+| `{pluginDir}` | `require('path').resolve(__dirname, '..')` | Plugin root directory |
 
-module kind 的 `args` 在生成的 serverOptions 中以数组形式传入：
+Module kind's `args` are passed as an array in the generated serverOptions:
 ```typescript
 { module: serverPath, transport: TransportKind.ipc, args: ['--flag', require('path').resolve(__dirname, '..')] }
 ```
 
 #### transport
 
-| transport | 说明 |
-|-----------|------|
-| `"ipc"`（默认） | TransportKind.ipc，Node.js IPC |
-| `"stdio"` | TransportKind.stdio，标准输入输出 |
+| transport | Description |
+|-----------|-------------|
+| `"ipc"` (default) | TransportKind.ipc, Node.js IPC |
+| `"stdio"` | TransportKind.stdio, standard input/output |
 
 #### languages
 
-声明文档选择器。生成 `documentSelector: [{ scheme: "file", language: "prisma" }]`。
+Declares the document selector. Generates `documentSelector: [{ scheme: "file", language: "prisma" }]`.
 
-#### multiRoot（暂未实现）
+#### multiRoot (not yet implemented)
 
-`true` 时：为每个 workspace folder 创建一个 LanguageClient 实例。当前 `multiRoot` 在类型定义中存在但生成代码未使用该参数。
+When `true`: creates a LanguageClient instance for each workspace folder. Currently `multiRoot` exists in the type definition but the generated code does not use this parameter.
 
 ---
 
 ### `source`
 
-复制源文件中使用了 VS Code API 的部分，应用 transforms。覆盖非 LSP 代码（命令注册、状态栏、补全提供者等）。
+Copies the parts of source files that use VS Code API and applies transforms. Covers non-LSP code (command registration, status bar, completion providers, etc.).
 
-扫描器检测所有包含 `from 'vscode'` 或 `require('vscode')` 的文件，这些文件会被自动复制并应用 transforms。不需要逐个声明文件名——扫描器只做这个，不做任何 server 检测。
+The scanner detects all files containing `from 'vscode'` or `require('vscode')`; these files are automatically copied and transforms are applied. There is no need to declare file names one by one — the scanner only does this, not any server detection.
 
 ```json
 {
@@ -175,37 +175,37 @@ module kind 的 `args` 在生成的 serverOptions 中以数组形式传入：
 }
 ```
 
-transforms 在 `source` 步骤中声明，只对扫描器检测到的文件生效。
+transforms are declared in the `source` step and only apply to files detected by the scanner.
 
-| transform | 说明 |
-|-----------|------|
-| `import-mapping` | `from 'vscode'` → `from 'coc.nvim'` + 文本 polyfills（showMessage、createStatusBarItem 等） |
-| `enum-offset` | 添加 enum 值差异注释 |
+| transform | Description |
+|-----------|-------------|
+| `import-mapping` | `from 'vscode'` → `from 'coc.nvim'` + text polyfills (showMessage, createStatusBarItem, etc.) |
+| `enum-offset` | Add enum value difference comments |
 | `class-to-factory` | `new SomeClass()` → `SomeClass.create()` |
-| `provider-register` | 适配 provider 注册签名 |
-| `strip-volar` | 移除 Volar 特有的框架导入（如 `@vue/vscode-snippets`、`@vue/vue-language-core` 等），仅在 Volar 条目中使用 |
+| `provider-register` | Adapt provider registration signatures |
+| `strip-volar` | Remove Volar-specific framework imports (like `@vue/vscode-snippets`, `@vue/vue-language-core`, etc.), only used in Volar entries |
 
-#### 文本后处理（convert.ts）
+#### Text post-processing (convert.ts)
 
-步骤执行后，convert.ts 对所有输出源文件执行以下文本替换：
-- `.fileName` → `Uri.parse($1.uri).fsPath`（coc 的 TextDocument 无 fileName 属性）。加 `(?<![\w$])` negative lookbehind 避免匹配 `_document.fileName`
-- `const { fileName, ...rest } = doc` 解构 → 拆分为 `{ ...rest } = doc; const fileName = Uri.parse(doc.uri).fsPath`
-- `.uri.fsPath` → `Uri.parse($1.uri).fsPath`（coc 的 uri 是 file:// URI 字符串）。首字符限定为 `[a-zA-Z_$]` 避免匹配数组下标
-- `getWordRangeAtPosition` → 内联词边界计算
+After step execution, convert.ts performs the following text replacements on all output source files:
+- `.fileName` → `Uri.parse($1.uri).fsPath` (coc's TextDocument has no fileName property). Added `(?<![\w$])` negative lookbehind to avoid matching `_document.fileName`
+- `const { fileName, ...rest } = doc` destructure → split into `{ ...rest } = doc; const fileName = Uri.parse(doc.uri).fsPath`
+- `.uri.fsPath` → `Uri.parse($1.uri).fsPath` (coc's uri is a file:// URI string). First character restricted to `[a-zA-Z_$]` to avoid matching array indices
+- `getWordRangeAtPosition` → inline word boundary calculation
 
-引入 `Uri.parse()` 后自动将 `Uri` 补入 `from 'coc.nvim'` import。
+After introducing `Uri.parse()`, automatically adds `Uri` to the `from 'coc.nvim'` import.
 
 #### entry
 
-`source` 步骤复制所有 `.ts/.tsx` 文件到输出目录，对含 `from 'vscode'` 的文件应用 transforms。`entry` 指定 esbuild 入口（仅在无 `language-client` 步骤时使用）。
+The `source` step copies all `.ts/.tsx` files to the output directory and applies transforms to files containing `from 'vscode'`. `entry` specifies the esbuild entry point (only used when there is no `language-client` step).
 
-当 `language-client` 和 `source` 步骤同时存在时，`src/index.ts` 是自包含的入口，**不 import** `source` 步骤的文件。`source` 步骤的文件仅作为补充（被其他文件间接引用时才会被 esbuild 打包）。
+When both `language-client` and `source` steps exist, `src/index.ts` is a self-contained entry point that does **NOT import** files from the `source` step. The `source` step files only serve as supplements (they are bundled by esbuild only when indirectly referenced by other files).
 
-步骤只负责生成源码。pipeline 在步骤执行后调用 esbuild，将所有源码打包为 `lib/index.js`。
+Steps are only responsible for generating source code. After step execution, the pipeline calls esbuild to bundle all source code into `lib/index.js`.
 
-#### activationEvents（可选）
+#### activationEvents (optional)
 
-声明插件的激活事件，仅在无 `language-client` 步骤时使用。pipeline 读取此字段写入输出 `package.json` 的 `activationEvents`。
+Declares the plugin's activation events, only used when there is no `language-client` step. The pipeline reads this field and writes it to the output `package.json`'s `activationEvents`.
 
 ```json
 {
@@ -216,22 +216,22 @@ transforms 在 `source` 步骤中声明，只对扫描器检测到的文件生�
 }
 ```
 
-当存在 `language-client` 步骤时，activationEvents 由该步骤自动生成。
+When a `language-client` step exists, activationEvents are automatically generated by that step.
 
 #### keepDeps
 
-从原始 package.json 保留的运行时依赖列表。用于保留非 server 的依赖（如 lodash、chokidar 等）。
+List of runtime dependencies to preserve from the original package.json. Used to retain non-server dependencies (such as lodash, chokidar, etc.).
 
-版本的解析规则（三步降级）：
+Version resolution rules (three-step fallback):
 
 ```
-1. 在原始 package.json 的 dependencies 里找包名 → 找到则用
-2. 没找到 → 在 devDependencies 里找 → 找到则用
-3. 没找到 → 向上查找 workspace root（../package.json, ../../package.json...）的 dependencies/devDependencies → 找到则用（处理 monorepo 场景，暂未实现）
-4. 都没找到 → 报错，提示人工补全版本号（暂未实现，当前静默返回 undefined）
+1. Look for the package name in the original package.json's dependencies → use if found
+2. Not found → look in devDependencies → use if found
+3. Not found → look upward in workspace root (../package.json, ../../package.json...) dependencies/devDependencies → use if found (handles monorepo scenarios, not yet implemented)
+4. All failed → report error, prompt manual version completion (not yet implemented, currently silently returns undefined)
 ```
 
-如果自动解析均失败，可改用对象语法在 registry 中手动指定版本号：
+If auto-resolution all fails, you can use object syntax in the registry to manually specify version numbers:
 
 ```json
 {
@@ -245,23 +245,23 @@ transforms 在 `source` 步骤中声明，只对扫描器检测到的文件生�
 }
 ```
 
-数组语法（自动解析）和对象语法（手动指定）二选一，混用时报错。
+The array syntax (auto-resolve) and object syntax (manual specification) are mutually exclusive; mixing them will cause an error.
 
 ---
 
 ### `bridge`
 
-使用预设代码生成器生成独立入口代码。用于 **有大量不可移植 API 的插件**，这些插件的源码无法通过 `import-mapping` 完整转换。
+Uses preset code generators to produce standalone entry code. Used for **plugins with a large number of non-portable APIs**, whose source code cannot be fully converted via `import-mapping`.
 
-原则：能用 `source` 优先用 `source`。`bridge` 是兜底策略，仅在 `import-mapping` 无法处理时使用。
+Principle: use `source` when possible. `bridge` is a fallback strategy, only used when `import-mapping` cannot handle it.
 
-当前预设：
+Current presets:
 
-| 预设 | 适用插件 | 生成内容 |
-|------|----------|----------|
-| `ts-bridge` | Volar | TypeScript 插件桥接代码：`activate()` 入口、TS 语言服务中间件、命令转发层 |
+| Preset | Applicable plugins | Generated content |
+|--------|--------------------|-------------------|
+| `ts-bridge` | Volar | TypeScript plugin bridge code: `activate()` entry point, TS language service middleware, command forwarding layer |
 
-Bridge 步骤与其他步骤配合：`bridge` 生成核心桥接层，`source` 转换原始源码中的非桥接部分，两者通过 esbuild 合并打包。
+Bridge steps work in conjunction with other steps: `bridge` generates the core bridge layer, `source` converts the non-bridge parts of the original source code, and both are bundled together via esbuild.
 
 ```json
 {
@@ -270,20 +270,20 @@ Bridge 步骤与其他步骤配合：`bridge` 生成核心桥接层，`source` �
 }
 ```
 
-Bridge 代码由 converter 内置的安全模板生成，不在 registry 中存放可执行代码。添加新预设需要两步：
+Bridge code is generated by built-in safe templates in the converter; no executable code is stored in the registry. Adding a new preset requires two steps:
 
-1. 在 `converter/src/steps/bridge.ts` 的 `BRIDGE_TEMPLATES` 中添加新类型（经审计的代码模板）
-2. 在 [coc-vscode-registry/presets.json](https://github.com/coc-plugin/coc-vscode-registry/blob/main/presets.json) 中添加预设定义，引用该类型
+1. Add a new type in `BRIDGE_TEMPLATES` in `converter/src/steps/bridge.ts` (audited code template)
+2. Add a preset definition in [coc-vscode-registry/presets.json](https://github.com/coc-plugin/coc-vscode-registry/blob/main/presets.json) that references this type
 
 ```typescript
 // converter/src/steps/bridge.ts
 const BRIDGE_TEMPLATES = {
   'custom-bridge': (opts) => ({
-    code: `...`,                      // 安全模板代码
-    injectExts: opts.extensions || [], // 需要激活的 coc 扩展
-    injectSvcs: opts.services || [],   // 需要启动的服务
-    callAfter: 'registerBridge(...)',  // client 启动后的回调
-    extraDeps: ['typescript'],         // 额外依赖
+    code: `...`,                      // Safe template code
+    injectExts: opts.extensions || [], // coc extensions to activate
+    injectSvcs: opts.services || [],   // Services to start
+    callAfter: 'registerBridge(...)',  // Callback after client starts
+    extraDeps: ['typescript'],         // Extra dependencies
   }),
 }
 ```
@@ -305,7 +305,7 @@ const BRIDGE_TEMPLATES = {
 
 ### `mark-unsupported`
 
-标记不支持的功能，在生成的代码里加警告注释，不产生可执行代码。
+Marks unsupported features, adding warning comments in the generated code without producing executable code.
 
 ```json
 {
@@ -314,10 +314,10 @@ const BRIDGE_TEMPLATES = {
 }
 ```
 
-支持的 feature：
+Supported features:
 
-| feature | 警告内容 |
-|---------|----------|
+| feature | Warning content |
+|---------|-----------------|
 | `decoration` | "Decoration API is not supported in coc.nvim" |
 | `webview` | "Webview API is not supported in coc.nvim" |
 | `tree-data-provider` | "Tree data provider is not supported" |
@@ -327,7 +327,7 @@ const BRIDGE_TEMPLATES = {
 
 ### `snippets`
 
-纯 Snippets 扩展转换（v1.2.6+）。自动读取源 `package.json` 的 `contributes.snippets`，复制 JSON 文件并生成空入口。
+Converts pure Snippets extensions (v1.2.6+). Automatically reads the source `package.json`'s `contributes.snippets`, copies JSON files and generates an empty entry point.
 
 ```json
 {
@@ -335,30 +335,30 @@ const BRIDGE_TEMPLATES = {
 }
 ```
 
-输出：
-- `./snippets/*.json` — 从源扩展按原始相对路径复制
-- `src/index.ts` — 空壳入口（仅 `export function activate() {}`）
+Output:
+- `./snippets/*.json` — Copied from source extension at the original relative path
+- `src/index.ts` — Empty shell entry (just `export function activate() {}`)
 
-> coc-snippets 通过 `package.json` 的 `contributes.snippets` 发现片段文件，因此 `convert.ts` 会保留原始声明，snippet JSON 文件必须放在**原相对路径**。
-
----
-
-## 输出 package.json 生成
-
-输出插件的 `package.json` 由 converter 在步骤执行后生成（而非 pipeline）。生成规则：
-
-| 字段 | 来源 |
-|------|------|
-| `name` | `origPkg.name` + `"coc-"` 前缀（如 `coc-prisma`） |
-| `main` | 固定为 `"lib/index.js"` |
-| `activationEvents` | 从各步骤收集：`language-client` 自动生成 `onLanguage:<lang>`；`source.activationEvents` 直接透传 |
-| `contributes` | 从原始插件 `package.json` 的 `contributes.configuration` 和 `contributes.commands` 透传；bridge 步骤额外生成 `typescriptServerPlugins` |
-| `dependencies` | server 依赖 + `keepDeps` 解析结果 + 原始 `dependencies`（过滤后） |
-| `devDependencies` | 固定 `esbuild: "^0.28.0"` |
+> coc-snippets discovers snippet files through `package.json`'s `contributes.snippets`, so `convert.ts` preserves the original declaration. Snippet JSON files must be placed at the **original relative path**.
 
 ---
 
-## 完整示例
+## Output package.json generation
+
+The output plugin's `package.json` is generated by the converter after step execution (not by the pipeline). Generation rules:
+
+| Field | Source |
+|-------|--------|
+| `name` | `origPkg.name` + `"coc-"` prefix (e.g. `coc-prisma`) |
+| `main` | Fixed to `"lib/index.js"` |
+| `activationEvents` | Collected from each step: `language-client` auto-generates `onLanguage:<lang>`; `source.activationEvents` is passed through directly |
+| `contributes` | Passed through from the original plugin's `package.json` `contributes.configuration` and `contributes.commands`; the bridge step additionally generates `typescriptServerPlugins` |
+| `dependencies` | server dependencies + `keepDeps` resolution results + original `dependencies` (filtered) |
+| `devDependencies` | Fixed `esbuild: "^0.28.0"` |
+
+---
+
+## Complete examples
 
 ### Prisma
 
@@ -389,7 +389,7 @@ const BRIDGE_TEMPLATES = {
 }
 ```
 
-`keepDeps` 保留了 server 外的原始依赖。converter 自动从源 `package.json` 读取版本号。
+`keepDeps` preserves the original dependencies outside the server. The converter automatically reads version numbers from the source `package.json`.
 
 ### Angular Language Service
 
@@ -426,11 +426,11 @@ const BRIDGE_TEMPLATES = {
 }
 ```
 
-`@angular/language-server` 的 `requireOverride` 会拦截 `require('typescript/lib/tsserverlibrary')`，通过 `--tsProbeLocations` 参数找到 TypeScript。`{pluginDir}` 在生成代码时展开为 `require('path').resolve(__dirname, '..')`（插件根目录），使 server 能发现 `node_modules/typescript` 和 `node_modules/@angular/language-service`。
+`@angular/language-server`'s `requireOverride` intercepts `require('typescript/lib/tsserverlibrary')` and finds TypeScript via the `--tsProbeLocations` parameter. `{pluginDir}` expands to `require('path').resolve(__dirname, '..')` (plugin root directory) in the generated code, allowing the server to discover `node_modules/typescript` and `node_modules/@angular/language-service`.
 
-需要 `minPluginVersion: "1.4.3"`（module kind 的 `args` 支持在该版本加入）。
+Requires `minPluginVersion: "1.4.3"` (module kind `args` support was added in this version).
 
-生成的代码结构：
+Generated code structure:
 
 ```typescript
 // src/index.ts (generated entry)
@@ -506,7 +506,7 @@ import { LanguageClient, TransportKind, services } from 'coc.nvim'
 }
 ```
 
-Volar 使用三个步骤：`bridge` 生成 TypeScript 桥接代码，`language-client` 创建 LanguageClient 连接 Vue 语言服务器，`source` 转换剩余源码（使用 `strip-volar` 移除 Volar 特有的框架导入）。
+Volar uses three steps: `bridge` generates TypeScript bridge code, `language-client` creates a LanguageClient to connect to the Vue language server, and `source` converts the remaining source code (using `strip-volar` to remove Volar-specific framework imports).
 
 ### HTML CSS Support
 
@@ -551,13 +551,13 @@ Volar 使用三个步骤：`bridge` 生成 TypeScript 桥接代码，`language-c
 }
 ```
 
-Prettier 使用 `source` 步骤直接转换 prettier-vscode 的源码（而非 bridge 生成器）。`import-mapping` 的文本替换层处理了其特有的 API：
+Prettier uses the `source` step to directly convert prettier-vscode's source code (rather than a bridge generator). The `import-mapping` text replacement layer handles its specific APIs:
 - `window.activeTextEditor` → runtime polyfill
-- `languages.createLanguageStatusItem` → no-op（支持 `vscode.` 前缀）
-- `registerDocumentFormatProvider(sel, provider, 1)` → priority=1 避免被 tsserver 覆盖
-- `{ fileName } = doc` 解构拆分 → convert.ts 通用处理
+- `languages.createLanguageStatusItem` → no-op (supports `vscode.` prefix)
+- `registerDocumentFormatProvider(sel, provider, 1)` → priority=1 to avoid being overridden by tsserver
+- `{ fileName } = doc` destructure split → convert.ts generic handling
 
-`keepDeps: ["prettier"]` 保留 prettier 运行时依赖（原始 package.json 过滤掉了 prettier）。
+`keepDeps: ["prettier"]` retains the prettier runtime dependency (the original package.json had prettier filtered out).
 
 ### Tailwind CSS IntelliSense
 
@@ -594,11 +594,11 @@ Prettier 使用 `source` 步骤直接转换 prettier-vscode 的源码（而非 b
 }
 ```
 
-`@tailwindcss/language-server` 无 `main` 字段，仅通过 `bin` 暴露入口（`css-language-server` 和 `tailwindcss-language-server`）。取用 `binName` 指定完整版 `tailwindcss-language-server`。`entry: "bin"` 的 `require.resolve` 会回退到 `require.resolve('pkg/package.json')`。
+`@tailwindcss/language-server` has no `main` field, only exposes entry points via `bin` (`css-language-server` and `tailwindcss-language-server`). Uses `binName` to specify the full-featured `tailwindcss-language-server`. `entry: "bin"`'s `require.resolve` falls back to `require.resolve('pkg/package.json')`.
 
-需要 `minPluginVersion: "1.2.2"`（因为 `binName` 和 `require.resolve` 回退逻辑在该版本才加入）。
+Requires `minPluginVersion: "1.2.2"` (because `binName` and `require.resolve` fallback logic were added in this version).
 
-### Haskell（新插件示例）
+### Haskell（New plugin example）
 
 ```json
 {
@@ -629,100 +629,100 @@ Prettier 使用 `source` 步骤直接转换 prettier-vscode 的源码（而非 b
 
 ---
 
-## 验证规则
+## Validation rules
 
-验证分为 CI 时（PR 阶段）和转换时（converter 执行时）两个阶段：
+Validation is divided into two phases: CI time (PR phase) and conversion time (when converter is executing):
 
-### CI 时验证（`scripts/test-regression.sh` 中）
+### CI time validation (`scripts/test-regression.sh`)
 
-| 条件 | 验证方式 |
-|------|----------|
-| `kind: "module"` + `package` | `npm view <package>` 存在 |
-| `entry: "bin"` | `npm view <package> --json` 有 bin 字段 |
-| `binName` | `npm view <package> --json` 的 bin 中包含该名称 |
-| `entry: "bin"` + 无 `main` 字段 | `npm view <package> --json` 无 main，自动回退 `require.resolve('pkg/package.json')` |
-| `kind: "binary"` + `binary.repo` | GitHub API `repos/<repo>/releases/latest` 可访问 |
-| `type: "snippets"` 或 `convert` 含 `snippets` | 源 `package.json` 的 `contributes.snippets` 存在且非空 |
-| `kind: "binary"` + `binary.asset` | asset 模板变量渲染后匹配已发布的 release |
-| `bridge.preset` | 预设已注册 |
+| Condition | Validation method |
+|-----------|-------------------|
+| `kind: "module"` + `package` | `npm view <package>` exists |
+| `entry: "bin"` | `npm view <package> --json` has bin field |
+| `binName` | The name exists in `npm view <package> --json`'s bin |
+| `entry: "bin"` + no `main` field | `npm view <package> --json` has no main, auto-fallback to `require.resolve('pkg/package.json')` |
+| `kind: "binary"` + `binary.repo` | GitHub API `repos/<repo>/releases/latest` is accessible |
+| `type: "snippets"` or `convert` contains `snippets` | Source `package.json`'s `contributes.snippets` exists and is non-empty |
+| `kind: "binary"` + `binary.asset` | Asset matches a published release after template variable rendering |
+| `bridge.preset` | Preset is registered |
 
-### 转换时验证（converter 执行时）
+### Conversion time validation (when converter is executing)
 
-| 条件 | 验证 |
-|------|------|
-| `languages` | 非空数组 |
-| `source.entry` | 文件在源码目录存在 |
-| `transforms` | 每个 transform 已注册 |
-| `keepDeps`（数组语法） | 每个包名在源 package.json 的 dependency/devDependency 能找到 |
-| `keepDeps`（对象语法） | 不验证版本号（手动指定，无自动解析） |
-| 依赖版本号（数组语法） | 在源 package.json 能找到 |
-| `bridge.preset` | 预设已注册 |
-
----
-
-## 迁移计划
-
-### Phase 1: 基础设施（已完成 ✅）
-
-- [x] 在 `converter/src/types.ts` 添加完整步骤类型定义
-- [x] 更新 `cli.ts`：添加 `--convert <JSON>` 参数接收步骤配置
-- [x] 更新 `pipeline.ts`：从 registry 读取 `convert`，传入 CLI
-- [x] 重构 `convert.ts` 核心循环：按步骤执行，不做启发式扫描
-- [x] 添加 `language-client` 代码生成器（module/binary）
-- [x] 添加 `source` 代码生成器（copy + transforms + esbuild）
-- [x] 添加 `bridge` 代码生成器（preset 系统）
-- [x] 添加 `mark-unsupported` 代码生成器
-- [x] 添加 `snippets` 代码生成器（v1.2.6+）
-- [x] 添加步骤验证逻辑
-- [x] 删除 `detectServerModules` 等启发式函数
-- [x] 删除 pipeline 中的正则后处理（documentSelector、activationEvents、bin-walking 等）
-- [x] 保留 pipeline：npm install、esbuild、binary download、pip install
-
-### Phase 2: Registry 迁移（已完成 ✅）
-
-- [x] 为全部 7 个现有插件添加 `convert` 配置
-- [x] 逐个验证生成的插件能正常工作（Prisma ✅ Volar ✅ Deno ✅ Taplo ✅ Lua ✅ Ansible ✅ HTML CSS ✅）
-
-### Phase 3: 测试（已完成 ✅）
-
-- [x] 创建 `scripts/test-regression.sh`（36 项测试，覆盖全部步骤类型和 edge cases）
-- [x] 165 个单元测试（15 files），含 fixture 测试
-- [x] 烟雾测试（`test:smoke`）：全量转换 128 registry 条目，验证输出结构
-- [x] Baseline diff（`diff:check`）：输出文件 SHA-256 指纹对比，检测非预期变更
-- [x] `check-tests` 强制：每个源文件必须有对应 `.test.ts` 且包含至少一个 `it()`
-- [x] 预提交 hook 自动跑 `npm test`
-
-### 待修复
-
-- [ ] `keepDeps` 第 3 步 workspace root 查找（monorepo 场景）
-- [ ] `keepDeps` 解析失败时报错而非静默返回
-- [ ] `multiRoot` 支持多 workspace folder
-- [ ] CI 验证规则中 registry 条目的校验（`npm view` server 包存在性等）
+| Condition | Validation |
+|-----------|------------|
+| `languages` | Non-empty array |
+| `source.entry` | File exists in source directory |
+| `transforms` | Each transform is registered |
+| `keepDeps` (array syntax) | Each package name can be found in source package.json's dependency/devDependency |
+| `keepDeps` (object syntax) | Version not validated (manually specified, no auto-resolution) |
+| Dependency version (array syntax) | Can be found in source package.json |
+| `bridge.preset` | Preset is registered |
 
 ---
 
-## 删除清单
+## Migration plan
 
-删除后，这些代码不再需要：
+### Phase 1: Infrastructure (completed ✅)
 
-| 文件 | 删除内容 |
-|------|----------|
-| `converter/src/convert.ts` | `detectServerModules()` 函数 |
-| `converter/src/convert.ts` | 所有基于正则的 server 检测逻辑 |
-| `converter/src/scanner.ts` | 可以保留用于检测 `from 'vscode'`，去掉 server 相关检测 |
-| `plugin/src/pipeline.ts` | documentSelector 正则替换 |
-| `plugin/src/pipeline.ts` | activationEvents 正则替换 |
-| `plugin/src/pipeline.ts` | config.get() 替换为 binary path 的正则 |
+- [x] Add complete step type definitions in `converter/src/types.ts`
+- [x] Update `cli.ts`: add `--convert <JSON>` parameter to receive step configuration
+- [x] Update `pipeline.ts`: read `convert` from registry and pass it to the CLI
+- [x] Refactor `convert.ts` core loop: execute by steps, no heuristic scanning
+- [x] Add `language-client` code generator (module/binary)
+- [x] Add `source` code generator (copy + transforms + esbuild)
+- [x] Add `bridge` code generator (preset system)
+- [x] Add `mark-unsupported` code generator
+- [x] Add `snippets` code generator (v1.2.6+)
+- [x] Add step validation logic
+- [x] Delete heuristic functions like `detectServerModules`
+- [x] Remove regex-based post-processing in pipeline (documentSelector, activationEvents, bin-walking, etc.)
+- [x] Keep pipeline: npm install, esbuild, binary download, pip install
+
+### Phase 2: Registry migration (completed ✅)
+
+- [x] Add `convert` configuration for all 7 existing plugins
+- [x] Verify each generated plugin works correctly (Prisma ✅ Volar ✅ Deno ✅ Taplo ✅ Lua ✅ Ansible ✅ HTML CSS ✅)
+
+### Phase 3: Testing (completed ✅)
+
+- [x] Create `scripts/test-regression.sh` (36 tests covering all step types and edge cases)
+- [x] 165 unit tests (15 files), including fixture tests
+- [x] Smoke test (`test:smoke`): fully convert 128 registry entries, validate output structure
+- [x] Baseline diff (`diff:check`): compare output file SHA-256 fingerprints, detect unexpected changes
+- [x] `check-tests` enforcement: each source file must have a corresponding `.test.ts` containing at least one `it()`
+- [x] Pre-commit hook auto-runs `npm test`
+
+### Pending fixes
+
+- [ ] `keepDeps` step 3 workspace root lookup (monorepo scenario)
+- [ ] `keepDeps` should report an error on resolution failure instead of silently returning
+- [ ] `multiRoot` support for multiple workspace folders
+- [ ] CI validation rules for registry entries (`npm view` server package existence, etc.)
 
 ---
 
-## 对比：旧 vs 新
+## Deletion checklist
 
-| 维度 | v1.x（启发式） | v2.0（配置驱动） |
-|------|---------------|-----------------|
-| 加新插件 | 调正则，可能影响已有插件 | 写 JSON 声明，完全隔离 |
-| 调试 | 正则匹配了什么？不知道 | 每个步骤独立验证，错误精确 |
-| 可靠性 | 猜对就能用，猜错就炸 | 声明的就是确定的 |
-| 混合类型 | 不支持（pure-lsp vs direct-api 二选一） | 步骤数组可以组合 |
-| 测试 | 手动测试 | 配置即测试用例 |
-| 学习成本 | 需要理解 500 行正则逻辑 | 理解 6 个 JSON 字段即可 |
+After deletion, these code are no longer needed:
+
+| File | Deletion content |
+|------|------------------|
+| `converter/src/convert.ts` | `detectServerModules()` function |
+| `converter/src/convert.ts` | All regex-based server detection logic |
+| `converter/src/scanner.ts` | Can be kept for detecting `from 'vscode'`, remove server-related detection |
+| `plugin/src/pipeline.ts` | documentSelector regex replacement |
+| `plugin/src/pipeline.ts` | activationEvents regex replacement |
+| `plugin/src/pipeline.ts` | config.get() to binary path regex replacement |
+
+---
+
+## Comparison: Old vs New
+
+| Dimension | v1.x (heuristic) | v2.0 (config-driven) |
+|-----------|------------------|----------------------|
+| Adding new plugins | Tweak regexes, may affect existing plugins | Write JSON declaration, fully isolated |
+| Debugging | What did the regex match? Unknown | Each step independently validated, precise errors |
+| Reliability | Works if guesses are correct, breaks if not | What is declared is deterministic |
+| Mixed types | Not supported (pure-lsp vs direct-api binary choice) | Step arrays can be combined |
+| Testing | Manual testing | Configuration is the test case |
+| Learning cost | Need to understand 500 lines of regex logic | Just need to understand 6 JSON fields |

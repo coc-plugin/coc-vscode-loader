@@ -127,7 +127,7 @@ export class TUI {
     const col = Math.max(Math.floor((editorCols - width) / 2), 0)
 
     // Create backdrop (Mason-style dim overlay, requires termguicolors and non-transparent)
-    // Vim 拆分窗口不支持 backdrop，跳过
+    // Vim split window does not support backdrop, skip
     const tc = await editor.termguicolors()
     const bg = await editor.normalHlBg()
     const isTransparent = bg === null

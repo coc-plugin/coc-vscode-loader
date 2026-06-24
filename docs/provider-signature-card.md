@@ -1,7 +1,7 @@
-# Provider 注册签名卡 — VS Code vs coc.nvim
+# Provider Registration Signature Card — VS Code vs coc.nvim
 
-> vscode 统一模式：`(selector: DocumentSelector, provider, ...)`
-> coc 统一模式：`(name: string, shortcut: string, selector: DocumentSelector | null, provider, ...)`
+> vscode unified pattern: `(selector: DocumentSelector, provider, ...)`
+> coc unified pattern: `(name: string, shortcut: string, selector: DocumentSelector | null, provider, ...)`
 
 ---
 
@@ -17,17 +17,17 @@ languages.registerCompletionItemProvider(
 
 // coc.nvim
 languages.registerCompletionItemProvider(
-  name: string,                    // 额外：provider 唯一标识
-  shortcut: string,               // 额外：补全菜单显示缩写
-  selector: DocumentSelector | null,  // 可为 null
+  name: string,                    // extra: unique provider identifier
+  shortcut: string,               // extra: completion menu abbreviation
+  selector: DocumentSelector | null,  // can be null
   provider: CompletionItemProvider,
-  triggerCharacters?: string[],   // 数组 vs rest 参数
-  priority?: number,              // 额外：优先级
-  allCommitCharacters?: string[]  // 额外：全局 commit chars
+  triggerCharacters?: string[],   // array vs rest parameter
+  priority?: number,              // extra: priority
+  allCommitCharacters?: string[]  // extra: global commit chars
 ): Disposable
 ```
 
-**差异：** coc 多了 `name`、`shortcut`、`priority`、`allCommitCharacters`。`triggerCharacters` 是可选数组而非必填 rest 参数。`selector` 可为 `null`。
+**Differences:** coc adds `name`, `shortcut`, `priority`, `allCommitCharacters`. `triggerCharacters` is an optional array instead of a required rest parameter. `selector` can be `null`.
 
 ---
 
@@ -47,7 +47,7 @@ languages.registerInlineCompletionItemProvider(
 ): Disposable
 ```
 
-**相同。**
+**Same.**
 
 ---
 
@@ -60,26 +60,26 @@ languages.registerHoverProvider(
   provider: HoverProvider
 ): Disposable
 
-// coc.nvim — 相同签名
+// coc.nvim — same signature
 ```
 
-**相同。**
+**Same.**
 
 ---
 
 ## 4. DefinitionProvider / DeclarationProvider / TypeDefinitionProvider / ImplementationProvider
 
 ```typescript
-// VS Code — 四者签名相同
+// VS Code — all four share the same signature
 languages.registerDefinitionProvider(
   selector: DocumentSelector,
   provider: DefinitionProvider
 ): Disposable
 
-// coc.nvim — 相同签名
+// coc.nvim — same signature
 ```
 
-**相同。**
+**Same.**
 
 ---
 
@@ -93,19 +93,19 @@ languages.registerReferenceProvider(
 ): Disposable
 
 // coc.nvim
-languages.registerReferencesProvider(  // ⚠️ 命名不同：复数 References
+languages.registerReferencesProvider(  // ⚠️ different name: plural References
   selector: DocumentSelector,
   provider: ReferenceProvider
 ): Disposable
 ```
 
-**差异：** `registerReferenceProvider` (vscode) vs `registerReferencesProvider` (coc)。
+**Differences:** `registerReferenceProvider` (vscode) vs `registerReferencesProvider` (coc).
 
 ---
 
 ## 6. DocumentHighlightProvider
 
-**相同。**
+**Same.**
 
 ---
 
@@ -119,10 +119,10 @@ languages.registerDocumentSymbolProvider(
   metadata?: DocumentSymbolProviderMetadata
 ): Disposable
 
-// coc.nvim — 相同签名
+// coc.nvim — same signature
 ```
 
-**相同。**
+**Same.**
 
 ---
 
@@ -134,10 +134,10 @@ languages.registerWorkspaceSymbolProvider(
   provider: WorkspaceSymbolProvider<T>
 ): Disposable
 
-// coc.nvim — 相同签名（但无泛型）
+// coc.nvim — same signature (but without generics)
 ```
 
-**相同**（类型参数差异忽略）。
+**Same** (type parameter differences ignored).
 
 ---
 
@@ -145,28 +145,28 @@ languages.registerWorkspaceSymbolProvider(
 
 ```typescript
 // VS Code
-languages.registerCodeActionsProvider(  // ⚠️ 复数 Actions
+languages.registerCodeActionsProvider(  // ⚠️ plural Actions
   selector: DocumentSelector,
   provider: CodeActionProvider,
   metadata?: CodeActionProviderMetadata
 ): Disposable
 
 // coc.nvim
-languages.registerCodeActionProvider(   // ⚠️ 单数 Action
+languages.registerCodeActionProvider(   // ⚠️ singular Action
   selector: DocumentSelector,
   provider: CodeActionProvider,
-  clientId?: string,                    // 额外：客户端 ID
-  codeActionKinds?: ReadonlyArray<string>  // meta 数据用简单数组
+  clientId?: string,                    // extra: client ID
+  codeActionKinds?: ReadonlyArray<string>  // metadata as simple array
 ): Disposable
 ```
 
-**差异：** 命名不同（Actions vs Action），`metadata` 对象换成 `clientId + codeActionKinds[]`。
+**Differences:** different names (Actions vs Action), `metadata` object replaced with `clientId + codeActionKinds[]`.
 
 ---
 
 ## 10. CodeLensProvider
 
-**相同。**
+**Same.**
 
 ---
 
@@ -180,14 +180,14 @@ languages.registerDocumentFormattingEditProvider(
 ): Disposable
 
 // coc.nvim
-languages.registerDocumentFormatProvider(  // ⚠️ 命名不同
+languages.registerDocumentFormatProvider(  // ⚠️ different name
   selector: DocumentSelector,
   provider: DocumentFormattingEditProvider,
-  priority?: number                       // 额外：优先级
+  priority?: number                       // extra: priority
 ): Disposable
 ```
 
-**差异：** `registerDocumentFormat` (coc) vs `registerDocumentFormattingEdit` (vscode)，coc 多了 `priority`。
+**Differences:** `registerDocumentFormat` (coc) vs `registerDocumentFormattingEdit` (vscode), coc adds `priority`.
 
 ---
 
@@ -201,14 +201,14 @@ languages.registerDocumentRangeFormattingEditProvider(
 ): Disposable
 
 // coc.nvim
-languages.registerDocumentRangeFormatProvider(  // ⚠️ 命名不同
+languages.registerDocumentRangeFormatProvider(  // ⚠️ different name
   selector: DocumentSelector,
   provider: DocumentRangeFormattingEditProvider,
   priority?: number
 ): Disposable
 ```
 
-**差异：** 同上。
+**Differences:** Same as above.
 
 ---
 
@@ -227,24 +227,24 @@ languages.registerOnTypeFormattingEditProvider(
 languages.registerOnTypeFormattingEditProvider(
   selector: DocumentSelector,
   provider: OnTypeFormattingEditProvider,
-  triggerCharacters: string[]  // ⚠️ 数组而非 rest 参数
+  triggerCharacters: string[]  // ⚠️ array instead of rest parameter
 ): Disposable
 ```
 
-**差异：** vscode 用 rest 参数，coc 用数组。
+**Differences:** vscode uses rest parameters, coc uses an array.
 
 ---
 
 ## 14. RenameProvider
 
-**相同。**
+**Same.**
 
 ---
 
 ## 15. SignatureHelpProvider
 
 ```typescript
-// VS Code — 有 2 个 overloads
+// VS Code — has 2 overloads
 // Overload 1:
 languages.registerSignatureHelpProvider(
   selector: DocumentSelector,
@@ -258,7 +258,7 @@ languages.registerSignatureHelpProvider(
   metadata: SignatureHelpProviderMetadata  // ⚠️ metadata overload
 ): Disposable
 
-// coc.nvim — 只有 1 个
+// coc.nvim — only 1
 languages.registerSignatureHelpProvider(
   selector: DocumentSelector,
   provider: SignatureHelpProvider,
@@ -266,13 +266,13 @@ languages.registerSignatureHelpProvider(
 ): Disposable
 ```
 
-**差异：** coc 没有 `SignatureHelpProviderMetadata` overload。
+**Differences:** coc does not have the `SignatureHelpProviderMetadata` overload.
 
 ---
 
 ## 16. DocumentLinkProvider
 
-**相同。**
+**Same.**
 
 ---
 
@@ -286,58 +286,58 @@ languages.registerColorProvider(
 ): Disposable
 
 // coc.nvim
-languages.registerDocumentColorProvider(  // ⚠️ 命名不同
+languages.registerDocumentColorProvider(  // ⚠️ different name
   selector: DocumentSelector,
   provider: DocumentColorProvider
 ): Disposable
 ```
 
-**差异：** `registerColorProvider` (vscode) vs `registerDocumentColorProvider` (coc)。
+**Differences:** `registerColorProvider` (vscode) vs `registerDocumentColorProvider` (coc).
 
 ---
 
 ## 18. FoldingRangeProvider / SelectionRangeProvider / LinkedEditingRangeProvider
 
-**相同。**
+**Same.**
 
 ---
 
 ## 19. CallHierarchyProvider / TypeHierarchyProvider
 
-**相同。**
+**Same.**
 
 ---
 
 ## 20. InlayHintsProvider
 
-**相同。**
+**Same.**
 
 ---
 
 ## 21. SemanticTokensProvider (Document + Range)
 
-**相同。**
+**Same.**
 
 ---
 
 ## 22. TextDocumentContentProvider
 
 ```typescript
-// 不是 languages namespace 的，是 workspace 的
+// Not from the languages namespace, but from workspace
 workspace.registerTextDocumentContentProvider(
   scheme: string,
   provider: TextDocumentContentProvider
 ): Disposable
 ```
 
-**相同。**
+**Same.**
 
 ---
 
-## 23. vscode 独有 Provider（coc 无）
+## 23. vscode-only Providers (coc doesn't have)
 
 ```typescript
-// 以下在 coc 中不存在（InlineValuesProvider 接口存在，但无注册函数）
+// The following don't exist in coc (InlineValuesProvider interface exists, but no registration function)
 languages.registerEvaluatableExpressionProvider(selector, provider)
 languages.registerInlineValuesProvider(selector, provider)
 languages.registerDocumentDropEditProvider(selector, provider, metadata?)
@@ -349,32 +349,32 @@ window.registerTerminalProfileProvider(id, provider)
 
 ---
 
-## 快速转换表
+## Quick Conversion Table
 
-| vscode 注册函数 | coc 注册函数 | 参数调整 |
+| vscode registration function | coc registration function | Parameter Adjustments |
 |----------------|-------------|---------|
-| `registerCompletionItemProvider(sel,p,...t)` | `registerCompletionItemProvider(n,s,sel,p,t?,pri?,ac?)` | 加上 n,s,pri,ac；t 从 rest 变数组 |
-| `registerInlineCompletionItemProvider(sel,p)` | `registerInlineCompletionItemProvider(sel,p)` | 不变 |
-| `registerHoverProvider(sel,p)` | `registerHoverProvider(sel,p)` | 不变 |
-| `registerDefinitionProvider(sel,p)` | `registerDefinitionProvider(sel,p)` | 不变 |
-| `registerReferenceProvider(sel,p)` | `registerReferencesProvider(sel,p)` | 函数名加 s |
-| `registerDocumentHighlightProvider(sel,p)` | `registerDocumentHighlightProvider(sel,p)` | 不变 |
-| `registerDocumentSymbolProvider(sel,p,m?)` | `registerDocumentSymbolProvider(sel,p,m?)` | 不变 |
-| `registerWorkspaceSymbolProvider(p)` | `registerWorkspaceSymbolProvider(p)` | 不变 |
-| `registerCodeActionsProvider(sel,p,m?)` | `registerCodeActionProvider(sel,p,cid?,kinds?)` | 函数名去 s；metadata 拆成 cid/kinds |
-| `registerCodeLensProvider(sel,p)` | `registerCodeLensProvider(sel,p)` | 不变 |
-| `registerDocumentFormattingEditProvider(sel,p)` | `registerDocumentFormatProvider(sel,p,pri?)` | 简写函数名；加 priority |
-| `registerDocumentRangeFormattingEditProvider(sel,p)` | `registerDocumentRangeFormatProvider(sel,p,pri?)` | 同上 |
-| `registerOnTypeFormattingEditProvider(sel,p,...t)` | `registerOnTypeFormattingEditProvider(sel,p,t[])` | rest 参数变为数组 |
-| `registerRenameProvider(sel,p)` | `registerRenameProvider(sel,p)` | 不变 |
-| `registerSignatureHelpProvider(sel,p,...t)` 或 `(sel,p,meta)` | `registerSignatureHelpProvider(sel,p,t?)` | rest 变数组；无 metadata |
-| `registerDocumentLinkProvider(sel,p)` | `registerDocumentLinkProvider(sel,p)` | 不变 |
-| `registerColorProvider(sel,p)` | `registerDocumentColorProvider(sel,p)` | 函数名加 Document |
-| `registerFoldingRangeProvider(sel,p)` | `registerFoldingRangeProvider(sel,p)` | 不变 |
-| `registerSelectionRangeProvider(sel,p)` | `registerSelectionRangeProvider(sel,p)` | 不变 |
-| `registerCallHierarchyProvider(sel,p)` | `registerCallHierarchyProvider(sel,p)` | 不变 |
-| `registerTypeHierarchyProvider(sel,p)` | `registerTypeHierarchyProvider(sel,p)` | 不变 |
-| `registerLinkedEditingRangeProvider(sel,p)` | `registerLinkedEditingRangeProvider(sel,p)` | 不变 |
-| `registerInlayHintsProvider(sel,p)` | `registerInlayHintsProvider(sel,p)` | 不变 |
-| `registerDocumentSemanticTokensProvider(sel,p,l)` | `registerDocumentSemanticTokensProvider(sel,p,l)` | 不变 |
-| `registerDocumentRangeSemanticTokensProvider(sel,p,l)` | `registerDocumentRangeSemanticTokensProvider(sel,p,l)` | 不变 |
+| `registerCompletionItemProvider(sel,p,...t)` | `registerCompletionItemProvider(n,s,sel,p,t?,pri?,ac?)` | adds n,s,pri,ac; t from rest to array |
+| `registerInlineCompletionItemProvider(sel,p)` | `registerInlineCompletionItemProvider(sel,p)` | unchanged |
+| `registerHoverProvider(sel,p)` | `registerHoverProvider(sel,p)` | unchanged |
+| `registerDefinitionProvider(sel,p)` | `registerDefinitionProvider(sel,p)` | unchanged |
+| `registerReferenceProvider(sel,p)` | `registerReferencesProvider(sel,p)` | function name adds s |
+| `registerDocumentHighlightProvider(sel,p)` | `registerDocumentHighlightProvider(sel,p)` | unchanged |
+| `registerDocumentSymbolProvider(sel,p,m?)` | `registerDocumentSymbolProvider(sel,p,m?)` | unchanged |
+| `registerWorkspaceSymbolProvider(p)` | `registerWorkspaceSymbolProvider(p)` | unchanged |
+| `registerCodeActionsProvider(sel,p,m?)` | `registerCodeActionProvider(sel,p,cid?,kinds?)` | function name drops s; metadata split into cid/kinds |
+| `registerCodeLensProvider(sel,p)` | `registerCodeLensProvider(sel,p)` | unchanged |
+| `registerDocumentFormattingEditProvider(sel,p)` | `registerDocumentFormatProvider(sel,p,pri?)` | shortened function name; adds priority |
+| `registerDocumentRangeFormattingEditProvider(sel,p)` | `registerDocumentRangeFormatProvider(sel,p,pri?)` | same as above |
+| `registerOnTypeFormattingEditProvider(sel,p,...t)` | `registerOnTypeFormattingEditProvider(sel,p,t[])` | rest parameter becomes array |
+| `registerRenameProvider(sel,p)` | `registerRenameProvider(sel,p)` | unchanged |
+| `registerSignatureHelpProvider(sel,p,...t)` or `(sel,p,meta)` | `registerSignatureHelpProvider(sel,p,t?)` | rest becomes array; no metadata |
+| `registerDocumentLinkProvider(sel,p)` | `registerDocumentLinkProvider(sel,p)` | unchanged |
+| `registerColorProvider(sel,p)` | `registerDocumentColorProvider(sel,p)` | function name adds Document |
+| `registerFoldingRangeProvider(sel,p)` | `registerFoldingRangeProvider(sel,p)` | unchanged |
+| `registerSelectionRangeProvider(sel,p)` | `registerSelectionRangeProvider(sel,p)` | unchanged |
+| `registerCallHierarchyProvider(sel,p)` | `registerCallHierarchyProvider(sel,p)` | unchanged |
+| `registerTypeHierarchyProvider(sel,p)` | `registerTypeHierarchyProvider(sel,p)` | unchanged |
+| `registerLinkedEditingRangeProvider(sel,p)` | `registerLinkedEditingRangeProvider(sel,p)` | unchanged |
+| `registerInlayHintsProvider(sel,p)` | `registerInlayHintsProvider(sel,p)` | unchanged |
+| `registerDocumentSemanticTokensProvider(sel,p,l)` | `registerDocumentSemanticTokensProvider(sel,p,l)` | unchanged |
+| `registerDocumentRangeSemanticTokensProvider(sel,p,l)` | `registerDocumentRangeSemanticTokensProvider(sel,p,l)` | unchanged |

@@ -15,7 +15,7 @@
   <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png?v=1.5.9" alt="Registry preview" width="100%">
 </p>
 
-在 coc.nvim 中无缝运行 VS Code 扩展。支持 **Neovim 0.8+** 和 **Vim 9.0+**。
+Run VS Code extensions seamlessly in coc.nvim. Supports **Neovim 0.8+** and **Vim 9.0+**.
 
 [![Browse Registry](https://img.shields.io/badge/🌐_Browse_Available_Extensions-coc--plugin.github.io-blue?style=for-the-badge)](https://coc-plugin.github.io/coc-vscode-registry/)
 
@@ -104,11 +104,11 @@ This repo contains two parts:
 ```
 Input → Scanner (detect `from 'vscode'` / `require('vscode')` files)
       → Steps pipeline (5 registered generators):
-      │   ├─ language-client  → LanguageClient 代码 (module/binary server)
+      │   ├─ language-client  → LanguageClient code (module/binary server)
       │   ├─ source           → Copy + 5 AST transforms (import-mapping, class-to-factory,
       │   │                      provider-register, enum-offset, strip-volar)
       │   ├─ bridge           → Bridge code from BRIDGE_TEMPLATES (tsserver-forward)
-      │   ├─ snippets         → Copy snippets JSON + 空壳入口
+      │   ├─ snippets         → Copy snippets JSON + stub entry
       │   └─ mark-unsupported → Remove unsupported API calls
       → Text replacements (.fileName, .uri.fsPath, getWordRangeAtPosition, WorkspaceEdit)
       → Plugin patches (per-entry find/replace from registry)
@@ -190,14 +190,14 @@ cd plugin && npm run build  # build plugin only
 ### OS
 - **Linux** ✅ Fully supported
 - **macOS** ✅ Fully supported
-- **Windows** ❌ Not supported (计划中有兼容方案，参见 [`docs/windows-compatibility.md`](./docs/windows-compatibility.md)，但目前 pipeline 仍依赖 Unix shell 命令)
+- **Windows** ❌ Not supported (compatibility plans in [`docs/windows-compatibility.md`](./docs/windows-compatibility.md), but pipeline currently requires Unix shell commands)
 
 ### Editor
 
 | Editor | TUI | Notes |
 |--------|-----|-------|
-| **Neovim** 0.8+ | ✅ 完整浮窗 + extmark | 推荐，完整 Mason 风格体验 |
-| **Vim** 9.0+ | ✅ 拆分窗口 + prop_add | 底部拆分窗口，无 backdrop 遮罩，无实时搜索 |
+| **Neovim** 0.8+ | ✅ Full floating window + extmark | Recommended, full Mason-style experience |
+| **Vim** 9.0+ | ✅ Split window + prop_add | Bottom split, no backdrop, no live search |
 
 ### External commands
 

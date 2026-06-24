@@ -1,46 +1,46 @@
-# Windows 兼容性计划
+# Windows Compatibility Plan
 
-## 概述
+## Overview
 
-当前 coc-vscode-loader **不支持 Windows**。本文档详细分析所有兼容性壁垒，按优先级排列整改方案。
+coc-vscode-loader **does not support Windows** currently. This document analyzes all compatibility barriers in detail, with remediation plans prioritized by urgency.
 
-**目标**: 使 converter (CLI)、plugin (TUI + pipeline) 在 Windows 10/11 上正常工作。
-
----
-
-## 目录
-
-1. [路径系统 — Coc 配置目录](#1-路径系统--coc-配置目录)
-2. [Shell 命令缺失 — unzip / gunzip / rm -rf](#2-shell-命令缺失)
-3. [Python 二进制命名](#3-python-二进制命名)
-4. [进程信号 — SIGTERM](#4-进程信号)
-5. [生成代码中的 Bash 脚本](#5-生成代码中的-bash-脚本)
-6. [tsc 输出解析](#6-tsc-输出解析)
-7. [chmod 权限设置](#7-chmod-权限设置)
-8. [Shell 脚本迁移](#8-shell-脚本迁移)
-9. [验证清单](#9-验证清单)
+**Goal**: Make the converter (CLI), plugin (TUI + pipeline) work properly on Windows 10/11.
 
 ---
 
-## 1. 路径系统 — Coc 配置目录
+## Table of Contents
 
-### 现状
+1. [Path System — Coc Config Directory](#1-path-system--coc-config-directory)
+2. [Missing Shell Commands — unzip / gunzip / rm -rf](#2-missing-shell-commands)
+3. [Python Binary Naming](#3-python-binary-naming)
+4. [Process Signals — SIGTERM](#4-process-signals)
+5. [Bash Scripts in Generated Code](#5-bash-scripts-in-generated-code)
+6. [tsc Output Parsing](#6-tsc-output-parsing)
+7. [chmod Permission Settings](#7-chmod-permission-settings)
+8. [Shell Script Migration](#8-shell-script-migration)
+9. [Verification Checklist](#9-verification-checklist)
 
-所有模块硬编码 `path.join(os.homedir(), '.config', 'coc', ...)`，Windows 下 coc.nvim 实际使用 `%APPDATA%/coc`（即 `C:\Users\<user>\AppData\Roaming\coc`）。
+---
 
-### 波及文件
+## 1. Path System — Coc Config Directory
 
-| 文件 | 用途 |
-|------|------|
-| `plugin/src/pipeline.ts` | 缓存、构建、installToCoc |
-| `plugin/src/registry.ts` | 本地缓存路径 |
-| `plugin/src/index.ts` | 日志路径 |
-| `plugin/src/state.ts` | 状态持久化路径 |
-| `plugin/src/tui.ts` | 日志文件引用 |
+### Current Status
 
-### 整改方案
+All modules hardcode `path.join(os.homedir(), '.config', 'coc', ...)`, but on Windows, coc.nvim actually uses `%APPDATA%/coc` (i.e., `C:\Users\<user>\AppData\Roaming\coc`).
 
-新建 `plugin/src/paths.ts`，统一导出所有路径：
+### Affected Files
+
+| File | Purpose |
+|------|---------|
+| `plugin/src/pipeline.ts` | Cache, build, installToCoc |
+| `plugin/src/registry.ts` | Local cache path |
+| `plugin/src/index.ts` | Log path |
+| `plugin/src/state.ts` | State persistence path |
+| `plugin/src/tui.ts` | Log file reference |
+
+### Remediation Plan
+
+Create `plugin/src/paths.ts` to export all paths from a single source:
 
 ```typescript
 import * as path from 'path'
@@ -63,13 +63,13 @@ export const STATE_FILE = path.join(CACHE_DIR, 'state.json')
 export const REGISTRY_CACHE = path.join(CACHE_DIR, 'registry.json')
 ```
 
-### 迁移步骤
+### Migration Steps
 
-1. 创建 `paths.ts`
-2. 逐模块替换硬编码路径为 `paths.ts` 导出
-3. 更新所有 `import` 语句
+1. Create `paths.ts`
+2. Replace hardcoded paths in each module with `paths.ts` exports
+3. Update all `import` statements
 
-### 影响范围
+### Scope of Impact
 
 - `pipeline.ts`: `CACHE_DIR`, `BUILD_DIR`, `INSTALL_DIR`, `EXTENSIONS_DIR`
 - `registry.ts`: `REGISTRY_CACHE`
@@ -78,34 +78,34 @@ export const REGISTRY_CACHE = path.join(CACHE_DIR, 'registry.json')
 
 ---
 
-## 2. Shell 命令缺失
+## 2. Missing Shell Commands
 
-### 现状
+### Current Status
 
-`pipeline.ts` 通过 `spawn()` 调用外部 shell 命令，部分命令 Windows 不存在。
+`pipeline.ts` calls external shell commands via `spawn()`, some of which do not exist on Windows.
 
-### 命令清单
+### Command List
 
-| 命令 | 行号 | Windows | 替代方案 |
-|------|------|---------|----------|
-| `unzip` | 475 | ❌ 不存在 | `adm-zip` npm 包或 `tar -xf`（Win10+ 内置） |
-| `gunzip` | 481 | ❌ 不存在 | Node.js `zlib.createGunzip()` + `fs.createWriteStream()` |
-| `rm -rf` | 659 | ❌ cmd 无此命令 | `fs.rmSync(dir, { recursive: true, force: true })`（Node 16.7+） |
-| `chmod` | 658 | ⚠️ 不存在但 try/catch 兜底 | 跳过（见第 7 节） |
-| `git` | 多处 | ✅ Git for Windows | 确保在 PATH 中即可 |
-| `curl` | 多处 | ✅ Win10+ 内置 `curl.exe` | 确保在 PATH 中 |
-| `tar` | 477 | ✅ Win10+ 内置 `tar.exe` | 确保在 PATH 中 |
-| `npm` | 多处 | ✅ `npm.cmd` | 自动由 Node.js 解析 |
-| `npx` | 多处 | ✅ `npx.cmd` | 自动由 Node.js 解析 |
-| `node` | 383 | ✅ `node.exe` | 自动由 Node.js 解析 |
-| `go` | 336 | ✅ | 需用户安装 |
-| `cargo` | 357 | ✅ | 需用户安装 |
+| Command | Line | Windows | Alternative |
+|---------|------|---------|-------------|
+| `unzip` | 475 | ❌ Not available | `adm-zip` npm package or `tar -xf` (built-in on Win10+) |
+| `gunzip` | 481 | ❌ Not available | Node.js `zlib.createGunzip()` + `fs.createWriteStream()` |
+| `rm -rf` | 659 | ❌ cmd has no such command | `fs.rmSync(dir, { recursive: true, force: true })` (Node 16.7+) |
+| `chmod` | 658 | ⚠️ Not available but caught by try/catch | Skip (see Section 7) |
+| `git` | Multiple | ✅ Git for Windows | Just ensure it's in PATH |
+| `curl` | Multiple | ✅ Built-in on Win10+ `curl.exe` | Ensure it's in PATH |
+| `tar` | 477 | ✅ Built-in on Win10+ `tar.exe` | Ensure it's in PATH |
+| `npm` | Multiple | ✅ `npm.cmd` | Automatically resolved by Node.js |
+| `npx` | Multiple | ✅ `npx.cmd` | Automatically resolved by Node.js |
+| `node` | 383 | ✅ `node.exe` | Automatically resolved by Node.js |
+| `go` | 336 | ✅ | Requires user installation |
+| `cargo` | 357 | ✅ | Requires user installation |
 
-### 整改方案
+### Remediation Plan
 
-#### 2.1 压缩包解压统一
+#### 2.1 Unified Archive Extraction
 
-将分散的 `unzip` / `tar` / `gunzip` 分支合并为统一的解压函数，使用 Node.js 标准库和 `adm-zip`：
+Merge the scattered `unzip` / `tar` / `gunzip` branches into a unified extraction function using Node.js standard library and `adm-zip`:
 
 ```typescript
 // pipeline.ts — extractArchive()
@@ -143,7 +143,7 @@ async function extractArchive(archivePath: string, destDir: string): Promise<voi
 }
 ```
 
-#### 2.2 `rm -rf` 替换
+#### 2.2 `rm -rf` Replacement
 
 ```typescript
 // Before (line 659):
@@ -153,15 +153,15 @@ await spawnPromise('rm', ['-rf', dir])
 fs.rmSync(dir, { recursive: true, force: true })
 ```
 
-> **注意**: `pipeline.ts` 中 Go 缓存清理的 `chmod -R u+w` + `rm -rf` 模式，可直接替换为 `fs.rmSync(dir, { recursive: true, force: true })`，Node.js 18+ 的 `fs.rm` 不需要先 chmod。
+> **Note**: The `chmod -R u+w` + `rm -rf` pattern used for Go cache cleanup in `pipeline.ts` can be directly replaced with `fs.rmSync(dir, { recursive: true, force: true })`. Node.js 18+ `fs.rm` does not require chmod first.
 
 ---
 
-## 3. Python 二进制命名
+## 3. Python Binary Naming
 
-### 现状
+### Current Status
 
-硬编码 Unix Python3 路径，且命令名固定为 `python3`：
+Hardcoded Unix Python3 paths, with the command name fixed as `python3`:
 
 ```typescript
 const PYTHON_PATHS = [
@@ -171,9 +171,9 @@ const PYTHON_PATHS = [
 ]
 ```
 
-### 整改方案
+### Remediation Plan
 
-使用 `which`/`where` 动态查找，并加入 `python` 备选：
+Use `which`/`where` for dynamic lookup, and add `python` as a fallback:
 
 ```typescript
 async function findPython(): Promise<string> {
@@ -197,28 +197,28 @@ async function findPython(): Promise<string> {
 
 ---
 
-## 4. 进程信号
+## 4. Process Signals
 
-### 现状
+### Current Status
 
 ```typescript
 child.kill('SIGTERM')
 ```
 
-Windows 不支持 `SIGTERM`，Node.js 会回退为 `SIGKILL`（强制终止）。
+Windows does not support `SIGTERM`; Node.js falls back to `SIGKILL` (forceful termination).
 
-### 整改方案
+### Remediation Plan
 
 ```typescript
 function killProcess(child: ChildProcess): void {
   if (process.platform === 'win32') {
-    // Windows: 用 taskkill 确保子进程树也被终止
+    // Windows: Use taskkill to ensure the child process tree is also terminated
     if (child.pid) {
       spawn('taskkill', ['/pid', String(child.pid), '/f', '/t'])
     }
   } else {
     child.kill('SIGTERM')
-    // 5s 后强制 kill
+    // Force kill after 5s
     setTimeout(() => { child.kill('SIGKILL') }, 5000)
   }
 }
@@ -226,22 +226,22 @@ function killProcess(child: ChildProcess): void {
 
 ---
 
-## 5. 生成代码中的 Bash 脚本
+## 5. Bash Scripts in Generated Code
 
-### 现状
+### Current Status
 
-`converter/src/convert.ts` 在生成的 `package.json` 中注入 bash 后安装脚本：
+`converter/src/convert.ts` injects a bash postinstall script into the generated `package.json`:
 
 ```typescript
 scripts['postinstall'] = 'if [ -d server ] && [ -f server/package.json ]; then (cd server && npm install --legacy-peer-deps); fi'
 ```
 
-### 整改方案
+### Remediation Plan
 
-改用 Node.js 脚本，存为 `scripts/postinstall.js`，由生成的 `esbuild.mjs` 一同输出：
+Switch to a Node.js script saved as `scripts/postinstall.js`, output alongside the generated `esbuild.mjs`:
 
 ```javascript
-// scripts/postinstall.js — 自动由生成器写入
+// scripts/postinstall.js — automatically written by the generator
 const { execSync } = require('child_process')
 const fs = require('fs')
 const path = require('path')
@@ -254,11 +254,11 @@ if (fs.existsSync(serverDir) && fs.existsSync(serverPkg)) {
 }
 ```
 
-`convert.ts` 改为：
+`convert.ts` changes to:
 
 ```typescript
 scripts['postinstall'] = 'node scripts/postinstall.js'
-// 同时写入 scripts/postinstall.js 到输出目录
+// Also write scripts/postinstall.js to the output directory
 generatedFiles.push({
   path: 'scripts/postinstall.js',
   content: postinstallScriptContent,
@@ -267,21 +267,21 @@ generatedFiles.push({
 
 ---
 
-## 6. tsc 输出解析
+## 6. tsc Output Parsing
 
-### 现状
+### Current Status
 
-`convert.ts` 用正则解析 tsc 编译错误，硬编码 `/` 分隔符：
+`convert.ts` uses regex to parse tsc compilation errors, with hardcoded `/` separator:
 
 ```typescript
 const errorFiles = new Set(checkOut.match(/^src\/(.+?\.ts)\(/gm))
 ```
 
-Windows 下 tsc 输出路径使用 `\`，正则无法匹配。
+On Windows, tsc output paths use `\`, which the regex cannot match.
 
-### 整改方案
+### Remediation Plan
 
-使分隔符与平台无关：
+Make the separator platform-independent:
 
 ```typescript
 const sep = path.sep === '\\' ? '\\\\' : '/'
@@ -291,43 +291,43 @@ const errorFiles = new Set(checkOut.match(re))
 
 ---
 
-## 7. chmod 权限设置
+## 7. chmod Permission Settings
 
-### 现状
+### Current Status
 
-多处 `fs.chmodSync(path, 0o755)` 设置二进制可执行权限。
+Multiple places use `fs.chmodSync(path, 0o755)` to set binary executable permissions.
 
-### 整改方案
+### Remediation Plan
 
-Windows 不区分可执行权限。包一层条件跳过：
+Windows does not distinguish executable permissions. Wrap with a conditional skip:
 
 ```typescript
 function setExecutable(filePath: string): void {
   if (process.platform !== 'win32') {
     fs.chmodSync(filePath, 0o755)
   }
-  // Windows: 不需要操作，.exe 后缀已足够
+  // Windows: No action needed, .exe extension is sufficient
 }
 ```
 
-> **注意**: 当前 try/catch 已兜底 (`chmod` 失败被捕获)，但显式跳过更清晰可靠。
+> **Note**: The current try/catch already handles this (`chmod` failure is caught), but an explicit skip is cleaner and more reliable.
 
 ---
 
-## 8. Shell 脚本迁移
+## 8. Shell Script Migration
 
-### 现状
+### Current Status
 
-| 脚本 | 用途 | 是否阻塞 Windows |
-|------|------|------------------|
-| `dev.sh` | 测试 + push | ❌ 低优先级，可用 `SKIP_SMOKE=1 git push` 替代 |
-| `switch.sh` | 切换 dev/npm 模式 | ⚠️ 中等，可用 Node.js 重写 |
-| `scripts/convert-plugin.sh` | CLI 转换入口 | ⚠️ 中等 |
-| `scripts/test-*.sh` | 测试工具 | ❌ 低优先级，可用 `npm test` 替代 |
+| Script | Purpose | Blocks Windows? |
+|--------|---------|-----------------|
+| `dev.sh` | Test + push | ❌ Low priority, can be replaced with `SKIP_SMOKE=1 git push` |
+| `switch.sh` | Toggle dev/npm mode | ⚠️ Medium, can be rewritten in Node.js |
+| `scripts/convert-plugin.sh` | CLI conversion entry | ⚠️ Medium |
+| `scripts/test-*.sh` | Test utilities | ❌ Low priority, can be replaced with `npm test` |
 
-### 整改方案
+### Remediation Plan
 
-`dev.sh` 和 `switch.sh` 重写为 `.mjs` 文件，使其跨平台：
+Rewrite `dev.sh` and `switch.sh` as `.mjs` files to make them cross-platform:
 
 ```javascript
 // switch.mjs
@@ -346,54 +346,54 @@ function cocExtensionsDir() {
   return path.join(home, '.config', 'coc', 'extensions')
 }
 
-// ... 其余逻辑等同 switch.sh
+// ... remaining logic same as switch.sh
 ```
 
 ---
 
-## 9. 验证清单
+## 9. Verification Checklist
 
-### 9.1 单元测试通过
+### 9.1 Unit Tests Pass
 
 ```bash
 npm test                    # 165 tests (15 test files)
 npm run test:smoke          # 128 registry entries
 ```
 
-### 9.2 Windows 专项测试
+### 9.2 Windows-Specific Tests
 
-| 测试项 | 验证方法 |
-|--------|----------|
-| Coc 配置目录解析 | `getCocConfigDir()` 返回 `%APPDATA%/coc` |
-| 压缩包解压 | 分别测试 `.zip`, `.tar.gz`, `.gz` 格式 |
-| Python 查找 | `findPython()` 返回 `python` 而非 `python3` |
-| 进程终止 | `killProcess()` 调用 `taskkill` |
-| 无 bash 生成物 | 检查输出 `package.json` 的 `postinstall` |
-| chmod 跳过 | Windows 下不报错 |
-| tsc 错误解析 | `src\foo.ts(10,5)` 能被正确匹配 |
-| 二进制下载 | 下载 Windows 平台 asset |
-| pip 安装 | `--break-system-packages` 不在 Windows 下使用 |
-| 完整安装流程 | 安装 Volar / Deno / Tailwind CSS 各一个 |
+| Test Item | Verification Method |
+|-----------|-------------------|
+| Coc config directory resolution | `getCocConfigDir()` returns `%APPDATA%/coc` |
+| Archive extraction | Test `.zip`, `.tar.gz`, `.gz` formats separately |
+| Python lookup | `findPython()` returns `python` instead of `python3` |
+| Process termination | `killProcess()` calls `taskkill` |
+| No bash artifacts | Check `postinstall` in output `package.json` |
+| chmod skip | No error on Windows |
+| tsc error parsing | `src\foo.ts(10,5)` can be matched correctly |
+| Binary download | Downloads Windows platform asset |
+| pip installation | `--break-system-packages` is not used on Windows |
+| Full installation flow | Install one each of Volar / Deno / Tailwind CSS |
 
-### 9.3 已知不可行项
+### 9.3 Known Infeasible Items
 
-| 功能 | 原因 |
-|------|------|
-| `switch.sh local` symlink | Windows 下需要管理员权限或 Developer Mode 才能创建符号链接，不阻塞核心功能 |
+| Feature | Reason |
+|---------|--------|
+| `switch.sh local` symlink | Windows requires administrator privileges or Developer Mode to create symlinks; does not block core functionality |
 
 ---
 
-## 优先级时间线
+## Priority Timeline
 
-| Phase | 内容 | 预计工时 |
-|-------|------|----------|
-| **P0** | 路径系统统一 (`paths.ts`) | 半天 |
-| **P0** | 压缩包解压重构 (`extractArchive`) | 半天 |
-| **P1** | Python 查找 + 进程信号 + chmod | 2 小时 |
-| **P1** | postinstall bash → Node.js 脚本 | 2 小时 |
-| **P1** | tsc 错误解析跨平台 | 1 小时 |
-| **P2** | `switch.sh` → Node.js 重写 | 半天 |
-| **P2** | `dev.sh` → Node.js 重写 | 1 小时 |
-| **验证** | Windows VM/CI 端到端测试 | 半天 |
+| Phase | Content | Estimated Effort |
+|-------|---------|-----------------|
+| **P0** | Path system unification (`paths.ts`) | Half day |
+| **P0** | Archive extraction refactoring (`extractArchive`) | Half day |
+| **P1** | Python lookup + process signals + chmod | 2 hours |
+| **P1** | postinstall bash → Node.js script | 2 hours |
+| **P1** | Cross-platform tsc error parsing | 1 hour |
+| **P2** | `switch.sh` → Node.js rewrite | Half day |
+| **P2** | `dev.sh` → Node.js rewrite | 1 hour |
+| **Verification** | Windows VM/CI end-to-end testing | Half day |
 
-**总计**: 约 2-3 人天。
+**Total**: Approximately 2-3 person-days.

@@ -28,21 +28,21 @@ External commands required at runtime:
 | `docs/` | API mapping docs, converter design, migration guides |
 | `docs/types/` | Type definitions (vscode.d.ts, coc.d.ts) for reference |
 
-## Registry 添加规则
+## Registry Entry Rules
 
-`coc-vscode-registry/registry.json` 是一个扁平数组（当前 128 条），按技术含量从高到低排列，同组内按 `name` 字母序插入。
+`coc-vscode-registry/registry.json` is a flat array (currently 128 entries), ordered by technical complexity descending, with alphabetical `name` ordering within groups.
 
-### 排列逻辑
+### Ordering Logic
 
-整体分为两大段：**非 snippets**（type 为 `pure-lsp` / `ts-bridge` / `direct-api`）在前，**snippets** 在后。非 snippets 段按技术含量从高到低分组：
+The array is split into two segments: **non-snippets** (type `pure-lsp` / `ts-bridge` / `direct-api`) first, then **snippets**. The non-snippets segment is ordered by technical complexity descending:
 
 ```
 LSP (binary / module / bridge) → direct-api (API polyfill)
 ```
 
-### 非 snippets 段插入位置
+### Non-snippets Insertion Position
 
-按以下语言/工具类别分组，组内按 `name` 字母序插入：
+Grouped by language/tool category, ordered alphabetically by `name` within each group:
 
 ```
 1.  C/C++                    — clangd (binary)
@@ -61,9 +61,9 @@ LSP (binary / module / bridge) → direct-api (API polyfill)
 14. Other tools              — gitignore (direct-api)
 ```
 
-### snippets 段插入位置
+### Snippets Insertion Position
 
-按以下类别分组，组内按 `name` 字母序插入：
+Grouped by category, ordered alphabetically by `name` within each group:
 
 ```
 1.  Vue
@@ -84,9 +84,9 @@ LSP (binary / module / bridge) → direct-api (API polyfill)
 16. Other
 ```
 
-新插件不属于任何现有组时放在对应段的 Other 组末尾。
+Plugins not belonging to any existing group are placed at the end of the corresponding segment's Other group.
 
-### 必需字段
+### Required Fields
 
 ```json
 {
@@ -102,37 +102,37 @@ LSP (binary / module / bridge) → direct-api (API polyfill)
 }
 ```
 
-### 可选字段
+### Optional Fields
 
-| 字段 | 适用 type | 说明 |
-|------|-----------|------|
-| `minPluginVersion` | 全部 | 最低 coc-vscode-loader 版本，低于此版本的客户端会过滤掉该条目 |
-| `serverBinary` | pure-lsp (binary kind) | GitHub Release 二进制下载配置，含 `repo`、`asset`、`binaryPath`、可选 `args` 和 `targetAssets` |
-| `pipPackages` | pure-lsp | Python pip 依赖，pipeline 自动安装 |
-| `goPackages` | pure-lsp | Go 包，pipeline 执行 `go install` 编译到 `server/` |
-| `cargoPackages` | pure-lsp | Rust crate，pipeline 执行 `cargo install --root` 编译后复制到 `server/` |
-| `notes` | 全部 | 用户可见的安装提示，显示在 TUI 详情弹窗中（如手动步骤或注意事项） |
+| Field | Applies to | Description |
+|-------|-----------|-------------|
+| `minPluginVersion` | All | Minimum coc-vscode-loader version; entries below this version are filtered out |
+| `serverBinary` | pure-lsp (binary kind) | GitHub Release binary download config with `repo`, `asset`, `binaryPath`, optional `args` and `targetAssets` |
+| `pipPackages` | pure-lsp | Python pip dependencies, auto-installed by pipeline |
+| `goPackages` | pure-lsp | Go packages, pipeline runs `go install` to compile into `server/` |
+| `cargoPackages` | pure-lsp | Rust crates, pipeline runs `cargo install --root` then copies to `server/` |
+| `notes` | All | User-visible install hints shown in TUI detail popup (e.g. manual steps or caveats) |
 
-### convert 字段说明
+### convert Field Description
 
-`convert` 是数组，按执行顺序排列：
+`convert` is an array, executed in order:
 
-- **`language-client`** — 生成 `src/index.ts`，创建 LanguageClient 连接语言服务器。适用于 `pure-lsp` 类型。`server.kind` 可选 `module`（npm 包）或 `binary`（可执行文件）。binary 类型需要设置 `server.binary`（repo/asset/binaryPath）和可选 `args`。
-- **`source`** — 用 import-mapping 等 transform 转换 TypeScript 源码。可选，有则保留原扩展的部分功能。
-- **`bridge`** — 桥接预设（目前只有 `ts-bridge` 用于 Volar）。
-- **`snippets`** — 纯 Snippets 扩展，复制 snippets JSON 文件并生成空壳 `src/index.ts`。
+- **`language-client`** — generates `src/index.ts`, creates a LanguageClient to connect to the language server. Applies to `pure-lsp` type. `server.kind` can be `module` (npm package) or `binary` (executable). Binary type requires `server.binary` (repo/asset/binaryPath) and optional `args`.
+- **`source`** — applies transforms like import-mapping to TypeScript source. Optional; preserves part of the original extension's functionality.
+- **`bridge`** — bridge preset (currently only `ts-bridge` for Volar).
+- **`snippets`** — pure Snippets extension, copies snippets JSON files and generates a stub `src/index.ts`.
 
-### 插件特有文本补丁
+### Plugin-Specific Text Patches
 
-- 插件级别的文本修复（如修复原扩展自身 bug）用 `patches` 字段
-- 不要写在 converter 通用逻辑里
-- 使用 `patches` 时设 `minPluginVersion: "1.4.3"`
+- Plugin-level text fixes (e.g. fixing bugs in the original extension) use the `patches` field
+- Do not put them in the converter's general logic
+- When using `patches`, set `minPluginVersion: "1.4.3"`
 
-### 命名规范
+### Naming Convention
 
-- 名称统一用 `vscode-<repository-short-name>` 格式
-- `displayName` 用原扩展的 displayName
-- `languages` 包含所有触发语言（遵守原扩展的 activationEvents）
+- Names follow the `vscode-<repository-short-name>` format
+- `displayName` uses the original extension's displayName
+- `languages` includes all trigger languages (following the original extension's activationEvents)
 
 ## Converter transforms
 
@@ -144,53 +144,53 @@ LSP (binary / module / bridge) → direct-api (API polyfill)
 | `enum-offset` | Comment on enum value differences |
 | `language-client` | LanguageClient signature adaptation |
 
-### `import-mapping` 文本级替换（text-level polyfills）
+### `import-mapping` Text-Level Polyfills
 
-`import-mapping` 除了 AST 层的导入重写，还会对源码做文本替换来适配 coc.nvim 的 API 差异：
+`import-mapping` applies text-level replacements on source code in addition to AST-level import rewriting to adapt to coc.nvim API differences:
 
-| 替换 | 原因 |
+| Replacement | Reason |
 |------|------|
-| `await import(...)` → `require(...)` | coc 扩展运行在 CJS 沙箱 |
-| `createStatusBarItem(name, alignment, priority)` → `createStatusBarItem(priority)` | coc API 参数不同 |
-| `LanguageStatusSeverity.xxx` → `2` | coc 无此类型 |
-| `new StatusBar()` → no-op mock | VS Code status bar 接口差异 |
-| `workspace.isTrusted` → `true` | coc 无工作区信任概念 |
-| `new CodeAction()` → try-catch safe | coc 的 CodeAction 构造器可能不可用 |
-| `CodeActionKind.SourceFixAll.append(...)` → string literal | coc 的 CodeActionKind 是 string 别名 |
-| `window.activeTextEditor` → polyfill | coc 无此属性，注入运行时兼容层 |
-| `window.onDidChangeActiveTextEditor` → `workspace.onDidOpenTextDocument` | coc 使用不同事件名 |
-| `languages.createLanguageStatusItem(...)` → no-op（支持 `vscode.` 前缀） | coc 无此 API |
-| `window.showOpenDialog(...)` → `void 0`（支持 `vscode.` 前缀） | coc 无文件选择对话框 |
-| `window.showInformationMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'more'))`（支持 `vscode.` 前缀） | coc 使用 showMessage 加 severity 参数（`'error'`/`'warning'`/`'more'`），包裹 Promise.resolve 保持 `.then()` 链式调用 |
-| `window.showWarningMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'warning'))`（同上） | 同上，自动剥离多余参数（按钮、选项等） |
-| `window.showErrorMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'error'))`（同上） | 同上 |
-| `languages.match(...)` → `1` | coc 无此 API，返回 truthy 值假设匹配 |
-| `registerDocumentFormatProvider(sel, provider)` → `(sel, provider, 1)` | 默认 priority=1 避免被 LanguageClient 覆盖 |
-| `workspace.workspaceFolders[` → `(workspace.workspaceFolders \|\| [])[` | coc 可能返回 undefined |
-| 自动补 `workspace`/`Uri` import | 引入新 API 后自动补全 import |
+| `await import(...)` → `require(...)` | coc extensions run in CJS sandbox |
+| `createStatusBarItem(name, alignment, priority)` → `createStatusBarItem(priority)` | Different coc API parameters |
+| `LanguageStatusSeverity.xxx` → `2` | coc has no such type |
+| `new StatusBar()` → no-op mock | VS Code status bar API differences |
+| `workspace.isTrusted` → `true` | coc has no workspace trust concept |
+| `new CodeAction()` → try-catch safe | coc's CodeAction constructor may be unavailable |
+| `CodeActionKind.SourceFixAll.append(...)` → string literal | coc's CodeActionKind is a string alias |
+| `window.activeTextEditor` → polyfill | coc has no such property, injects runtime compatibility layer |
+| `window.onDidChangeActiveTextEditor` → `workspace.onDidOpenTextDocument` | coc uses different event name |
+| `languages.createLanguageStatusItem(...)` → no-op (supports `vscode.` prefix) | coc has no such API |
+| `window.showOpenDialog(...)` → `void 0` (supports `vscode.` prefix) | coc has no file picker dialog |
+| `window.showInformationMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'more'))` (supports `vscode.` prefix) | coc uses showMessage with severity parameter (`'error'`/`'warning'`/`'more'`), wraps Promise.resolve to preserve `.then()` chaining |
+| `window.showWarningMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'warning'))` (same) | Same, auto-strips extra arguments (buttons, options, etc.) |
+| `window.showErrorMessage(msg)` → `Promise.resolve(window.showMessage(msg, 'error'))` (same) | Same |
+| `languages.match(...)` → `1` | coc has no such API, returns truthy value assuming match |
+| `registerDocumentFormatProvider(sel, provider)` → `(sel, provider, 1)` | Default priority=1 to avoid being overridden by LanguageClient |
+| `workspace.workspaceFolders[` → `(workspace.workspaceFolders \|\| [])[` | coc may return undefined |
+| Auto-inject `workspace`/`Uri` import | Automatically adds imports after introducing new APIs |
 
-### `convert.ts` 通用文本替换
+### `convert.ts` Generic Text Replacements
 
-converter 主流程在步骤执行后还会对所有输出源文件做一轮通用文本替换：
+The converter main flow applies a round of generic text replacements to all output source files after step execution:
 
-| 替换 | 原因 |
+| Replacement | Reason |
 |------|------|
-| `.fileName` → `Uri.parse($1.uri).fsPath` | coc 的 TextDocument 无 fileName 属性。加 `(?<![\w$])` negative lookbehind 避免匹配 `_document.fileName` |
-| `{ fileName } = doc` 解构拆分 | 同上，处理解构写法 |
-| `.uri.fsPath` → `Uri.parse($1.uri).fsPath` | coc 的 uri 是 file:// URI 字符串。要求首字符为 `[a-zA-Z_$]` 避免匹配 `0.uri.fsPath` |
-| `getWordRangeAtPosition` → 内联实现 | coc 无此 API |
-| `Location.create(Uri.file($1), $2)` → `Location.create($1, Range.create($2, $2))` | coc 的 Location.create 接受 `(string, Range)`，非 `(Uri, Position)` |
-| `Uri`/`Range` 自动注入 import | 命名空间 import 无法用解构注入，自动补 `import { Uri }`/`import { Range }` |
-| `(?:vscode\.)?workspace\.workspaceFolders` guard | 处理 `vscode.` 前缀，避免产生 `vscode.(...)` 语法错误 |
-| `new WorkspaceEdit()` → `({ changes: {} })` | coc 的 WorkspaceEdit 是 interface，不可 new。`.set(uri, edits)`/`.set(document.uri, edits)` 同时转为 `.changes[uri] = edits` |
+| `.fileName` → `Uri.parse($1.uri).fsPath` | coc's TextDocument has no fileName property. Added `(?<![\w$])` negative lookbehind to avoid matching `_document.fileName` |
+| `{ fileName } = doc` destructure split | Same, handles destructuring syntax |
+| `.uri.fsPath` → `Uri.parse($1.uri).fsPath` | coc's uri is a file:// URI string. Requires first character `[a-zA-Z_$]` to avoid matching `0.uri.fsPath` |
+| `getWordRangeAtPosition` → inline implementation | coc has no such API |
+| `Location.create(Uri.file($1), $2)` → `Location.create($1, Range.create($2, $2))` | coc's Location.create accepts `(string, Range)`, not `(Uri, Position)` |
+| `Uri`/`Range` auto-inject import | Namespace imports can't use destructuring injection, auto-adds `import { Uri }`/`import { Range }` |
+| `(?:vscode\.)?workspace\.workspaceFolders` guard | Handles `vscode.` prefix, avoids producing `vscode.(...)` syntax errors |
+| `new WorkspaceEdit()` → `({ changes: {} })` | coc's WorkspaceEdit is an interface, cannot be instantiated with new. `.set(uri, edits)`/`.set(document.uri, edits)` also converted to `.changes[uri] = edits` |
 
-### 插件级文本补丁 `patches`（v1.4.2+）
+### Plugin-Specific Text Patches `patches` (v1.4.2+)
 
-插件特有的文本替换（如修复原扩展自身 bug）应通过 registry 的 `patches` 字段声明，不污染通用 converter：
+Plugin-specific text replacements (e.g. fixing bugs in the original extension) should be declared via the registry `patches` field, not in the generic converter:
 
-**类型一：源码层 patches（source step）**
+**Type 1: Source-level patches (source step)**
 
-对转换后的 TypeScript/JavaScript 源文件做文本替换，在通用替换之后、写文件之前依次执行。
+Applied to converted TypeScript/JavaScript source files, after generic replacements but before writing to disk.
 
 ```json
 {
@@ -202,12 +202,12 @@ converter 主流程在步骤执行后还会对所有输出源文件做一轮通�
 }
 ```
 
-- `find`：RegExp 源的**转义后**字符串（与 `new RegExp(find, 'g')` 兼容）
-- `replace`：替换文本
+- `find`: **Escaped** RegExp source string (compatible with `new RegExp(find, 'g')`)
+- `replace`: Replacement text
 
-**类型二：Server 编译后 patches（language-client step）**
+**Type 2: Server post-compilation patches (language-client step)**
 
-对 local language server 编译后的 JS 输出文件做文本替换，在 `tsc` 编译完成后、`esbuild` 打包之前执行。适用于修复 server 端 behavior（如禁用 pull diagnostics、注入事件钩子等）。
+Applied to compiled JS output of a local language server, after `tsc` compilation but before `esbuild` bundling. Suitable for fixing server-side behavior (e.g. disabling pull diagnostics, injecting event hooks).
 
 ```json
 {
@@ -226,21 +226,21 @@ converter 主流程在步骤执行后还会对所有输出源文件做一轮通�
 }
 ```
 
-- `file`：相对于 `server/out/` 的文件路径（如 `"eslintServer.js"`、`"eslint.js"`）
-- `find`：RegExp 源的**转义后**字符串
-- `replace`：替换文本
-- 所有 patch 通过 `server-patches.json` 写入 build 目录，由生成的 `esbuild.mjs` prebuild 段在构建时读取执行
+- `file`: Path relative to `server/out/` (e.g. `"eslintServer.js"`, `"eslint.js"`)
+- `find`: **Escaped** RegExp source string
+- `replace`: Replacement text
+- All patches written to `server-patches.json` in the build directory, read and executed by the generated `esbuild.mjs` prebuild section
 
-### `class-to-factory` 的命名空间映射
+### `class-to-factory` Namespace Mapping
 
-部分 coc.nvim 类型是 interface（非 class），且 namespace 函数名不是 `.create()`：
+Some coc.nvim types are interfaces (not classes), and their namespace function names are not `.create()`:
 
-| VS Code | coc.nvim | 原因 |
+| VS Code | coc.nvim | Reason |
 |---------|----------|------|
-| `new TextEdit(range, text)` | `TextEdit.replace(range, text)` | coc 的 TextEdit 是 interface，只有 `TextEdit.replace/insert/del` |
-| `new WorkspaceEdit()` | `({ changes: {} })` | coc 的 WorkspaceEdit 是 interface，不可 new |
+| `new TextEdit(range, text)` | `TextEdit.replace(range, text)` | coc's TextEdit is an interface, only `TextEdit.replace/insert/del` exist |
+| `new WorkspaceEdit()` | `({ changes: {} })` | coc's WorkspaceEdit is an interface, cannot be instantiated with `new` |
 
-通过 `NAMESPACE_MAP` 配置（`class-to-factory.ts`），新增类型只需添加一行映射：
+Configured via `NAMESPACE_MAP` (`class-to-factory.ts`), adding a new type only requires one line: 
 
 ```typescript
 const NAMESPACE_MAP: Record<string, string> = {
@@ -248,7 +248,7 @@ const NAMESPACE_MAP: Record<string, string> = {
 }
 ```
 
-`WorkspaceEdit` 不是通过 `NAMESPACE_MAP` 处理，而是在 `class-to-factory.ts` 和 `convert.ts` 的文本回退中做文本级替换：`new WorkspaceEdit()` → `({ changes: {} })`，同时 `.set(uri, edits)` → `.changes[uri] = edits`（在 `convert.ts` 的通用文本替换阶段）。
+`WorkspaceEdit` is not handled via `NAMESPACE_MAP`; instead it's done via text-level replacement in `class-to-factory.ts` and `convert.ts`: `new WorkspaceEdit()` → `({ changes: {} })`, and `.set(uri, edits)` → `.changes[uri] = edits` (in `convert.ts` generic text replacement phase).
 
 **Bridge preset system** (`converter/src/steps/bridge.ts` + `coc-vscode-registry/presets.json`):
 - Bridge logic is not used for source-based plugins
@@ -364,9 +364,9 @@ npm install coc-vscode-loader    # or
 | [v1.5.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/4) | 2026-09 | Go/Cargo source install, `installToCoc` optimization, registry expansion |
 | [v2.0.0](https://github.com/coc-plugin/coc-vscode-loader/milestone/3) | 2026-12 | Stable ecosystem: 10+ plugins, full transform coverage |
 
-## `excludeDeps`（v1.5.7+）
+## `excludeDeps` (v1.5.7+)
 
-`excludeDeps` 用于从源扩展的 `dependencies`/`devDependencies` 中排除不需要的包名，配合 `keepDeps` 精确控制输出 `package.json` 的依赖。
+`excludeDeps` filters out unwanted package names from the source extension's `dependencies`/`devDependencies`, used with `keepDeps` to precisely control the output `package.json` dependencies.
 
 ```json
 {
@@ -376,19 +376,19 @@ npm install coc-vscode-loader    # or
 }
 ```
 
-- `excludeDeps` 是字符串数组，支持前缀匹配（如 `@wdio` 会排除 `@wdio/cli`、`@wdio/local-runner` 等）
-- `keepDeps` 中同名的 dep 会被重新加入，用于替换源扩展中错误的版本号或文件路径（如 `"file:lib\\live-server"`）
+- `excludeDeps` is a string array supporting prefix matching (e.g. `@wdio` excludes `@wdio/cli`, `@wdio/local-runner`, etc.)
+- `keepDeps` re-adds same-named deps, used to replace incorrect version numbers or file paths (e.g. `"file:lib\\live-server"`)
 
-## keepDeps 版本解析策略（Converter v2.0）
+## keepDeps Version Resolution Strategy (Converter v2.0)
 
-`keepDeps` 的版本解析采用三步降级：
+`keepDeps` version resolution uses a three-step fallback:
 
-1. 源插件 `package.json` 的 `dependencies` → 找到则用
-2. 源插件 `package.json` 的 `devDependencies` → 找到则用
-3. 向上查找 workspace root `package.json`（monorepo 场景）
-4. 全部失败 → 报错
+1. Source plugin `package.json` `dependencies` → use if found
+2. Source plugin `package.json` `devDependencies` → use if found
+3. Walk up to workspace root `package.json` (monorepo scenario)
+4. All fail → error
 
-若自动解析无法满足，registry 配置可改用对象语法手动指定版本号：
+If auto-resolution is insufficient, registry config can use object syntax to manually specify versions:
 
 ```json
 "keepDeps": {
@@ -397,21 +397,21 @@ npm install coc-vscode-loader    # or
 }
 ```
 
-数组语法（自动解析）和对象语法（手动指定）互斥。
+Array syntax (auto-resolve) and object syntax (manual) are mutually exclusive.
 
-### `snippets` step type（v1.3.0+）
+### `snippets` step type (v1.3.0+)
 
-用于纯 VS Code Snippets 扩展（无代码、无 LSP，只有 `contributes.snippets` JSON 文件）。
+For pure VS Code Snippets extensions (no code, no LSP, only `contributes.snippets` JSON files).
 
-**核心原则**：coc-snippets 通过 **`package.json` 的 `contributes.snippets`** 发现片段文件（读取 `textmateProvider.ts:loadSnippetDefinition()`），不是通过目录名匹配。所以必须保留原始 `contributes.snippets` 声明和文件相对路径。
+**Core principle**: coc-snippets discovers snippet files via **`package.json` `contributes.snippets`** (reads `textmateProvider.ts:loadSnippetDefinition()`), not by directory name matching. So the original `contributes.snippets` declaration and relative paths must be preserved.
 
-转换逻辑：
-1. 读源 `package.json` 的 `contributes.snippets` → 得到 `{language → path}` 映射
-2. 把每个 snippet JSON 文件复制到输出的**相同相对路径**（如 `./snippets/snippets.json` → `output/snippets/snippets.json`）
-3. 生成空壳 `src/index.ts`（`export function activate() {}`）
-4. `convert.ts` 保留 `origPkg.contributes.snippets` 到输出 `package.json`
+Conversion logic:
+1. Read source `package.json` `contributes.snippets` → get `{language → path}` mapping
+2. Copy each snippet JSON file to output at the **same relative path** (e.g. `./snippets/snippets.json` → `output/snippets/snippets.json`)
+3. Generate stub `src/index.ts` (`export function activate() {}`)
+4. `convert.ts` preserves `origPkg.contributes.snippets` to output `package.json`
 
-Registry 条目示例：
+Registry entry example: 
 ```json
 {
   "name": "vscode-javascript-snippets",
@@ -424,14 +424,14 @@ Registry 条目示例：
 }
 ```
 
-实现文件：`converter/src/steps/snippets.ts`，在 `steps/index.ts` 注册。
-`convert.ts` 中新增 `contributes.snippets` 的透传（在 package.json 生成阶段保留原声明）。
+Implementation file: `converter/src/steps/snippets.ts`, registered in `steps/index.ts`.
+`convert.ts` passes through `contributes.snippets` (preserves the original declaration during package.json generation).
 
-## Converter 关键模块
+## Converter Key Modules
 
-### Local server 支持（v1.4.2+）
+### Local server support (v1.4.2+)
 
-当 language server 是源码中本地子目录（而非已发布 npm 包），可在 `server.package` 使用相对路径：
+When the language server is a local subdirectory in the source code (not a published npm package), use a relative path in `server.package`:
 
 ```json
 {
@@ -444,17 +444,17 @@ Registry 条目示例：
 }
 ```
 
-本地 server 的处理方式：
-- **代码生成**：`require.resolve` + `path.join` 回退（无 npm 特有的 bin walking / package.json fallback）
-- **Build**：esbuild.mjs 自动安装 `@types/node`、编译 `server/` 下的 TypeScript
-- **Pipeline**：`buildPackage()` 自动从 source 拷贝 `server/` 目录到 build 目录
-- **Hover fallback**：对 local server 自动注册直接 hover provider，先试 `textDocument/hover`，失败则从 `textDocument/definition` 结果读文件构造 hover 内容（语言标签从扩展名自动识别）
+Local server handling:
+- **Code generation**: `require.resolve` + `path.join` fallback (no npm-specific bin walking / package.json fallback)
+- **Build**: esbuild.mjs auto-installs `@types/node`, compiles TypeScript under `server/`
+- **Pipeline**: `buildPackage()` automatically copies `server/` directory from source to build directory
+- **Hover fallback**: auto-registers direct hover provider for local servers, tries `textDocument/hover` first, falls back to reading files from `textDocument/definition` results to construct hover content (language tag auto-detected from extension)
 
-注意：`server/` 目录需要有自己的 `package.json` 和 `tsconfig.json`。
+Note: `server/` directory needs its own `package.json` and `tsconfig.json`.
 
-### `binName` 字段（v1.2.0+）
+### `binName` field (v1.2.0+)
 
-当 `server.kind === "module"` 且 `entry === "bin"` 时，可用 `binName` 指定 bin 字段的某个具体入口。适用于 `bin` 有多个值的包（如 `@tailwindcss/language-server` 有 `css-language-server` 和 `tailwindcss-language-server` 两个 bin）。
+When `server.kind === "module"` and `entry === "bin"`, use `binName` to specify a specific bin entry. Useful for packages with multiple bin values (e.g. `@tailwindcss/language-server` has both `css-language-server` and `tailwindcss-language-server` bins).
 
 ```json
 {
@@ -465,15 +465,15 @@ Registry 条目示例：
 }
 ```
 
-### 无 main 字段回退（v1.2.2+）
+### No main field fallback (v1.2.2+)
 
-`entry: "bin"` 的解析逻辑：优先 `require.resolve(pkg)`，失败则回退到 `require.resolve(pkg/package.json)`。这对没有 `main` 字段只通过 `bin` 暴露入口的包（如 `@tailwindcss/language-server`）是必需的。
+`entry: "bin"` resolution: prefer `require.resolve(pkg)`, fall back to `require.resolve(pkg/package.json)` on failure. Required for packages without a `main` field that only expose entry via `bin` (e.g. `@tailwindcss/language-server`).
 
-> 注意：`binName` 本身在 v1.2.0 可用，但无 main 字段回退在 v1.2.2 才加入。需要同时使用两者的 registry 条目（如 tailwindcss）应设 `minPluginVersion: "1.2.2"`。
+> Note: `binName` itself is available since v1.2.0, but no-main fallback was added in v1.2.2. Registry entries needing both (e.g. tailwindcss) should set `minPluginVersion: "1.2.2"`.
 
-### `args` 字段（v1.4.3+）
+### `args` field (v1.4.3+)
 
-当 `server.kind === "module"` 时，可用 `args` 指定启动 language server 时传入的 CLI 参数（之前仅 `binary` kind 支持）。
+When `server.kind === "module"`, use `args` to specify CLI arguments passed when starting the language server (previously only `binary` kind supported).
 
 ```json
 {
@@ -491,21 +491,21 @@ Registry 条目示例：
 }
 ```
 
-支持以下占位符，会在代码生成时替换为运行时表达式：
+Supports the following placeholders, replaced at code generation time with runtime expressions:
 
-| 占位符 | 运行时值 |
+| Placeholder | Runtime value |
 |--------|----------|
-| `{dir}` | `__dirname`（编译输出目录） |
-| `{pluginDir}` | `require('path').resolve(__dirname, '..')`（插件根目录） |
+| `{dir}` | `__dirname` (compiled output directory) |
+| `{pluginDir}` | `require('path').resolve(__dirname, '..')` (plugin root directory) |
 
-生成的 serverOptions 包含 `args` 数组：
+Generated serverOptions includes the `args` array: 
 ```typescript
 { module: serverPath, transport: TransportKind.ipc, args: ['--ngProbeLocations', require('path').resolve(__dirname, '..'), ...] }
 ```
 
-### `targetAssets` 字段（v1.5.0+）
+### `targetAssets` field (v1.5.0+)
 
-当 GitHub Release 的二进制文件命名**因平台而异**（如 clangd 用 `mac`/`windows` 而非 `darwin`/`win32`），可用 `targetAssets` 覆盖默认的 `asset`/`binaryPath`：
+When GitHub Release binaries use **platform-specific naming** (e.g. clangd uses `mac`/`windows` instead of `darwin`/`win32`), use `targetAssets` to override the default `asset`/`binaryPath`:
 
 ```json
 {
@@ -522,21 +522,21 @@ Registry 条目示例：
 }
 ```
 
-匹配规则：按 `platform` + `arch` 查找，找到则用该条目的 `file` 和 `binaryPath`；不匹配则回退到顶层 `asset`/`binaryPath`。
+Matching: looks up by `platform` + `arch`, uses the matched entry's `file` and `binaryPath`; falls back to top-level `asset`/`binaryPath` on no match.
 
-| 字段 | 必需 | 说明 |
+| Field | Required | Description |
 |------|------|------|
-| `platform` | ❌ | 目标平台，`"darwin"` \| `"linux"` \| `"win32"`，缺省匹配所有 |
-| `arch` | ❌ | 目标架构，`"x64"` \| `"arm64"`，缺省匹配所有 |
-| `file` | ✅ | 该平台的 asset 文件名模板 |
-| `binaryPath` | ❌ | 该平台的压缩包内二进制路径 |
+| `platform` | ❌ | Target platform, `"darwin"` \| `"linux"` \| `"win32"`, omitted matches all |
+| `arch` | ❌ | Target architecture, `"x64"` \| `"arm64"`, omitted matches all |
+| `file` | ✅ | Platform-specific asset filename template |
+| `binaryPath` | ❌ | Binary path inside the platform archive |
 
 ## Pending
 
 - [x] Angular Language Service (`vscode-ng-language-service`) — added to registry
 - [x] `args` field for module-kind language servers — supports `{dir}` and `{pluginDir}` placeholders
 - [x] ESLint added to registry (with server patches: diagnostic injection, pull diagnostics disabled, resolveSettings fix)
-- [x] `server.patches` — local server 编译后文本补丁通用机制（v1.4.5+）
+- [x] `server.patches` — local server post-compilation text patch mechanism (v1.4.5+)
 - [ ] Add more plugins to registry (Code Spell Checker)
 - [ ] Add `vscode-languageclient` import rewrite to `import-mapping` transform
 - [ ] Add more transforms (uri-mapping, more provider signatures)
@@ -546,53 +546,53 @@ Registry 条目示例：
 - [x] `serverBinary` raw binary download: handled for non-archive assets (e.g. Biome)
 - [x] JavaScript extension support (`.js` file copy + text-level replacements, `require('vscode')` → `require('coc.nvim')`)
 - [x] Language-client step `initializationOptions` field (tsdk for Volar-based servers)
-- [x] `snippets` step type — 纯 snippets 扩展自动转换
-- [x] 92 snippet extensions 已录入 registry
-- [x] Local server support — `server.package` 支持相对路径，自动编译 `server/` TypeScript、pipeline 自动拷贝
-- [x] Pyright (`vscode-pyright`) — 加入 registry，module kind 自动安装 pyright npm 包
-- [x] Go LSP (`vscode-go`) — 加入 registry，goPackages 支持自动 go install gopls
-- [x] `targetAssets` — serverBinary per-platform 资产映射，支持非标准平台命名
-- [x] `installToCoc` 优化 — 跳过 node_modules，选择性复制 + 重新 npm install
-- [x] Code Runner (`vscode-code-runner`) — 加入 registry, direct-api, 11 patches
+- [x] `snippets` step type — automatic pure snippets conversion
+- [x] 92 snippet extensions added to registry
+- [x] Local server support — `server.package` supports relative paths, auto-compiles `server/` TypeScript, pipeline auto-copies
+- [x] Pyright (`vscode-pyright`) — added to registry, module kind auto-installs pyright npm package
+- [x] Go LSP (`vscode-go`) — added to registry, goPackages support for auto go install gopls
+- [x] `targetAssets` — serverBinary per-platform asset mapping, supports non-standard platform names
+- [x] `installToCoc` optimization — skips node_modules, selective copy + re-run npm install
+- [x] Code Runner (`vscode-code-runner`) — added to registry, direct-api, 11 patches
 
 ## TUI design
 
-TUI 完全参照 Mason.nvim 的视觉风格和交互设计，目标 1:1 一致。
+TUI matches Mason.nvim's visual style and interaction design, aiming for 1:1 consistency.
 
-关键设计决策：
-- Mason 色彩精确复制（金色 #DCA561 + 青色 #56B6C2 + 灰色 #888888）
-- Mason 窗口选项一致（无 border、80%宽、90%高、backdrop 遮罩）
-- Sections 按状态分组：Failed → Installing → Installed → Available
-- Tabs 使用数字键 1-9 切换，格式 ` (N) Name `
-- 包行：`◍ displayName`，展开详情/日志内联显示
-- 不保留 Mason 没有的功能
+Key design decisions:
+- Mason colors replicated exactly (gold #DCA561 + cyan #56B6C2 + gray #888888)
+- Mason window options identical (no border, 80% width, 90% height, backdrop overlay)
+- Sections grouped by status: Failed → Installing → Installed → Available
+- Tabs use number keys 1-9, format ` (N) Name `
+- Package line: `◍ displayName`, expand details/log inline
+- No features that Mason doesn't have
 
-### Mason 功能映射
+### Mason Feature Mapping
 
-- Header 金色居中 + `g?` 提示 ✓
-- 安装/更新/卸载/检查更新 ✓
-- `<CR>` 内联展开详情/日志 ✓
-- 缩进链: 4sp→6sp→8sp ✓
-- `<C-f>` 语言筛选: 预留
-- `<C-c>` 取消安装: 待实现
-- [x] `rimraf` 容错 — 删除前 chmod -R u+w，处理 Go 模块缓存只读目录
+- Header gold centered + `g?` hint ✓
+- Install/Update/Uninstall/Check updates ✓
+- `<CR>` expand details/log inline ✓
+- Indent chain: 4sp→6sp→8sp ✓
+- `<C-f>` language filter: reserved
+- `<C-c>` cancel install: pending
+- [x] `rimraf` error handling — chmod -R u+w before delete, handling Go module cache read-only directories
 
-### goPackages / cargoPackages（v1.5.0+）
+### goPackages / cargoPackages (v1.5.0+)
 
-当 language server 不是 npm 包也没有 GitHub 预编译二进制时，可用源码编译安装：
+When the language server is not an npm package and has no prebuilt GitHub Release binary, use source compilation:
 
-| 字段 | 机制 | 示例 |
+| Field | Mechanism | Example |
 |------|------|------|
-| `goPackages` | Pipeline 执行 `go install`，`GOBIN` 指向 `server/`，二进制直接输出到 `server/` | `["golang.org/x/tools/gopls@latest"]` |
-| `cargoPackages` | Pipeline 执行 `cargo install --root`，从临时目录复制二进制到 `server/` | `[{ "crate": "nil", "binary": "nil" }]` |
+| `goPackages` | Pipeline runs `go install`, `GOBIN` points to `server/`, binary output directly to `server/` | `["golang.org/x/tools/gopls@latest"]` |
+| `cargoPackages` | Pipeline runs `cargo install --root`, copies binary from temp dir to `server/` | `[{ "crate": "nil", "binary": "nil" }]` |
 
-Go/Cargo 编译缓存在 `build/.gopath/` 和 `build/.cargo-root/`，安装完成后自动清理。
+Go/Cargo build cache stored in `build/.gopath/` and `build/.cargo-root/`, cleaned up after installation.
 
-### Pipeline 健壮性改进（v1.5.0+）
+### Pipeline Robustness Improvements (v1.5.0+)
 
-- **`rimraf` 容错**：删除前先 `chmod -R u+w`，处理 Go 模块缓存的 0555 只读目录
-- **`cpdir` 改用 `fs.cp`**：Node.js 原生递归复制，正确处理符号链接和权限
-- **`installToCoc` 优化**：只复制 `lib/`、`server/`、`package.json` 等必要文件，跳过 `node_modules/`，到目标目录后重新 `npm install`，避免 `cp -rL` 在大 `node_modules` 上的问题
+- **`rimraf` error handling**: chmod -R u+w before delete, handling Go module cache read-only directories
+- **`cpdir` switched to `fs.cp`**: Node.js native recursive copy, correctly handles symlinks and permissions
+- **`installToCoc` optimization**: only copies `lib/`, `server/`, `package.json` etc., skips `node_modules/`, then re-runs `npm install` at destination, avoiding `cp -rL` issues on large `node_modules`
 
 ## Testing
 

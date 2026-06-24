@@ -32,8 +32,8 @@ export class VimEditor implements EditorAPI {
     return `call ${name}(${args.map(a => this.vimlEncode(a)).join(',')})`
   }
 
-  // Vim9 def 中部分内置函数通过 call_function RPC 调用时返回 void（E1031），
-  // 自动降级到 nvim.command('call Func(...)')。
+  // Some built-in functions in Vim9 def return void when called via call_function RPC (E1031),
+  // auto-degrade to nvim.command('call Func(...)').
   private async vcall(name: string, args: any[]): Promise<any> {
     if (this._batchMode) {
       this._batchCommands.push(this.cmd(name, args))
@@ -291,12 +291,12 @@ export class VimEditor implements EditorAPI {
     const cmds = this._batchCommands
     this._batchCommands = []
     if (cmds.length === 0) return
-    // 合并成单个 execute 调用，大幅减少 RPC 往返
+    // Merge into a single execute call, greatly reducing RPC round trips
     const script = cmds.join(' | ')
     if (script.length < 32000) {
       await this.nvim.command(script)
     } else {
-      // 超长脚本分批执行
+      // Execute overly long scripts in batches
       for (const cmd of cmds) {
         await this.nvim.command(cmd)
       }

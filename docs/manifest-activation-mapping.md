@@ -1,8 +1,8 @@
-# package.json / activate 对比：VS Code → coc.nvim
+# package.json / activate Comparison: VS Code → coc.nvim
 
 ---
 
-## 1. 入口配置
+## 1. Entry Configuration
 
 ```jsonc
 // VS Code package.json
@@ -54,27 +54,27 @@
 
 ---
 
-## 2. activationEvents 映射
+## 2. activationEvents Mapping
 
-| VS Code | coc | 备注 |
+| VS Code | coc | Notes |
 |---------|-----|------|
-| `onLanguage:langId` | `onLanguage:langId` | 相同 |
-| `onCommand:cmdId` | `onCommand:cmdId` | 相同 |
-| `*` | `*` | 相同（启动时立即激活） |
-| `onFileSystem:scheme` | `onFileSystem:scheme` | 相同 |
-| `workspaceContains:filePattern` | `workspaceContains:filePattern` | 相同 |
-| — | `onNotification:method` | coc 独有（监听 LSP notification） |
-| `onStartupFinished` | — | vscode 独有（编辑器完成初始化后激活） |
-| `onUri` | — | vscode 独有（处理自定义 URI 协议） |
-| `onCustomEditor:viewType` | — | vscode 独有（自定义编辑器） |
-| `onWebviewPanel:viewType` | — | vscode 独有（webview 面板） |
-| `onRenderer:viewType` | — | vscode 独有（notebooks 渲染器） |
-| `onTerminalProfile` | — | vscode 独有（终端配置文件） |
-| `onAuthenticationRequest:authId` | — | vscode 独有（认证请求） |
+| `onLanguage:langId` | `onLanguage:langId` | Same |
+| `onCommand:cmdId` | `onCommand:cmdId` | Same |
+| `*` | `*` | Same (activates immediately on startup) |
+| `onFileSystem:scheme` | `onFileSystem:scheme` | Same |
+| `workspaceContains:filePattern` | `workspaceContains:filePattern` | Same |
+| — | `onNotification:method` | coc only (listens for LSP notification) |
+| `onStartupFinished` | — | vscode only (activates after editor initialization completes) |
+| `onUri` | — | vscode only (handles custom URI protocol) |
+| `onCustomEditor:viewType` | — | vscode only (custom editor) |
+| `onWebviewPanel:viewType` | — | vscode only (webview panel) |
+| `onRenderer:viewType` | — | vscode only (notebooks renderer) |
+| `onTerminalProfile` | — | vscode only (terminal profile) |
+| `onAuthenticationRequest:authId` | — | vscode only (authentication request) |
 
 ---
 
-## 3. contributes 映射
+## 3. contributes Mapping
 
 ### 3.1 commands
 
@@ -85,9 +85,9 @@
     {
       "command": "myExt.hello",
       "title": "Say Hello",
-      "category": "My Extension",       // ⚠️ coc 无
-      "icon": "$(star)",                  // ⚠️ coc 无
-      "enablement": "editorFocus"         // ⚠️ coc 无
+      "category": "My Extension",       // ⚠️ coc does not support
+      "icon": "$(star)",                  // ⚠️ coc does not support
+      "enablement": "editorFocus"         // ⚠️ coc does not support
     }
   ]
 }
@@ -112,12 +112,12 @@
     {
       "command": "myExt.hello",
       "key": "ctrl+e",
-      "when": "editorTextFocus",          // ⚠️ coc 无
-      "mac": "cmd+e"                       // ⚠️ coc 无
+      "when": "editorTextFocus",          // ⚠️ coc does not support
+      "mac": "cmd+e"                       // ⚠️ coc does not support
     }
   ]
 }
-// ⚠️ VS Code 使用标准 key 字符串（如 "ctrl+e"）
+// ⚠️ VS Code uses standard key strings (e.g. "ctrl+e")
 
 // coc
 "contributes": {
@@ -128,7 +128,7 @@
     }
   ]
 }
-// ⚠️ coc 使用 vim 格式的 key 字符串（如 "leader e"、"<C-p>"）
+// ⚠️ coc uses vim-style key strings (e.g. "leader e", "<C-p>")
 ```
 
 ### 3.3 configuration
@@ -138,17 +138,17 @@
 "contributes": {
   "configuration": {
     "title": "My Extension",
-    "order": 0,                        // ⚠️ coc 无
+    "order": 0,                        // ⚠️ coc does not support
     "properties": {
       "myExt.enable": {
         "type": "boolean",
         "default": true,
         "description": "Enable",
-        "markdownDescription": "**Enable** my extension",  // ⚠️ coc 无
-        "scope": "resource",            // ⚠️ coc 无（resource/window/machine）
-        "enum": ["a", "b"],             // ⚠️ coc 无
-        "markdownEnumDescriptions": [],  // ⚠️ coc 无
-        "deprecationMessage": "Use ..."  // ⚠️ coc 无
+        "markdownDescription": "**Enable** my extension",  // ⚠️ coc does not support
+        "scope": "resource",            // ⚠️ coc does not support (resource/window/machine)
+        "enum": ["a", "b"],             // ⚠️ coc does not support
+        "markdownEnumDescriptions": [],  // ⚠️ coc does not support
+        "deprecationMessage": "Use ..."  // ⚠️ coc does not support
       }
     }
   }
@@ -185,8 +185,8 @@
   }
 }
 
-// coc — coc 通常不支持 contributes.menus
-// (coc 用 vim 的插键和命令方式替代)
+// coc — coc does not normally support contributes.menus
+// (coc uses vim key mappings and commands instead)
 ```
 
 ### 3.5 configurationDefaults
@@ -201,7 +201,7 @@
   }
 }
 
-// coc 无
+// coc does not support
 ```
 
 ### 3.6 icons / iconThemes / productIconThemes
@@ -220,7 +220,7 @@
   }
 }
 
-// coc 无
+// coc does not support
 ```
 
 ### 3.7 views / viewsContainers
@@ -240,7 +240,7 @@
   }
 }
 
-// coc 无
+// coc does not support
 ```
 
 ### 3.8 languages / grammars / semantictokenScopes
@@ -260,7 +260,7 @@
   }]
 }
 
-// coc 无（coc 不定义语言语法）
+// coc does not support (coc does not define language grammars)
 ```
 
 ### 3.9 problemMatchers / taskDefinitions
@@ -272,7 +272,7 @@
   "taskDefinitions": [{ ... }]
 }
 
-// coc 无
+// coc does not support
 ```
 
 ### 3.10 snippets
@@ -288,7 +288,7 @@
   ]
 }
 
-// coc — 相同
+// coc — same
 ```
 
 ### 3.11 types / typescriptServerPlugins
@@ -302,8 +302,8 @@
   ]
 }
 
-// coc — 支持需要 coc-tsserver 配合
-// ⚠️ PR #493 未合并，需手动安装 fork 版本:
+// coc — support requires coc-tsserver
+// ⚠️ PR #493 is not merged, requires manual installation of a fork:
 //   cd ~/.config/coc/extensions && npm install ChuYanLon/coc-tsserver
 "contributes": {
   "typescriptServerPlugins": [
@@ -314,12 +314,12 @@
     }
   ]
 }
-// coc-tsserver 启动时自动加载这些插件（globalPlugins + pluginPaths）
-// PR (#493) 为 coc-tsserver 添加了 globalPlugins 支持 + typescript.tsserverRequest 命令
-// 合并前需要保持使用 fork 版本
+// coc-tsserver automatically loads these plugins on startup (globalPlugins + pluginPaths)
+// PR (#493) adds globalPlugins support + typescript.tsserverRequest command to coc-tsserver
+// Must keep using fork version until merged
 ```
 
-### 3.12 authentication 认证
+### 3.12 authentication
 
 ```jsonc
 // VS Code
@@ -332,7 +332,7 @@
   ]
 }
 
-// coc 无
+// coc does not support
 ```
 
 ### 3.13 notebooks / notebookRenderers
@@ -343,7 +343,7 @@
   "notebooks": [{ "type": "jupyter-notebook", ... }]
 }
 
-// coc 无
+// coc does not support
 ```
 
 ### 3.14 walkthroughs
@@ -354,12 +354,12 @@
   "walkthroughs": [{ "id": "myWalkthrough", ... }]
 }
 
-// coc 无
+// coc does not support
 ```
 
 ---
 
-## 4. ExtensionContext 属性对比
+## 4. ExtensionContext Properties Comparison
 
 ```typescript
 // vscode ExtensionContext
@@ -367,22 +367,22 @@ interface ExtensionContext {
   subscriptions: Disposable[]
   extensionPath: string
   extensionUri: Uri
-  extensionMode: ExtensionMode       // ⚠️ coc 无
+  extensionMode: ExtensionMode       // ⚠️ coc does not support
   storagePath: string | undefined
-  globalStoragePath: string           // ⚠️ coc 无
-  logPath: string                     // ⚠️ coc 无
-  languageModelAccessInformation: LanguageModelAccessInformation  // ⚠️ coc 无
+  globalStoragePath: string           // ⚠️ coc does not support
+  logPath: string                     // ⚠️ coc does not support
+  languageModelAccessInformation: LanguageModelAccessInformation  // ⚠️ coc does not support
   globalState: Memento
   workspaceState: Memento
   asAbsolutePath(relativePath: string): string
-  secrets: SecretStorage              // ⚠️ coc 无
+  secrets: SecretStorage              // ⚠️ coc does not support
 }
 
 // coc ExtensionContext
 interface ExtensionContext {
   subscriptions: Disposable[]
   extensionPath: string
-  extensionUri: Uri                 // 对 coc 来说 string
+  extensionUri: Uri                 // string for coc
   storagePath: string | undefined
   globalState: Memento
   workspaceState: Memento
@@ -390,4 +390,4 @@ interface ExtensionContext {
 }
 ```
 
-**coc 缺少：** `extensionMode`、`globalStoragePath`、`logPath`、`secrets`、`languageModelAccessInformation`。
+**coc lacks:** `extensionMode`, `globalStoragePath`, `logPath`, `secrets`, `languageModelAccessInformation`.

@@ -1,222 +1,222 @@
-# Baseline 差异系统 — 功能创意集
+# Baseline Diff System — Feature Idea Collection
 
-基于 `converter/baseline.json`（输出文件 SHA-256 指纹库）延伸的各类用户侧和开发侧功能设想。
-
----
-
-## 目录
-
-- [用户侧功能](#用户侧功能)
-- [开发侧功能](#开发侧功能)
-- [高级 / 基础设施](#高级--基础设施)
+Various user-facing and developer-facing feature ideas extending from the `converter/baseline.json` (output file SHA-256 fingerprint database).
 
 ---
 
-## 用户侧功能
+## Table of Contents
 
-### 1. `loader.verify` — 插件完整性校验
+- [User-Facing Features](#user-facing-features)
+- [Developer-Facing Features](#developer-facing-features)
+- [Advanced / Infrastructure](#advanced--infrastructure)
 
-对已安装插件的输出文件重新计算 SHA-256，与安装时记录的 hash 对比。
+---
+
+## User-Facing Features
+
+### 1. `loader.verify` — Plugin Integrity Verification
+
+Recompute SHA-256 for installed plugin output files and compare against the hash recorded at installation time.
 
 ```
 :CocCommand loader.verify
 ```
 
-输出：
+Output:
 ```
-vscode-eslint     ✓ (3/3 文件一致)
-vscode-prettier   ✗ src/index.ts 哈希不匹配，建议重新安装
-vscode-pyright    ✓ (5/5 文件一致)
+vscode-eslint     ✓ (3/3 files match)
+vscode-prettier   ✗ src/index.ts hash mismatch, reinstall recommended
+vscode-pyright    ✓ (5/5 files match)
 ```
 
-可区分：
-- hash 匹配 → 正常
-- hash 不匹配但文件存在 → 可能被手动修改过
-- 文件缺失 → 损坏，建议重装
-- 多余文件 → 可能被手动添加
+Can distinguish:
+- hash matches → normal
+- hash mismatch but file exists → may have been manually modified
+- file missing → corrupted, reinstall recommended
+- extra files → may have been manually added
 
-**用户场景**：怀疑某个插件工作异常时，一键排查是否文件损坏。
+**User scenario**: When suspecting a plugin is malfunctioning, one-click check for file corruption.
 
 ---
 
-### 2. `loader.whatChanged` — 跨版本影响预览
+### 2. `loader.whatChanged` — Cross-Version Impact Preview
 
-升级 `coc-vscode-loader` 后，对比新版本内置的 baseline 与旧版 baseline，告诉用户哪些插件的输出发生了变化。
+After upgrading `coc-vscode-loader`, compare the new version's bundled baseline with the old baseline to tell users which plugins' outputs have changed.
 
 ```
 :CocCommand loader.whatChanged
 ```
 
-输出：
+Output:
 ```
-跨版本影响分析 (v1.5.8 → v1.6.0):
+Cross-version impact analysis (v1.5.8 → v1.6.0):
 
 [vscode-eslint]
-  ~ src/index.ts — 转换逻辑优化
-  ~ package.json — 依赖版本更新
-  ⚠ 建议重新安装
+  ~ src/index.ts — conversion logic optimization
+  ~ package.json — dependency version update
+  ⚠ Reinstall recommended
 
 [vscode-prettier]
-  + esbuild.mjs   — 新增打包脚本
-  ~ src/index.ts  — 拆分配置模块
-  ⚠ 建议重新安装
+  + esbuild.mjs   — new build script
+  ~ src/index.ts  — refactored config module
+  ⚠ Reinstall recommended
 
 [vscode-pyright]
-  ✓ 无变化
+  ✓ No changes
 
-其余 126 个插件均无变化，无需处理。
+The remaining 126 plugins have no changes, no action needed.
 ```
 
-实现方案：
-- 发布时在 npm 包中附带发布时的 `baseline.json`
-- 升级后读取本地旧 baseline（用户侧缓存）和包内新 baseline
-- 按 entry 做 hash diff
-- 只 report 源码提交 hash 相同（即源 repo 没动过）的条目
+Implementation:
+- Include the `baseline.json` at publish time in the npm package
+- After upgrade, read the local old baseline (user cache) and the new baseline from the package
+- Compute hash diff per entry
+- Only report entries whose source commit hash is the same (i.e., the source repo hasn't changed)
 
-**用户场景**：升级后不再需要一刀切重装所有插件，只重装确实有变化的。
+**User scenario**: After upgrade, no need to blindly reinstall all plugins — only reinstall those that actually changed.
 
 ---
 
-### 3. 安装失败自动回滚
+### 3. Automatic Rollback on Installation Failure
 
-用 pipeline 安装插件时，先记录当前文件的 hash 快照。如果安装/编译过程中任何一步失败，自动恢复文件到快照状态。
+When installing a plugin via the pipeline, first record a hash snapshot of current files. If any step fails during installation/compilation, automatically restore files to the snapshot state.
 
 ```
 Installing vscode-eslint...
   ✓ Git clone
   ✓ Convert
-  ✗ npm install (网络超时)
-  → 回滚中... ✓ 已恢复原状
+  ✗ npm install (network timeout)
+  → Rolling back... ✓ Restored to original state
 ```
 
-实现方式：安装前 `rsync -a` 或 `cp -r` 备份 → 失败则恢复 → 成功则删除备份。
+Implementation: backup with `rsync -a` or `cp -r` before installation → restore on failure → delete backup on success.
 
-**用户场景**：网络不稳定导致 npm install 失败，不影响已有插件。
+**User scenario**: `npm install` fails due to network instability without affecting existing plugins.
 
 ---
 
-### 4. `loader.doctor` — 一键诊断
+### 4. `loader.doctor` — One-Click Diagnosis
 
-组合多项检查，输出健康报告。
+Combine multiple checks and output a health report.
 
 ```
 :CocCommand loader.doctor
 ```
 
-输出：
+Output:
 ```
-[coc-vscode-loader 诊断报告]
+[coc-vscode-loader Diagnostic Report]
 
-系统环境
+System Environment
   Node.js:  v20.11.0  ✓
   Git:      ️ 2.43.0   ✓
   Neovim:   0.10.0    ✓
 
-已安装插件 (5)
-  ✓ vscode-eslint         (完整性校验通过)
-  ✓ vscode-prettier       (完整性校验通过)
-  ✓ vscode-pyright        (完整性校验通过)
-  ✓ vscode-ansible        (完整性校验通过)
-  ✗ vscode-tailwindcss    (server/ 目录缺失，请重装)
+Installed Plugins (5)
+  ✓ vscode-eslint         (integrity check passed)
+  ✓ vscode-prettier       (integrity check passed)
+  ✓ vscode-pyright        (integrity check passed)
+  ✓ vscode-ansible        (integrity check passed)
+  ✗ vscode-tailwindcss    (server/ directory missing, please reinstall)
 
-升级影响
-  当前版本 v1.5.8 → 最新 v1.6.0
-  影响 2/5 个已安装插件：eslint, prettier
-  运行 :CocCommand loader.whatChanged 查看详情
+Upgrade Impact
+  Current v1.5.8 → Latest v1.6.0
+  Affects 2/5 installed plugins: eslint, prettier
+  Run :CocCommand loader.whatChanged for details
 ```
 
-**用户场景**：出问题时收集标准化诊断信息，便于排查和报 bug。
+**User scenario**: Collect standardized diagnostic information when problems occur, for easier troubleshooting and bug reporting.
 
 ---
 
-### 5. 配置溯源 / 只读防护
+### 5. Configuration Traceability / Read-Only Protection
 
-检测用户是否手动修改了转换后的输出文件（常见于新手直接编辑 `src/index.ts`）。
+Detect whether users have manually modified converted output files (common for beginners who directly edit `src/index.ts`).
 
 ```
 :CocCommand loader.audit
 ```
 
-输出：
+Output:
 ```
-vscode-eslint/src/index.ts — 哈希不匹配
-  安装时间: 2026-06-20
-  最后修改: 2026-06-22 (用户手动编辑)
-  提示: 重新安装将覆盖你的修改
+vscode-eslint/src/index.ts — hash mismatch
+  Installed: 2026-06-20
+  Last modified: 2026-06-22 (user manually edited)
+  Note: Reinstalling will overwrite your changes
 ```
 
-可选：对输出目录设只读权限（pipeline 安装后 chmod -w）。
+Optional: Set read-only permissions on output directories (`chmod -w` after pipeline installation).
 
-**用户场景**：用户改坏了文件后排查原因，或者阻止意外修改。
+**User scenario**: Troubleshoot after users break files by editing them, or prevent accidental modifications.
 
 ---
 
-### 6. 增量安装缓存
+### 6. Incremental Installation Cache
 
-pipeline 中，对源文件目录算 hash（`find . -type f | xargs md5sum`），与上次安装时保存的源 hash 对比：
+In the pipeline, compute a hash of the source file directory (`find . -type f | xargs md5sum`) and compare against the source hash saved from the last installation:
 
-- hash 相同 → 跳过 `npx tsx convert`，用缓存输出
-- npm 依赖没变（`package.json` hash 一致）→ 跳过 `npm install`
+- hash matches → skip `npx tsx convert`, use cached output
+- npm dependencies unchanged (`package.json` hash matches) → skip `npm install`
 
-安装 10 个未变更插件耗时从 ~5s/个降到 ~0.2s/个（纯 cp）。
+Installing 10 unchanged plugins goes from ~5s each to ~0.2s each (pure `cp`).
 
-**用户场景**：批量重装时大幅提速；CI 中反复转换同一版本源 repo 时避免不必要的工作。
-
----
-
-### 7. 静默校验 + 启动通知
-
-coc 启动时后台异步跑 hash 校验（只对已安装插件），发现不一致后在状态栏显示 Badge 或弹通知。
-
-```
-coc - 1 plugins need reinstall (run :CocCommand loader.verify)
-```
-
-不阻塞启动，但让用户感知到问题存在。
-
-**用户场景**：升级后忘了重装，下次打开 vim 时自动提示。
+**User scenario**: Significantly speed up batch reinstalls; avoid unnecessary work in CI when repeatedly converting the same version of a source repo.
 
 ---
 
-### 8. 文件级 diff 详情
+### 7. Silent Verification + Startup Notification
 
-不只是知道「变了」，还能展示具体变更：
+When coc starts, run hash verification asynchronously in the background (only for installed plugins), and show a badge in the status bar or pop a notification when inconsistencies are found.
+
+```
+coc - 1 plugin needs reinstall (run :CocCommand loader.verify)
+```
+
+Does not block startup, but makes users aware of the problem.
+
+**User scenario**: Forget to reinstall after upgrade, automatically reminded next time vim is opened.
+
+---
+
+### 8. File-Level Diff Details
+
+Not just knowing that something changed, but showing the specific changes:
 
 ```
 vscode-eslint/src/index.ts:
-  旧 hash: a3f2b8c1...
-  新 hash: 7e4d1a2f...
-  ~ Line 42:   client.start() → client.start().catch(console.error)
-  ~ Line 78:   removed deprecated method
+   Old hash: a3f2b8c1...
+   New hash: 7e4d1a2f...
+   ~ Line 42:   client.start() → client.start().catch(console.error)
+   ~ Line 78:   removed deprecated method
 ```
 
-实现方式：baseline 中存储旧版本文件 + 新转换输出文件，用 `diff` 工具展示。不过存储旧文件会增大 baseline 体积，需要权衡。可选只存最后两个版本的 baseline 差异。
+Implementation: Store old version files + new converted output files in the baseline, display with `diff` tool. However, storing old files increases baseline size, requiring a trade-off. Optionally only store baseline diffs for the last two versions.
 
-**用户场景**：高级用户或开发者想了解具体改了什么。
+**User scenario**: Advanced users or developers want to understand exactly what changed.
 
 ---
 
-### 9. 批量重装排序
+### 9. Batch Reinstall Sorting
 
-按 hash 变化程度对需要重装的插件排序：
-- 文件数量变化大的优先（如新增了 `esbuild.mjs`）
-- hash 不同的文件多的优先
-- 实际内容变动大的优先（对比行数变化）
+Sort plugins requiring reinstallation by degree of hash change:
+- Prioritize those with large file count changes (e.g., `esbuild.mjs` was added)
+- Prioritize those with more files having different hashes
+- Prioritize those with larger actual content changes (compare line count changes)
 
 ```
-重装优先级:
+Reinstall Priority:
   1. vscode-eslint      (4 files changed)  ️
   2. vscode-prettier    (2 files changed)
   3. vscode-slither     (1 file changed)
 ```
 
-**用户场景**：批量重装时优先处理风险高的，避免一次重装太多不知道哪个出问题。
+**User scenario**: When batch reinstalling, prioritize higher-risk plugins to avoid not knowing which one caused issues after reinstalling too many at once.
 
 ---
 
-### 10. 多版本基线保留
+### 10. Multi-Version Baseline Retention
 
-本地保留最近 2-3 个版本的 baseline 快照 + 对应的输出文件备份。用户试用新版本后发现有问题，可以快速切回旧版本文件集。
+Keep baseline snapshots + corresponding output file backups for the last 2-3 versions locally. If users find issues after trying a new version, they can quickly switch back to the old version's file set.
 
 ```
 :CocCommand loader.rollback vscode-eslint
@@ -226,70 +226,70 @@ Available snapshots:
   [3] v1.5.4 (2026-05-28)
 ```
 
-空间开销：每个版本 ~50KB baseline + 插件输出文件集（平均 ~1MB/插件 × 8 = 8MB）。可设定期限自动清理。
+Space cost: ~50KB baseline per version + plugin output file set (average ~1MB/plugin × 8 = 8MB). Auto-cleanup can be configured with a time limit.
 
-**用户场景**：新版本出 bug 时快速回退，不等修复。
+**User scenario**: Quickly rollback when a new version has bugs, without waiting for a fix.
 
 ---
 
-## 开发侧功能
+## Developer-Facing Features
 
-### 11. 本地开发验证
+### 11. Local Development Verification
 
-开发者在修改 converter 代码后，跑一个轻量级 diff check：
+After modifying converter code, developers run a lightweight diff check:
 
 ```bash
-npx tsx scripts/diff-check.ts check --local   # 只检查本地有缓存的 repo
+npx tsx scripts/diff-check.ts check --local   # only check locally cached repos
 ```
 
-比全量 CI 快得多（跳过下载），适合开发过程中的快速反馈。
+Much faster than full CI (skips downloads), suitable for quick feedback during development.
 
 ---
 
-### 12. PR 影响预览
+### 12. PR Impact Preview
 
-在 GitHub PR 中自动 comment 展示 baseline 变更：
+Automatically comment in GitHub PRs to show baseline changes:
 
 ```
 ## Baseline Diff
 
-| 状态 | 条目 | 变更文件 |
+| Status | Entry | Changed Files |
 |------|------|----------|
 | ~ | vscode-eslint | src/index.ts, package.json |
 | ~ | vscode-prettier | src/index.ts |
 | + | vscode-new-plugin | (6 files) |
-| ✓ | 其余 125 条目 | 无变化 |
+| ✓ | Remaining 125 entries | No changes |
 
-请 review 上述变更，确认无意外破坏。
+Please review the above changes to confirm no unintended breakage.
 ```
 
-用 GitHub Actions 实现，在 PR 被 reviewer 查看前提供信息。
+Implemented via GitHub Actions, providing information before the PR is reviewed.
 
 ---
 
-### 13. 零影响发布检查
+### 13. Zero-Impact Release Check
 
-CI 在 publish npm 之前自动检查：如果本次 release 中所有 registry 条目的 baseline hash 都没变，说明没有代码生成变动，直接发 no-op changelog。
+CI automatically checks before npm publish: if all registry entries' baseline hashes haven't changed in this release, it means no code generation changes, so emit a no-op changelog.
 
 ```json
 {
   "version": "1.5.9",
   "baselineImpact": "none",
-  "releaseNotes": "仅 registry 更新，无代码生成变化"
+  "releaseNotes": "Registry update only, no code generation changes"
 }
 ```
 
 ---
 
-### 14. 变更分类（break / feature / fix）
+### 14. Change Classification (break / feature / fix)
 
-手动给 baseline 差异打标签：
+Manually tag baseline diffs:
 
 ```bash
 npx tsx scripts/diff-check.ts tag --type=break "eslint: new client.start guard"
 ```
 
-在 baseline.json 中记录：
+Record in `baseline.json`:
 
 ```json
 {
@@ -300,53 +300,53 @@ npx tsx scripts/diff-check.ts tag --type=break "eslint: new client.start guard"
 }
 ```
 
-发布时自动汇总成兼容性说明。
+Automatically summarize into compatibility notes when publishing.
 
 ---
 
-### 15. 测试用例自动生成
+### 15. Automatic Test Case Generation
 
-当 baseline 检测到差异时，自动为变更的部分生成 fixture 测试用例（input/output pair），防止后续又被改回去。
+When baseline detects differences, automatically generate fixture test cases (input/output pair) for the changed parts to prevent them from being changed back later.
 
 ---
 
-## 高级 / 基础设施
+## Advanced / Infrastructure
 
-### 16. 远程哈希验证
+### 16. Remote Hash Verification
 
-Registry 服务端存储 CI 通过的 hash 集合，用户端增加 `--remote` 模式：
+Registry server stores CI-verified hash sets, client adds `--remote` mode:
 
 ```
 :CocCommand loader.verify --remote
 ```
 
-不仅对比本地缓存 hash，还对比 registry 官方认证的 hash。如果本地 hash 与远程一致，说明安装的是「官方认证版本」；如果不一致，说明本地环境有差异。
+Not only compare against local cached hash, but also against the registry's officially certified hash. If local hash matches remote, the installed version is "officially certified"; if not, the local environment differs.
 
-**用户场景**：排查明明 hash 没变但插件不工作的问题。
-
----
-
-### 17. 插件依赖图 + 影响链分析
-
-多个插件可能共享同一个 language server（如 eslint 和 stylelint 都依赖 eslint LSP）。当转换逻辑涉及 shared server 代码时，baseline 可以辅助分析影响链。
-
-```
-vscode-eslint  (esbuild.mjs + src/index.ts 变化)
-  └── 共享 eslint server → 可能影响 vscode-stylelint
-  └── 共享 eslint config → 可能影响 vscode-code-actions
-```
-
-实现：registry 中声明 `sharedModules` 或 `sharedServers`，结合 baseline diff 自动推导。
+**User scenario**: Troubleshoot issues where hash hasn't changed but the plugin is not working.
 
 ---
 
-### 18. Baseline 增量更新
+### 17. Plugin Dependency Graph + Impact Chain Analysis
 
-当前 diff:baseline 是全量重新转换所有条目（~5 分钟）。改进为增量模式：
+Multiple plugins may share the same language server (e.g., both eslint and stylelint depend on eslint LSP). When conversion logic involves shared server code, the baseline can help analyze the impact chain.
 
-- 只有 registry 中源 repo commit hash 变化的条目才重新转换
-- 其余条目保留旧 baseline 数据
-- 新加入 registry 的条目追加写入
+```
+vscode-eslint  (esbuild.mjs + src/index.ts changed)
+  └── Shared eslint server → may affect vscode-stylelint
+  └── Shared eslint config → may affect vscode-code-actions
+```
+
+Implementation: Declare `sharedModules` or `sharedServers` in the registry, combined with baseline diff for automatic derivation.
+
+---
+
+### 18. Incremental Baseline Update
+
+Currently `diff:baseline` fully reconverts all entries (~5 minutes). Improve to incremental mode:
+
+- Only reconvert entries whose source repo commit hash has changed
+- Keep old baseline data for remaining entries
+- Append new registry entries
 
 ```bash
 npm run diff:baseline --incremental   # ~30s vs ~5min
@@ -354,12 +354,12 @@ npm run diff:baseline --incremental   # ~30s vs ~5min
 
 ---
 
-### 19. 输出文件树快照
+### 19. Output File Tree Snapshot
 
-不只是 hash，baseline 还可以存储文件树结构（路径 + 是否目录），用于检测：
-- 新增文件（如新增 `esbuild.mjs`）
-- 文件被删除
-- 目录结构变化（如 `server/` 改为 `server/out/`）
+Not just hashes, the baseline can also store the file tree structure (paths + whether directory), used to detect:
+- Added files (e.g., newly added `esbuild.mjs`)
+- Deleted files
+- Directory structure changes (e.g., `server/` changed to `server/out/`)
 
 ```json
 {
@@ -376,60 +376,60 @@ npm run diff:baseline --incremental   # ~30s vs ~5min
 
 ---
 
-### 20. 用户侧 baseline 上报（匿名）
+### 20. Client-Side Baseline Reporting (Anonymous)
 
-用户可以选择匿名上报本地的 baseline hash 校验结果：
+Users can optionally anonymously report local baseline hash verification results:
 
 ```
-插件: vscode-eslint
-状态: ✓ hash 一致
-版本: coc-vscode-loader v1.5.8
-平台: linux-x64
+Plugin: vscode-eslint
+Status: ✓ hash matches
+Version: coc-vscode-loader v1.5.8
+Platform: linux-x64
 ```
 
-帮助开发者了解：
-- 哪些插件在用户环境中最常见
-- 是否有特定平台的文件损坏问题
-- 用户版本分布
+Helps developers understand:
+- Which plugins are most common in user environments
+- Whether there are platform-specific file corruption issues
+- User version distribution
 
 ---
 
-### 21. 安全性 — 篡改检测
+### 21. Security — Tamper Detection
 
-如果某个插件的输出文件被恶意篡改（如注入恶意代码），hash 校验可以检测到异常。结合 `--remote` 模式对比官方 hash，输出若与官方一致则安全。
+If a plugin's output files are maliciously tampered with (e.g., injected malicious code), hash verification can detect the anomaly. Combined with `--remote` mode to compare against official hashes, the output is safe if it matches the official version.
 
-对于追求高安全性的用户，可以设为强制：启动时如果任何插件 hash 与 remote 不一致，拒绝加载。
+For users seeking high security, this can be made mandatory: refuse to load any plugin whose hash doesn't match the remote on startup.
 
 ---
 
-### 22. 调试模式 — 逐文件还原
+### 22. Debug Mode — Per-File Restore
 
-调试时，可以把某个插件的输出文件逐一还原到某个 baseline 版本的状态：
+During debugging, you can restore individual plugin output files to a specific baseline version's state:
 
 ```
 :CocCommand loader.revertFile vscode-eslint src/index.ts v1.5.6
 ```
 
-需要 baseline 不仅存 hash，还存文件归档（如 tar.gz）。存储开销大，但调试时非常有用。
+Requires the baseline to not only store hashes but also file archives (e.g., tar.gz). High storage cost, but very useful during debugging.
 
 ---
 
-### 23. 变更灰度发布
+### 23. Staged Change Rollout
 
-Registry 中可以标注 baseline diff 的影响等级，用户可以选择「只安装无 break 变更的插件」：
+The registry can mark the impact level of baseline diffs, allowing users to "only install plugins without breaking changes":
 
 ```vim
-" 配置
-let g:coc_loader_update_policy = 'safe'  " 只接受 fix/feature，拒绝 break
+" Configuration
+let g:coc_loader_update_policy = 'safe'  " only accept fix/feature, reject break
 ```
 
-结合 #### 14 的变更分类实现。
+Implemented in conjunction with change classification from Section 14.
 
 ---
 
-### 24. 性能基线
+### 24. Performance Baseline
 
-在 baseline 中顺便记录转换耗时：
+Also record conversion duration in the baseline:
 
 ```json
 {
@@ -443,145 +443,145 @@ let g:coc_loader_update_policy = 'safe'  " 只接受 fix/feature，拒绝 break
 }
 ```
 
-CI 中对比性能变化，发现某个 transform 改导致转换时间翻倍时告警。
+Compare performance changes in CI, alert when a transform change causes conversion time to double.
 
 ---
 
-### 25. 智能跳过重装
+### 25. Smart Skip Reinstallation
 
-安装时对每个输出文件逐个对比 hash 和 mtime，只有真正变化的文件才写盘。这可以大幅减少 `installToCoc` 阶段的磁盘 IO。
+During installation, compare hash and mtime for each output file individually, only writing files that actually changed. This can significantly reduce disk I/O during the `installToCoc` phase.
 
-同时避免不必要的 `npm install`（当 `package.json` hash 没变时）。
+Also avoid unnecessary `npm install` (when `package.json` hash hasn't changed).
 
 ---
 
-## 更多创意
+## More Ideas
 
-### 26. 插件评分权重
+### 26. Plugin Stability Rating
 
-统计每个插件在 baseline 迭代中文件 hash 变化的频率。变化越频繁 → 转换稳定性越差 → 对用户显示稳定性评级：
+Track the frequency of file hash changes per plugin across baseline iterations. More frequent changes → worse conversion stability → display stability rating to users:
 
 ```
-vscode-eslint     ⭐⭐⭐ (13 次 baseline 变动，较为稳定)
-vscode-prettier   ⭐⭐    (28 次 baseline 变动，频繁变化)
-vscode-pyright    ⭐⭐⭐⭐ (3 次 baseline 变动，非常稳定)
+vscode-eslint     ⭐⭐⭐ (13 baseline changes, relatively stable)
+vscode-prettier   ⭐⭐    (28 baseline changes, frequently changing)
+vscode-pyright    ⭐⭐⭐⭐ (3 baseline changes, very stable)
 ```
 
-帮助用户决定哪些插件值得安装，哪些可能频繁出问题。
+Help users decide which plugins are worth installing and which may frequently cause issues.
 
 ---
 
-### 27. 本地补丁追踪
+### 27. Local Patch Tracking
 
-用户可能对转换后的输出文件手动打补丁。baseline diff 可以感知到「文件 hash 既不是 baseline 版本也不是新转换版本」，说明用户有自定义修改。
+Users may manually patch converted output files. Baseline diff can detect when "file hash is neither the baseline version nor the newly converted version", indicating custom user modifications.
 
-此时升级时自动：
-1. 识别出用户本地的 patch
-2. 用 `git apply` 或类似机制在新版本上重试应用
-3. 如果有冲突则提示用户手动合并
+In this case, during upgrade, automatically:
+1. Identify the user's local patch
+2. Retry applying it on the new version using `git apply` or similar mechanism
+3. Prompt user to manually merge if conflicts arise
 
 ```vim
 :CocCommand loader.patchList vscode-eslint
-  1. src/index.ts — 自定义 documentSelector (2026-06-20)
-  2. server/eslintServer.js — 禁用 pull diagnostics (2026-06-18)
+  1. src/index.ts — custom documentSelector (2026-06-20)
+  2. server/eslintServer.js — disabled pull diagnostics (2026-06-18)
 ```
 
 ---
 
-### 28. 转换日志审计
+### 28. Conversion Log Audit
 
-每次转换时生成详细日志，包括：
-- 哪些文件被创建/修改/删除
-- 每个 transform 步骤的耗时
-- 文本替换的行级记录
+Generate detailed logs on each conversion, including:
+- Which files were created/modified/deleted
+- Duration of each transform step
+- Line-level records of text replacements
 
-存入 `build/conversion.log`，用户报 bug 时执行：
+Stored in `build/conversion.log`, run when users report bugs:
 
 ```vim
 :CocCommand loader.bugReport vscode-eslint
 ```
 
-自动打包以下内容：
+Automatically package the following:
 - `conversion.log`
-- 输入 vs 输出的 hash 对比
+- Input vs output hash comparison
 - `package.json`
-- coc.nvim 版本信息
-- 平台信息
+- coc.nvim version information
+- Platform information
 
-生成一个归档文件，可直接附到 GitHub issue 中。
+Generate an archive file that can be directly attached to a GitHub issue.
 
 ---
 
-### 29. 智能依赖裁剪
+### 29. Smart Dependency Pruning
 
-通过对比 baseline 中的输出文件 vs `node_modules` 中实际被引用的包，自动识别未使用的依赖：
+By comparing output files in the baseline vs packages actually referenced in `node_modules`, automatically identify unused dependencies:
 
 ```bash
-# 分析 vscode-eslint 的 node_modules
-eslint-server.js 用了: vscode-languageclient, vscode-languageserver
-未使用的包: chalk, ora, cli-truncate  → 建议移除 (-1.2MB)
+# Analyze vscode-eslint's node_modules
+eslint-server.js uses: vscode-languageclient, vscode-languageserver
+Unused packages: chalk, ora, cli-truncate  → suggest removal (-1.2MB)
 ```
 
-配合 `keepDeps`/`excludeDeps` 自动优化输出 `package.json`。每次升级时重新评估。
+Work with `keepDeps`/`excludeDeps` to automatically optimize the output `package.json`. Re-evaluate on each upgrade.
 
 ---
 
-### 30. 插件健康度看板
+### 30. Plugin Health Dashboard
 
-在 TUI 中新增一个 tab（`Tab 9: Health`），展示全局状态仪表盘：
+Add a new tab in the TUI (`Tab 9: Health`) to display a global status dashboard:
 
 ```
-┌─ coc-vscode-loader 健康度 ───────────────┐
-│                                           │
-│  已安装: 8    完好: 5   需重装: 2  损坏: 1 │
-│                                           │
-│  ️ vscode-eslint      ● 完好              │
-│  ️ vscode-prettier    ● 完好              │
-│  ⚠ vscode-pyright     ◐ 需重装 (hash 不匹配)│
-│  ⚠ vscode-ansible     ◐ 需重装 (node_modules缺失)│
-│  ✗ vscode-html        ○ 损坏 (server/ 缺失)│
-│                                           │
-│  上次验证: 2026-06-23 14:30               │
-│  健康度: 62.5%                            │
-└───────────────────────────────────────────┘
+┌─ coc-vscode-loader Health ───────────────────┐
+│                                               │
+│  Installed: 8    Intact: 5   Needs Reinstall: 2   Damaged: 1 │
+│                                               │
+│  ️ vscode-eslint      ● Intact                │
+│  ️ vscode-prettier    ● Intact                │
+│  ⚠ vscode-pyright     ◐ Needs Reinstall (hash mismatch)│
+│  ⚠ vscode-ansible     ◐ Needs Reinstall (node_modules missing)│
+│  ✗ vscode-html        ○ Damaged (server/ missing)│
+│                                               │
+│  Last verified: 2026-06-23 14:30             │
+│  Health: 62.5%                                │
+└───────────────────────────────────────────────┘
 ```
 
 ---
 
-### 31. 自定义警报规则
+### 31. Custom Alert Rules
 
-用户可以写 Lua/VimL 规则，根据 baseline 事件触发通知：
+Users can write Lua/VimL rules to trigger notifications based on baseline events:
 
 ```vim
 " ~/.vim/coc-loader-rules.vim
-" 当某个插件的 hash 改变时发消息
-call LoaderRule('hashChanged', 'vscode-eslint', {-> execute('echo "eslint 已更新，请重装"')})
+" Send a message when a plugin's hash changes
+call LoaderRule('hashChanged', 'vscode-eslint', {-> execute('echo "eslint has been updated, please reinstall"')})
 
-" 当损坏插件超过 3 个时弹窗警告
+" Pop a warning when damaged plugins exceed 3
 call LoaderRule('damagedCount', 3, {-> execute('call s:showWarning()')})
 ```
 
 ---
 
-### 32. 转换质量分数
+### 32. Conversion Quality Score
 
-每次 baseline 更新时对每个插件自动跑质量检测：
+Automatically run quality checks on each plugin every time the baseline is updated:
 
-| 检测项 | 权重 | 说明 |
+| Check Item | Weight | Description |
 |--------|------|------|
-| 输出文件语法正确 | 30% | `node --check` 无报错 |
-| TypeScript 编译通过 | 25% | `tsc --noEmit` |
-| esbuild 打包成功 | 20% | `node esbuild.mjs` |
-| LanguageClient 启动可达 | 15% | 模拟 `require` 不报错 |
-| no-eval / no-deprecated | 10% | 检查有无不安全用法 |
+| Output file syntax is correct | 30% | `node --check` no errors |
+| TypeScript compilation passes | 25% | `tsc --noEmit` |
+| esbuild bundling succeeds | 20% | `node esbuild.mjs` |
+| LanguageClient startup reachable | 15% | Mock `require` returns no error |
+| no-eval / no-deprecated | 10% | Check for unsafe usage |
 
-低于 60 分的插件标记为 `unstable`，TUI 中显示 ⚠ 图标，安装时提示用户「该插件转换质量较低，可能工作不正常」。
+Plugins scoring below 60 are marked as `unstable`, shown with an ⚠ icon in the TUI, and prompt the user during installation: "This plugin's conversion quality is low and may not work properly."
 
 ---
 
-### 33. 安装签名
+### 33. Installation Signature
 
-在 baseline hash 之外，再加一层 HMAC 签名：
+Add an HMAC signature layer beyond the baseline hash:
 
 ```json
 {
@@ -592,16 +592,16 @@ call LoaderRule('damagedCount', 3, {-> execute('call s:showWarning()')})
 }
 ```
 
-安装时用设备密钥验证 HMAC，防止：
-- 本地 baseline 文件被篡改
-- 磁盘损坏导致静默数据污染
-- 多用户共享系统下的权限逃逸
+Verify HMAC with device-specific key during installation, preventing:
+- Local baseline file tampering
+- Silent data corruption due to disk damage
+- Permission escalation in multi-user shared systems
 
 ---
 
-### 34. 环境差异补偿
+### 34. Environment Difference Compensation
 
-跨平台 diff 时自动过滤掉平台相关的字段：
+Automatically filter out platform-related fields during cross-platform diff:
 
 ```json
 {
@@ -609,62 +609,62 @@ call LoaderRule('damagedCount', 3, {-> execute('call s:showWarning()')})
     "esbuild.mjs": {
       "linux-x64": "hashA...",
       "darwin-arm64": "hashA...",
-      "win32-x64": "hashB..."    // Windows 路径分隔符不同
+      "win32-x64": "hashB..."    // Windows path separator differs
     }
   }
 }
 ```
 
-对比时只比较当前平台的 hash，不为别的平台误报。对新条目自动从 CI 的多平台 baseline 中匹配。
+Only compare hashes for the current platform during diff, avoiding false reports for other platforms. Automatically match new entries from CI's multi-platform baseline.
 
 ---
 
-### 35. 冷启动预热
+### 35. Cold Start Prewarming
 
-利用 baseline 信息预判哪些插件的代码路径最常变化，在 vim 启动时异步预热这些模块的 require cache：
+Use baseline information to predict which plugins' code paths change most frequently, and asynchronously prewarm these modules' require cache when vim starts:
 
 ```typescript
-// 在 plugin 激活时
-const volatilePlugins = baseline.getMostChanged(5)  // 前 5 个最常变的
+// On plugin activation
+const volatilePlugins = baseline.getMostChanged(5)  // top 5 most changed
 for (const p of volatilePlugins) {
-  require(p.entryPoint)  // 提前载入，减少用户第一次触发的延迟
+  require(p.entryPoint)  // preload to reduce latency on first user trigger
 }
 ```
 
-只在 idle 时做，不影响启动速度。
+Only do this during idle time, does not affect startup speed.
 
 ---
 
-### 36. 多 Node 版本兼容性矩阵
+### 36. Multi-Node Version Compatibility Matrix
 
-CI 中在 Node.js 18/20/22 上分别跑全量转换，生成三个 baseline：
+In CI, run full conversion on Node.js 18/20/22 respectively, generating three baselines:
 
 ```
 baseline-v18.json
-baseline-v20.json  ← 主版本
+baseline-v20.json  ← main version
 baseline-v22.json
 ```
 
-如果发现某个文件在特定 Node 版本上 hash 不同（如 esbuild 输出差异），自动标注兼容性：
+If a file's hash differs on a specific Node version (e.g., esbuild output differences), automatically mark compatibility:
 
 ```
 vscode-eslint/esbuild.mjs:
   ✓ Node 18
   ✓ Node 20
-  ⚠ Node 22 — hash 不同，esbuild 输出格式有差异
+  ⚠ Node 22 — hash differs, esbuild output format varies
 ```
 
 ---
 
-### 37. CLI 导出 SBOM
+### 37. CLI Export SBOM
 
-基于 baseline + 实际 node_modules，导出软件物料清单（Software Bill of Materials），满足企业安全合规需求：
+Based on baseline + actual `node_modules`, export a Software Bill of Materials (SBOM) to meet enterprise security compliance requirements:
 
 ```bash
 npx tsx scripts/export-sbom.ts --format=cyclonedx
 ```
 
-输出：
+Output:
 ```json
 {
   "bomFormat": "CycloneDX",
@@ -684,191 +684,190 @@ npx tsx scripts/export-sbom.ts --format=cyclonedx
 
 ---
 
-### 38. 慢文件监控
+### 38. Slow File Monitoring
 
-在 baseline 校验时记录每次 `readFile` 的耗时。如果某个文件的读取时间持续变慢（如从 2ms → 200ms），提示用户磁盘可能有问题：
+Record the duration of each `readFile` during baseline verification. If a file's read time consistently increases (e.g., from 2ms to 200ms), warn the user that the disk may have issues:
 
 ```
-⚠ 检测到异常 I/O:
-  vscode-eslint/src/index.ts 读取耗时从 2ms 上升至 210ms
-  可能原因：磁盘故障 / 文件系统碎片 / 存储介质降级
+⚠ Abnormal I/O detected:
+  vscode-eslint/src/index.ts read time increased from 2ms to 210ms
+  Possible causes: disk failure / filesystem fragmentation / storage media degradation
 ```
 
 ---
 
-### 39. 转换历史图表
+### 39. Conversion History Chart
 
-在 TUI 中可视化每个插件在版本迭代中的 baseline 变化次数：
+Visualize in the TUI how many times each plugin's baseline has changed across version iterations:
 
 ```
-插件变更频率 (最近 10 个版本)
+Plugin Change Frequency (Last 10 Versions)
 ┌────────────────────────────────────────────────────────┐
-│ eslint      ██████████▏  2 次                           │
-│ prettier    ████████████████████▌  4 次                 │
-│ pyright     █████▎  1 次                                │
-│ ansible     ██████████████████████████████████▏  7 次   │
-│ html        ████████████████████████████████████████ 8 次│
+│ eslint      ██████████▏  2 times                        │
+│ prettier    ████████████████████▌  4 times              │
+│ pyright     █████▎  1 time                             │
+│ ansible     ██████████████████████████████████▏  7 times│
+│ html        ████████████████████████████████████████ 8 times│
 └────────────────────────────────────────────────────────┘
 ```
 
-一眼看出哪个插件最「折腾」，辅助决定是否等待稳定再安装。
+At a glance, see which plugin is the most "volatile", helping decide whether to wait for stability before installing.
 
 ---
 
-### 40. 用户投票决定默认行为
+### 40. User Voting for Default Behavior
 
-对于存在争议的 transform 改动（如改变代码生成风格），在 TUI 中展示两个 baseline 变体让用户预览：
+For controversial transform changes (e.g., changing code generation style), show two baseline variants in the TUI for users to preview:
 
 ```
-vscode-eslint 有两种可选输出风格:
+vscode-eslint has two optional output styles:
 
-[A] 当前 (v1.5.8) — client.start() 直接调用
+[A] Current (v1.5.8) — client.start() direct call
     src/index.ts hash: a1b2c3
 
-[B] 候选 (v1.6.0) — client.start() 加 .catch()
+[B] Candidate (v1.6.0) — client.start() with .catch()
     src/index.ts hash: d4e5f6
 
-你希望在下次更新中使用哪种？
-➤ [A] 保持当前  [B] 切换到新版  [S] 跳过此插件
+Which would you like to use on the next update?
+➤ [A] Keep current  [B] Switch to new  [S] Skip this plugin
 ```
 
-投票结果匿名上报，帮助维护者判断社区偏好。
+Voting results are anonymously reported, helping maintainers gauge community preferences.
 
 ---
 
-## 优先级建议
+## Priority Suggestions
 
-### P0 — 用户即时价值高，实现成本低
+### P0 — High Immediate User Value, Low Implementation Cost
 
-| # | 功能 | 理由 |
+| # | Feature | Reason |
 |---|------|------|
-| 1 | `loader.verify` | 最直观，hash 系统入口功能 |
-| 2 | `loader.whatChanged` | 解决升级重装的核心痛点 |
-| 3 | 安装失败自动回滚 | 提升用户体验可靠性 |
+| 1 | `loader.verify` | Most intuitive, entry point for hash system |
+| 2 | `loader.whatChanged` | Solves the core pain point of upgrade reinstalls |
+| 3 | Automatic rollback on install failure | Improves user experience reliability |
 
-### P1 — 价值高，但需要一些架构调整
+### P1 — High Value, But Requires Some Architectural Changes
 
-| # | 功能 | 理由 |
+| # | Feature | Reason |
 |---|------|------|
-| 4 | `loader.doctor` | 集成已有检查，提升可支持性 |
-| 6 | 增量安装缓存 | 显著提升重装速度 |
-| 7 | 静默校验 + 通知 | 被动发现问题的入口 |
-| 28 | 转换日志审计 | 报 bug 必备信息 |
-| 30 | 插件健康度看板 | 全局状态一目了然 |
+| 4 | `loader.doctor` | Integrates existing checks, improves supportability |
+| 6 | Incremental installation cache | Significantly improves reinstall speed |
+| 7 | Silent verification + notification | Entry point for passively discovering issues |
+| 28 | Conversion log audit | Essential info for bug reports |
+| 30 | Plugin health dashboard | Global status at a glance |
 
-### P2 — 锦上添花
+### P2 — Nice to Have
 
-| # | 功能 | 理由 |
+| # | Feature | Reason |
 |---|------|------|
-| 5 | 配置溯源 / 只读防护 | 防止用户误操作 |
-| 8 | 文件级 diff 详情 | 信息更透明 |
-| 9 | 批量重装排序 | 批量场景优化 |
-| 10 | 多版本基线保留 | 高级用户回退需求 |
-| 26 | 插件评分权重 | 辅助用户决策 |
-| 27 | 本地补丁追踪 | 高级用户自定义需求 |
-| 29 | 智能依赖裁剪 | 减小插件体积 |
-| 31 | 自定义警报规则 | 可扩展性 |
-| 35 | 冷启动预热 | 优化启动体验 |
+| 5 | Configuration traceability / read-only protection | Prevents user misoperation |
+| 8 | File-level diff details | More transparent information |
+| 9 | Batch reinstall sorting | Batch scenario optimization |
+| 10 | Multi-version baseline retention | Advanced user rollback needs |
+| 26 | Plugin stability rating | Aids user decision-making |
+| 27 | Local patch tracking | Advanced user customization needs |
+| 29 | Smart dependency pruning | Reduces plugin size |
+| 31 | Custom alert rules | Extensibility |
+| 35 | Cold start prewarming | Optimizes startup experience |
 
-### P3 — 开发侧工具
+### P3 — Developer-Facing Tools
 
-| # | 功能 | 理由 |
+| # | Feature | Reason |
 |---|------|------|
-| 11 | 本地开发验证 | 提升开发体验 |
-| 12 | PR 影响预览 | CI 协作 |
-| 13 | 零影响发布检查 | 发布质量 |
-| 14 | 变更分类 | 发布管理 |
-| 15 | 测试自动生成 | 防止回归 |
-| 32 | 转换质量分数 | 自动化质量门禁 |
-| 36 | 多 Node 兼容性矩阵 | 跨版本验证 |
-| 39 | 转换历史图表 | 辅助决策 |
-| 40 | 用户投票 | 社区驱动 |
+| 11 | Local development verification | Improves developer experience |
+| 12 | PR impact preview | CI collaboration |
+| 13 | Zero-impact release check | Release quality |
+| 14 | Change classification | Release management |
+| 15 | Automatic test generation | Prevents regression |
+| 32 | Conversion quality score | Automated quality gate |
+| 36 | Multi-Node compatibility matrix | Cross-version verification |
+| 39 | Conversion history chart | Aids decision-making |
+| 40 | User voting | Community-driven |
 
-### P4 — 高级基础设施
+### P4 — Advanced Infrastructure
 
-| # | 功能 |
+| # | Feature |
 |---|------|
-| 16 | 远程哈希验证 |
-| 17 | 插件依赖图 + 影响链 |
-| 18 | Baseline 增量更新 |
-| 19 | 输出文件树快照 |
-| 20 | 用户侧匿名上报 |
-| 21 | 安全篡改检测 |
-| 22 | 逐文件还原调试 |
-| 23 | 变更灰度发布 |
-| 24 | 性能基线 |
-| 25 | 智能跳过重装 |
-| 33 | 安装签名 |
-| 34 | 环境差异补偿 |
-| 37 | CLI 导出 SBOM |
-| 38 | 慢文件监控 |
+| 16 | Remote hash verification |
+| 17 | Plugin dependency graph + impact chain |
+| 18 | Incremental baseline update |
+| 19 | Output file tree snapshot |
+| 20 | Client-side anonymous reporting |
+| 21 | Security tamper detection |
+| 22 | Per-file restore debugging |
+| 23 | Staged change rollout |
+| 24 | Performance baseline |
+| 25 | Smart skip reinstallation |
+| 33 | Installation signature |
+| 34 | Environment difference compensation |
+| 37 | CLI export SBOM |
+| 38 | Slow file monitoring |
 
 ---
 
-## 实现依赖
+## Implementation Dependencies
 
-大部分功能依赖以下基础设施：
+Most features depend on the following infrastructure:
 
-- [ ] 安装时在用户端缓存 hash 快照（`~/.config/coc/coc-vscode-loader/hashes/`）
-- [ ] npm 发布时附带 `baseline.json`
-- [ ] 用户端程序化读取和对比 baseline 的能力
-- [ ] 独立于 TUI 的命令模块（`src/commands/` 或 `src/baseline.ts`）
+- [ ] Cache hash snapshot on client during installation (`~/.config/coc/coc-vscode-loader/hashes/`)
+- [ ] Include `baseline.json` with npm publish
+- [ ] Ability to programmatically read and compare baseline on client side
+- [ ] Command module independent of TUI (`src/commands/` or `src/baseline.ts`)
 
-## 初期最小实现
+## Minimum Initial Implementation
 
-要能让这些想法中的大多数跑起来，最小切入点是：
+To get most of these ideas working, the minimum starting point is:
 
-1. 在 pipeline 中，安装成功后自动写一份 `package.hash.json` 到插件目录
-2. 提供 `loader.verify` 命令读取并对比
-3. 在 npm 包中打包一份 `baseline.json`
-4. 提供 `loader.whatChanged` 读取包内的 baseline 做 diff
+1. In the pipeline, automatically write a `package.hash.json` to the plugin directory after successful installation
+2. Provide `loader.verify` command to read and compare
+3. Bundle a `baseline.json` in the npm package
+4. Provide `loader.whatChanged` to read the baseline from the package and perform diff
 
-这三个功能互相依赖，可以一次实现。
+These three features are interdependent and can be implemented together.
 
 ---
 
-## 功能清单汇总
+## Feature List Summary
 
-| # | 功能 | 分类 | 价值 |
+| # | Feature | Category | Priority |
 |---|------|------|------|
-| 1 | `loader.verify` — 完整性校验 | 用户 | P0 |
-| 2 | `loader.whatChanged` — 跨版本预览 | 用户 | P0 |
-| 3 | 安装失败自动回滚 | 用户 | P0 |
-| 4 | `loader.doctor` — 一键诊断 | 用户 | P1 |
-| 5 | 配置溯源 / 只读防护 | 用户 | P2 |
-| 6 | 增量安装缓存 | 用户 | P1 |
-| 7 | 静默校验 + 启动通知 | 用户 | P1 |
-| 8 | 文件级 diff 详情 | 用户 | P2 |
-| 9 | 批量重装排序 | 用户 | P2 |
-| 10 | 多版本基线保留 | 用户 | P2 |
-| 11 | 本地开发验证 | 开发 | P3 |
-| 12 | PR 影响预览 | 开发 | P3 |
-| 13 | 零影响发布检查 | 开发 | P3 |
-| 14 | 变更分类（break / feature / fix） | 开发 | P3 |
-| 15 | 测试用例自动生成 | 开发 | P3 |
-| 16 | 远程哈希验证 | 基础设施 | P4 |
-| 17 | 插件依赖图 + 影响链 | 基础设施 | P4 |
-| 18 | Baseline 增量更新 | 基础设施 | P4 |
-| 19 | 输出文件树快照 | 基础设施 | P4 |
-| 20 | 用户侧匿名上报 | 基础设施 | P4 |
-| 21 | 安全篡改检测 | 基础设施 | P4 |
-| 22 | 逐文件还原调试 | 基础设施 | P4 |
-| 23 | 变更灰度发布 | 基础设施 | P4 |
-| 24 | 性能基线 | 基础设施 | P4 |
-| 25 | 智能跳过重装 | 基础设施 | P4 |
-| 26 | 插件评分权重 | 用户 | P2 |
-| 27 | 本地补丁追踪 | 用户 | P2 |
-| 28 | 转换日志审计 | 用户 | P1 |
-| 29 | 智能依赖裁剪 | 用户 | P2 |
-| 30 | 插件健康度看板 | 用户 | P1 |
-| 31 | 自定义警报规则 | 用户 | P2 |
-| 32 | 转换质量分数 | 开发 | P3 |
-| 33 | 安装签名 | 基础设施 | P4 |
-| 34 | 环境差异补偿 | 基础设施 | P4 |
-| 35 | 冷启动预热 | 用户 | P2 |
-| 36 | 多 Node 版本兼容性矩阵 | 开发 | P3 |
-| 37 | CLI 导出 SBOM | 基础设施 | P4 |
-| 38 | 慢文件监控 | 基础设施 | P4 |
-| 39 | 转换历史图表 | 开发 | P3 |
-| 40 | 用户投票决定默认行为 | 开发 | P3 |
-
+| 1 | `loader.verify` — Integrity Verification | User | P0 |
+| 2 | `loader.whatChanged` — Cross-Version Preview | User | P0 |
+| 3 | Automatic Rollback on Install Failure | User | P0 |
+| 4 | `loader.doctor` — One-Click Diagnosis | User | P1 |
+| 5 | Configuration Traceability / Read-Only Protection | User | P2 |
+| 6 | Incremental Installation Cache | User | P1 |
+| 7 | Silent Verification + Startup Notification | User | P1 |
+| 8 | File-Level Diff Details | User | P2 |
+| 9 | Batch Reinstall Sorting | User | P2 |
+| 10 | Multi-Version Baseline Retention | User | P2 |
+| 11 | Local Development Verification | Dev | P3 |
+| 12 | PR Impact Preview | Dev | P3 |
+| 13 | Zero-Impact Release Check | Dev | P3 |
+| 14 | Change Classification (break / feature / fix) | Dev | P3 |
+| 15 | Automatic Test Case Generation | Dev | P3 |
+| 16 | Remote Hash Verification | Infrastructure | P4 |
+| 17 | Plugin Dependency Graph + Impact Chain | Infrastructure | P4 |
+| 18 | Incremental Baseline Update | Infrastructure | P4 |
+| 19 | Output File Tree Snapshot | Infrastructure | P4 |
+| 20 | Client-Side Anonymous Reporting | Infrastructure | P4 |
+| 21 | Security Tamper Detection | Infrastructure | P4 |
+| 22 | Per-File Restore Debugging | Infrastructure | P4 |
+| 23 | Staged Change Rollout | Infrastructure | P4 |
+| 24 | Performance Baseline | Infrastructure | P4 |
+| 25 | Smart Skip Reinstallation | Infrastructure | P4 |
+| 26 | Plugin Stability Rating | User | P2 |
+| 27 | Local Patch Tracking | User | P2 |
+| 28 | Conversion Log Audit | User | P1 |
+| 29 | Smart Dependency Pruning | User | P2 |
+| 30 | Plugin Health Dashboard | User | P1 |
+| 31 | Custom Alert Rules | User | P2 |
+| 32 | Conversion Quality Score | Dev | P3 |
+| 33 | Installation Signature | Infrastructure | P4 |
+| 34 | Environment Difference Compensation | Infrastructure | P4 |
+| 35 | Cold Start Prewarming | User | P2 |
+| 36 | Multi-Node Version Compatibility Matrix | Dev | P3 |
+| 37 | CLI Export SBOM | Infrastructure | P4 |
+| 38 | Slow File Monitoring | Infrastructure | P4 |
+| 39 | Conversion History Chart | Dev | P3 |
+| 40 | User Voting for Default Behavior | Dev | P3 |

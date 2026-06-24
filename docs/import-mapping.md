@@ -1,118 +1,118 @@
-# Import 映射：VS Code → coc.nvim
+# Import Mapping: VS Code → coc.nvim
 
-> 完整对照 `from 'vscode'` 的导出名到 `from 'coc.nvim'` 的导出名。
-> 标记 `≈` 表示签名/类型不完全一致。
+> Complete mapping of exports from `from 'vscode'` to `from 'coc.nvim'`.
+> `≈` marks that signatures/types are not exactly the same.
 
 ---
 
-## 1. 基础类型
+## 1. Basic Types
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
-| `CancellationToken` | `CancellationToken` | ≈ coc 多了 namespace |
-| `CancellationTokenSource` | `CancellationTokenSource` | 是 |
-| `CancellationError` | `CancellationError` | 是 |
+| `CancellationToken` | `CancellationToken` | ≈ coc has namespace |
+| `CancellationTokenSource` | `CancellationTokenSource` | Yes |
+| `CancellationError` | `CancellationError` | Yes |
 | `Disposable` | `Disposable` | ≈ class vs interface |
-| `Event<T>` | `Event<T>` | 是 |
-| `EventEmitter<T>` | `Emitter<T>` | ≈ 命名不同 |
-| — | `EventEmitter` | coc 无此名，用 Emitter |
+| `Event<T>` | `Event<T>` | Yes |
+| `EventEmitter<T>` | `Emitter<T>` | ≈ different name |
+| — | `EventEmitter` | coc does not have this name, use Emitter |
 | `Position` | `Position` | ≈ class vs interface |
 | `Range` | `Range` | ≈ class vs interface |
-| `Selection` | — | vscode 独有 |
-| `TextDocument` | `TextDocument` | ≈ 缺少部分字段 |
-| — | `LinesTextDocument` | coc 独有（extends TextDocument） |
-| `TextLine` | `TextLine` | 是 |
-| `EndOfLine` | — | vscode 独有 |
-| `Uri` | `Uri` | ≈ class vs class（coc 构造器为 protected） |
-| — | `DocumentUri` | coc 独有（`= string`） |
-| `Command` | `Command` | ≈ coc 少 tooltip |
+| `Selection` | — | vscode only |
+| `TextDocument` | `TextDocument` | ≈ missing some fields |
+| — | `LinesTextDocument` | coc only (extends TextDocument) |
+| `TextLine` | `TextLine` | Yes |
+| `EndOfLine` | — | vscode only |
+| `Uri` | `Uri` | ≈ class vs class (coc constructor is protected) |
+| — | `DocumentUri` | coc only (`= string`) |
+| `Command` | `Command` | ≈ coc missing tooltip |
 | `TextEdit` | `TextEdit` | ≈ class vs interface |
-| — | `AnnotatedTextEdit` | coc 独有（LSP） |
-| — | `SnippetTextEdit` | coc 独有 |
+| — | `AnnotatedTextEdit` | coc only (LSP) |
+| — | `SnippetTextEdit` | coc only |
 | `WorkspaceEdit` | `WorkspaceEdit` | ≈ class vs interface |
-| — | `WorkspaceChange` | coc 独有 |
-| `SnippetString` | `SnippetString` | 是 |
-| `MarkdownString` | — | vscode 独有 |
-| — | `MarkupContent` | coc 独有（LSP） |
-| — | `MarkupKind` | coc 独有 |
-| `MarkedString` | `MarkedString` | 是 |
-| `Hover` | `Hover` | ≈ class vs interface，coc 无工厂方法 |
-| `ThemeColor` | — | coc 无 |
-| `ThemeIcon` | — | coc 无 |
-| `IconPath` | — | vscode 独有 |
-| `RelativePattern` | `RelativePattern` | 是 |
-| `GlobPattern` | `GlobPattern` | 是 |
-| `DocumentFilter` | `DocumentFilter` | 是 |
-| `DocumentSelector` | `DocumentSelector` | 是 |
-| `ProviderResult` | `ProviderResult` | 是 |
+| — | `WorkspaceChange` | coc only |
+| `SnippetString` | `SnippetString` | Yes |
+| `MarkdownString` | — | vscode only |
+| — | `MarkupContent` | coc only (LSP) |
+| — | `MarkupKind` | coc only |
+| `MarkedString` | `MarkedString` | Yes |
+| `Hover` | `Hover` | ≈ class vs interface, coc has no factory method |
+| `ThemeColor` | — | coc does not have |
+| `ThemeIcon` | — | coc does not have |
+| `IconPath` | — | vscode only |
+| `RelativePattern` | `RelativePattern` | Yes |
+| `GlobPattern` | `GlobPattern` | Yes |
+| `DocumentFilter` | `DocumentFilter` | Yes |
+| `DocumentSelector` | `DocumentSelector` | Yes |
+| `ProviderResult` | `ProviderResult` | Yes |
 
 ---
 
-## 2. 诊断
+## 2. Diagnostics
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
-| `Diagnostic` | `Diagnostic` | ≈ class vs interface，severity 值不同 |
+| `Diagnostic` | `Diagnostic` | ≈ class vs interface, severity values differ |
 | `DiagnosticSeverity` | `DiagnosticSeverity` | ≈ enum 0-3 vs 1-4 |
 | `DiagnosticTag` | `DiagnosticTag` | ≈ enum vs namespace |
 | `DiagnosticRelatedInformation` | `DiagnosticRelatedInformation` | ≈ |
-| `DiagnosticCollection` | `DiagnosticCollection` | ≈ key 类型 Uri vs string |
-| — | `CodeDescription` | coc 独有（LSP） |
-| — | `DiagnosticItem` | coc 独有 |
-| — | `DiagnosticProvider` | coc 独有 |
-| — | `DiagnosticEventParams` | coc 独有（LSP） |
+| `DiagnosticCollection` | `DiagnosticCollection` | ≈ key type Uri vs string |
+| — | `CodeDescription` | coc only (LSP) |
+| — | `DiagnosticItem` | coc only |
+| — | `DiagnosticProvider` | coc only |
+| — | `DiagnosticEventParams` | coc only (LSP) |
 
 ---
 
-## 3. 补全
+## 3. Completion
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
-| `CompletionItem` | `CompletionItem` | ≈ class vs interface，coc `create(label)` 只接受 label，kind 需单独设 `item.kind =` |
-| `CompletionItemKind` | `CompletionItemKind` | ≈ enum vs namespace + type，值偏移 1 (vscode Text=0, coc Text=1) |
+| `CompletionItem` | `CompletionItem` | ≈ class vs interface, coc `create(label)` only accepts label, kind needs separate `item.kind =` |
+| `CompletionItemKind` | `CompletionItemKind` | ≈ enum vs namespace + type, values offset by 1 (vscode Text=0, coc Text=1) |
 | `CompletionList` | `CompletionList` | ≈ class vs interface |
-| `CompletionTriggerKind` | `CompletionTriggerKind` | ≈ enum vs namespace + type，vscode `Invoke=0` vs coc `Invoked:1` |
-| — | `InsertTextFormat` | coc 独有（LSP，vscode 用 `string \| SnippetString`） |
-| — | `InsertTextMode` | coc 独有（LSP） |
+| `CompletionTriggerKind` | `CompletionTriggerKind` | ≈ enum vs namespace + type, vscode `Invoke=0` vs coc `Invoked:1` |
+| — | `InsertTextFormat` | coc only (LSP, vscode uses `string \| SnippetString`) |
+| — | `InsertTextMode` | coc only (LSP) |
 | `CompletionItemTag` | `CompletionItemTag` | ≈ enum vs namespace + type |
 | `InsertReplaceEdit` | `InsertReplaceEdit` | ≈ |
-| `CompletionItemLabelDetails` | `CompletionItemLabelDetails` | 是 |
-| — | `CompleteOption` | coc 独有 |
-| — | `CompleteDoneItem` | coc 独有 |
-| — | `CompleteResult` | coc 独有 |
+| `CompletionItemLabelDetails` | `CompletionItemLabelDetails` | Yes |
+| — | `CompleteOption` | coc only |
+| — | `CompleteDoneItem` | coc only |
+| — | `CompleteResult` | coc only |
 
 ---
 
 ## 4. CodeAction / CodeLens
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
 | `CodeAction` | `CodeAction` | ≈ class vs interface |
 | `CodeActionKind` | `CodeActionKind` | ≈ class vs string alias |
 | `CodeActionContext` | `CodeActionContext` | ≈ |
-| `CodeActionTriggerKind` | `CodeActionTriggerKind` | ≈ enum vs namespace，命名不同 vscode `Invoke` vs coc `Invoked` |
+| `CodeActionTriggerKind` | `CodeActionTriggerKind` | ≈ enum vs namespace, different name vscode `Invoke` vs coc `Invoked` |
 | `CodeLens` | `CodeLens` | ≈ class vs interface |
 
 ---
 
-## 5. 文档符号
+## 5. Document Symbols
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
-| `SymbolKind` | `SymbolKind` | ≈ enum vs namespace，值偏移 1 (vscode File=0, coc File=1) |
+| `SymbolKind` | `SymbolKind` | ≈ enum vs namespace, values offset by 1 (vscode File=0, coc File=1) |
 | `SymbolTag` | `SymbolTag` | ≈ enum vs namespace |
 | `DocumentSymbol` | `DocumentSymbol` | ≈ class vs interface |
 | `SymbolInformation` | `SymbolInformation` | ≈ class vs interface |
-| — | `BaseSymbolInformation` | coc 独有（LSP） |
-| — | `WorkspaceSymbol` | coc 独有（LSP） |
+| — | `BaseSymbolInformation` | coc only (LSP) |
+| — | `WorkspaceSymbol` | coc only (LSP) |
 | `DocumentHighlight` | `DocumentHighlight` | ≈ class vs interface |
-| `DocumentHighlightKind` | `DocumentHighlightKind` | ≈ enum vs namespace，值偏移 1 (vscode Text=0, coc Text=1) |
+| `DocumentHighlightKind` | `DocumentHighlightKind` | ≈ enum vs namespace, values offset by 1 (vscode Text=0, coc Text=1) |
 
 ---
 
 ## 6. SignatureHelp
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
 | `SignatureHelp` | `SignatureHelp` | ≈ class vs interface |
 | `SignatureInformation` | `SignatureInformation` | ≈ class vs interface |
@@ -120,21 +120,21 @@
 
 ---
 
-## 7. 引用 / 定义
+## 7. References / Definitions
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
 | `Location` | `Location` | ≈ class vs interface |
 | `LocationLink` | `LocationLink` | ≈ class vs interface |
-| `ReferenceContext` | `ReferenceContext` | 是 |
-| — | `Declaration` | coc 无顶层类型（直接用 Location[]） |
-| — | `DeclarationLink` | coc 独有 |
+| `ReferenceContext` | `ReferenceContext` | Yes |
+| — | `Declaration` | coc has no top-level type (uses Location[] directly) |
+| — | `DeclarationLink` | coc only |
 
 ---
 
-## 8. 折叠 / 选择
+## 8. Folding / Selection
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
 | `FoldingRange` | `FoldingRange` | ≈ class vs interface |
 | `FoldingRangeKind` | `FoldingRangeKind` | ≈ |
@@ -142,9 +142,9 @@
 
 ---
 
-## 9. 层次
+## 9. Hierarchy
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
 | `CallHierarchyItem` | `CallHierarchyItem` | ≈ class vs interface |
 | `CallHierarchyIncomingCall` | `CallHierarchyIncomingCall` | ≈ |
@@ -154,65 +154,65 @@
 
 ---
 
-## 10. InlayHint / 语义令牌
+## 10. InlayHint / Semantic Tokens
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
 | `InlayHint` | `InlayHint` | ≈ class vs type alias |
 | `InlayHintKind` | `InlayHintKind` | ≈ enum vs namespace |
 | `InlayHintLabelPart` | `InlayHintLabelPart` | ≈ |
-| `SemanticTokensLegend` | `SemanticTokensLegend` | 是 |
-| `SemanticTokens` | `SemanticTokens` | 是 |
-| `SemanticTokensEdit` | `SemanticTokensEdit` | 是 |
-| `SemanticTokensEdits` | `SemanticTokensEdits` | 是 |
-| `SemanticTokensBuilder` | `SemanticTokensBuilder` | 是 |
+| `SemanticTokensLegend` | `SemanticTokensLegend` | Yes |
+| `SemanticTokens` | `SemanticTokens` | Yes |
+| `SemanticTokensEdit` | `SemanticTokensEdit` | Yes |
+| `SemanticTokensEdits` | `SemanticTokensEdits` | Yes |
+| `SemanticTokensBuilder` | `SemanticTokensBuilder` | Yes |
 
 ---
 
 ## 11. Terminal / Output / StatusBar
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
-| `Terminal` | `Terminal` | ≈ coc 多了 bufnr |
-| `TerminalOptions` | `TerminalOptions` | ≈ coc 少了大量选项 |
-| `TerminalExitStatus` | `TerminalExitStatus` | 是 |
-| `Pseudoterminal` | — | vscode 独有 |
-| `ExtensionTerminalOptions` | — | vscode 独有 |
-| `TerminalProfile` | — | vscode 独有 |
-| `StatusBarAlignment` | — | vscode 独有 |
-| `StatusBarItem` | `StatusBarItem` | ≈ coc 少了大量属性 |
-| `OutputChannel` | `OutputChannel` | ≈ coc 多了 content，少了 replace |
+| `Terminal` | `Terminal` | ≈ coc has additional bufnr |
+| `TerminalOptions` | `TerminalOptions` | ≈ coc missing many options |
+| `TerminalExitStatus` | `TerminalExitStatus` | Yes |
+| `Pseudoterminal` | — | vscode only |
+| `ExtensionTerminalOptions` | — | vscode only |
+| `TerminalProfile` | — | vscode only |
+| `StatusBarAlignment` | — | vscode only |
+| `StatusBarItem` | `StatusBarItem` | ≈ coc missing many properties |
+| `OutputChannel` | `OutputChannel` | ≈ coc has additional content, missing replace |
 
 ---
 
 ## 12. TreeView
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
-| `TreeItem` | `TreeItem` | ≈ coc 用 icon 替代 iconPath |
-| `TreeItemCollapsibleState` | `TreeItemCollapsibleState` | 是 |
-| `TreeDataProvider` | `TreeDataProvider` | 是 |
-| `TreeView` | `TreeView` | ≈ coc 多了 windowId/show |
+| `TreeItem` | `TreeItem` | ≈ coc uses icon instead of iconPath |
+| `TreeItemCollapsibleState` | `TreeItemCollapsibleState` | Yes |
+| `TreeDataProvider` | `TreeDataProvider` | Yes |
+| `TreeView` | `TreeView` | ≈ coc has additional windowId/show |
 | `TreeViewOptions` | `TreeViewOptions` | ≈ |
 
 ---
 
 ## 13. QuickPick / InputBox
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
-| `QuickPickItem` | `QuickPickItem` | ≈ coc 少 kind/iconPath/detail/buttons |
-| — | `QuickPickOptions` | coc 无此接口 |
-| `QuickPick<T>` | `QuickPick<T>` | ≈ coc 多 loading/maxHeight 等 vim 属性 |
-| `InputBox` | `InputBox` | ≈ coc 多 borderhighlight/bufnr 等 vim 属性 |
-| `MessageItem` | `MessageItem` | 是 |
-| `MessageOptions` | `MessageOptions` | 是 |
+| `QuickPickItem` | `QuickPickItem` | ≈ coc missing kind/iconPath/detail/buttons |
+| — | `QuickPickOptions` | coc does not have this interface |
+| `QuickPick<T>` | `QuickPick<T>` | ≈ coc has additional vim properties like loading/maxHeight |
+| `InputBox` | `InputBox` | ≈ coc has additional vim properties like borderhighlight/bufnr |
+| `MessageItem` | `MessageItem` | Yes |
+| `MessageOptions` | `MessageOptions` | Yes |
 
 ---
 
-## 14. 颜色
+## 14. Color
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
 | `Color` | `Color` | ≈ class vs interface |
 | `ColorInformation` | `ColorInformation` | ≈ class vs interface |
@@ -220,113 +220,113 @@
 
 ---
 
-## 15. Providers（接口名）
+## 15. Providers (Interface Names)
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
-| `CompletionItemProvider` | `CompletionItemProvider` | ≈ vscode 有泛型 |
-| `InlineCompletionItemProvider` | `InlineCompletionItemProvider` | 是 |
-| `HoverProvider` | `HoverProvider` | 是 |
-| `DefinitionProvider` | `DefinitionProvider` | 是 |
-| `DeclarationProvider` | `DeclarationProvider` | 是 |
-| `TypeDefinitionProvider` | `TypeDefinitionProvider` | 是 |
-| `ImplementationProvider` | `ImplementationProvider` | 是 |
-| `ReferenceProvider` | `ReferenceProvider` | 是 |
-| `DocumentHighlightProvider` | `DocumentHighlightProvider` | 是 |
-| `DocumentSymbolProvider` | `DocumentSymbolProvider` | 是 |
-| `WorkspaceSymbolProvider` | `WorkspaceSymbolProvider` | 是 |
-| `CodeActionProvider` | `CodeActionProvider` | 是 |
-| `CodeLensProvider` | `CodeLensProvider` | 是 |
-| `DocumentFormattingEditProvider` | `DocumentFormattingEditProvider` | 是 |
-| `DocumentRangeFormattingEditProvider` | `DocumentRangeFormattingEditProvider` | 是 |
-| `OnTypeFormattingEditProvider` | `OnTypeFormattingEditProvider` | 是 |
-| `SignatureHelpProvider` | `SignatureHelpProvider` | 是 |
-| `RenameProvider` | `RenameProvider` | 是 |
-| `DocumentLinkProvider` | `DocumentLinkProvider` | 是 |
-| `DocumentColorProvider` | `DocumentColorProvider` | 是 |
-| `FoldingRangeProvider` | `FoldingRangeProvider` | 是 |
-| `SelectionRangeProvider` | `SelectionRangeProvider` | 是 |
-| `CallHierarchyProvider` | `CallHierarchyProvider` | 是 |
-| `TypeHierarchyProvider` | `TypeHierarchyProvider` | 是 |
-| `LinkedEditingRangeProvider` | `LinkedEditingRangeProvider` | 是 |
-| `InlayHintsProvider` | `InlayHintsProvider` | 是 |
-| `DocumentSemanticTokensProvider` | `DocumentSemanticTokensProvider` | 是 |
-| `DocumentRangeSemanticTokensProvider` | `DocumentRangeSemanticTokensProvider` | 是 |
-| `InlineValuesProvider` | `InlineValuesProvider` | ≈ 接口存在，但无注册函数可用 |
-| `EvaluatableExpressionProvider` | — | coc 无 |
+| `CompletionItemProvider` | `CompletionItemProvider` | ≈ vscode has generics |
+| `InlineCompletionItemProvider` | `InlineCompletionItemProvider` | Yes |
+| `HoverProvider` | `HoverProvider` | Yes |
+| `DefinitionProvider` | `DefinitionProvider` | Yes |
+| `DeclarationProvider` | `DeclarationProvider` | Yes |
+| `TypeDefinitionProvider` | `TypeDefinitionProvider` | Yes |
+| `ImplementationProvider` | `ImplementationProvider` | Yes |
+| `ReferenceProvider` | `ReferenceProvider` | Yes |
+| `DocumentHighlightProvider` | `DocumentHighlightProvider` | Yes |
+| `DocumentSymbolProvider` | `DocumentSymbolProvider` | Yes |
+| `WorkspaceSymbolProvider` | `WorkspaceSymbolProvider` | Yes |
+| `CodeActionProvider` | `CodeActionProvider` | Yes |
+| `CodeLensProvider` | `CodeLensProvider` | Yes |
+| `DocumentFormattingEditProvider` | `DocumentFormattingEditProvider` | Yes |
+| `DocumentRangeFormattingEditProvider` | `DocumentRangeFormattingEditProvider` | Yes |
+| `OnTypeFormattingEditProvider` | `OnTypeFormattingEditProvider` | Yes |
+| `SignatureHelpProvider` | `SignatureHelpProvider` | Yes |
+| `RenameProvider` | `RenameProvider` | Yes |
+| `DocumentLinkProvider` | `DocumentLinkProvider` | Yes |
+| `DocumentColorProvider` | `DocumentColorProvider` | Yes |
+| `FoldingRangeProvider` | `FoldingRangeProvider` | Yes |
+| `SelectionRangeProvider` | `SelectionRangeProvider` | Yes |
+| `CallHierarchyProvider` | `CallHierarchyProvider` | Yes |
+| `TypeHierarchyProvider` | `TypeHierarchyProvider` | Yes |
+| `LinkedEditingRangeProvider` | `LinkedEditingRangeProvider` | Yes |
+| `InlayHintsProvider` | `InlayHintsProvider` | Yes |
+| `DocumentSemanticTokensProvider` | `DocumentSemanticTokensProvider` | Yes |
+| `DocumentRangeSemanticTokensProvider` | `DocumentRangeSemanticTokensProvider` | Yes |
+| `InlineValuesProvider` | `InlineValuesProvider` | ≈ interface exists, but no available registration function |
+| `EvaluatableExpressionProvider` | — | coc does not have |
 
 ---
 
-## 16. 命名空间
+## 16. Namespaces
 
-| VS Code | coc.nvim | 完全一致？ |
+| VS Code | coc.nvim | Exact Match? |
 |---------|----------|-----------|
-| `workspace` | `workspace` | ≈ 见详细文档 |
-| `window` | `window` | ≈ 见详细文档 |
-| `languages` | `languages` | ≈ 见详细文档 |
-| `commands` | `commands` | ≈ 见详细文档 |
+| `workspace` | `workspace` | ≈ see detailed docs |
+| `window` | `window` | ≈ see detailed docs |
+| `languages` | `languages` | ≈ see detailed docs |
+| `commands` | `commands` | ≈ see detailed docs |
 | `extensions` | `extensions` | ≈ getExtensionById vs getExtension |
-| `env` | — | vscode 独有 |
-| `debug` | — | vscode 独有 |
-| `tasks` | — | vscode 独有 |
-| `notebooks` | — | vscode 独有 |
-| `scm` | — | vscode 独有 |
-| `tests` | — | vscode 独有 |
-| `chat` | — | vscode 独有 |
-| `lm` | — | vscode 独有 |
-| `authentication` | — | vscode 独有 |
-| `l10n` | — | vscode 独有 |
-| — | `snippetManager` | coc 独有 |
+| `env` | — | vscode only |
+| `debug` | — | vscode only |
+| `tasks` | — | vscode only |
+| `notebooks` | — | vscode only |
+| `scm` | — | vscode only |
+| `tests` | — | vscode only |
+| `chat` | — | vscode only |
+| `lm` | — | vscode only |
+| `authentication` | — | vscode only |
+| `l10n` | — | vscode only |
+| — | `snippetManager` | coc only |
 
 ---
 
-## 17. LSP 类型（coc 独有，无 vscode 等价）
+## 17. LSP Types (coc only, no vscode equivalent)
 
-这些是 LSP 协议中的类型，coc 直接暴露但在 vscode 中不直接暴露：
+These are types from the LSP protocol that coc exposes directly but vscode does not:
 
-| coc.nvim | 说明 |
+| coc.nvim | Description |
 |----------|------|
-| `integer`、`uinteger`、`decimal` | LSP 数值类型 |
-| `LSPAny`、`LSPObject`、`LSPArray` | LSP 通用类型 |
-| `TextDocumentIdentifier` | LSP 文档 ID |
-| `VersionedTextDocumentIdentifier` | LSP 带版本 |
-| `OptionalVersionedTextDocumentIdentifier` | LSP 可选版本 |
-| `TextDocumentItem` | LSP 文档创建 |
-| `TextDocumentEdit` | LSP 文档编辑 |
-| `CreateFile` / `RenameFile` / `DeleteFile` | LSP 文件操作 |
-| `ChangeAnnotation` / `ChangeAnnotationIdentifier` | LSP 变更注解 |
-| `TextEditChange` | LSP 编辑变更 |
-| `ConfigurationItem`、`ConfigurationParams` | LSP 配置参数 |
+| `integer`、`uinteger`、`decimal` | LSP numeric types |
+| `LSPAny`、`LSPObject`、`LSPArray` | LSP generic types |
+| `TextDocumentIdentifier` | LSP document ID |
+| `VersionedTextDocumentIdentifier` | LSP versioned |
+| `OptionalVersionedTextDocumentIdentifier` | LSP optional version |
+| `TextDocumentItem` | LSP document creation |
+| `TextDocumentEdit` | LSP document edit |
+| `CreateFile` / `RenameFile` / `DeleteFile` | LSP file operations |
+| `ChangeAnnotation` / `ChangeAnnotationIdentifier` | LSP change annotations |
+| `TextEditChange` | LSP edit changes |
+| `ConfigurationItem`、`ConfigurationParams` | LSP configuration params |
 | `ColorProviderMiddleware` | LSP middleware |
 | `ConfigurationWorkspaceMiddleware` | LSP middleware |
 | `DiagnosticProviderMiddleware` | LSP middleware |
 | `CallHierarchyMiddleware` | LSP middleware |
 | `DeclarationMiddleware` | LSP middleware |
-| 各种 `*RegistrationOptions`、`*Signature` | LSP 注册/特征类型 |
+| Various `*RegistrationOptions`、`*Signature` | LSP registration/signature types |
 
 ---
 
-## 18. Vim 特有 API（coc 独有）
+## 18. Vim-specific API (coc only)
 
-以下类型 coc 有，VS Code 没有：
+The following types are available in coc but not in VS Code:
 
-| coc.nvim | 说明 |
+| coc.nvim | Description |
 |----------|------|
-| `Buffer` | Neovim buffer 操作 |
-| `BufferHighlight` / `BufferClearHighlight` | buffer 高亮 |
-| `BufferSync` / `BufferSyncItem` | buffer 同步 |
+| `Buffer` | Neovim buffer operations |
+| `BufferHighlight` / `BufferClearHighlight` | buffer highlights |
+| `BufferSync` / `BufferSyncItem` | buffer sync |
 | `Autocmd` / `AugroupOption` | vim autocmd |
-| `KeymapOption` / `BufferKeymapOption` | 键映射 |
-| `Neovim` | Neovim 实例 |
-| `Env` (workspace.env) | vim 环境信息 |
-| `Dialog` / `DialogButton` / `DialogConfig` | vim 浮动对话框 |
-| `AnsiHighlight` / `AnsiItem` / `ansiparse` | ANSI 颜色解析 |
-| `ApplyKind` | LSP 应用类别 |
-| `CompleteOption` / `CompleteDoneItem` / `CompleteResult` | 补全信息 |
-| `CursorPosition` | 光标位置（含 screen 坐标） |
-| `CommandItem` | 命令列表项 |
-| `Channel`、`ChannelOption` | Nvim 通道 |
-| `ConfigurationInspect` | 配置检查结果 |
-| `ChildProcessInfo` | 子进程信息 |
-| `VimCommand` / `VimCommandDescription` | Vim 命令描述 |
-| `IsKeywordOption` | 关键词字符配置 |
+| `KeymapOption` / `BufferKeymapOption` | key mappings |
+| `Neovim` | Neovim instance |
+| `Env` (workspace.env) | vim environment info |
+| `Dialog` / `DialogButton` / `DialogConfig` | vim floating dialogs |
+| `AnsiHighlight` / `AnsiItem` / `ansiparse` | ANSI color parsing |
+| `ApplyKind` | LSP apply kind |
+| `CompleteOption` / `CompleteDoneItem` / `CompleteResult` | completion info |
+| `CursorPosition` | cursor position (includes screen coordinates) |
+| `CommandItem` | command list item |
+| `Channel`、`ChannelOption` | Nvim channels |
+| `ConfigurationInspect` | configuration inspection result |
+| `ChildProcessInfo` | child process info |
+| `VimCommand` / `VimCommandDescription` | Vim command description |
+| `IsKeywordOption` | keyword character configuration |

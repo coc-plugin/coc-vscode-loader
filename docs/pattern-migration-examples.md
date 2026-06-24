@@ -1,17 +1,17 @@
-# VS Code → coc 常见模式转换示例
+# VS Code → coc Common Pattern Migration Examples
 
-> 每一段代码对比：左侧是 VS Code 写法，右侧是等价的 coc.nvim 写法
+> Each code comparison: left is the VS Code approach, right is the equivalent coc.nvim approach
 
 ---
 
-## 1. 激活函数
+## 1. Activation Function
 
 ```typescript
 // VS Code
 import * as vscode from 'vscode'
 
 export function activate(context: vscode.ExtensionContext): void {
-  // vscode 的 activate 可以是 sync
+  // vscode's activate can be sync
   context.subscriptions.push(
     vscode.workspace.onDidOpenTextDocument((doc) => { /* ... */ })
   )
@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext): void {
 import { ExtensionContext, workspace, window } from 'coc.nvim'
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  // coc 的 activate 支持 async（也支持 sync，用 async 更安全）
+  // coc's activate supports async (sync also works, but async is safer)
   context.subscriptions.push(
     workspace.registerAutocmd({
       event: 'BufEnter',
@@ -32,10 +32,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
 }
 ```
 
-**差异：**
-- vscode 的 `activate` 可返回 `void`；coc 两者都支持，通常用 `Promise<void>`
-- vscode 用 `workspace.onDid*` 事件；coc 用 `registerAutocmd` 注册 vim 事件
-- vscode 的 `ExtensionContext` 含 `subscriptions: Disposable[]`；coc 同
+**Differences:**
+- vscode's `activate` can return `void`; coc supports both, usually `Promise<void>`
+- vscode uses `workspace.onDid*` events; coc uses `registerAutocmd` to register vim events
+- vscode's `ExtensionContext` has `subscriptions: Disposable[]`; coc same
 
 ---
 
@@ -53,7 +53,7 @@ languages.registerCompletionItemProvider(
       return [item]
     },
   },
-  '.'  // rest: 每个 trigger char 是单独参数
+  '.'  // rest: each trigger char is a separate argument
 )
 
 // coc.nvim
@@ -74,12 +74,12 @@ languages.registerCompletionItemProvider(
 )
 ```
 
-**差异点：**
+**Differences:**
 | vscode | coc |
 |--------|-----|
 | `registerCompletionItemProvider(selector, provider, ...triggers)` | `registerCompletionItemProvider(name, shortcut, selector, provider, triggers?)` |
 | `new CompletionItem(label, kind)` | `CompletionItem.create(label); item.kind = kind` |
-| `context` 不含 `option: CompleteOption` 字段 | `context` 多 `option: CompleteOption` 字段 |
+| `context` does not have `option: CompleteOption` field | `context` additionally has `option: CompleteOption` field |
 
 ---
 
@@ -113,10 +113,10 @@ languages.registerHoverProvider(
 )
 ```
 
-**差异点：**
+**Differences:**
 | vscode | coc |
 |--------|-----|
-| `new Hover(contents, range?)` | 直接构造 `{ contents, range }` 对象 |
+| `new Hover(contents, range?)` | Construct `{ contents, range }` directly |
 | contents: `MarkdownString[] \| MarkedString[]` | contents: `MarkupContent \| MarkedString \| MarkedString[]` |
 | `new Range(sl, sc, el, ec)` | `Range.create(sl, sc, el, ec)` |
 
@@ -146,11 +146,11 @@ function updateDiagnostics(uri: string, diagnostics: Diagnostic[]) {
 }
 ```
 
-**差异点：**
+**Differences:**
 | vscode | coc |
 |--------|-----|
 | `collection.set(uri: Uri, ...)` | `collection.set(uri: string, ...)` |
-| 清空用 `undefined` | 清空用 `null` |
+| Use `undefined` to clear | Use `null` to clear |
 | `new Diagnostic(range, msg, severity?)` | `Diagnostic.create(range, msg, severity?, code?)` |
 | `DiagnosticSeverity.Error` = `0` | `DiagnosticSeverity.Error` = `1` |
 
@@ -169,8 +169,8 @@ const item: vscode.StatusBarItem = vscode.window.createStatusBarItem(
 )
 item.text = 'Hello'
 item.tooltip = 'Click me'
-item.command = 'my.command'            // ⚠️ coc 无 command 属性
-item.backgroundColor = new vscode.ThemeColor(...)  // ⚠️ coc 无
+item.command = 'my.command'            // ⚠️ coc has no command property
+item.backgroundColor = new vscode.ThemeColor(...)  // ⚠️ coc does not have
 item.show()
 
 // coc.nvim
@@ -182,12 +182,12 @@ item.isProgress = false
 item.show()
 ```
 
-**差异点：**
+**Differences:**
 | vscode | coc |
 |--------|-----|
 | `createStatusBarItem(id, alignment?, priority?)` | `createStatusBarItem(priority?, opts?)` |
-| 有 `id`/`name`/`alignment`/`tooltip`/`color`/`backgroundColor`/`command` | 无 |
-| 无 `isProgress` | 有 `isProgress`（coc 独有） |
+| Has `id`/`name`/`alignment`/`tooltip`/`color`/`backgroundColor`/`command` | Not available |
+| No `isProgress` | Has `isProgress` (coc only) |
 
 ---
 
@@ -199,7 +199,7 @@ import * as vscode from 'vscode'
 
 const channel: vscode.OutputChannel = vscode.window.createOutputChannel(
   'My Extension',
-  'log'  // ⚠️ coc 不支持 languageId
+  'log'  // ⚠️ coc does not support languageId
 )
 channel.appendLine('hello world')
 channel.show(true)  // preserveFocus
@@ -212,14 +212,14 @@ channel.appendLine('hello world')
 channel.show()
 ```
 
-**差异点：**
+**Differences:**
 | vscode | coc |
 |--------|-----|
 | `createOutputChannel(name, languageId?)` | `createOutputChannel(name)` |
-| `show(preserveFocus?)` / `show(column?, preserveFocus?)` | `show()` 无参数 |
+| `show(preserveFocus?)` / `show(column?, preserveFocus?)` | `show()` no parameters |
 | `clear()` | `clear(keep?: number)` |
-| 无 `content` 属性 | 有 `content` 属性（coc 独有） |
-| 有 `replace()` | 无 |
+| No `content` property | Has `content` property (coc only) |
+| Has `replace()` | Not available |
 
 ---
 
@@ -241,7 +241,7 @@ const value: string | undefined = config.get<string>('someKey')
 const value2: string = config.get<string>('someKey', 'default')
 ```
 
-**相同。**
+**Identical.**
 
 ---
 
@@ -272,12 +272,12 @@ const edit: WorkspaceEdit = {
 await workspace.applyEdit(edit)
 ```
 
-**差异点：**
+**Differences:**
 | vscode | coc |
 |--------|-----|
-| 用 `WorkspaceEdit` class 的 `replace/insert/delete` 方法 | 直接构造 LSP `WorkspaceEdit` 对象 |
-| Uri 用 `Uri.file()`/`Uri.parse()` | Uri 用字符串 |
-| `new TextEdit(range, newText)` 构造函数 | `TextEdit.replace()` 工厂方法 |
+| Uses `WorkspaceEdit` class's `replace/insert/delete` methods | Construct LSP `WorkspaceEdit` object directly |
+| Uri uses `Uri.file()`/`Uri.parse()` | Uri uses string |
+| `new TextEdit(range, newText)` constructor | `TextEdit.replace()` factory method |
 
 ---
 
@@ -292,7 +292,7 @@ class MyProvider implements vscode.TreeDataProvider<MyItem> {
     return {
       label: element.name,
       collapsibleState: vscode.TreeItemCollapsibleState.None,
-      iconPath: new vscode.ThemeIcon('symbol-file'),  // ⚠️ coc 无
+      iconPath: new vscode.ThemeIcon('symbol-file'),  // ⚠️ coc not available
     }
   }
   getChildren(element?: MyItem): vscode.ProviderResult<MyItem[]> {
@@ -324,13 +324,13 @@ window.createTreeView<MyItem>('myView', {
 })
 ```
 
-**差异点：**
+**Differences:**
 | vscode | coc |
 |--------|-----|
-| `iconPath`（`Uri \| ThemeIcon`） | `TreeItem.icon`（自定义 `{text, hlGroup}`） |
+| `iconPath` (`Uri \| ThemeIcon`) | `TreeItem.icon` (custom `{text, hlGroup}`) |
 | `tooltip: string \| MarkdownString` | `tooltip: string \| MarkupContent` |
-| 有 `contextValue` | 无 |
-| 有 `checkboxState` | 无 |
+| Has `contextValue` | Not available |
+| Has `checkboxState` | Not available |
 
 ---
 
@@ -344,9 +344,9 @@ const items: vscode.QuickPickItem[] = [
   { label: 'Item 1', description: 'desc 1' },
   { label: 'Item 2', description: 'desc 2' },
 ]
-const picker = vscode.window.createQuickPick()  // 同步
+const picker = vscode.window.createQuickPick()  // sync
 picker.items = items
-picker.show()  // 事件驱动，不返回 Promise
+picker.show()  // event-driven, does not return Promise
 picker.onDidAccept(() => {
   const selected = picker.selectedItems[0]
   picker.dispose()
@@ -365,13 +365,13 @@ const selected = await picker.show()
 picker.dispose()
 ```
 
-**差异点：**
+**Differences:**
 | vscode | coc |
 |--------|-----|
-| `createQuickPick()` 返回 `QuickPick<T>`（同步） | 返回 `Promise<QuickPick<T>>` |
-| `picker.show()` 返回 `void` | `picker.show()` 返回 `Promise<T[]>` |
-| 交互模式：事件驱动（`onDidAccept`, `onDidChangeSelection`） | 交互模式：Promise 式 |
-| 有 `onDidTriggerButton`、`buttons` | 无 |
+| `createQuickPick()` returns `QuickPick<T>` (sync) | Returns `Promise<QuickPick<T>>` |
+| `picker.show()` returns `void` | `picker.show()` returns `Promise<T[]>` |
+| Interaction: event-driven (`onDidAccept`, `onDidChangeSelection`) | Interaction: Promise-based |
+| Has `onDidTriggerButton`, `buttons` | Not available |
 
 ---
 
@@ -384,14 +384,14 @@ snippet.appendText('console.log(')
 snippet.appendPlaceholder('hello')
 snippet.appendText(')')
 
-// coc.nvim — 完全一样
+// coc.nvim — completely identical
 const snippet = new SnippetString()
 snippet.appendText('console.log(')
 snippet.appendPlaceholder('hello')
 snippet.appendText(')')
 ```
 
-**相同。**
+**Identical.**
 
 ---
 
@@ -404,8 +404,8 @@ import * as vscode from 'vscode'
 const term: vscode.Terminal = vscode.window.createTerminal({
   name: 'My Terminal',
   shellPath: '/bin/bash',
-  cwd: vscode.Uri.file('/tmp'),  // ⚠️ coc 只接受 string
-  iconPath: new vscode.ThemeIcon('terminal'),  // ⚠️ coc 无
+  cwd: vscode.Uri.file('/tmp'),  // ⚠️ coc only accepts string
+  iconPath: new vscode.ThemeIcon('terminal'),  // ⚠️ coc not available
 })
 
 // coc.nvim
@@ -418,18 +418,18 @@ const term: Terminal = await window.createTerminal({
 })
 ```
 
-**差异点：**
+**Differences:**
 | vscode | coc |
 |--------|-----|
-| `createTerminal()` 返回 `Terminal`（同步） | 返回 `Promise<Terminal>` |
+| `createTerminal()` returns `Terminal` (sync) | Returns `Promise<Terminal>` |
 | `cwd: string \| Uri` | `cwd: string` |
-| 有 `iconPath`/`color`/`hideFromUser`/`location`/`isTransient`/`message` | 无 |
-| 有 `shellIntegration`/`state` | 无 |
-| 无 `bufnr` | 有 `bufnr`（coc 独有） |
+| Has `iconPath`/`color`/`hideFromUser`/`location`/`isTransient`/`message` | Not available |
+| Has `shellIntegration`/`state` | Not available |
+| No `bufnr` | Has `bufnr` (coc only) |
 
 ---
 
-## 13. 诊断 (Diagnostics)
+## 13. Diagnostics
 
 ```typescript
 // VS Code
@@ -456,7 +456,7 @@ const diag = Diagnostic.create(
 // DiagnosticSeverity.Error = 1
 ```
 
-**差异点：**
+**Differences:**
 | vscode | coc |
 |--------|-----|
 | `new Diagnostic(range, msg, severity?)` | `Diagnostic.create(range, msg, severity?)` |
@@ -464,12 +464,12 @@ const diag = Diagnostic.create(
 | - Warning: 1 | - Warning: 2 |
 | - Information: 2 | - Information: 3 |
 | - Hint: 3 | - Hint: 4 |
-| code 类型: `string \| number \| {value, target}` | code 类型: `integer \| string` |
-| 无 `data: LSPAny?` | 有 `data: LSPAny?`（coc 独有） |
+| code type: `string \| number \| {value, target}` | code type: `integer \| string` |
+| No `data: LSPAny?` | Has `data: LSPAny?` (coc only) |
 
 ---
 
-## 14. 配置监听
+## 14. Configuration Watching
 
 ```typescript
 // VS Code
@@ -484,27 +484,27 @@ vscode.workspace.onDidChangeConfiguration((e) => {
 // coc.nvim
 import { workspace } from 'coc.nvim'
 
-// coc 方式一：onDidChangeConfiguration
+// coc method 1: onDidChangeConfiguration
 workspace.onDidChangeConfiguration((e) => {
   if (e.affectsConfiguration('myExt')) {
     const val = workspace.getConfiguration('myExt').get('key')
   }
 })
 
-// coc 方式二（vim 特有）：watchOption
+// coc method 2 (vim specific): watchOption
 workspace.watchOption('tabstop', (newVal) => { /* ... */ })
 
-// coc 方式三（vim 特有）：watchGlobal
+// coc method 3 (vim specific): watchGlobal
 workspace.watchGlobal('g:my_var', () => { /* ... */ })
 ```
 
-`onDidChangeConfiguration` 签名字段基本相同。coc 额外有 `watchOption`/`watchGlobal`（vim 特有）。
+`onDidChangeConfiguration` signature fields are basically the same. coc additionally has `watchOption`/`watchGlobal` (vim specific).
 
 ---
 
-## 15. LanguageClient + tsserver 桥接（TS 插件专用）
+## 15. LanguageClient + tsserver Bridge (TS Plugin)
 
-某些语言服务器（如 Volar v3）需要 LSP 客户端做 `tsserver/request` ↔ `tsserver/response` 桥接，将 TypeScript 请求转发给 tsserver：
+Some language servers (like Volar v3) need the LSP client to bridge `tsserver/request` ↔ `tsserver/response`, forwarding TypeScript requests to tsserver:
 
 ```typescript
 // VS Code
@@ -533,17 +533,17 @@ client.onNotification('tsserver/request', async ([seq, command, args]) => {
 })
 ```
 
-**注意：** `typescript.tsserverRequest` 命令由 coc-tsserver 提供（PR [#493](https://github.com/neoclide/coc-tsserver/pull/493)）。PR 合并前需使用我们的 [fork](https://github.com/ChuYanLon/coc-tsserver)：
+**Note:** The `typescript.tsserverRequest` command is provided by coc-tsserver (PR [#493](https://github.com/neoclide/coc-tsserver/pull/493)). Before the PR is merged, use our [fork](https://github.com/ChuYanLon/coc-tsserver):
 
 ```bash
 cd ~/.config/coc/extensions
 npm install ChuYanLon/coc-tsserver --legacy-peer-deps
 ```
 
-同时需要在 `package.json` 中声明 `typescriptServerPlugins` contribution，coc-tsserver 会自动加载插件。
+At the same time, you need to declare the `typescriptServerPlugins` contribution in `package.json`, and coc-tsserver will automatically load the plugin.
 
 ```jsonc
-// coc 插件 package.json
+// coc plugin package.json
 {
   "contributes": {
     "typescriptServerPlugins": [

@@ -127,29 +127,29 @@
 ## [1.5.0] - 2026-06-16
 
 ### Added
-- **`targetAssets` — serverBinary per-platform 资产映射**。当 GitHub Release 的二进制命名因平台而异时（如 clangd 用 `mac`/`windows` 而非 `darwin`/`win32`），可用 `targetAssets` 数组按 `platform` + `arch` 匹配，每条目指定 `file` 和 `binaryPath`
-- **vscode-clangd** — 加入 registry，使用 `targetAssets` 实现 per-platform 二进制下载
-- **`goPackages`** — registry 字段，pipeline 通过 `go install` 编译 Go language server（如 gopls），二进制自动放入 `server/` 目录
-- **`cargoPackages`** — registry 字段，pipeline 通过 `cargo install --root` 编译 Rust language server，二进制复制到 `server/` 目录
-- **vscode-go** — 加入 registry，使用 `goPackages` 自动安装 gopls
-- **vscode-pyright** — 加入 registry，使用 `pyright` npm 包 + `pyright-langserver` binName
+- **`targetAssets` — serverBinary per-platform asset mapping**. When GitHub Release binaries use platform-specific naming (e.g. clangd uses `mac`/`windows` instead of `darwin`/`win32`), `targetAssets` array matches by `platform` + `arch`, each entry specifies `file` and `binaryPath`
+- **vscode-clangd** — added to registry with `targetAssets` for per-platform binary download
+- **`goPackages`** — registry field, pipeline compiles Go language servers via `go install` (e.g. gopls), binary placed in `server/` directory
+- **`cargoPackages`** — registry field, pipeline compiles Rust language servers via `cargo install --root`, binary copied to `server/` directory
+- **vscode-go** — added to registry with `goPackages` for automatic gopls installation
+- **vscode-pyright** — added to registry with `pyright` npm package + `pyright-langserver` binName
 
 ### Changed
-- **plugin/pipeline**: `rimraf` 先在 `rm -rf` 前 `chmod -R u+w`，处理 Go 模块缓存的 0555 只读目录
-- **plugin/pipeline**: `cpdir` 改用 Node.js `fs.cp`（`dereference: true`），处理符号链接和权限问题
-- **plugin/pipeline**: `installToCoc` 优化：只复制 `lib/`、`server/`、`package.json` 等必要文件，跳过 `node_modules/`，到目标目录后重新 `npm install`，避免 `cp -rL` 在大 `node_modules` 上的问题
-- **plugin/pipeline**: `run()` 支持可选 `env` 参数，用于传递 `GOPATH`/`GOBIN`/`GOCACHE` 等环境变量
+- **plugin/pipeline**: `rimraf` now does `chmod -R u+w` before `rm -rf`, handling Go module cache 0555 read-only directories
+- **plugin/pipeline**: `cpdir` switched to Node.js `fs.cp` (`dereference: true`), handling symlinks and permissions
+- **plugin/pipeline**: `installToCoc` optimization: only copies `lib/`, `server/`, `package.json` etc., skips `node_modules/`, then runs `npm install` at destination, avoiding `cp -rL` issues on large `node_modules`
+- **plugin/pipeline**: `run()` now supports optional `env` parameter for passing `GOPATH`/`GOBIN`/`GOCACHE` environment variables
 - **converter**: bump to v1.5.0
 - **plugin**: bump to v1.5.0
 
 ## [1.4.5] - 2026-06-16
 
 ### Added
-- **`server.patches`** — local server 编译后文本补丁通用机制。支持在 registry 的 `server.patches` 中声明对编译后 JS 文件的 find/replace 补丁（如禁用 pull diagnostics、注入事件钩子等），替代之前 converter 里的硬编码 ESLint 补丁
-- **ESLint (`vscode-eslint`)** — 加入 registry，使用 `server.patches` 实现三处修复：pull diagnostics 禁用（避免重复）、diagnostic refresh 注入（onDidOpen/onDidChangeContent）、resolveSettings 提前返回修复
+- **`server.patches`** — general mechanism for text patches on compiled local server JS files. Supports declaring find/replace patches in registry `server.patches` (e.g. disabling pull diagnostics, injecting event hooks), replacing previously hardcoded ESLint patches in the converter
+- **ESLint (`vscode-eslint`)** — added to registry with `server.patches` for three fixes: disable pull diagnostics (avoid duplication), inject diagnostic refresh (onDidOpen/onDidChangeContent), resolveSettings early return fix
 
 ### Changed
-- **converter**: 移除 `convert.ts` 中所有硬编码 ESLint 补丁，改为通用 `server.patches` 机制
+- **converter**: removed all hardcoded ESLint patches from `convert.ts`, replaced with generic `server.patches` mechanism
 - **converter**: bump to v1.4.5
 - **plugin**: bump to v1.4.5
 

@@ -1,672 +1,672 @@
-# VS Code Extension API vs coc.nvim API 完整对比
+# VS Code Extension API vs coc.nvim API Complete Comparison
 
-对比依据：
-- VS Code: [`docs/types/vscode.d.ts`](./types/vscode.d.ts) (21235 行)
-- coc.nvim: [`docs/types/coc.d.ts`](./types/coc.d.ts) (13327 行)
+Comparison basis:
+- VS Code: [`docs/types/vscode.d.ts`](./types/vscode.d.ts) (21235 lines)
+- coc.nvim: [`docs/types/coc.d.ts`](./types/coc.d.ts) (13327 lines)
 
-> 类型文件每日自动同步自 [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry)，请勿手动编辑。
-
----
-
-## 目录
-
-1. [总览](#1-总览)
-2. [核心类型](#2-核心类型)
-3. [编辑器 API](#3-编辑器-api)
-4. [`window` 命名空间](#4-window-命名空间)
-5. [`workspace` 命名空间](#5-workspace-命名空间)
-6. [`languages` 命名空间](#6-languages-命名空间)
-7. [`commands` 命名空间](#7-commands-命名空间)
-8. [`extensions` 命名空间](#8-extensions-命名空间)
-9. [`env` 命名空间](#9-env-命名空间)
-10. [Provider 接口对比](#10-provider-接口对比)
-11. [完整缺失的 vscode 功能](#11-完整缺失的-vscode-功能)
-12. [coc 特有 API（vscode 没有的）](#12-coc-特有-apivscode-没有的)
+> Type files are auto-synced daily from [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry), do not edit manually.
 
 ---
 
-## 1. 总览
+## Table of Contents
 
-| 方面 | VS Code | coc.nvim |
+1. [Overview](#1-overview)
+2. [Core Types](#2-core-types)
+3. [Editor API](#3-editor-api)
+4. [`window` Namespace](#4-window-namespace)
+5. [`workspace` Namespace](#5-workspace-namespace)
+6. [`languages` Namespace](#6-languages-namespace)
+7. [`commands` Namespace](#7-commands-namespace)
+8. [`extensions` Namespace](#8-extensions-namespace)
+9. [`env` Namespace](#9-env-namespace)
+10. [Provider Interface Comparison](#10-provider-interface-comparison)
+11. [Completely Missing vscode Features](#11-completely-missing-vscode-features)
+12. [coc Specific APIs (not in vscode)](#12-coc-specific-apisnot-in-vscode)
+
+---
+
+## 1. Overview
+
+| Aspect | VS Code | coc.nvim |
 |------|---------|----------|
-| 导出总数 | ~524 (≈776 含内部类型) | ~536 (≈653 含 LSP 内部类型) |
-| 命名空间 | 15 (`window`, `workspace`, `languages`, `commands`, `env`, `extensions`, `debug`, `tasks`, `notebooks`, `scm`, `tests`, `authentication`, `l10n`, `chat`, `lm`) | 4 (`window`, `workspace`, `languages`, `commands`) + `snippetManager` |
-| 架构 | 丰富的 class + interface + enum + namespace | 偏 LSP 风格，多数为 interface + factory namespace，enum 用 type alias |
-| Uri 方案 | `class Uri` | `class Uri` + `type DocumentUri = string` |
-| 文档模型 | `TextDocument` (完整) | `TextDocument` (精简) + `LinesTextDocument` (扩展) |
-| LSP 集成 | 底层封装 | 原生 LSP 类型贯穿始终 |
+| Total exports | ~524 (≈776 with internal types) | ~536 (≈653 with LSP internal types) |
+| Namespaces | 15 (`window`, `workspace`, `languages`, `commands`, `env`, `extensions`, `debug`, `tasks`, `notebooks`, `scm`, `tests`, `authentication`, `l10n`, `chat`, `lm`) | 4 (`window`, `workspace`, `languages`, `commands`) + `snippetManager` |
+| Architecture | Rich class + interface + enum + namespace | LSP-oriented, mostly interface + factory namespace, enum uses type alias |
+| Uri | `class Uri` | `class Uri` + `type DocumentUri = string` |
+| Document model | `TextDocument` (full) | `TextDocument` (simplified) + `LinesTextDocument` (extended) |
+| LSP integration | Low-level wrapping | Native LSP types throughout |
 
 ---
 
-## 2. 核心类型
+## 2. Core Types
 
 ### 2.1 Position
 
-| 项目 | VS Code (class) | coc.nvim (LSP interface) | 差异 |
+| Item | VS Code (class) | coc.nvim (LSP interface) | Difference |
 |------|-----------------|--------------------------|------|
-| 类型 | `class` (有 constructor) | `interface` | **根本不同** |
-| 字段类型 | `line: number`, `character: number` | `line: uinteger`, `character: uinteger` | coc 用 `uinteger` |
-| isBefore() | 有 | **无** | vscode 独有 |
-| isBeforeOrEqual() | 有 | **无** | vscode 独有 |
-| isAfter() | 有 | **无** | vscode 独有 |
-| isAfterOrEqual() | 有 | **无** | vscode 独有 |
-| compareTo() | 有 | **无** | vscode 独有 |
-| translate() | 有 | **无** | vscode 独有 |
-| with() | 有 | **无** | vscode 独有 |
-| 构造方式 | `new Position(1, 2)` | `Position.create(1, 2)` | 工厂 vs 构造函数 |
+| Type | `class` (has constructor) | `interface` | **Fundamentally different** |
+| Field types | `line: number`, `character: number` | `line: uinteger`, `character: uinteger` | coc uses `uinteger` |
+| isBefore() | Yes | **No** | vscode only |
+| isBeforeOrEqual() | Yes | **No** | vscode only |
+| isAfter() | Yes | **No** | vscode only |
+| isAfterOrEqual() | Yes | **No** | vscode only |
+| compareTo() | Yes | **No** | vscode only |
+| translate() | Yes | **No** | vscode only |
+| with() | Yes | **No** | vscode only |
+| Construction | `new Position(1, 2)` | `Position.create(1, 2)` | Factory vs constructor |
 
 ### 2.2 Range
 
-| 项目 | VS Code (class) | coc.nvim (interface) | 差异 |
+| Item | VS Code (class) | coc.nvim (interface) | Difference |
 |------|-----------------|----------------------|------|
-| isEmpty | `getter` | **无** | vscode 独有 |
-| isSingleLine | `getter` | **无** | vscode 独有 |
-| contains() | 有 | **无** | vscode 独有 |
-| intersection() | 有 | **无** | vscode 独有 |
-| union() | 有 | **无** | vscode 独有 |
-| with() | 有 | **无** | vscode 独有 |
+| isEmpty | `getter` | **No** | vscode only |
+| isSingleLine | `getter` | **No** | vscode only |
+| contains() | Yes | **No** | vscode only |
+| intersection() | Yes | **No** | vscode only |
+| union() | Yes | **No** | vscode only |
+| with() | Yes | **No** | vscode only |
 
 ### 2.3 Selection
 
-| 项目 | VS Code | coc.nvim |
+| Item | VS Code | coc.nvim |
 |------|---------|----------|
-| `class Selection extends Range` | 有 | **无** |
-| anchor/active/isReversed | 有 | **无** |
+| `class Selection extends Range` | Yes | **No** |
+| anchor/active/isReversed | Yes | **No** |
 
 ### 2.4 Uri
 
-| 项目 | VS Code | coc.nvim | 差异 |
+| Item | VS Code | coc.nvim | Difference |
 |------|---------|----------|------|
-| `class Uri` | 有 | 有 | coc 构造器为 `protected` |
-| scheme/authority/path/query/fragment/fsPath | 有 | 有 | 相同 |
-| Uri.parse() / Uri.file() / Uri.from() | 有 | 有 | 相同 |
-| with() / toString() / toJSON() | 有 | 有 | 相同 |
-| Uri.joinPath() | 有 | **无** | vscode 独有 |
-| Uri.isUri() | **无** | 有 | coc 独有 |
-| `type DocumentUri = string` | **无** | 有 | coc 独有（LSP 风格） |
+| `class Uri` | Yes | Yes | coc constructor is `protected` |
+| scheme/authority/path/query/fragment/fsPath | Yes | Yes | Same |
+| Uri.parse() / Uri.file() / Uri.from() | Yes | Yes | Same |
+| with() / toString() / toJSON() | Yes | Yes | Same |
+| Uri.joinPath() | Yes | **No** | vscode only |
+| Uri.isUri() | **No** | Yes | coc only |
+| `type DocumentUri = string` | **No** | Yes | coc only (LSP style) |
 
 ### 2.5 TextDocument
 
-| 字段/方法 | VS Code | coc.nvim (TextDocument) | coc.nvim (LinesTextDocument) |
+| Field/Method | VS Code | coc.nvim (TextDocument) | coc.nvim (LinesTextDocument) |
 |-----------|---------|------------------------|----------------------------|
 | uri | `Uri` | `DocumentUri` (string) | — |
-| fileName | 有 | **无** | — |
-| isUntitled | 有 | **无** | — |
-| languageId | 有 | 有 | — |
-| encoding | 有 | **无** | — |
+| fileName | Yes | **No** | — |
+| isUntitled | Yes | **No** | — |
+| languageId | Yes | Yes | — |
+| encoding | Yes | **No** | — |
 | version | `number` | `integer` | — |
-| isDirty | 有 | **无** | — |
-| isClosed | 有 | **无** | — |
-| save() | 有 | **无** | — |
-| eol | `EndOfLine` enum | **无** | `eol: boolean` (额外字段) |
+| isDirty | Yes | **No** | — |
+| isClosed | Yes | **No** | — |
+| save() | Yes | **No** | — |
+| eol | `EndOfLine` enum | **No** | `eol: boolean` (extra field) |
 | lineCount | `number` | `uinteger` | — |
-| lineAt() | 有 (返回 TextLine) | **无** | 有 (返回 TextLine) |
-| offsetAt() | 有 | 有 | — |
-| positionAt() | 有 | 有 | — |
-| getText(range?) | 有 | 有 | — |
-| getWordRangeAtPosition() | 有 | **无** | — |
-| validateRange() | 有 | **无** | — |
-| validatePosition() | 有 | **无** | — |
+| lineAt() | Yes (returns TextLine) | **No** | Yes (returns TextLine) |
+| offsetAt() | Yes | Yes | — |
+| positionAt() | Yes | Yes | — |
+| getText(range?) | Yes | Yes | — |
+| getWordRangeAtPosition() | Yes | **No** | — |
+| validateRange() | Yes | **No** | — |
+| validatePosition() | Yes | **No** | — |
 
 ### 2.6 TextLine
 
-| 字段 | VS Code | coc.nvim | 差异 |
+| Field | VS Code | coc.nvim | Difference |
 |------|---------|----------|------|
-| lineNumber, text, range, rangeIncludingLineBreak, firstNonWhitespaceCharacterIndex, isEmptyOrWhitespace | 一致 | 一致 | **完全相同** |
+| lineNumber, text, range, rangeIncludingLineBreak, firstNonWhitespaceCharacterIndex, isEmptyOrWhitespace | Same | Same | **Completely identical** |
 
 ### 2.7 EndOfLine
 
-| 项目 | VS Code | coc.nvim |
+| Item | VS Code | coc.nvim |
 |------|---------|----------|
-| `enum EndOfLine { LF=1, CRLF=2 }` | 有 | **无** (用 `eol: boolean` 替代) |
+| `enum EndOfLine { LF=1, CRLF=2 }` | Yes | **No** (uses `eol: boolean` instead) |
 
 ### 2.8 CancellationToken / CancellationTokenSource
 
-| 类型 | VS Code | coc.nvim | 差异 |
+| Type | VS Code | coc.nvim | Difference |
 |------|---------|----------|------|
-| CancellationToken | interface | interface (同字段) | coc 额外有 `namespace` 含 `None`, `Cancelled`, `is()` |
-| CancellationTokenSource | class | class | 基本相同 |
-| CancellationError | class extends Error | class extends Error | 相同 |
-| AbstractCancellationTokenSource | **无** | 有 (interface extends Disposable) | coc 独有 |
+| CancellationToken | interface | interface (same fields) | coc additionally has `namespace` with `None`, `Cancelled`, `is()` |
+| CancellationTokenSource | class | class | Mostly the same |
+| CancellationError | class extends Error | class extends Error | Same |
+| AbstractCancellationTokenSource | **No** | Yes (interface extends Disposable) | coc only |
 
 ### 2.9 Disposable
 
-| 项目 | VS Code (class) | coc.nvim (interface) | 差异 |
+| Item | VS Code (class) | coc.nvim (interface) | Difference |
 |------|-----------------|----------------------|------|
-| dispose() | 返回 `any` | 返回 `void` | 返回值不同 |
-| 构造方式 | `new Disposable(() => void)` | `Disposable.create(() => void)` | 工厂 vs 构造函数 |
-| Disposable.from() | 有 | **无** | vscode 独有 |
+| dispose() | returns `any` | returns `void` | Different return type |
+| Construction | `new Disposable(() => void)` | `Disposable.create(() => void)` | Factory vs constructor |
+| Disposable.from() | Yes | **No** | vscode only |
 
 ### 2.10 Event / EventEmitter
 
-| 项目 | VS Code | coc.nvim | 差异 |
+| Item | VS Code | coc.nvim | Difference |
 |------|---------|----------|------|
-| 名称 | `EventEmitter<T>` | `Emitter<T>` | **命名不同** |
-| fire() 返回 | `void` | `any` | 返回值不同 |
-| EmitterOptions | **无** | 有 (onFirstListenerAdd/onLastListenerRemove) | coc 独有 |
-| Event.None | **无** | 有 | coc 独有 |
+| Name | `EventEmitter<T>` | `Emitter<T>` | **Different naming** |
+| fire() return | `void` | `any` | Different return type |
+| EmitterOptions | **No** | Yes (onFirstListenerAdd/onLastListenerRemove) | coc only |
+| Event.None | **No** | Yes | coc only |
 
 ### 2.11 Command
 
-| 字段 | VS Code | coc.nvim | 差异 |
+| Field | VS Code | coc.nvim | Difference |
 |------|---------|----------|------|
-| title | 有 | 有 | 相同 |
-| command | 有 | 有 | 相同 |
-| tooltip? | 有 | **无** | vscode 独有 |
-| arguments? | `any[]` | `LSPAny[]` | 类型不同 |
+| title | Yes | Yes | Same |
+| command | Yes | Yes | Same |
+| tooltip? | Yes | **No** | vscode only |
+| arguments? | `any[]` | `LSPAny[]` | Different types |
 
 ### 2.12 MarkdownString
 
-| 项目 | VS Code | coc.nvim |
+| Item | VS Code | coc.nvim |
 |------|---------|----------|
-| `class MarkdownString` | 有 (含 appendText/appendMarkdown/appendCodeblock, isTrusted, supportThemeIcons, supportHtml, baseUri) | **无** (coc 用 `MarkedString = string \| {language, value}`) |
+| `class MarkdownString` | Yes (includes appendText/appendMarkdown/appendCodeblock, isTrusted, supportThemeIcons, supportHtml, baseUri) | **No** (coc uses `MarkedString = string \| {language, value}`) |
 
 ### 2.13 ThemeColor / ThemeIcon
 
-| 项目 | VS Code | coc.nvim |
+| Item | VS Code | coc.nvim |
 |------|---------|----------|
-| `class ThemeColor` | 有 | **无** |
-| `class ThemeIcon` | 有 (含 File/Folder 静态, id, color) | **无** |
+| `class ThemeColor` | Yes | **No** |
+| `class ThemeIcon` | Yes (includes File/Folder statics, id, color) | **No** |
 
 ### 2.14 SnippetString
 
-| 项目 | VS Code | coc.nvim | 差异 |
+| Item | VS Code | coc.nvim | Difference |
 |------|---------|----------|------|
-| value | `string` | `string` | 相同 |
-| appendText/appendTabstop/appendPlaceholder/appendChoice/appendVariable | 一致 | 一致 | **相同** |
+| value | `string` | `string` | Same |
+| appendText/appendTabstop/appendPlaceholder/appendChoice/appendVariable | Same | Same | **Same** |
 
 ### 2.15 TextEdit
 
-| 项目 | VS Code (class) | coc.nvim (interface) | 差异 |
+| Item | VS Code (class) | coc.nvim (interface) | Difference |
 |------|-----------------|----------------------|------|
-| range | `Range` | `Range` | 相同 |
-| newText | `string` | `string` | 相同 |
-| 构造 | `new TextEdit(range, newText)` | `TextEdit.replace/insert/del` | 工厂 vs 构造函数 |
+| range | `Range` | `Range` | Same |
+| newText | `string` | `string` | Same |
+| Construction | `new TextEdit(range, newText)` | `TextEdit.replace/insert/del` | Factory vs constructor |
 
 ### 2.16 WorkspaceEdit
 
-| 项目 | VS Code (class) | coc.nvim (interface) | 差异 |
+| Item | VS Code (class) | coc.nvim (interface) | Difference |
 |------|-----------------|----------------------|------|
-| 类型 | `class` 有 methods (replace/insert/delete/set/get/has/entries/size) | `interface` (纯 LSP: changes/documentChanges) | **完全不同的使用方式** |
-| entries() / size | 有 | **无** | — |
-| uri 参数 | `Uri` | `DocumentUri` (string) | — |
+| Type | `class` with methods (replace/insert/delete/set/get/has/entries/size) | `interface` (pure LSP: changes/documentChanges) | **Completely different usage** |
+| entries() / size | Yes | **No** | — |
+| uri parameter | `Uri` | `DocumentUri` (string) | — |
 
 ### 2.17 Hover
 
-| 项目 | VS Code (class) | coc.nvim (interface) | 差异 |
+| Item | VS Code (class) | coc.nvim (interface) | Difference |
 |------|-----------------|----------------------|------|
-| contents | `Array<MarkdownString \| MarkedString>` | `MarkupContent \| MarkedString \| MarkedString[]` | 类型不同 |
-| range? | 有 | 有 | 相同 |
-| 构造 | `new Hover(contents, range?)` | 直接构造 `{ contents, range }` 对象 | coc 无工厂方法 |
+| contents | `Array<MarkdownString \| MarkedString>` | `MarkupContent \| MarkedString \| MarkedString[]` | Different types |
+| range? | Yes | Yes | Same |
+| Construction | `new Hover(contents, range?)` | Direct object construction `{ contents, range }` | coc has no factory method |
 
-### 2.18 枚举值偏移（LSP 1-based vs vscode 0-based）
+### 2.18 Enum Value Offset (LSP 1-based vs vscode 0-based)
 
-coc 使用 LSP 协议风格（值从 1 开始），而 vscode 多数枚举从 0 开始。除 `DiagnosticSeverity` 外，以下枚举也存在相同偏移：
+coc uses LSP protocol style (values starting from 1), while vscode mostly starts enums from 0. Besides `DiagnosticSeverity`, the following enums also have the same offset:
 
-| 枚举 | vscode | coc | 差异 |
+| Enum | vscode | coc | Difference |
 |------|--------|-----|------|
-| `CompletionItemKind` | `Text = 0` | `Text: 1` | 偏移 1 |
-| `SymbolKind` | `File = 0` | `File: 1` | 偏移 1 |
-| `DocumentHighlightKind` | `Text = 0` | `Text: 1` | 偏移 1 |
-| `InlineCompletionTriggerKind` | `Invoke = 0` | `Invoked: 1` | 偏移 1 + 命名不同 |
-| `CompletionTriggerKind` | `Invoke = 0` | `Invoked: 1` | 偏移 1 + 命名不同 |
-| `CodeActionTriggerKind` | `Invoke = 1` | `Invoked: 1` | 值相同，命名不同 |
-| `SignatureHelpTriggerKind` | `Invoke = 1` | `Invoked: 1` | 值相同，命名不同 |
+| `CompletionItemKind` | `Text = 0` | `Text: 1` | Offset 1 |
+| `SymbolKind` | `File = 0` | `File: 1` | Offset 1 |
+| `DocumentHighlightKind` | `Text = 0` | `Text: 1` | Offset 1 |
+| `InlineCompletionTriggerKind` | `Invoke = 0` | `Invoked: 1` | Offset 1 + naming difference |
+| `CompletionTriggerKind` | `Invoke = 0` | `Invoked: 1` | Offset 1 + naming difference |
+| `CodeActionTriggerKind` | `Invoke = 1` | `Invoked: 1` | Same value, naming difference |
+| `SignatureHelpTriggerKind` | `Invoke = 1` | `Invoked: 1` | Same value, naming difference |
 
-**注意命名差异：** vscode 统一使用 `Invoke`（动词原形），coc 遵循 LSP 规范使用 `Invoked`（过去分词）。
+**Note on naming differences:** vscode uniformly uses `Invoke` (base verb form), coc follows LSP conventions using `Invoked` (past participle).
 
 ---
 
-## 3. 编辑器 API
+## 3. Editor API
 
 ### 3.1 TextEditor
 
-| 字段/方法 | VS Code | coc.nvim | 差异 |
+| Field/Method | VS Code | coc.nvim | Difference |
 |-----------|---------|----------|------|
-| document | `TextDocument` | `TextDocument` | vscode: `uri` 是 Uri；coc: 多 `bufnr`, `winid` |
-| selection(s) | 有 | 有 | coc 只有 single selection (vscode 有多光标) |
-| visibleRanges | 有 | 有 | 相同 |
-| options | 有 | 有 | vscode 含 tabSize/indentSize/insertSpaces/cursorStyle/lineNumbers；coc 含 tabSize/insertSpaces 及其他 |
-| viewColumn | 有 | **无** | coc 没有列概念 |
-| edit() | 有 | 有 | 相同模式 |
-| insertSnippet() | 有 | **无** | coc 用 `workspace.applyEdit` 或 `snippetManager` |
-| setDecorations() | 有 | **无** | coc 用 `BufferHighlight` / `highlight` API |
-| revealRange() | 有 | **无** | coc 用 `window.moveTo` |
-| hide()/show() | 有 (deprecated) | **无** | — |
+| document | `TextDocument` | `TextDocument` | vscode: `uri` is Uri; coc: additional `bufnr`, `winid` |
+| selection(s) | Yes | Yes | coc only has single selection (vscode has multi-cursor) |
+| visibleRanges | Yes | Yes | Same |
+| options | Yes | Yes | vscode includes tabSize/indentSize/insertSpaces/cursorStyle/lineNumbers; coc includes tabSize/insertSpaces and others |
+| viewColumn | Yes | **No** | coc has no column concept |
+| edit() | Yes | Yes | Same pattern |
+| insertSnippet() | Yes | **No** | coc uses `workspace.applyEdit` or `snippetManager` |
+| setDecorations() | Yes | **No** | coc uses `BufferHighlight` / `highlight` API |
+| revealRange() | Yes | **No** | coc uses `window.moveTo` |
+| hide()/show() | Yes (deprecated) | **No** | — |
 
 ### 3.2 TextEditorEdit
 
-| 方法 | VS Code | coc.nvim |
+| Method | VS Code | coc.nvim |
 |------|---------|----------|
-| replace / insert / delete / setEndOfLine | 有 | **无直接等价** (coc 用 `TextEdit` 操作) |
+| replace / insert / delete / setEndOfLine | Yes | **No direct equivalent** (coc uses `TextEdit` operations) |
 
 ### 3.3 Decoration System
 
-| 项目 | VS Code | coc.nvim |
+| Item | VS Code | coc.nvim |
 |------|---------|----------|
-| TextEditorDecorationType | 有 (key, dispose) | **无** — 用 `BufferClearHighlight` / `BufferHighlight` |
-| DecorationRenderOptions | 丰富 (backgroundColor, outline, border, gutterIcon, overviewRuler, before/after 等) | coc 的 highlight 系统基于 vim 的命名空间高亮 |
-| 机制 | 程序化 decoration | vim `nvim_buf_add_highlight` 模式 |
+| TextEditorDecorationType | Yes (key, dispose) | **No** — uses `BufferClearHighlight` / `BufferHighlight` |
+| DecorationRenderOptions | Rich (backgroundColor, outline, border, gutterIcon, overviewRuler, before/after, etc.) | coc's highlight system is based on vim namespace highlights |
+| Mechanism | Programmatic decoration | vim `nvim_buf_add_highlight` pattern |
 
 ### 3.4 ViewColumn
 
-| 项目 | VS Code | coc.nvim |
+| Item | VS Code | coc.nvim |
 |------|---------|----------|
-| `enum ViewColumn { Active= -1, Beside= -2, One~Nine }` | 有 | **无** (Neovim 没有列概念) |
+| `enum ViewColumn { Active= -1, Beside= -2, One~Nine }` | Yes | **No** (Neovim has no column concept) |
 
 ---
 
-## 4. `window` 命名空间
+## 4. `window` Namespace
 
-### 4.1 编辑器相关
+### 4.1 Editor Related
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| activeTextEditor | 有 | **无** | converter 注入 polyfill 使用 `workspace.getDocument()` 近似 |
-| visibleTextEditors | 有 | **无** | vscode 独有 |
-| onDidChangeActiveTextEditor | 有 | **无** | converter 替换为 `workspace.onDidOpenTextDocument` |
-| onDidChangeVisibleTextEditors | 有 | 有 | 相同 |
-| **onDidChangeTextEditorSelection** | 有 | **无** | — |
-| **onDidChangeTextEditorVisibleRanges** | 有 | **无** | — |
-| **onDidChangeTextEditorOptions** | 有 | **无** | — |
-| **onDidChangeTextEditorViewColumn** | 有 | **无** | — |
-| **showTextDocument()** | 有 | **无** | coc 无等价 API |
+| activeTextEditor | Yes | **No** | converter injects polyfill using `workspace.getDocument()` approximation |
+| visibleTextEditors | Yes | **No** | vscode only |
+| onDidChangeActiveTextEditor | Yes | **No** | converter replaced with `workspace.onDidOpenTextDocument` |
+| onDidChangeVisibleTextEditors | Yes | Yes | Same |
+| **onDidChangeTextEditorSelection** | Yes | **No** | — |
+| **onDidChangeTextEditorVisibleRanges** | Yes | **No** | — |
+| **onDidChangeTextEditorOptions** | Yes | **No** | — |
+| **onDidChangeTextEditorViewColumn** | Yes | **No** | — |
+| **showTextDocument()** | Yes | **No** | coc has no equivalent API |
 
-### 4.2 消息对话框
+### 4.2 Message Dialogs
 
-| API | VS Code | coc.nvim | 差异 | 自动转换 |
+| API | VS Code | coc.nvim | Difference | Auto-conversion |
 |-----|---------|----------|------|----------|
-| showInformationMessage | 有 (4 overloads) | 有 (2 overloads) | coc 缺少 MessageOptions 变体，coc 的 MsgTypes 为 `'error'\|'warning'\|'more'` | converter 转为 `showMessage(msg, 'more')` |
-| showWarningMessage | 有 (4 overloads) | 有 (2 overloads) | 同上 | converter 转为 `showMessage(msg, 'warning')` |
-| showErrorMessage | 有 (4 overloads) | 有 (2 overloads) | 同上 | converter 转为 `showMessage(msg, 'error')` |
+| showInformationMessage | Yes (4 overloads) | Yes (2 overloads) | coc lacks MessageOptions variant, coc's MsgTypes are `'error'\|'warning'\|'more'` | converter converts to `showMessage(msg, 'more')` |
+| showWarningMessage | Yes (4 overloads) | Yes (2 overloads) | Same as above | converter converts to `showMessage(msg, 'warning')` |
+| showErrorMessage | Yes (4 overloads) | Yes (2 overloads) | Same as above | converter converts to `showMessage(msg, 'error')` |
 
-### 4.3 输入/选择
+### 4.3 Input/Selection
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| showQuickPick | 有 (4 overloads) | 有 | 签名基本一致 |
-| showWorkspaceFolderPick | 有 | **无** | — |
-| createQuickPick() | 返回 `QuickPick<T>` | 返回 `Promise<QuickPick<T>>` | 同步 vs Promise |
-| showInputBox | 有 | **无** | coc 用 `requestInput` 和 `createInputBox` 替代 |
-| createInputBox() | 返回 `InputBox` | 返回 `Promise<InputBox>` (参数不同) | 签名完全不同 |
+| showQuickPick | Yes (4 overloads) | Yes | Signatures are mostly the same |
+| showWorkspaceFolderPick | Yes | **No** | — |
+| createQuickPick() | Returns `QuickPick<T>` | Returns `Promise<QuickPick<T>>` | Sync vs Promise |
+| showInputBox | Yes | **No** | coc uses `requestInput` and `createInputBox` instead |
+| createInputBox() | Returns `InputBox` | Returns `Promise<InputBox>` (different parameters) | Completely different signature |
 
-### 4.4 文件对话框
+### 4.4 File Dialogs
 
 | API | VS Code | coc.nvim |
 |-----|---------|----------|
-| showOpenDialog | 有 | **无** |
-| showSaveDialog | 有 | **无** |
+| showOpenDialog | Yes | **No** |
+| showSaveDialog | Yes | **No** |
 
-### 4.5 输出通道
+### 4.5 Output Channels
 
-| API | VS Code | coc.nvim | 差异 | 自动转换 |
+| API | VS Code | coc.nvim | Difference | Auto-conversion |
 |-----|---------|----------|------|----------|
-| createOutputChannel(name, languageId?) | 有 (2 params) | 有 (1 param) | coc 没有 `languageId` 参数, 无 LogOutputChannel。coc 原生支持 `window.createOutputChannel`，无需转换 |
-| OutputChannel.replace() | 有 | **无** | — |
-| OutputChannel.clear() | `clear()` | `clear(keep?: number)` | coc 可保留 N 行 |
+| createOutputChannel(name, languageId?) | Yes (2 params) | Yes (1 param) | coc has no `languageId` parameter, no LogOutputChannel. coc natively supports `window.createOutputChannel`, no conversion needed |
+| OutputChannel.replace() | Yes | **No** | — |
+| OutputChannel.clear() | `clear()` | `clear(keep?: number)` | coc can keep N lines |
 
-### 4.6 状态栏
+### 4.6 Status Bar
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| createStatusBarItem(id, alignment?, priority?) | 有 (3 params) | `createStatusBarItem(priority?, option?)` | 无 id/alignment 参数 |
-| setStatusBarMessage | 有 (3 overloads) | **无** | — |
-| StatusBarAlignment enum | 有 | **无** | coc 用数字优先级 |
-| StatusBarItem.id/name/alignment | 有 | **无** | — |
-| StatusBarItem.tooltip/color/backgroundColor/command | 有 | **无** | — |
+| createStatusBarItem(id, alignment?, priority?) | Yes (3 params) | `createStatusBarItem(priority?, option?)` | No id/alignment parameters |
+| setStatusBarMessage | Yes (3 overloads) | **No** | — |
+| StatusBarAlignment enum | Yes | **No** | coc uses numeric priority |
+| StatusBarItem.id/name/alignment | Yes | **No** | — |
+| StatusBarItem.tooltip/color/backgroundColor/command | Yes | **No** | — |
 
-### 4.7 终端
+### 4.7 Terminal
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| createTerminal(options) | 返回 `Terminal` | 返回 `Promise<Terminal>` | Promise vs 同步 |
-| activeTerminal | 有 | **无** | — |
-| onDidChangeActiveTerminal | 有 | **无** | — |
-| onDidChangeTerminalState | 有 | **无** | — |
-| onDidOpenTerminal | 有 | 有 | 相同 |
-| onDidCloseTerminal | 有 | 有 | 相同 |
-| TerminalOptions.cwd | `string \| Uri` | `string` | Uri 不支持 |
-| TerminalOptions.hideFromUser/message/iconPath/color/location/isTransient | 有 | **无** | — |
-| Pseudoterminal / ExtensionTerminalOptions | 有 | **无** | — |
-| Terminal.processId | `Thenable<number \| undefined>` | `Promise<number>` | 类型不同 |
-| Terminal.shellIntegration / state | 有 | **无** | — |
+| createTerminal(options) | Returns `Terminal` | Returns `Promise<Terminal>` | Promise vs sync |
+| activeTerminal | Yes | **No** | — |
+| onDidChangeActiveTerminal | Yes | **No** | — |
+| onDidChangeTerminalState | Yes | **No** | — |
+| onDidOpenTerminal | Yes | Yes | Same |
+| onDidCloseTerminal | Yes | Yes | Same |
+| TerminalOptions.cwd | `string \| Uri` | `string` | Uri not supported |
+| TerminalOptions.hideFromUser/message/iconPath/color/location/isTransient | Yes | **No** | — |
+| Pseudoterminal / ExtensionTerminalOptions | Yes | **No** | — |
+| Terminal.processId | `Thenable<number \| undefined>` | `Promise<number>` | Different types |
+| Terminal.shellIntegration / state | Yes | **No** | — |
 
-### 4.8 进度
+### 4.8 Progress
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| withProgress | 有 | 有 | `Thenable` vs `Promise` |
-| withScmProgress | 有 | **无** | — |
-| ProgressOptions | `{location, title?, cancellable?}` | `{title?, cancellable?}` | coc 无 `location` 字段 |
+| withProgress | Yes | Yes | `Thenable` vs `Promise` |
+| withScmProgress | Yes | **No** | — |
+| ProgressOptions | `{location, title?, cancellable?}` | `{title?, cancellable?}` | coc has no `location` field |
 
-### 4.9 树状视图
+### 4.9 Tree View
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| createTreeView | 有 | 有 | 签名相同 |
-| registerTreeDataProvider | 有 | **无** | — |
+| createTreeView | Yes | Yes | Same signature |
+| registerTreeDataProvider | Yes | **No** | — |
 
 ### 4.10 Webview
 
 | API | VS Code | coc.nvim |
 |-----|---------|----------|
-| createWebviewPanel | 有 | **无** |
-| registerWebviewPanelSerializer | 有 | **无** |
-| registerWebviewViewProvider | 有 | **无** |
+| createWebviewPanel | Yes | **No** |
+| registerWebviewPanelSerializer | Yes | **No** |
+| registerWebviewViewProvider | Yes | **No** |
 
-### 4.11 其他 window API
+### 4.11 Other window APIs
 
 | API | VS Code | coc.nvim |
 |-----|---------|----------|
-| tabGroups / Tab / TabGroup | 有 | **无** |
-| state (WindowState) / onDidChangeWindowState | 有 | **无** |
-| activeColorTheme / onDidChangeActiveColorTheme | 有 | **无** |
-| registerUriHandler | 有 | **无** |
-| registerTerminalLinkProvider / registerTerminalProfileProvider | 有 | **无** |
-| registerFileDecorationProvider | 有 | **无** |
-| registerCustomEditorProvider | 有 | **无** |
+| tabGroups / Tab / TabGroup | Yes | **No** |
+| state (WindowState) / onDidChangeWindowState | Yes | **No** |
+| activeColorTheme / onDidChangeActiveColorTheme | Yes | **No** |
+| registerUriHandler | Yes | **No** |
+| registerTerminalLinkProvider / registerTerminalProfileProvider | Yes | **No** |
+| registerFileDecorationProvider | Yes | **No** |
+| registerCustomEditorProvider | Yes | **No** |
 
 ---
 
-## 5. `workspace` 命名空间
+## 5. `workspace` Namespace
 
-### 5.1 属性
+### 5.1 Properties
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| rootPath | `string \| undefined` | `string` | vscode 可 undefined |
-| workspaceFolders | `WorkspaceFolder[] \| undefined` | `ReadonlyArray<WorkspaceFolder>` | coc 始终是数组 |
-| name | `string \| undefined` | **无** | — |
-| workspaceFile | `Uri \| undefined` | **无** | — |
-| textDocuments | `TextDocument[]` | `ReadonlyArray<LinesTextDocument>` | 类型不同 |
-| **fs** (FileSystem) | 有 (readFile/writeFile/stat/readDirectory/createDirectory/delete/rename) | **无** | — |
-| isTrusted | `boolean` | `= true` (硬编码) | coc 不支持信任机制 |
-| notebookDocuments | 有 | **无** | — |
+| rootPath | `string \| undefined` | `string` | vscode can be undefined |
+| workspaceFolders | `WorkspaceFolder[] \| undefined` | `ReadonlyArray<WorkspaceFolder>` | coc is always an array |
+| name | `string \| undefined` | **No** | — |
+| workspaceFile | `Uri \| undefined` | **No** | — |
+| textDocuments | `TextDocument[]` | `ReadonlyArray<LinesTextDocument>` | Different types |
+| **fs** (FileSystem) | Yes (readFile/writeFile/stat/readDirectory/createDirectory/delete/rename) | **No** | — |
+| isTrusted | `boolean` | `= true` (hardcoded) | coc does not support trust mechanism |
+| notebookDocuments | Yes | **No** | — |
 
-### 5.2 文档事件
+### 5.2 Document Events
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| onDidOpenTextDocument | `Event<TextDocument>` | `Event<LinesTextDocument & {bufnr}>` | coc 带 bufnr |
-| onDidCloseTextDocument | `Event<TextDocument>` | `Event<LinesTextDocument & {bufnr}>` | 同上 |
-| onDidChangeTextDocument | `Event<TextDocumentChangeEvent>` | `Event<DidChangeTextDocumentParams>` | **LSP 格式不同** |
-| onWillSaveTextDocument | `Event<TextDocumentWillSaveEvent>` | `Event<WillSaveEvent>` | 类型不同 |
-| onDidSaveTextDocument | `Event<TextDocument>` | `Event<LinesTextDocument>` | 类型不同 |
-| onDidChangeConfiguration | `Event<ConfigurationChangeEvent>` | `Event<ConfigurationChangeEvent>` | **相同** |
+| onDidOpenTextDocument | `Event<TextDocument>` | `Event<LinesTextDocument & {bufnr}>` | coc includes bufnr |
+| onDidCloseTextDocument | `Event<TextDocument>` | `Event<LinesTextDocument & {bufnr}>` | Same as above |
+| onDidChangeTextDocument | `Event<TextDocumentChangeEvent>` | `Event<DidChangeTextDocumentParams>` | **Different LSP format** |
+| onWillSaveTextDocument | `Event<TextDocumentWillSaveEvent>` | `Event<WillSaveEvent>` | Different types |
+| onDidSaveTextDocument | `Event<TextDocument>` | `Event<LinesTextDocument>` | Different types |
+| onDidChangeConfiguration | `Event<ConfigurationChangeEvent>` | `Event<ConfigurationChangeEvent>` | **Same** |
 
-### 5.3 文件事件
+### 5.3 File Events
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| onDidCreateFiles / onDidRenameFiles / onDidDeleteFiles | 有 | 有 | **相同** |
-| onWillCreateFiles / onWillRenameFiles / onWillDeleteFiles | 有 | 有 | **相同** |
+| onDidCreateFiles / onDidRenameFiles / onDidDeleteFiles | Yes | Yes | **Same** |
+| onWillCreateFiles / onWillRenameFiles / onWillDeleteFiles | Yes | Yes | **Same** |
 
-### 5.4 函数
+### 5.4 Functions
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
 | getConfiguration() | `Thenable<T>` | `Promise<T>` | Thenable vs Promise |
-| openTextDocument(uri) | `Thenable<TextDocument>` | `Promise<Document>` | 返回类型不同 |
-| openTextDocument(options) with `{language, content}` | 有 | **无** | coc 不能用内存内容创建虚拟文档 |
-| registerTextDocumentContentProvider | 有 | 有 | **相同** |
-| registerFileSystemProvider | 有 | **无** | — |
-| createFileSystemWatcher | 有 | 有 | **相同** |
-| findFiles | 有 | 有 | **相同** |
-| applyEdit | 有 | 有 | **相同** |
-| asRelativePath | 有 | 有 | **相同** |
-| getWorkspaceFolder | `(uri: Uri)` | `(uri: string \| Uri)` | coc 额外接受 string |
-| updateWorkspaceFolders | 有 | **无** | — |
-| saveAll / save / saveAs | 有 | **无** | — |
-| decode / encode (Uint8Array <-> string) | 有 | **无** | — |
+| openTextDocument(uri) | `Thenable<TextDocument>` | `Promise<Document>` | Different return types |
+| openTextDocument(options) with `{language, content}` | Yes | **No** | coc cannot create virtual documents from in-memory content |
+| registerTextDocumentContentProvider | Yes | Yes | **Same** |
+| registerFileSystemProvider | Yes | **No** | — |
+| createFileSystemWatcher | Yes | Yes | **Same** |
+| findFiles | Yes | Yes | **Same** |
+| applyEdit | Yes | Yes | **Same** |
+| asRelativePath | Yes | Yes | **Same** |
+| getWorkspaceFolder | `(uri: Uri)` | `(uri: string \| Uri)` | coc additionally accepts string |
+| updateWorkspaceFolders | Yes | **No** | — |
+| saveAll / save / saveAs | Yes | **No** | — |
+| decode / encode (Uint8Array <-> string) | Yes | **No** | — |
 
 ### 5.5 WorkspaceFolder
 
-| 字段 | VS Code | coc.nvim |
+| Field | VS Code | coc.nvim |
 |------|---------|----------|
 | uri | `Uri` | `string` |
 | name | `string` | `string` |
-| index | `number` | **无** |
+| index | `number` | **No** |
 
 ---
 
-## 6. `languages` 命名空间
+## 6. `languages` Namespace
 
-### 6.1 基础函数
+### 6.1 Basic Functions
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| getLanguages(): `Thenable<string[]>` | 有 | **无** (用 `workspace.languageIds` Set) | 替代方式 |
-| setTextDocumentLanguage() | 有 | **无** | — |
-| match(selector, document) | 有 | 有 | coc 用 `TextDocumentMatch` 替代 `TextDocument` |
-| createDiagnosticCollection | 有 | 有 | **相同** |
-| createLanguageStatusItem | 有 | **无** | — (converter 替换为 no-op，支持 `vscode.` 前缀) |
-| getDiagnostics / onDidChangeDiagnostics | 有 | **无** (coc 在 `diagnosticManager` 提供, 事件名为 `onDidRefresh`) | 位置/命名不同 |
+| getLanguages(): `Thenable<string[]>` | Yes | **No** (uses `workspace.languageIds` Set) | Alternative approach |
+| setTextDocumentLanguage() | Yes | **No** | — |
+| match(selector, document) | Yes | Yes | coc uses `TextDocumentMatch` instead of `TextDocument` |
+| createDiagnosticCollection | Yes | Yes | **Same** |
+| createLanguageStatusItem | Yes | **No** | — (converter replaces with no-op, supports `vscode.` prefix) |
+| getDiagnostics / onDidChangeDiagnostics | Yes | **No** (coc provides in `diagnosticManager`, event named `onDidRefresh`) | Different location/naming |
 
-### 6.2 Provider 注册函数
+### 6.2 Provider Registration Functions
 
-| 注册器 | VS Code 名称 | coc 名称 | 签名差异 |
+| Registrar | VS Code Name | coc Name | Signature Difference |
 |--------|-------------|---------|---------|
-| CompletionItemProvider | `registerCompletionItemProvider` | `registerCompletionItemProvider` | coc 多了 `name`, `shortcut`, `priority`, `allCommitCharacters` 参数 |
-| InlineCompletionItemProvider | `registerInlineCompletionItemProvider` | `registerInlineCompletionItemProvider` | **相同** |
-| HoverProvider | `registerHoverProvider` | `registerHoverProvider` | **相同** |
-| DefinitionProvider | `registerDefinitionProvider` | `registerDefinitionProvider` | **相同** |
-| DeclarationProvider | `registerDeclarationProvider` | `registerDeclarationProvider` | **相同** |
-| TypeDefinitionProvider | `registerTypeDefinitionProvider` | `registerTypeDefinitionProvider` | **相同** |
-| ImplementationProvider | `registerImplementationProvider` | `registerImplementationProvider` | **相同** |
-| ReferenceProvider | `registerReferenceProvider` | `registerReferencesProvider` | **命名不同** (coc 是复数 `References`) |
-| DocumentHighlightProvider | `registerDocumentHighlightProvider` | `registerDocumentHighlightProvider` | **相同** |
-| DocumentSymbolProvider | `registerDocumentSymbolProvider` | `registerDocumentSymbolProvider` | **相同** |
-| WorkspaceSymbolProvider | `registerWorkspaceSymbolProvider` | `registerWorkspaceSymbolProvider` | **相同** |
-| CodeActionsProvider | `registerCodeActionsProvider` | `registerCodeActionProvider` | **命名不同** (coc 单数 `Action`), coc 多 `clientId` 参数 |
-| CodeLensProvider | `registerCodeLensProvider` | `registerCodeLensProvider` | **相同** |
-| Formatting | `registerDocumentFormattingEditProvider` | `registerDocumentFormatProvider` | **命名不同**, coc 多 `priority` |
-| Range Formatting | `registerDocumentRangeFormattingEditProvider` | `registerDocumentRangeFormatProvider` | **命名不同**, coc 多 `priority` |
-| OnType Formatting | `registerOnTypeFormattingEditProvider` | `registerOnTypeFormattingEditProvider` | coc 用 `string[]` 数组 vs vscode rest 参数 |
-| RenameProvider | `registerRenameProvider` | `registerRenameProvider` | **相同** |
-| SignatureHelpProvider | `registerSignatureHelpProvider` | `registerSignatureHelpProvider` | coc 缺少 metadata overload |
-| DocumentLinkProvider | `registerDocumentLinkProvider` | `registerDocumentLinkProvider` | **相同** |
-| ColorProvider | `registerColorProvider` | `registerDocumentColorProvider` | **命名不同** |
-| FoldingRangeProvider | `registerFoldingRangeProvider` | `registerFoldingRangeProvider` | **相同** |
-| SelectionRangeProvider | `registerSelectionRangeProvider` | `registerSelectionRangeProvider` | **相同** |
-| CallHierarchyProvider | `registerCallHierarchyProvider` | `registerCallHierarchyProvider` | **相同** |
-| TypeHierarchyProvider | `registerTypeHierarchyProvider` | `registerTypeHierarchyProvider` | **相同** |
-| LinkedEditingRangeProvider | `registerLinkedEditingRangeProvider` | `registerLinkedEditingRangeProvider` | **相同** |
-| InlayHintsProvider | `registerInlayHintsProvider` | `registerInlayHintsProvider` | **相同** |
-| SemanticTokensProvider | `registerDocumentSemanticTokensProvider` | `registerDocumentSemanticTokensProvider` | **相同** |
-| RangeSemanticTokensProvider | `registerDocumentRangeSemanticTokensProvider` | `registerDocumentRangeSemanticTokensProvider` | **相同** |
-| **EvaluatableExpressionProvider** | `registerEvaluatableExpressionProvider` | **无** | — |
-| **InlineValuesProvider** | `registerInlineValuesProvider` | **无** (接口存在但无注册函数) | 仅有 `InlineValuesProvider` 接口导出，无注册入口 |
-| **DocumentDropEditProvider** | `registerDocumentDropEditProvider` | **无** | — |
-| **DocumentPasteEditProvider** | `registerDocumentPasteEditProvider` | **无** | — |
+| CompletionItemProvider | `registerCompletionItemProvider` | `registerCompletionItemProvider` | coc has additional `name`, `shortcut`, `priority`, `allCommitCharacters` parameters |
+| InlineCompletionItemProvider | `registerInlineCompletionItemProvider` | `registerInlineCompletionItemProvider` | **Same** |
+| HoverProvider | `registerHoverProvider` | `registerHoverProvider` | **Same** |
+| DefinitionProvider | `registerDefinitionProvider` | `registerDefinitionProvider` | **Same** |
+| DeclarationProvider | `registerDeclarationProvider` | `registerDeclarationProvider` | **Same** |
+| TypeDefinitionProvider | `registerTypeDefinitionProvider` | `registerTypeDefinitionProvider` | **Same** |
+| ImplementationProvider | `registerImplementationProvider` | `registerImplementationProvider` | **Same** |
+| ReferenceProvider | `registerReferenceProvider` | `registerReferencesProvider` | **Different naming** (coc is plural `References`) |
+| DocumentHighlightProvider | `registerDocumentHighlightProvider` | `registerDocumentHighlightProvider` | **Same** |
+| DocumentSymbolProvider | `registerDocumentSymbolProvider` | `registerDocumentSymbolProvider` | **Same** |
+| WorkspaceSymbolProvider | `registerWorkspaceSymbolProvider` | `registerWorkspaceSymbolProvider` | **Same** |
+| CodeActionsProvider | `registerCodeActionsProvider` | `registerCodeActionProvider` | **Different naming** (coc singular `Action`), coc has extra `clientId` parameter |
+| CodeLensProvider | `registerCodeLensProvider` | `registerCodeLensProvider` | **Same** |
+| Formatting | `registerDocumentFormattingEditProvider` | `registerDocumentFormatProvider` | **Different naming**, coc has extra `priority` |
+| Range Formatting | `registerDocumentRangeFormattingEditProvider` | `registerDocumentRangeFormatProvider` | **Different naming**, coc has extra `priority` |
+| OnType Formatting | `registerOnTypeFormattingEditProvider` | `registerOnTypeFormattingEditProvider` | coc uses `string[]` array vs vscode rest parameters |
+| RenameProvider | `registerRenameProvider` | `registerRenameProvider` | **Same** |
+| SignatureHelpProvider | `registerSignatureHelpProvider` | `registerSignatureHelpProvider` | coc lacks metadata overload |
+| DocumentLinkProvider | `registerDocumentLinkProvider` | `registerDocumentLinkProvider` | **Same** |
+| ColorProvider | `registerColorProvider` | `registerDocumentColorProvider` | **Different naming** |
+| FoldingRangeProvider | `registerFoldingRangeProvider` | `registerFoldingRangeProvider` | **Same** |
+| SelectionRangeProvider | `registerSelectionRangeProvider` | `registerSelectionRangeProvider` | **Same** |
+| CallHierarchyProvider | `registerCallHierarchyProvider` | `registerCallHierarchyProvider` | **Same** |
+| TypeHierarchyProvider | `registerTypeHierarchyProvider` | `registerTypeHierarchyProvider` | **Same** |
+| LinkedEditingRangeProvider | `registerLinkedEditingRangeProvider` | `registerLinkedEditingRangeProvider` | **Same** |
+| InlayHintsProvider | `registerInlayHintsProvider` | `registerInlayHintsProvider` | **Same** |
+| SemanticTokensProvider | `registerDocumentSemanticTokensProvider` | `registerDocumentSemanticTokensProvider` | **Same** |
+| RangeSemanticTokensProvider | `registerDocumentRangeSemanticTokensProvider` | `registerDocumentRangeSemanticTokensProvider` | **Same** |
+| **EvaluatableExpressionProvider** | `registerEvaluatableExpressionProvider` | **No** | — |
+| **InlineValuesProvider** | `registerInlineValuesProvider` | **No** (interface exists but no registration function) | Only `InlineValuesProvider` interface is exported, no registration entry point |
+| **DocumentDropEditProvider** | `registerDocumentDropEditProvider` | **No** | — |
+| **DocumentPasteEditProvider** | `registerDocumentPasteEditProvider` | **No** | — |
 
 ### 6.3 Configuration
 
 | API | VS Code | coc.nvim |
 |-----|---------|----------|
-| setLanguageConfiguration | 有 | **无** |
+| setLanguageConfiguration | Yes | **No** |
 
 ---
 
-## 7. `commands` 命名空间
+## 7. `commands` Namespace
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| registerCommand | `(command, callback, thisArg?)` | `(id, impl, thisArg?, internal?)` | 参数名不同，coc 有额外 `internal` 参数且 callback 返回 `void` 而非 `any` |
-| registerTextEditorCommand | 有 | **无** | — |
+| registerCommand | `(command, callback, thisArg?)` | `(id, impl, thisArg?, internal?)` | Different parameter names, coc has extra `internal` parameter and callback returns `void` instead of `any` |
+| registerTextEditorCommand | Yes | **No** | — |
 | executeCommand | `Thenable<T>` | `Promise<T>` | Thenable vs Promise |
-| getCommands | `Thenable<string[]>` | **无** (coc 有 `commandList` + 另有一个 `getCommands()` 返回 Vim 命令描述) | 完全不同 |
+| getCommands | `Thenable<string[]>` | **No** (coc has `commandList` + another `getCommands()` returning Vim command descriptions) | Completely different |
 
 ---
 
-## 8. `extensions` 命名空间
+## 8. `extensions` Namespace
 
-| API | VS Code | coc.nvim | 差异 |
+| API | VS Code | coc.nvim | Difference |
 |-----|---------|----------|------|
-| all | `Extension<any>[]` | `ReadonlyArray<Extension<any>>` | 基本一致 |
-| getExtension | `getExtension(id)` | `getExtensionById(id)` | **命名不同** |
-| onDidChange (extensions changed) | 有 | **无** (coc 有 `onDidLoadExtension`, `onDidActiveExtension`, `onDidUnloadExtension` 三个事件) | 细分不同 |
+| all | `Extension<any>[]` | `ReadonlyArray<Extension<any>>` | Mostly the same |
+| getExtension | `getExtension(id)` | `getExtensionById(id)` | **Different naming** |
+| onDidChange (extensions changed) | Yes | **No** (coc has `onDidLoadExtension`, `onDidActiveExtension`, `onDidUnloadExtension` three events) | Different granularity |
 
 ---
 
-## 9. `env` 命名空间
+## 9. `env` Namespace
 
 | API | VS Code | coc.nvim |
 |-----|---------|----------|
-| `namespace env` 完整 | 有 (appName, appRoot, appHost, language, machineId, sessionId, remoteName, shell, clipboard, openExternal, uiKind 等) | **无** |
-| `workspace.env: Env` | — | coc 有 (`runtimepath`, `extensionRoot`, `pid`, `columns`, `lines`, `version`, `isVim`, `isNvim` 等 vim 专属属性) |
+| `namespace env` full | Yes (appName, appRoot, appHost, language, machineId, sessionId, remoteName, shell, clipboard, openExternal, uiKind, etc.) | **No** |
+| `workspace.env: Env` | — | coc has (`runtimepath`, `extensionRoot`, `pid`, `columns`, `lines`, `version`, `isVim`, `isNvim` and other vim-specific properties) |
 
-**结论**: 完全不同，coc 的 `env` 是 vim 运行时环境描述，而非 vscode 那样的应用环境。
+**Conclusion**: Completely different, coc's `env` describes the vim runtime environment, not vscode-like application environment.
 
 ---
 
-## 10. Provider 接口对比
+## 10. Provider Interface Comparison
 
-### 10.1 通用差异模式
+### 10.1 Common Difference Patterns
 
-所有 provider 接口在 coc 中都有以下共性差异：
-1. 第一个参数 `document` 用 `LinesTextDocument` 代替 `TextDocument`
-2. VS Code 用泛型（如 `CompletionItemProvider<T>`），coc 用具体类型
-3. 部分 provider coc 要求在注册时额外传入 `clientId` 等参数
+All provider interfaces in coc share the following common differences:
+1. First parameter `document` uses `LinesTextDocument` instead of `TextDocument`
+2. VS Code uses generics (e.g. `CompletionItemProvider<T>`), coc uses concrete types
+3. Some providers in coc require additional parameters like `clientId` during registration
 
-### 10.2 具体差异
+### 10.2 Specific Differences
 
-| Provider | 差异详情 |
+| Provider | Difference Details |
 |----------|---------|
-| CompletionItemProvider | coc 额外 `option: CompleteOption` 字段在 context 中 |
+| CompletionItemProvider | coc has additional `option: CompleteOption` field in context |
 | CodeActionProvider | vscode `range: Range \| Selection` vs coc `range: Range` |
-| DocumentRangeFormattingEditProvider | vscode 有额外 `provideDocumentRangesFormattingEdits` 方法，coc 没有 |
-| TypeHierarchyProvider | vscode `prepareTypeHierarchy` 返回 `TypeHierarchyItem \| TypeHierarchyItem[]`，coc 仅返回 `TypeHierarchyItem[]` |
-| WorkspaceSymbolProvider | vscode 有泛型 `<T extends SymbolInformation>`，coc 非泛型 |
+| DocumentRangeFormattingEditProvider | vscode has additional `provideDocumentRangesFormattingEdits` method, coc does not |
+| TypeHierarchyProvider | vscode `prepareTypeHierarchy` returns `TypeHierarchyItem \| TypeHierarchyItem[]`, coc only returns `TypeHierarchyItem[]` |
+| WorkspaceSymbolProvider | vscode has generic `<T extends SymbolInformation>`, coc is non-generic |
 | SelectionRangeProvider | vscode `positions: readonly Position[]` vs coc `positions: Position[]` |
-| FileSystemProvider | **coc 完全不存在** |
-| TextDocumentContentProvider | 相同 |
+| FileSystemProvider | **Completely absent in coc** |
+| TextDocumentContentProvider | Same |
 
 ---
 
-## 11. 完整缺失的 vscode 功能
+## 11. Completely Missing vscode Features
 
-以下 vscode **完整命名空间或子系统**在 coc 中完全不存在：
+The following vscode **complete namespaces or subsystems** are entirely absent in coc:
 
-| # | vscode 命名空间/子系统 | 说明 |
+| # | vscode Namespace/Subsystem | Description |
 |---|----------------------|------|
-| 1 | **`notebooks`** | 笔记本文档、编辑器、序列化、内核选择等全部缺失 |
-| 2 | **`scm`** | 源代码管理（Git 集成、SourceControl、变更追踪） |
-| 3 | **`debug`** | 调试器全部功能（breakpoints、debug session、stack frames 等） |
-| 4 | **`tests`** | 测试控制器、测试运行、测试项、测试覆盖 |
-| 5 | **`tasks`** | 任务系统（TaskProvider、TaskExecution、Shell/ProcessExecution） |
-| 6 | **`chat`** | GitHub Copilot Chat 参与者、对话管理 |
-| 7 | **`lm`** | Language Model API (LLM 调用) |
-| 8 | **`authentication`** | 认证提供商、session 管理 |
-| 9 | **`l10n`** | 本地化（t() 函数） |
-| 10 | **`Clipboard`** | 剪贴板读写 |
-| 11 | **`FileSystem` / `FileSystemProvider`** | 自定义文件系统提供者 |
-| 12 | **`Webview` / `WebviewPanel`** | Webview 面板、序列化、视图提供者 |
-| 13 | **`Tab` / `TabGroup` / `TabInput*`** | 标签页和标签组管理 |
-| 14 | **`CustomEditor`** | 自定义编辑器（CustomTextEditorProvider / CustomReadonlyEditorProvider） |
-| 15 | **`Comment` / `CommentThread` / `CommentController`** | 注释系统（Review） |
-| 16 | **`DataTransfer` / `DataTransferItem`** | 拖放数据传输 |
-| 17 | **`LanguageStatusItem`** | 语言状态项 |
-| 18 | **`TerminalLinkProvider` / `TerminalProfileProvider`** | 终端链接和配置文件 |
-| 19 | **`FileDecorationProvider`** | 文件装饰 |
-| 20 | **`UriHandler`** | URI 处理器 |
-| 21 | **`LogOutputChannel`** | 日志级别输出通道 |
+| 1 | **`notebooks`** | Notebook documents, editors, serialization, kernel selection, etc. all missing |
+| 2 | **`scm`** | Source control management (Git integration, SourceControl, change tracking) |
+| 3 | **`debug`** | Full debugger functionality (breakpoints, debug session, stack frames, etc.) |
+| 4 | **`tests`** | Test controller, test run, test items, test coverage |
+| 5 | **`tasks`** | Task system (TaskProvider, TaskExecution, Shell/ProcessExecution) |
+| 6 | **`chat`** | GitHub Copilot Chat participants, conversation management |
+| 7 | **`lm`** | Language Model API (LLM invocation) |
+| 8 | **`authentication`** | Authentication providers, session management |
+| 9 | **`l10n`** | Localization (t() function) |
+| 10 | **`Clipboard`** | Clipboard read/write |
+| 11 | **`FileSystem` / `FileSystemProvider`** | Custom file system provider |
+| 12 | **`Webview` / `WebviewPanel`** | Webview panels, serialization, view providers |
+| 13 | **`Tab` / `TabGroup` / `TabInput*`** | Tab and tab group management |
+| 14 | **`CustomEditor`** | Custom editors (CustomTextEditorProvider / CustomReadonlyEditorProvider) |
+| 15 | **`Comment` / `CommentThread` / `CommentController`** | Comment system (Review) |
+| 16 | **`DataTransfer` / `DataTransferItem`** | Drag-and-drop data transfer |
+| 17 | **`LanguageStatusItem`** | Language status item |
+| 18 | **`TerminalLinkProvider` / `TerminalProfileProvider`** | Terminal links and profiles |
+| 19 | **`FileDecorationProvider`** | File decorations |
+| 20 | **`UriHandler`** | URI handler |
+| 21 | **`LogOutputChannel`** | Log level output channel |
 
-### 11.1 有替代但差异大的功能
+### 11.1 Features with Alternatives But Large Differences
 
-| vscode 功能 | coc 替代方式 | 差异 |
+| vscode Feature | coc Alternative | Difference |
 |-------------|------------|------|
-| Decoration API | `BufferHighlight` / `highlight` | vscode 用 TextEditorDecorationType + setDecorations；coc 基于 vim 高亮 API |
-| showTextDocument | `window.moveTo` / 手动切换 buffer | coc 没有直接等价 |
-| showInputBox | `window.requestInput` / `window.createInputBox` | 签名完全不同 |
-| showOpenDialog / showSaveDialog | **无替代** | — |
-| Terminal (createTerminal) | `window.createTerminal`, `window.openTerminal` | 返回 Promise，缺少很多 options |
-| setLanguageConfiguration | `workspace.registerAutocmd` 手动实现 | — |
+| Decoration API | `BufferHighlight` / `highlight` | vscode uses TextEditorDecorationType + setDecorations; coc is based on vim highlight API |
+| showTextDocument | `window.moveTo` / manual buffer switching | coc has no direct equivalent |
+| showInputBox | `window.requestInput` / `window.createInputBox` | Completely different signature |
+| showOpenDialog / showSaveDialog | **No alternative** | — |
+| Terminal (createTerminal) | `window.createTerminal`, `window.openTerminal` | Returns Promise, lacks many options |
+| setLanguageConfiguration | `workspace.registerAutocmd` manual implementation | — |
 
 ---
 
-## 12. coc 特有 API（vscode 没有的）
+## 12. coc Specific APIs (not in vscode)
 
-coc 有大量 vim/neovim 集成的 API，这些在 vscode 中不存在：
+coc has a large number of vim/neovim integration APIs that do not exist in vscode:
 
-### 12.1 Vim 引擎集成
+### 12.1 Vim Engine Integration
 
-| API | 说明 |
+| API | Description |
 |-----|------|
-| `workspace.nvim` | 直接访问 Neovim 实例 |
-| `workspace.env: Env` | Vim 运行时环境描述（runtimepath, floating, textprop 等） |
-| `workspace.isVim` / `workspace.isNvim` | 检测 Vim 类型 |
-| `workspace.cwd` / `workspace.root` | 当前路径和工作区根 |
-| `workspace.filetypes` / `workspace.languageIds` | 支持的文件类型和语言集合 |
-| `workspace.pluginRoot` | 插件根路径 |
-| `workspace.channelNames` / `workspace.documents` | 通道和文档列表 |
-| `workspace.folderPaths` / `workspace.workspaceFolder` | 文件夹路径 |
-| `workspace.floatSupported` | 是否支持浮动窗口 |
-| `workspace.has(feature)` | 类似 vim 的 `has()` 函数 |
+| `workspace.nvim` | Direct access to Neovim instance |
+| `workspace.env: Env` | Vim runtime environment description (runtimepath, floating, textprop, etc.) |
+| `workspace.isVim` / `workspace.isNvim` | Detect Vim type |
+| `workspace.cwd` / `workspace.root` | Current path and workspace root |
+| `workspace.filetypes` / `workspace.languageIds` | Supported file type and language collections |
+| `workspace.pluginRoot` | Plugin root path |
+| `workspace.channelNames` / `workspace.documents` | Channel and document lists |
+| `workspace.folderPaths` / `workspace.workspaceFolder` | Folder paths |
+| `workspace.floatSupported` | Whether floating windows are supported |
+| `workspace.has(feature)` | Similar to vim's `has()` function |
 
-### 12.2 Vim 专属功能
+### 12.2 Vim Specific Features
 
-| API | 说明 |
+| API | Description |
 |-----|------|
-| `workspace.registerAutocmd` | 注册 vim autocmd |
-| `workspace.registerKeymap` / `registerExprKeymap` / `registerLocalKeymap` | 注册 vim 键映射 |
-| `workspace.watchOption` / `watchGlobal` | 监听 vim 选项/全局变量变化 |
-| `workspace.createDatabase` / `createMru` / `createTask` | Coc 数据持久化工具 |
-| `workspace.createFuzzyMatch` | 模糊匹配 |
-| `workspace.expand` / `workspace.findUp` | 文件路径工具 |
-| `workspace.runCommand` / `workspace.resolveModule` | 运行 shell 命令/解析模块 |
-| `workspace.loadFile` / `workspace.openResource` | 文件加载 |
-| `workspace.computeWordRanges` | 计算词范围 |
-| `workspace.getQuickfixItem` / `getQuickfixList` / `showLocations` | Quickfix 列表操作 |
-| `workspace.jumpTo` | 跳转到位置 |
-| `workspace.getDocument(bufnr)` | 通过 buffer 号获取文档 |
+| `workspace.registerAutocmd` | Register vim autocmd |
+| `workspace.registerKeymap` / `registerExprKeymap` / `registerLocalKeymap` | Register vim key mappings |
+| `workspace.watchOption` / `watchGlobal` | Watch vim options/global variable changes |
+| `workspace.createDatabase` / `createMru` / `createTask` | Coc data persistence utilities |
+| `workspace.createFuzzyMatch` | Fuzzy matching |
+| `workspace.expand` / `workspace.findUp` | File path utilities |
+| `workspace.runCommand` / `workspace.resolveModule` | Run shell commands/resolve modules |
+| `workspace.loadFile` / `workspace.openResource` | File loading |
+| `workspace.computeWordRanges` | Compute word ranges |
+| `workspace.getQuickfixItem` / `getQuickfixList` / `showLocations` | Quickfix list operations |
+| `workspace.jumpTo` | Jump to position |
+| `workspace.getDocument(bufnr)` | Get document by buffer number |
 
-### 12.3 Window 特有 API
+### 12.3 Window Specific APIs
 
-| API | 说明 |
+| API | Description |
 |-----|------|
-| `window.createFloatFactory` | 浮动窗口工厂 |
-| `window.runTerminalCommand` / `window.openTerminal` | 终端命令操作 |
-| `window.showMenuPicker` / `window.showPickerDialog` | 菜单/多选拾取器 |
-| `window.showPrompt` / `window.showDialog` / `window.showNotification` | 对话框 |
-| `window.getCursorPosition` / `window.moveTo` / `window.getOffset` / `window.getCursorScreenPosition` | 光标操作 |
-| `window.echoLines` | 在 vim 底部输出行 |
-| `window.showOutputChannel` | 显示输出通道 buffer |
-| `window.openLocalConfig` | 打开 coc 配置文件 |
-| `window.getSelectedRange` / `window.selectRange` | 可视化选择操作 |
-| `window.diffHighlights` / `window.applyDiffHighlights` | 差异高亮管理 |
-| `window.getVisibleRanges(bufnr, winid?)` | 按 buffer/窗口获取可见范围 |
+| `window.createFloatFactory` | Floating window factory |
+| `window.runTerminalCommand` / `window.openTerminal` | Terminal command operations |
+| `window.showMenuPicker` / `window.showPickerDialog` | Menu/multi-select picker |
+| `window.showPrompt` / `window.showDialog` / `window.showNotification` | Dialogs |
+| `window.getCursorPosition` / `window.moveTo` / `window.getOffset` / `window.getCursorScreenPosition` | Cursor operations |
+| `window.echoLines` | Output lines at the bottom of vim |
+| `window.showOutputChannel` | Show output channel buffer |
+| `window.openLocalConfig` | Open coc configuration file |
+| `window.getSelectedRange` / `window.selectRange` | Visual selection operations |
+| `window.diffHighlights` / `window.applyDiffHighlights` | Diff highlight management |
+| `window.getVisibleRanges(bufnr, winid?)` | Get visible ranges by buffer/window |
 
 ---
 
-## 总结
+## Summary
 
-### 适配难度评估
+### Migration Difficulty Assessment
 
-从 vscode 插件迁移到 coc（或反方向）的难度：
+Difficulty of migrating from vscode plugins to coc (or the reverse):
 
-| 类别 | 难度 | 原因 |
+| Category | Difficulty | Reason |
 |------|------|------|
-| LSP Provider (completion/hover/定义等) | ★☆☆ 容易 | 接口高度一致，仅需适配 document 类型和注册参数 |
-| Commands / Extensions | ★☆☆ 容易 | 基本一致 |
-| Workspace 操作 | ★★☆ 中等 | getConfiguration/findFiles/createFileSystemWatcher 一致，但 fs/notebook/saveAll 缺失 |
-| 编辑器操作 | ★★★ 较难 | decoration/selection/编辑 API 完全不同 |
-| UI 组件 | ★★★★ 很难 | statusbar/outputChannel/terminal 有但签名不同；treeview/quckpick 兼容但差异多 |
-| 完整缺失功能 | ★★★★★ 无法直接迁移 | debug/notebook/scm/tests/chat/webview/customEditor/authentication |
+| LSP Provider (completion/hover/definitions, etc.) | ★☆☆ Easy | Interfaces are highly consistent, only need to adapt document types and registration parameters |
+| Commands / Extensions | ★☆☆ Easy | Mostly consistent |
+| Workspace operations | ★★☆ Moderate | getConfiguration/findFiles/createFileSystemWatcher consistent, but fs/notebook/saveAll missing |
+| Editor operations | ★★★ Hard | Decoration/selection/editing APIs are completely different |
+| UI Components | ★★★★ Very hard | statusbar/outputChannel/terminal exist but signatures differ; treeview/quickpick compatible but many differences |
+| Completely missing features | ★★★★★ Cannot directly migrate | debug/notebook/scm/tests/chat/webview/customEditor/authentication |
 
-### converter 覆盖范围
+### Converter Coverage
 
-coc-vscode-loader 的 `import-mapping` transform + `convert.ts` 文本替换层提供了大量自动适配。转换器会处理：
+coc-vscode-loader's `import-mapping` transform + `convert.ts` text replacement layer provides extensive automatic adaptation. The converter handles:
 
 - `window.show{Information,Warning,ErrorMessage}` → `Promise.resolve(window.showMessage(msg, severity))`
-- `window.activeTextEditor` → polyfill 使用 `workspace.getDocument()`
+- `window.activeTextEditor` → polyfill using `workspace.getDocument()`
 - `window.onDidChangeActiveTextEditor` → `workspace.onDidOpenTextDocument`
-- `window.createOutputChannel` → `workspace.createOutputChannel`（丢弃 languageId）
+- `window.createOutputChannel` → `workspace.createOutputChannel` (drops languageId)
 - `workspace.isTrusted` → `true` 
 - `languages.createLanguageStatusItem` → no-op
-- `languages.match` → `1`（始终返回 truthy）
+- `languages.match` → `1` (always returns truthy)
 - `authentication.getSession` → `undefined as any`
 - `.uri.fsPath` → `Uri.parse(uri).fsPath`
 - `.fileName` → `Uri.parse(doc.uri).fsPath`
-- `getWordRangeAtPosition` → 内联实现
+- `getWordRangeAtPosition` → inline implementation
 - `Location.create(Uri.file(x), y)` → `Location.create(x, Range.create(y, y))`
 - `new WorkspaceEdit()` → `({ changes: {} })` + `.set()` → `.changes[]`
