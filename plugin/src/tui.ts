@@ -598,14 +598,13 @@ export class TUI {
 
     // Centered header + key hint
     const searchSuffix = state.searchQuery ? ' (search mode)' : ''
-    let hdrLine = `coc-loader v${VERSION}${searchSuffix}`
-    if (this.latestLoaderVersion) hdrLine += `  [v${this.latestLoaderVersion}]`
-    const hdrLen = Buffer.from(hdrLine).length
-    const hdrPad = Math.max(0, Math.floor((this.windowWidth - hdrLen) / 2) - 2)
+    const hdrLine = ` coc-loader${searchSuffix} `
+    const hdrLen = Buffer.from(hdrLine).length + (this.latestLoaderVersion ? 4 + this.latestLoaderVersion.length : 0)
+    const hdrPad = Math.max(0, Math.floor((this.windowWidth - hdrLen) / 2))
     if (hdrPad > 0) buf.append(' '.repeat(hdrPad), undefined)
-    buf.append(`coc-loader v${VERSION}${searchSuffix}`, 'CocLoaderHeader')
+    buf.append(` coc-loader${searchSuffix} `, 'CocLoaderHeader')
     if (this.latestLoaderVersion) {
-      buf.append('  ↑ ', 'CocLoaderHighlight')
+      buf.append('↑ ', 'CocLoaderHighlight')
       buf.append(`v${this.latestLoaderVersion}`, 'CocLoaderHighlight')
     }
     buf.nl()
