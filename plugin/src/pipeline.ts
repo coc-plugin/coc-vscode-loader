@@ -575,7 +575,7 @@ function metaPath(name: string): string {
 async function saveMeta(name: string): Promise<void> {
   const srcDir = sourceDir(name)
   try {
-    const log = await runWithOutput('git', ['-C', srcDir, 'log', '-1', '--format=%x00%h%x00%s%x00%ar'], srcDir)
+    const log = await runWithOutput('git', ['-C', srcDir, 'log', '-1', '--format=%x00%H%x00%s%x00%ar'], srcDir)
     const parts = log.split('\0')
     const commit = parts[1] || ''
     const msg = parts[2] || ''
@@ -854,7 +854,7 @@ export async function checkUpdates(state: StateManager, silent = false): Promise
       try {
         const out = await runWithOutput('git', ['ls-remote', `https://github.com/${pkg.info.source.repo}.git`, 'HEAD'], os.homedir())
         const remote = out.split('\t')[0]
-        if (remote) results[pkg.info.name] = remote.substring(0, 7) !== live.commit
+        if (remote) results[pkg.info.name] = !remote.startsWith(live.commit)
       } catch { /* non-critical: git ls-remote may fail offline */ }
     }
 
