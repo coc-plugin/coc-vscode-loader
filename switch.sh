@@ -111,6 +111,13 @@ case "${1:-}" in
       (cd "$LOCAL_PATH" && npm run build 2>&1 | tail -3)
     fi
 
+    # Fix npm hoisting: ensure typescript stays in coc-tsserver* own node_modules
+    for dir in "$EXT_DIR"/coc-tsserver*; do
+      if [ -d "$dir" ]; then
+        (cd "$dir" && npm install typescript --legacy-peer-deps --no-save 2>/dev/null)
+      fi
+    done
+
     echo "✅ Now using local version: $LOCAL_PATH"
     ;;
 
@@ -158,6 +165,14 @@ case "${1:-}" in
       fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
       fs.unlinkSync(pkgPath + '.bak');
     "
+
+    # Fix npm hoisting: ensure typescript stays in coc-tsserver* own node_modules
+    for dir in "$EXT_DIR"/coc-tsserver*; do
+      if [ -d "$dir" ]; then
+        (cd "$dir" && npm install typescript --legacy-peer-deps --no-save 2>/dev/null)
+      fi
+    done
+
     echo "✅ Now using npm version: $(npm view $PLUGIN_NAME version 2>/dev/null || echo 'latest')"
     ;;
 
