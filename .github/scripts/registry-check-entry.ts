@@ -56,7 +56,10 @@ const LABELS: Record<string, { color: string; desc: string }> = {
   'workflow-permission-error': { color: 'd93f0b', desc: 'GITHUB_TOKEN lacks required permissions' },
 }
 
+let _labelsEnsured = false
 function ensureLabelsExist() {
+  if (_labelsEnsured) return
+  _labelsEnsured = true
   for (const [name, cfg] of Object.entries(LABELS))
     run('gh', ['label', 'create', name, '--color', cfg.color, '--description', cfg.desc], { ignoreError: true })
 }
@@ -77,9 +80,10 @@ function getRemoteHead(repo: string): { ok: true; head: string } | { ok: false; 
   return { ok: true, head }
 }
 
-function checkArchived(repo: string): boolean | undefined {
+function checkArchived(repo: string): boolean {
   const r = run('gh', ['api', `repos/${repo}`, '--jq', '.archived'], { timeout: 10000 })
-  return r.ok ? r.stdout === 'true' : undefined
+  if (!r.ok) { log(`checkArchived: API call failed (${r.error}), assuming not archived`); return false }
+  return r.stdout === 'true'
 }
 
 function getDefaultBranch(repo: string): string {
@@ -266,7 +270,17 @@ async function main() {
   fullBaseline[entryName] = { ...newHashes, _source: { repo, commit: remote.head } } as any
   fs.writeFileSync(BASELINE_PATH, JSON.stringify(fullBaseline, null, 2) + '\n')
 
-  // 9. Git: branch → commit → push
+  // 9. Git: rebase → branch → commit → push
+  // Rebase onto latest main first to avoid conflicts when other PRs merged between checkout and push
+  const rb1 = run('git', ['fetch', 'origin'], { timeout: 30000 })
+  if (!rb1.ok) { log(`git fetch origin failed: ${rb1.error}`); return }
+  const rb2 = run('git', ['rebase', 'origin/HEAD'], { timeout: 30000 })
+  if (!rb2.ok) {
+    createIssue('pr-merge-conflict', `Merge conflict for ${entryName}`,
+      `## Merge conflict\n\nUnable to rebase onto origin/HEAD for ${entryName}.\n\nError: ${rb2.error}`)
+    return
+  }
+
   const branch = `update/${entryName}`
   const co = run('git', ['checkout', '-B', branch], { ignoreError: true })
   if (!co.ok) {
