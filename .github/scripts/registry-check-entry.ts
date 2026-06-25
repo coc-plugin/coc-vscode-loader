@@ -236,7 +236,7 @@ async function main() {
         `Repository ${repo} (${entryName}) — ${remote.reason === 'repo-removed' ? 'not found' : 'access denied'}`,
         `## Repository issue\n\nRegistry entry **${entry.displayName || entryName}** (\`${entryName}\`) points to **${repo}**.\n\n${remote.detail}`)
     log(`${remote.reason}: ${remote.detail}`)
-    return
+    process.exit(1)
   }
 
   if (remote.head === oldCommit) { log(`No upstream changes`); return }
@@ -247,7 +247,7 @@ async function main() {
   if (archived === true) {
     createIssue('repo-archived', `Repository ${repo} (${entryName}) has been archived`,
       `## Repository archived\n\nRegistry entry **${entry.displayName || entryName}** (\`${entryName}\`) points to **${repo}**, which has been archived.\n\nConsider removing this entry from the registry or finding an alternative.`)
-    return
+    process.exit(1)
   }
 
   // 4. Sync source repo
@@ -255,7 +255,7 @@ async function main() {
   if (!synced.ok) {
     createIssue('converter-failure', `Failed to sync source for ${entryName}`,
       `## Source sync failed\n\nEntry: \`${entryName}\`\nRepo: ${repo}\n\nError: ${synced.error}`)
-    return
+    process.exit(1)
   }
   log(`Source synced at ${synced.commit.slice(0, 8)}`)
 
@@ -268,7 +268,7 @@ async function main() {
   if (!converted.ok) {
     createIssue('converter-failure', `Converter failed for ${entryName}`,
       `## Converter failure\n\n| Field | Value |\n|-------|-------|\n| Entry | \`${entryName}\` |\n| Display name | ${entry.displayName || entryName} |\n| Source repo | ${repo} |\n| New HEAD | \`${remote.head}\` |\n\n### Error\n\n\`\`\`\n${converted.error}\n\`\`\``)
-    return
+    process.exit(1)
   }
   log(`Converter completed`)
 
@@ -281,13 +281,13 @@ async function main() {
   // 8. Git: rebase onto latest main first to avoid conflicts when other PRs merged between checkout and push
   // Must be done before modifying baseline.json to avoid unstaged changes blocking rebase
   const rb1 = git(['fetch', 'origin'], { timeout: 30000 })
-  if (!rb1.ok) { log(`git fetch origin failed: ${rb1.error}`); return }
+  if (!rb1.ok) { log(`git fetch origin failed: ${rb1.error}`); process.exit(1) }
   git(['remote', 'set-head', 'origin', '--auto'], { ignoreError: true })
   const rb2 = git(['rebase', 'origin/HEAD'], { timeout: 30000 })
   if (!rb2.ok) {
     createIssue('pr-merge-conflict', `Merge conflict for ${entryName}`,
       `## Merge conflict\n\nUnable to rebase onto origin/HEAD for ${entryName}.\n\nError: ${rb2.error}`)
-    return
+    process.exit(1)
   }
 
   // 9. Write updated baseline.json
@@ -300,25 +300,25 @@ async function main() {
   if (!co.ok) {
     createIssue('pr-merge-conflict', `Merge conflict for ${entryName}`,
       `## Merge conflict\n\nUnable to create branch ${branch} for ${entryName}.\n\nError: ${co.error}`)
-    return
+    process.exit(1)
   }
 
   const add = git(['add', 'converter/baseline.json'])
-  if (!add.ok) { log(`git add failed: ${add.error}`); return }
+  if (!add.ok) { log(`git add failed: ${add.error}`); process.exit(1) }
 
   const ci = git(['commit', '-m', `chore: update baseline for ${entryName}`], { ignoreError: true })
   if (!ci.ok) {
     log(`git commit failed: ${ci.error}`)
     createIssue('converter-failure', `Git commit failed for ${entryName}`,
       `## Git commit failed\n\nEntry: \`${entryName}\`\n\n\`git commit\` failed after baseline.json was updated. The branch exists but has no new commits.\n\nError: ${ci.error}`)
-    return
+    process.exit(1)
   }
 
   const push = git(['push', '-u', 'origin', branch, '--force-with-lease'], { timeout: 30000 })
   if (!push.ok) {
     createIssue('workflow-permission-error', `Failed to push branch for ${entryName}`,
       `## Push failed\n\nUnable to push branch ${branch} for ${entryName}.\n\nError: ${push.error}`)
-    return
+    process.exit(1)
   }
 
   // 10. PR: create or update
