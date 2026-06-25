@@ -43,7 +43,7 @@ Every registry entry points to an upstream VS Code extension that evolves indepe
 
 ```mermaid
 flowchart LR
-  A[Dawn UTC+0] --> B[Check 130+ repos]
+  A[00:00 / 12:00 Beijing] --> B[Check 130+ repos]
   B --> C{Upstream changed?}
   C -->|No| D[Skip]
   C -->|Yes| E[Run converter]

@@ -706,7 +706,7 @@ git commit -m "chore: update baseline"
 
 ### Registry update checker
 
-[`registry-check.yml`](.github/workflows/registry-check.yml) runs daily (06:00 UTC) to detect upstream changes:
+[`registry-check.yml`](.github/workflows/registry-check.yml) runs twice daily (04:00/16:00 UTC, Beijing 12:00/00:00) to detect upstream changes:
 
 1. **`generate-matrix.ts`** — reads `registry.json` + `baseline.json`, outputs array of entry names with both records
 2. **`registry-check-entry.ts`** (per entry, up to 8 parallel) — `git ls-remote` → compare HEAD → if changed: clone + convert + hash → if output differs: create/update PR
