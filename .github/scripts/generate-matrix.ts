@@ -22,7 +22,7 @@ function main() {
     registry = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf-8'))
   } catch (e) {
     console.error(`Failed to read registry: ${e}`)
-    process.stdout.write('{"include":[]}')
+    console.log('{"include":[]}')
     process.exit(0)
   }
 
@@ -39,14 +39,14 @@ function main() {
   } catch (e) {
     console.error(`baseline.json corrupted: ${e}`)
     console.error('Run `npm run diff:baseline` to regenerate it.')
-    process.stdout.write('{"include":[]}')
+    console.log('{"include":[]}')
     process.exit(0)
   }
 
   const baselineKeys = Object.keys(baseline).filter(k => !k.startsWith('_'))
   if (baselineKeys.length === 0) {
     console.error('baseline.json is empty. Run `npm run diff:baseline` first to generate baseline entries.')
-    process.stdout.write('{"include":[]}')
+    console.log('{"include":[]}')
     process.exit(0)
   }
 
@@ -87,7 +87,7 @@ function main() {
   }
 
   const matrix = JSON.stringify({ include: withBaseline })
-  process.stdout.write(matrix)
+  console.log(matrix)
 
   if (noBaseline.length > 0)
     console.error(`Skipping ${noBaseline.length} entries without baseline (run npm run diff:baseline first): ${noBaseline.join(', ')}`)
