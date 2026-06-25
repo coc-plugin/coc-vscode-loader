@@ -11,6 +11,8 @@ Supports **Neovim 0.8+** (floating window + extmark) and **Vim 9.0+** (split win
 > Each release includes critical converter fixes. Outdated versions silently produce broken plugins.
 > **After updating, the loader auto-detects which plugins changed** — look for `[changed]` markers in the TUI and reinstall only those.
 > Run `:CocCommand loader.open` → check for `[changed]` markers → press `R` on marked plugins.
+>
+> All 130+ upstream VS Code repos are [**monitored daily**](https://github.com/coc-plugin/coc-vscode-loader/actions/workflows/registry-check.yml) for API-breaking changes. When detected, automated PRs are created for review — so your plugins stay working.
 
 ## Install
 

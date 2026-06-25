@@ -24,6 +24,9 @@ External commands required at runtime:
 | `plugin/` | **coc-vscode-loader plugin** |
 | `plugin/README.md` | Plugin docs and usage |
 | `AGENTS.md` | Dev instructions for AI agents |
+| `.github/workflows/registry-check.yml` | **Daily CI**: detects upstream registry changes, auto-creates PRs |
+| `.github/scripts/generate-matrix.ts` | Generates check matrix from registry + baseline |
+| `.github/scripts/registry-check-entry.ts` | Per-entry check (ls-remote → convert → hash → PR/Issue) |
 | `coc-vscode-registry/` | Local clone of [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) — registry.json, presets.json (for dev mode) |
 | `docs/` | API mapping docs, converter design, migration guides |
 | `docs/types/` | Type definitions (vscode.d.ts, coc.d.ts) for reference |
@@ -700,6 +703,27 @@ git commit -m "chore: update baseline"
 | `MISSING TEST` | Source file has no `.test.ts` |
 | `EMPTY TEST` | Test file < 50 bytes |
 | `NO TEST CASES` | Test file has no `it(` or `test(` calls |
+
+### Registry update checker
+
+[`registry-check.yml`](.github/workflows/registry-check.yml) runs daily (06:00 UTC) to detect upstream changes:
+
+1. **`generate-matrix.ts`** — reads `registry.json` + `baseline.json`, outputs array of entry names with both records
+2. **`registry-check-entry.ts`** (per entry, up to 8 parallel) — `git ls-remote` → compare HEAD → if changed: clone + convert + hash → if output differs: create/update PR
+
+Entry behavior table (see [`docs/registry-update-checker.md`](./docs/registry-update-checker.md) for full detail):
+
+| Case | Behavior |
+|------|----------|
+| Upstream unchanged | Skip |
+| Upstream changed, output same | Skip |
+| Upstream changed, output different | Create/update PR (label: `registry-update`) |
+| Repo 404/403/archived | Create Issue (repo-removed / repo-access-error / repo-archived) |
+| Converter failed | Create Issue (converter-failure) |
+| No baseline entry | Skip, log warning to run `npm run diff:baseline` |
+| Git push / PR failed | Create Issue (workflow-permission-error / converter-failure) |
+
+PRs use stable branch names (`update/<entry-name>`) and are force-pushed on re-detection. One PR per outdated entry.
 
 ### Smoke test cache
 

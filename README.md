@@ -3,6 +3,7 @@
 [![npm](https://img.shields.io/npm/v/coc-vscode-loader)](https://www.npmjs.com/package/coc-vscode-loader)
 [![license](https://img.shields.io/github/license/coc-plugin/coc-vscode-loader)](LICENSE)
 [![CI](https://github.com/coc-plugin/coc-vscode-loader/actions/workflows/ci.yml/badge.svg)](https://github.com/coc-plugin/coc-vscode-loader/actions/workflows/ci.yml)
+[![Registry Check](https://github.com/coc-plugin/coc-vscode-loader/actions/workflows/registry-check.yml/badge.svg)](https://github.com/coc-plugin/coc-vscode-loader/actions/workflows/registry-check.yml)
 [![GitHub stars](https://img.shields.io/github/stars/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader/stargazers)
 [![last commit](https://img.shields.io/github/last-commit/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader)
 [![open issues](https://img.shields.io/github/issues/coc-plugin/coc-vscode-loader)](https://github.com/coc-plugin/coc-vscode-loader/issues)
@@ -35,6 +36,35 @@ Run VS Code extensions seamlessly in coc.nvim. Supports **Neovim 0.8+** and **Vi
 > ```
 >
 > **Failure to keep the loader + all plugins in sync is the #1 source of reported issues.**
+
+## Automated Upstream Change Detection
+
+Every registry entry points to an upstream VS Code extension that evolves independently. The [Registry Update Check](.github/workflows/registry-check.yml) workflow runs **daily** to ensure nothing silently breaks:
+
+```mermaid
+flowchart LR
+  A[Dawn UTC+0] --> B[Check 130+ repos]
+  B --> C{Upstream changed?}
+  C -->|No| D[Skip]
+  C -->|Yes| E[Run converter]
+  E --> F{Output changed?}
+  F -->|No| G[Skip]
+  F -->|Yes| H[Create PR]
+  F -->|Error| I[Create Issue]
+```
+
+| What happens | Action |
+|-------------|--------|
+| Upstream has new commits → output matches baseline | ✅ Skipped (no news is good news) |
+| Upstream has new commits → output changed | 📬 PR created — review & merge |
+| Upstream repo is deleted / archived | 📬 Issue created — investigate |
+| Converter fails on new upstream code | 📬 Issue created — debug needed |
+
+Each outdated entry gets **one isolated PR** with detailed diff output and upstream commit history. No noise — only actionable results. See [`docs/registry-update-checker.md`](./docs/registry-update-checker.md) for full design.
+
+Trigger manually: `gh workflow run registry-check.yml` or via the [Actions tab](https://github.com/coc-plugin/coc-vscode-loader/actions/workflows/registry-check.yml).
+
+---
 
 ## Quick Start
 

@@ -153,6 +153,19 @@ python3 -c "import json; json.load(open('coc-vscode-registry/registry.json'))"
   - Both changes must be in the same PR — otherwise the plugin won't work
   - **Checklist:** Update converter tests in `converter/src/**/*.test.ts`; run `npm test` + `npm run test:smoke` before submitting
 
+### After merging: baseline update
+
+After your PR is merged, run `npm run diff:baseline` to regenerate [baseline.json](converter/baseline.json) with your new entry. This is required for the [daily registry check](.github/workflows/registry-check.yml) to track upstream changes for your plugin.
+
+```bash
+npm run diff:baseline
+git add converter/baseline.json
+git commit -m "chore: update baseline"
+git push
+```
+
+> The daily registry check automatically monitors all upstream repos for API-breaking changes and creates review PRs when converter output differs.
+
 ---
 
 ## Code style
