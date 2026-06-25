@@ -32,13 +32,13 @@ jobs:
       - id: gen
         name: Generate check matrix
         run: |
-          MATRIX=$(npx tsx .github/scripts/generate-matrix.ts)
+          MATRIX=$(npx tsx ../.github/scripts/generate-matrix.ts)
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
         working-directory: converter
 
   check:
     needs: discover
-    if: ${{ needs.discover.outputs.matrix != '{"include":[]}' }}
+    if: ${{ needs.discover.result == 'success' && needs.discover.outputs.matrix != '{"include":[]}' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -57,12 +57,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/coc-converter-smoke
-          key: registry-check-cache-${{ hashFiles('converter/src/**') }}
+          key: smoke-cache-${{ hashFiles('converter/src/**') }}
+          restore-keys: smoke-cache-
       - name: Install converter dependencies
         run: npm ci
         working-directory: converter
       - name: Check entry for updates
-        run: npx tsx .github/scripts/registry-check-entry.ts
+        run: npx tsx ../.github/scripts/registry-check-entry.ts
         working-directory: converter
         env:
           GIT_AUTHOR_NAME: coc-vscode-loader[bot]
