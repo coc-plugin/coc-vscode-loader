@@ -90,6 +90,7 @@ function syncSourceRepo(entry: RegistryEntry): { ok: true; inputDir: string; com
   if (fs.existsSync(cp) && fs.existsSync(path.join(cp, '.git'))) {
     const f1 = run('git', ['fetch', '--depth', '1', 'origin'], { cwd: cp, timeout: 30000, ignoreError: true })
     if (!f1.ok) return { ok: false, error: `git fetch: ${f1.error}` }
+    run('git', ['remote', 'set-head', 'origin', '--auto'], { cwd: cp, ignoreError: true })
     run('git', ['reset', '--hard', 'origin/HEAD'], { cwd: cp, timeout: 30000, ignoreError: true })
     run('git', ['clean', '-fd'], { cwd: cp, timeout: 30000, ignoreError: true })
   } else {
@@ -240,7 +241,7 @@ async function main() {
 
   // 8. Write updated baseline.json
   const fullBaseline: Baseline = JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf-8'))
-  fullBaseline[entryName] = { ...newHashes, _source: { repo, commit: remote.head } } as any
+  fullBaseline[entryName] = { ...newHashes, _source: { repo, commit: synced.commit } } as any
   fs.writeFileSync(BASELINE_PATH, JSON.stringify(fullBaseline, null, 2) + '\n')
 
   // 9. Git: branch → commit → push
@@ -256,7 +257,12 @@ async function main() {
   if (!add.ok) { log(`git add failed: ${add.error}`); return }
 
   const ci = run('git', ['commit', '-m', `chore: update baseline for ${entryName}`], { ignoreError: true })
-  if (!ci.ok) { log(`git commit failed: ${ci.error}`); return }
+  if (!ci.ok) {
+    log(`git commit failed: ${ci.error}`)
+    createIssue('converter-failure', `Git commit failed for ${entryName}`,
+      `## Git commit failed\n\nEntry: \`${entryName}\`\n\n\`git commit\` failed after baseline.json was updated. The branch exists but has no new commits.\n\nError: ${ci.error}`)
+    return
+  }
 
   const push = run('git', ['push', 'origin', branch, '--force'], { timeout: 30000 })
   if (!push.ok) {
@@ -285,7 +291,7 @@ Registry entry **${entry.displayName || entryName}** (\`${entry.name}\`) has det
 |-------|-------|
 | Source repo | ${repo} |
 | Previous commit | \`${oldCommit}\` |
-| New HEAD | \`${remote.head}\` |
+| New HEAD | \`${synced.commit}\` |
 | Commits behind | ${info.count >= 0 ? info.count : 'unknown'} |
 ${repoChanged ? `| ⚠️ Repository changed | \`${baselineRepo}\` → \`${repo}\` |` : ''}
 
