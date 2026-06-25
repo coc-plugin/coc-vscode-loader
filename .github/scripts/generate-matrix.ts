@@ -28,6 +28,7 @@ function main() {
   let registry: RegistryEntry[] = []
   try {
     registry = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf-8'))
+    if (!Array.isArray(registry)) throw new Error('registry.json is not an array')
   } catch (e) {
     console.error(`Failed to read registry: ${e}`)
     emptyMatrix()

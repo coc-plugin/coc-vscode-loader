@@ -71,6 +71,8 @@ function getRemoteHead(repo: string): { ok: true; head: string } | { ok: false; 
     const sd = r.stderr.toLowerCase()
     if (sd.includes('404') || sd.includes('not found') || sd.includes('could not read'))
       return { ok: false, reason: 'repo-removed', detail: `Repository ${repo} returned 404` }
+    if (sd.includes('429') || sd.includes('rate limit'))
+      return { ok: false, reason: 'rate-limited', detail: `GitHub rate limited for ${repo}` }
     if (sd.includes('403') || sd.includes('access denied') || sd.includes('permission denied'))
       return { ok: false, reason: 'repo-access-error', detail: `Repository ${repo} access denied` }
     return { ok: false, reason: 'network-error', detail: `Failed to check ${repo}: ${r.error}` }
@@ -86,9 +88,11 @@ function checkArchived(repo: string): boolean {
   return r.stdout === 'true'
 }
 
-function getDefaultBranch(repo: string): string {
-  const r = run('gh', ['api', `repos/${repo}`, '--jq', '.default_branch'], { timeout: 10000 })
-  return r.ok ? r.stdout.trim() : 'main'
+function getDefaultBranch(): string {
+  // Get default branch of the coc-vscode-loader repo (this checkout), not the upstream extension repo
+  const r = run('git', ['rev-parse', '--abbrev-ref', 'origin/HEAD'])
+  if (!r.ok) return 'main'
+  return r.stdout.replace(/^origin\//, '').trim()
 }
 
 // ── Source Repo ────────────────────────────────────────────
@@ -153,8 +157,8 @@ async function runConverter(inputDir: string, outputDir: string, entry: Registry
 // ── Hashing ────────────────────────────────────────────────
 function hashOutputFiles(outputDir: string, entry: RegistryEntry): Record<string, string> {
   const hashes: Record<string, string> = {}
-  const isSnippets = entry.convert.some((s: any) => s.type === 'snippets')
-  const hasBuildStep = entry.convert.some((s: any) => s.type === 'snippets' && s.build)
+  const isSnippets = entry.convert?.some((s: any) => s.type === 'snippets') ?? false
+  const hasBuildStep = entry.convert?.some((s: any) => s.type === 'snippets' && s.build) ?? false
   const P = '0000000000000000000000000000000000000000000000000000000000000000'
   function collect(dir: string, prefix: string) {
     if (!fs.existsSync(dir)) return
@@ -202,7 +206,9 @@ function createIssue(label: string, title: string, body: string) {
 // ── Main ───────────────────────────────────────────────────
 async function main() {
   // 1. Read data
-  const registry: RegistryEntry[] = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf-8'))
+  const registryRaw = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf-8'))
+  if (!Array.isArray(registryRaw)) { log(`registry.json is not an array, skipping`); return }
+  const registry: RegistryEntry[] = registryRaw
   const baseline: Baseline = JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf-8'))
 
   const entry = registry.find((e: any) => e.name === entryName)
@@ -276,6 +282,7 @@ async function main() {
   // Rebase onto latest main first to avoid conflicts when other PRs merged between checkout and push
   const rb1 = run('git', ['fetch', 'origin'], { timeout: 30000 })
   if (!rb1.ok) { log(`git fetch origin failed: ${rb1.error}`); return }
+  run('git', ['remote', 'set-head', 'origin', '--auto'], { ignoreError: true })
   const rb2 = run('git', ['rebase', 'origin/HEAD'], { timeout: 30000 })
   if (!rb2.ok) {
     createIssue('pr-merge-conflict', `Merge conflict for ${entryName}`,
@@ -360,7 +367,7 @@ ${repoChanged ? `\n> ⚠️ **Repository changed** — this entry previously poi
     run('gh', ['pr', 'edit', String(prNum), '--title', title, '--body', prBody], { timeout: 30000, ignoreError: true })
     log(`Updated PR #${prNum}`)
   } else {
-    const defaultBranch = getDefaultBranch(repo)
+    const defaultBranch = getDefaultBranch()
     const created = run('gh', ['pr', 'create', '--title', title, '--body', prBody, '--label', 'registry-update', '--base', defaultBranch], { timeout: 30000 })
     if (created.ok) log(`PR created: ${created.stdout}`)
     else {
