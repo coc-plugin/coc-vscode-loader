@@ -273,13 +273,8 @@ async function main() {
   if (changes.length === 0) { log(`Upstream changed but converter output unchanged, skipping`); return }
   log(`Output changed: ${changes.map(c => `${c.status}:${c.rel}`).join(', ')}`)
 
-  // 8. Write updated baseline.json
-  const fullBaseline: Baseline = JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf-8'))
-  fullBaseline[entryName] = { ...newHashes, _source: { repo, commit: remote.head } } as any
-  fs.writeFileSync(BASELINE_PATH, JSON.stringify(fullBaseline, null, 2) + '\n')
-
-  // 9. Git: rebase → branch → commit → push
-  // Rebase onto latest main first to avoid conflicts when other PRs merged between checkout and push
+  // 8. Git: rebase onto latest main first to avoid conflicts when other PRs merged between checkout and push
+  // Must be done before modifying baseline.json to avoid unstaged changes blocking rebase
   const rb1 = run('git', ['fetch', 'origin'], { timeout: 30000 })
   if (!rb1.ok) { log(`git fetch origin failed: ${rb1.error}`); return }
   run('git', ['remote', 'set-head', 'origin', '--auto'], { ignoreError: true })
@@ -289,6 +284,11 @@ async function main() {
       `## Merge conflict\n\nUnable to rebase onto origin/HEAD for ${entryName}.\n\nError: ${rb2.error}`)
     return
   }
+
+  // 9. Write updated baseline.json
+  const fullBaseline: Baseline = JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf-8'))
+  fullBaseline[entryName] = { ...newHashes, _source: { repo, commit: remote.head } } as any
+  fs.writeFileSync(BASELINE_PATH, JSON.stringify(fullBaseline, null, 2) + '\n')
 
   const branch = `update/${entryName}`
   const co = run('git', ['checkout', '-B', branch], { ignoreError: true })
