@@ -1,0 +1,74 @@
+name: Registry Update Check
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: registry-check
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: converter/package-lock.json
+      - name: Install converter dependencies
+        run: npm ci
+        working-directory: converter
+      - id: gen
+        name: Generate check matrix
+        run: |
+          MATRIX=$(npx tsx .github/scripts/generate-matrix.ts)
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+        working-directory: converter
+
+  check:
+    needs: discover
+    if: ${{ needs.discover.outputs.matrix != '{"include":[]}' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        entry: ${{ fromJSON(needs.discover.outputs.matrix) }}
+      max-parallel: 8
+    env:
+      ENTRY_NAME: ${{ matrix.entry.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: converter/package-lock.json
+      - name: Cache source repos
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/coc-converter-smoke
+          key: registry-check-cache-${{ hashFiles('converter/src/**') }}
+      - name: Install converter dependencies
+        run: npm ci
+        working-directory: converter
+      - name: Check entry for updates
+        run: npx tsx .github/scripts/registry-check-entry.ts
+        working-directory: converter
+        env:
+          GIT_AUTHOR_NAME: coc-vscode-loader[bot]
+          GIT_AUTHOR_EMAIL: bot@coc-vscode-loader
+          GIT_COMMITTER_NAME: coc-vscode-loader[bot]
+          GIT_COMMITTER_EMAIL: bot@coc-vscode-loader
+          # Use PAT (REGISTRY_CHECK_PAT) to create PRs that trigger CI.
+          # Falls back to GITHUB_TOKEN if not configured.
+          GH_TOKEN: ${{ secrets.REGISTRY_CHECK_PAT || secrets.GITHUB_TOKEN }}
