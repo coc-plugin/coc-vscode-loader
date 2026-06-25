@@ -9,7 +9,9 @@ const BASELINE_PATH = path.resolve(ROOT, 'converter/baseline.json')
 
 interface RegistryEntry {
   name: string
+  displayName?: string
   source?: { type: string; repo?: string }
+  minPluginVersion?: string
 }
 
 interface Baseline { [name: string]: { _source?: { repo?: string; commit?: string } } }
@@ -20,44 +22,69 @@ function main() {
     registry = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf-8'))
   } catch (e) {
     console.error(`Failed to read registry: ${e}`)
-    process.exit(1)
+    process.stdout.write('{"include":[]}')
+    process.exit(0)
   }
 
   let baseline: Baseline = {}
   try {
-    baseline = JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf-8'))
+    const raw = fs.readFileSync(BASELINE_PATH, 'utf-8')
+    baseline = JSON.parse(raw)
+    // Validate structure — each entry should be an object
+    for (const [k, v] of Object.entries(baseline)) {
+      if (typeof v !== 'object' || v === null) {
+        throw new Error(`Entry "${k}" is not an object`)
+      }
+    }
   } catch (e) {
-    console.error(`Failed to read baseline: ${e}`)
-    process.exit(1)
+    console.error(`baseline.json corrupted: ${e}`)
+    console.error('Run `npm run diff:baseline` to regenerate it.')
+    process.stdout.write('{"include":[]}')
+    process.exit(0)
+  }
+
+  const baselineKeys = Object.keys(baseline).filter(k => !k.startsWith('_'))
+  if (baselineKeys.length === 0) {
+    console.error('baseline.json is empty. Run `npm run diff:baseline` first to generate baseline entries.')
+    process.stdout.write('{"include":[]}')
+    process.exit(0)
   }
 
   const withBaseline: { name: string }[] = []
   const noBaseline: string[] = []
   const noSource: string[] = []
+  const repoChanged: string[] = []
 
   for (const entry of registry) {
     if (!entry.source?.repo) {
       noSource.push(entry.name)
       continue
     }
-    if (baseline[entry.name]) {
-      withBaseline.push({ name: entry.name })
-    } else {
+
+    const be = baseline[entry.name]
+    if (!be) {
       noBaseline.push(entry.name)
+      continue
     }
+
+    // A4: Detect if source.repo changed since baseline was generated
+    const oldRepo = be._source?.repo
+    if (oldRepo && oldRepo !== entry.source.repo) {
+      repoChanged.push(`${entry.name}: ${oldRepo} → ${entry.source.repo}`)
+    }
+
+    withBaseline.push({ name: entry.name })
   }
 
-  // Output matrix as JSON to stdout — captured by workflow as step output
   const matrix = JSON.stringify({ include: withBaseline })
   process.stdout.write(matrix)
 
-  // Log info to stderr — visible in workflow logs, not captured as output
-  if (noBaseline.length > 0) {
+  if (noBaseline.length > 0)
     console.error(`Skipping ${noBaseline.length} entries without baseline (run npm run diff:baseline first): ${noBaseline.join(', ')}`)
-  }
-  if (noSource.length > 0) {
+  if (noSource.length > 0)
     console.error(`Skipping ${noSource.length} entries without source.repo: ${noSource.join(', ')}`)
-  }
+  if (repoChanged.length > 0)
+    console.error(`Repo changed for ${repoChanged.length} entries:\n  ${repoChanged.join('\n  ')}`)
   console.error(`Matrix: ${withBaseline.length} entries to check`)
 }
 

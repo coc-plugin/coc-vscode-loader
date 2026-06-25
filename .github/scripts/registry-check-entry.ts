@@ -272,6 +272,11 @@ async function main() {
     return `| ${icon} | \`${c.rel}\` | ${c.status} |`
   }).join('\n')
 
+  // A4: Detect if source.repo changed since baseline
+  const baselineRepo = baseEntry._source?.repo
+  const repoChanged = baselineRepo && baselineRepo !== repo
+  if (repoChanged) log(`Source repo changed: ${baselineRepo} → ${repo}`)
+
   const prBody = `## Summary
 
 Registry entry **${entry.displayName || entryName}** (\`${entry.name}\`) has detected upstream changes.
@@ -282,6 +287,7 @@ Registry entry **${entry.displayName || entryName}** (\`${entry.name}\`) has det
 | Previous commit | \`${oldCommit}\` |
 | New HEAD | \`${remote.head}\` |
 | Commits behind | ${info.count >= 0 ? info.count : 'unknown'} |
+${repoChanged ? `| ⚠️ Repository changed | \`${baselineRepo}\` → \`${repo}\` |` : ''}
 
 ### Changed output files
 
@@ -294,7 +300,7 @@ ${fileTable}
 \`\`\`
 ${info.log || '(no details available)'}
 \`\`\`
-
+${repoChanged ? `\n> ⚠️ **Repository changed** — this entry previously pointed to \`${baselineRepo}\`. Verify the new repo is the correct upstream.\n` : ''}
 ### Review checklist
 
 - [ ] Confirm changes are expected
