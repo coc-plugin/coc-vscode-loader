@@ -168,7 +168,9 @@ function hashOutputFiles(outputDir: string, entry: RegistryEntry): Record<string
           if (hasBuildStep && e.name.endsWith('.json') && e.name !== 'package.json' && e.name !== 'coc-convert.json')
             hashes[rel] = P
           else hashes[rel] = crypto.createHash('sha256').update(fs.readFileSync(full)).digest('hex')
-        } catch {}
+        } catch (e: any) {
+          log(`Warning: could not hash ${rel}: ${e.message}`)
+        }
       }
     }
   }
@@ -300,7 +302,7 @@ async function main() {
     return
   }
 
-  const push = run('git', ['push', 'origin', branch, '--force-with-lease'], { timeout: 30000 })
+  const push = run('git', ['push', '-u', 'origin', branch, '--force-with-lease'], { timeout: 30000 })
   if (!push.ok) {
     createIssue('workflow-permission-error', `Failed to push branch for ${entryName}`,
       `## Push failed\n\nUnable to push branch ${branch} for ${entryName}.\n\nError: ${push.error}`)
