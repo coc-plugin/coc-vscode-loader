@@ -16,13 +16,19 @@ interface RegistryEntry {
 
 interface Baseline { [name: string]: { _source?: { repo?: string; commit?: string } } }
 
+function writeMatrix(json: string) {
+  const outPath = process.env.GITHUB_OUTPUT
+  if (outPath) fs.appendFileSync(outPath, `matrix=${json}\n`)
+  else console.log(json)
+}
+
 function main() {
   let registry: RegistryEntry[] = []
   try {
     registry = JSON.parse(fs.readFileSync(REGISTRY_PATH, 'utf-8'))
   } catch (e) {
     console.error(`Failed to read registry: ${e}`)
-    console.log('{"include":[]}')
+    writeMatrix('{"include":[]}')
     process.exit(0)
   }
 
@@ -30,7 +36,6 @@ function main() {
   try {
     const raw = fs.readFileSync(BASELINE_PATH, 'utf-8')
     baseline = JSON.parse(raw)
-    // Validate structure — each entry should be an object
     for (const [k, v] of Object.entries(baseline)) {
       if (typeof v !== 'object' || v === null) {
         throw new Error(`Entry "${k}" is not an object`)
@@ -39,14 +44,14 @@ function main() {
   } catch (e) {
     console.error(`baseline.json corrupted: ${e}`)
     console.error('Run `npm run diff:baseline` to regenerate it.')
-    console.log('{"include":[]}')
+    writeMatrix('{"include":[]}')
     process.exit(0)
   }
 
   const baselineKeys = Object.keys(baseline).filter(k => !k.startsWith('_'))
   if (baselineKeys.length === 0) {
     console.error('baseline.json is empty. Run `npm run diff:baseline` first to generate baseline entries.')
-    console.log('{"include":[]}')
+    writeMatrix('{"include":[]}')
     process.exit(0)
   }
 
@@ -86,8 +91,7 @@ function main() {
     withBaseline.push({ name: entry.name })
   }
 
-  const matrix = JSON.stringify({ include: withBaseline })
-  console.log(matrix)
+  writeMatrix(JSON.stringify({ include: withBaseline }))
 
   if (noBaseline.length > 0)
     console.error(`Skipping ${noBaseline.length} entries without baseline (run npm run diff:baseline first): ${noBaseline.join(', ')}`)
