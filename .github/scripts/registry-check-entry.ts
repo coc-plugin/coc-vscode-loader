@@ -45,6 +45,11 @@ function run(cmd: string, args: string[], opts: { cwd?: string; timeout?: number
 
 function log(msg: string) { console.error(`[${entryName}] ${msg}`) }
 
+// Run git commands from repo root to avoid CWD issues (workflow sets working-directory: converter)
+function git(args: string[], opts: { timeout?: number; ignoreError?: boolean } = {}) {
+  return run('git', args, { ...opts, cwd: ROOT })
+}
+
 // ── Labels ─────────────────────────────────────────────────
 const LABELS: Record<string, { color: string; desc: string }> = {
   'registry-update':          { color: 'bfd4f2', desc: 'Upstream changes detected, converter output changed' },
@@ -90,7 +95,7 @@ function checkArchived(repo: string): boolean {
 
 function getDefaultBranch(): string {
   // Get default branch of the coc-vscode-loader repo (this checkout), not the upstream extension repo
-  const r = run('git', ['rev-parse', '--abbrev-ref', 'origin/HEAD'])
+  const r = git(['rev-parse', '--abbrev-ref', 'origin/HEAD'])
   if (!r.ok) return 'main'
   return r.stdout.replace(/^origin\//, '').trim()
 }
@@ -275,10 +280,10 @@ async function main() {
 
   // 8. Git: rebase onto latest main first to avoid conflicts when other PRs merged between checkout and push
   // Must be done before modifying baseline.json to avoid unstaged changes blocking rebase
-  const rb1 = run('git', ['fetch', 'origin'], { timeout: 30000 })
+  const rb1 = git(['fetch', 'origin'], { timeout: 30000 })
   if (!rb1.ok) { log(`git fetch origin failed: ${rb1.error}`); return }
-  run('git', ['remote', 'set-head', 'origin', '--auto'], { ignoreError: true })
-  const rb2 = run('git', ['rebase', 'origin/HEAD'], { timeout: 30000 })
+  git(['remote', 'set-head', 'origin', '--auto'], { ignoreError: true })
+  const rb2 = git(['rebase', 'origin/HEAD'], { timeout: 30000 })
   if (!rb2.ok) {
     createIssue('pr-merge-conflict', `Merge conflict for ${entryName}`,
       `## Merge conflict\n\nUnable to rebase onto origin/HEAD for ${entryName}.\n\nError: ${rb2.error}`)
@@ -291,17 +296,17 @@ async function main() {
   fs.writeFileSync(BASELINE_PATH, JSON.stringify(fullBaseline, null, 2) + '\n')
 
   const branch = `update/${entryName}`
-  const co = run('git', ['checkout', '-B', branch], { ignoreError: true })
+  const co = git(['checkout', '-B', branch], { ignoreError: true })
   if (!co.ok) {
     createIssue('pr-merge-conflict', `Merge conflict for ${entryName}`,
       `## Merge conflict\n\nUnable to create branch ${branch} for ${entryName}.\n\nError: ${co.error}`)
     return
   }
 
-  const add = run('git', ['add', 'converter/baseline.json'])
+  const add = git(['add', 'converter/baseline.json'])
   if (!add.ok) { log(`git add failed: ${add.error}`); return }
 
-  const ci = run('git', ['commit', '-m', `chore: update baseline for ${entryName}`], { ignoreError: true })
+  const ci = git(['commit', '-m', `chore: update baseline for ${entryName}`], { ignoreError: true })
   if (!ci.ok) {
     log(`git commit failed: ${ci.error}`)
     createIssue('converter-failure', `Git commit failed for ${entryName}`,
@@ -309,7 +314,7 @@ async function main() {
     return
   }
 
-  const push = run('git', ['push', '-u', 'origin', branch, '--force-with-lease'], { timeout: 30000 })
+  const push = git(['push', '-u', 'origin', branch, '--force-with-lease'], { timeout: 30000 })
   if (!push.ok) {
     createIssue('workflow-permission-error', `Failed to push branch for ${entryName}`,
       `## Push failed\n\nUnable to push branch ${branch} for ${entryName}.\n\nError: ${push.error}`)
