@@ -35,20 +35,19 @@ jobs:
         name: Generate check matrix
         run: |
           MATRIX=$(npx tsx ../.github/scripts/generate-matrix.ts)
-          echo "Debug: matrix length=${#MATRIX}, prefix=${MATRIX:0:30}"
           echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
         working-directory: converter
 
   check:
     needs: discover
-    if: ${{ needs.discover.result == 'success' && needs.discover.outputs.matrix != '{"include":[]}' }}
+    if: ${{ needs.discover.result == 'success' && needs.discover.outputs.matrix != '[]' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        entry: ${{ fromJSON(needs.discover.outputs.matrix) }}
+        include: ${{ fromJSON(needs.discover.outputs.matrix) }}
       max-parallel: 8
     env:
-      ENTRY_NAME: ${{ matrix.entry.name }}
+      ENTRY_NAME: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
