@@ -28,7 +28,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: converter/package-lock.json
       - name: Fetch registry
-        run: git clone --depth 1 --single-branch https://github.com/coc-plugin/coc-vscode-registry.git coc-vscode-registry
+        run: |
+          rm -rf coc-vscode-registry
+          git clone --depth 1 --single-branch https://github.com/coc-plugin/coc-vscode-registry.git coc-vscode-registry
       - name: Install converter dependencies
         run: npm ci
         working-directory: converter
@@ -63,7 +65,9 @@ jobs:
           key: smoke-cache-${{ hashFiles('converter/src/**') }}
           restore-keys: smoke-cache-
       - name: Fetch registry
-        run: git clone --depth 1 --single-branch https://github.com/coc-plugin/coc-vscode-registry.git coc-vscode-registry
+        run: |
+          rm -rf coc-vscode-registry
+          git clone --depth 1 --single-branch https://github.com/coc-plugin/coc-vscode-registry.git coc-vscode-registry
       - name: Install converter dependencies
         run: npm ci
         working-directory: converter

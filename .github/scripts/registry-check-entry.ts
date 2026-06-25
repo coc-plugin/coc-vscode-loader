@@ -15,7 +15,7 @@ const CACHE_DIR = path.join(os.homedir(), '.cache', 'coc-converter-smoke')
 const TEST_OUTPUT = path.join(os.tmpdir(), 'coc-registry-check')
 
 const entryName = process.env.ENTRY_NAME || ''
-if (!entryName) { console.error('ENTRY_NAME env var is required'); process.exit(0) }
+if (!entryName) { console.error('ENTRY_NAME env var is required'); process.exit(1) }
 
 // ── Types ──────────────────────────────────────────────────
 interface RegistryEntry {
@@ -163,7 +163,7 @@ function hashOutputFiles(outputDir: string, entry: RegistryEntry): Record<string
         try {
           if (hasBuildStep && e.name.endsWith('.json') && e.name !== 'package.json' && e.name !== 'coc-convert.json')
             hashes[rel] = P
-          else hashes[rel] = crypto.createHash('sha256').update(fs.readFileSync(full, 'utf-8')).digest('hex')
+          else hashes[rel] = crypto.createHash('sha256').update(fs.readFileSync(full)).digest('hex')
         } catch {}
       }
     }
@@ -286,7 +286,7 @@ async function main() {
     return
   }
 
-  const push = run('git', ['push', 'origin', branch, '--force'], { timeout: 30000 })
+  const push = run('git', ['push', 'origin', branch, '--force-with-lease'], { timeout: 30000 })
   if (!push.ok) {
     createIssue('workflow-permission-error', `Failed to push branch for ${entryName}`,
       `## Push failed\n\nUnable to push branch ${branch} for ${entryName}.\n\nError: ${push.error}`)
@@ -356,4 +356,4 @@ ${repoChanged ? `\n> ⚠️ **Repository changed** — this entry previously poi
   }
 }
 
-main().catch(e => { log(`Unexpected error: ${e}`) })
+main().catch(e => { log(`Unexpected error: ${e}`); process.exit(1) })

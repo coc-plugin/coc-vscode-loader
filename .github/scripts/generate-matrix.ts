@@ -31,7 +31,7 @@ function main() {
   } catch (e) {
     console.error(`Failed to read registry: ${e}`)
     emptyMatrix()
-    process.exit(0)
+    process.exit(1)
   }
 
   let baseline: Baseline = {}
@@ -47,14 +47,14 @@ function main() {
     console.error(`baseline.json corrupted: ${e}`)
     console.error('Run `npm run diff:baseline` to regenerate it.')
     emptyMatrix()
-    process.exit(0)
+    process.exit(1)
   }
 
   const baselineKeys = Object.keys(baseline).filter(k => !k.startsWith('_'))
   if (baselineKeys.length === 0) {
     console.error('baseline.json is empty. Run `npm run diff:baseline` first to generate baseline entries.')
     emptyMatrix()
-    process.exit(0)
+    process.exit(1)
   }
 
   const withBaseline: { name: string }[] = []
