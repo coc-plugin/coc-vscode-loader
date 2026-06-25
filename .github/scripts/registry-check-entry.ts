@@ -82,20 +82,42 @@ function checkArchived(repo: string): boolean | undefined {
   return r.ok ? r.stdout === 'true' : undefined
 }
 
+function getDefaultBranch(repo: string): string {
+  const r = run('gh', ['api', `repos/${repo}`, '--jq', '.default_branch'], { timeout: 10000 })
+  return r.ok ? r.stdout.trim() : 'main'
+}
+
 // ── Source Repo ────────────────────────────────────────────
 function cachePath(name: string) { return path.join(CACHE_DIR, name.replace(/[^a-z0-9_-]/gi, '_')) }
 
 function syncSourceRepo(entry: RegistryEntry): { ok: true; inputDir: string; commit: string } | { ok: false; error: string } {
   const cp = cachePath(entry.name)
+  const expectedUrl = `https://github.com/${entry.source!.repo}.git`
   if (fs.existsSync(cp) && fs.existsSync(path.join(cp, '.git'))) {
+    // Verify cached clone points to the correct remote URL (repo may have changed)
+    const originUrl = run('git', ['remote', 'get-url', 'origin'], { cwd: cp }).stdout
+    if (originUrl !== expectedUrl) {
+      log(`Cached remote URL (${originUrl}) differs from expected (${expectedUrl}), re-cloning`)
+      fs.rmSync(cp, { recursive: true, force: true })
+      fs.mkdirSync(cp, { recursive: true })
+      const c = run('git', ['clone', '--depth', '1', '--single-branch', expectedUrl, cp], { timeout: 300000 })
+      if (!c.ok) return { ok: false, error: `git clone: ${c.error}` }
+      const hr = run('git', ['rev-parse', 'HEAD'], { cwd: cp })
+      if (!hr.ok) return { ok: false, error: `rev-parse: ${hr.error}` }
+      const inputDir = entry.source!.subdir ? path.join(cp, entry.source!.subdir) : cp
+      if (!fs.existsSync(inputDir)) return { ok: false, error: `Subdir not found: ${inputDir}` }
+      return { ok: true, inputDir, commit: hr.stdout }
+    }
     const f1 = run('git', ['fetch', '--depth', '1', 'origin'], { cwd: cp, timeout: 30000, ignoreError: true })
     if (!f1.ok) return { ok: false, error: `git fetch: ${f1.error}` }
     run('git', ['remote', 'set-head', 'origin', '--auto'], { cwd: cp, ignoreError: true })
-    run('git', ['reset', '--hard', 'origin/HEAD'], { cwd: cp, timeout: 30000, ignoreError: true })
-    run('git', ['clean', '-fd'], { cwd: cp, timeout: 30000, ignoreError: true })
+    const r1 = run('git', ['reset', '--hard', 'origin/HEAD'], { cwd: cp, timeout: 30000 })
+    if (!r1.ok) return { ok: false, error: `git reset --hard origin/HEAD failed: ${r1.error}` }
+    const r2 = run('git', ['clean', '-fd'], { cwd: cp, timeout: 30000 })
+    if (!r2.ok) return { ok: false, error: `git clean -fd failed: ${r2.error}` }
   } else {
     fs.mkdirSync(cp, { recursive: true })
-    const c = run('git', ['clone', '--depth', '1', '--single-branch', `https://github.com/${entry.source!.repo}.git`, cp], { timeout: 300000 })
+    const c = run('git', ['clone', '--depth', '1', '--single-branch', expectedUrl, cp], { timeout: 300000 })
     if (!c.ok) return { ok: false, error: `git clone: ${c.error}` }
   }
   const hr = run('git', ['rev-parse', 'HEAD'], { cwd: cp })
@@ -241,7 +263,7 @@ async function main() {
 
   // 8. Write updated baseline.json
   const fullBaseline: Baseline = JSON.parse(fs.readFileSync(BASELINE_PATH, 'utf-8'))
-  fullBaseline[entryName] = { ...newHashes, _source: { repo, commit: synced.commit } } as any
+  fullBaseline[entryName] = { ...newHashes, _source: { repo, commit: remote.head } } as any
   fs.writeFileSync(BASELINE_PATH, JSON.stringify(fullBaseline, null, 2) + '\n')
 
   // 9. Git: branch → commit → push
@@ -291,7 +313,7 @@ Registry entry **${entry.displayName || entryName}** (\`${entry.name}\`) has det
 |-------|-------|
 | Source repo | ${repo} |
 | Previous commit | \`${oldCommit}\` |
-| New HEAD | \`${synced.commit}\` |
+| New HEAD | \`${remote.head}\` |
 | Commits behind | ${info.count >= 0 ? info.count : 'unknown'} |
 ${repoChanged ? `| ⚠️ Repository changed | \`${baselineRepo}\` → \`${repo}\` |` : ''}
 
@@ -315,14 +337,15 @@ ${repoChanged ? `\n> ⚠️ **Repository changed** — this entry previously poi
 - [ ] Merge after review`
 
   const title = `chore(registry): update ${entry.name} (upstream changed)`
-  const existingPR = run('gh', ['pr', 'list', '--head', branch, '--state', 'open', '--json', 'number'], { timeout: 10000 })
-  const prNum = existingPR.ok ? (JSON.parse(existingPR.stdout)?.[0]?.number ?? null) : null
+  const existingPR = run('gh', ['pr', 'view', branch, '--json', 'number'], { ignoreError: true, timeout: 10000 })
+  const prNum = existingPR.ok ? (JSON.parse(existingPR.stdout)?.number ?? null) : null
 
   if (prNum) {
     run('gh', ['pr', 'edit', String(prNum), '--title', title, '--body', prBody], { timeout: 30000, ignoreError: true })
     log(`Updated PR #${prNum}`)
   } else {
-    const created = run('gh', ['pr', 'create', '--title', title, '--body', prBody, '--label', 'registry-update', '--base', 'main'], { timeout: 30000 })
+    const defaultBranch = getDefaultBranch(repo)
+    const created = run('gh', ['pr', 'create', '--title', title, '--body', prBody, '--label', 'registry-update', '--base', defaultBranch], { timeout: 30000 })
     if (created.ok) log(`PR created: ${created.stdout}`)
     else {
       // PR creation failed — create an issue as fallback
