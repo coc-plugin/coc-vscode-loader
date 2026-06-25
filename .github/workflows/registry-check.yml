@@ -33,7 +33,10 @@ jobs:
         working-directory: converter
       - id: gen
         name: Generate check matrix
-        run: npx tsx ../.github/scripts/generate-matrix.ts
+        run: |
+          MATRIX=$(npx tsx ../.github/scripts/generate-matrix.ts)
+          echo "Debug: matrix length=${#MATRIX}, prefix=${MATRIX:0:30}"
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
         working-directory: converter
 
   check:

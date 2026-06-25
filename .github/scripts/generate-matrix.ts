@@ -17,9 +17,8 @@ interface RegistryEntry {
 interface Baseline { [name: string]: { _source?: { repo?: string; commit?: string } } }
 
 function writeMatrix(json: string) {
-  const outPath = process.env.GITHUB_OUTPUT
-  if (outPath) fs.appendFileSync(outPath, `matrix=${json}\n`)
-  else console.log(json)
+  // Output to stdout — captured by $(...) in workflow
+  process.stdout.write(json + '\n')
 }
 
 function main() {
