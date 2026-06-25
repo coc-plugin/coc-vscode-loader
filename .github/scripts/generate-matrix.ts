@@ -54,6 +54,16 @@ function main() {
   const noBaseline: string[] = []
   const noSource: string[] = []
   const repoChanged: string[] = []
+  const orphanedBaselines: string[] = []
+
+  const registryNames = new Set(registry.map(e => e.name))
+
+  // A5: Detect baseline entries whose name no longer exists in registry (renamed or removed)
+  for (const key of baselineKeys) {
+    if (!registryNames.has(key)) {
+      orphanedBaselines.push(key)
+    }
+  }
 
   for (const entry of registry) {
     if (!entry.source?.repo) {
@@ -85,6 +95,8 @@ function main() {
     console.error(`Skipping ${noSource.length} entries without source.repo: ${noSource.join(', ')}`)
   if (repoChanged.length > 0)
     console.error(`Repo changed for ${repoChanged.length} entries:\n  ${repoChanged.join('\n  ')}`)
+  if (orphanedBaselines.length > 0)
+    console.error(`Orphaned baseline entries (removed from registry or renamed):\n  ${orphanedBaselines.join('\n  ')}`)
   console.error(`Matrix: ${withBaseline.length} entries to check`)
 }
 
