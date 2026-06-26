@@ -1693,14 +1693,14 @@
   },
   "vscode-uni-app-snippets": {
     "coc-convert.json": "f81a09116efddf940b6830e9669167a50a91427b9391667eafa8dcf8c32d673e",
-    "package.json": "a00ebb5bd92f79a521ea28a4186648f44e08bd0158d2bb1f59106b807bbc4444",
+    "package.json": "1f7030da60cb75fd78a9a2389c83b9ca3919b15025a65c7ea0761f5744ff3354",
     "snippets/css.json": "d0e6465bc0dc7218b771d4c39920a0a543c9593c517ca2b16b5641d9248c7df9",
-    "snippets/javascript.json": "34b23b057936a7219e5228ec112951a45bdd6c085e092a6cf236bf13690c7722",
+    "snippets/javascript.json": "22549cef52f0f29b37dc4ff0a79decbdf092e059f6a606f438d5e993cfdb3580",
     "snippets/jsonc.json": "6f3c836e2aa8e8e403309203480552b5830a522d60660b2de01853547ca3e5f4",
-    "snippets/vue-html.json": "68e8fa05770385a685ba5b4f222bc1bce51dae2af75cd84668bf51265257a45c",
+    "snippets/vue-html.json": "cdb060f0fcb87ce8db6a94d0eb1241561026553e85bc25f9caffa97a46a07cce",
     "_source": {
       "repo": "uni-helper/uni-app-snippets-vscode",
-      "commit": "be0536e3d7f0d687ec5eac8a65c202a7594a871b"
+      "commit": "31bfcb4d622976e7c5012336e6209ec3283aa5f2"
     }
   },
   "vscode-uni-cloud-snippets": {
