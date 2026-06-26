@@ -1,0 +1,9 @@
+{
+  "entryPoint": "src/index.ts",
+  "activationEvents": [
+    "onLanguage:go"
+  ],
+  "keepDeps": {},
+  "serverDeps": {},
+  "hasLanguageClient": true
+}
