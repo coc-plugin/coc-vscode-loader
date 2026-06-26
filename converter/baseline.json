@@ -57,11 +57,11 @@
   },
   "vscode-pyright": {
     "esbuild.mjs": "3315fb7bdeae449c43dd37893169507dfb127a16e085741cc33bfd4d8a6838e7",
-    "package.json": "fed839c58ccdcd49ac01571735f7db78b09dee585c3f1379b9c71e65524cdff7",
+    "package.json": "c3ca30438144fca3a83162bcf0a276f78302c6dafa2e53567e83b8aa2a94399d",
     "src/index.ts": "21f17bca573f292f7e4eddaf2cc23791e5131d03d4b190ae343c62d807fa7549",
     "_source": {
       "repo": "microsoft/pyright",
-      "commit": "9e036b2b04082e3f0f10e9a79b10ddc9cea95eb8"
+      "commit": "e1f6805d25ec12725a04d8f315845bedd7328ea4"
     }
   },
   "vscode-ruff": {

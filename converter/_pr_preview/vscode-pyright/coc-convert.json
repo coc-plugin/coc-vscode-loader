@@ -1,0 +1,11 @@
+{
+  "entryPoint": "src/index.ts",
+  "activationEvents": [
+    "onLanguage:python"
+  ],
+  "keepDeps": {},
+  "serverDeps": {
+    "pyright": "*"
+  },
+  "hasLanguageClient": true
+}
