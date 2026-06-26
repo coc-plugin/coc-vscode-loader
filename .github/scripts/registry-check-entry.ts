@@ -147,17 +147,31 @@ function getCommitInfo(cp: string, oldCommit: string, newCommit: string) {
   const dR = run('git', ['diff', `${oldCommit}..${newCommit}`, '--', ':(exclude)package-lock.json', ':(exclude)yarn.lock', ':(exclude)pnpm-lock.yaml'], { cwd: cp, ignoreError: true, timeout: 30000 })
   let diff = ''
   if (dR.ok && dR.stdout) {
+    const FILE_MAX = 25000
+    const TOTAL_MAX = 50000
     const parts = dR.stdout.split(/\ndiff --git /)
-    diff = parts.map((p, i) => {
-      if (i === 0 && !p.startsWith('diff --git ')) {
-        // Leading content before first diff (should be empty)
-        return p.trim() ? p : ''
+    const fileDiffs: string[] = []
+    let total = 0
+    for (let i = 0; i < parts.length; i++) {
+      if (total > TOTAL_MAX) {
+        fileDiffs.push(`<details>\n<summary>... and ${parts.length - i} more files (diff truncated at ${TOTAL_MAX} bytes total)</summary>\n\n</details>`)
+        break
+      }
+      if (i === 0 && !parts[i].startsWith('diff --git ')) {
+        if (parts[i].trim()) fileDiffs.push(parts[i])
+        continue
       }
       const header = i === 0 ? '' : 'diff --git '
-      const firstLine = (header + p).split('\n')[0]
+      const firstLine = (header + parts[i]).split('\n')[0]
       const fileName = firstLine.replace(/^diff --git a\//, '').replace(/ b\/.*$/, '')
-      return `\n<details>\n<summary>${fileName}</summary>\n\n\`\`\`diff\n${header}${p}\n\`\`\`\n\n</details>`
-    }).filter(Boolean).join('\n')
+      const content = header + parts[i]
+      const truncated = content.length > FILE_MAX
+      const body = truncated ? content.slice(0, FILE_MAX) + '\n... (file diff truncated)' : content
+      const block = `<details>\n<summary>${fileName}${truncated ? ` (truncated, ~${content.length} bytes)` : ''}</summary>\n\n\`\`\`diff\n${body}\n\`\`\`\n\n</details>`
+      total += block.length
+      fileDiffs.push(block)
+    }
+    diff = fileDiffs.join('\n')
   }
   return { count: cR.ok ? parseInt(cR.stdout, 10) || 0 : -1, log: lR.ok ? lR.stdout : '', diff }
 }
