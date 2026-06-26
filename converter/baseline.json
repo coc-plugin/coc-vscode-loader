@@ -1705,12 +1705,12 @@
   },
   "vscode-uni-cloud-snippets": {
     "coc-convert.json": "c77ea56b75f4d37bf7b4929e3d3188034e30e13e035569dfcbbd499460843e79",
-    "package.json": "200bc5a2fbd7428654cd3a974b48318252f41534a35bc8596787512e39cd96ac",
-    "snippets/javascript.json": "f0fc01b90812723853e9a93e2618f24cbd19d2a5cf43ca76e91faa7ba08586b8",
+    "package.json": "0f40d5bda5a63264c526a8f264ae678c8731a712c83795a39b26235c54e2ddd3",
+    "snippets/javascript.json": "e9cb17054458dcec0900477dce09f18341ad6dc41b7e246082f688a403ff5887",
     "snippets/vue-html.json": "f165a9e3b7dae37b90a52fbf7e4833374eedb36043598ac532f08432cf2fb5ad",
     "_source": {
       "repo": "uni-helper/uni-cloud-snippets-vscode",
-      "commit": "8f4e0955f40234e43b4a8fcf21373408d5c7c072"
+      "commit": "0c0f588e7f6f14e22b1556461ac36b68fb1b7a4d"
     }
   },
   "vscode-uni-ui-snippets": {
