@@ -1,0 +1,17 @@
+{
+  "entryPoint": "src/index.ts",
+  "activationEvents": [
+    "onLanguage:python"
+  ],
+  "keepDeps": {},
+  "serverDeps": {},
+  "serverBinary": {
+    "repo": "astral-sh/ruff",
+    "asset": "ruff-{{rust-target}}.tar.gz",
+    "binaryPath": "ruff-{{rust-target}}/ruff",
+    "args": [
+      "server"
+    ]
+  },
+  "hasLanguageClient": true
+}
