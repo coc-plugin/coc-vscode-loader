@@ -176,7 +176,7 @@
     "package.json": "3ec90f3d2b61ba2c4b4f7e5bd886cd081148c0c90be845190726a669a094d0fd",
     "src/biome.ts": "9f23d45e1aefba95ce94fa0797e8a481a2cf24e260ad641b4acee02c00db4209",
     "src/constants.ts": "f9ea5211c862b155f44277c8733b321b5dc2a7224db25840fe5e4880134274dd",
-    "src/extension.ts": "b4864aa87fb31bf783dda319da8cb7489a1659c4f7e63c18569177c604cf1f35",
+    "src/extension.ts": "1f6c9a18e2a2de3e5129f65a3b95eb58605c9fd0d80e628b9a47fcbf44ec5dbc",
     "src/gritql/index.ts": "a8276fa7b91e5e7e5c6e6db9b1ff61b2e4b262527a2a21d66ccccd65dd86f1aa",
     "src/gritql/node_to_token.ts": "76b77c2dcb42acc7d08685b1b6ddcb7548282965ac62c5a486441f5bac5b00d5",
     "src/index.ts": "689da4e7df7ad6551c86944574d7a22e8d818daf78b7d591d1f3edb13107c6e9",
@@ -189,7 +189,7 @@
     "src/utils.ts": "d097c336e31f3596baea4024eb8a9b8f06e8da3104e43c8630b9193d2e4c585a",
     "_source": {
       "repo": "biomejs/biome-vscode",
-      "commit": "e2d9b169cacec3f3b560342ee796b1740954333c"
+      "commit": "3048619baf111ca349cf6760aced87617ea9f79f"
     }
   },
   "vscode-deno": {
