@@ -28,11 +28,12 @@ type Baseline = Record<string, BaselineEntry>
 interface FileChange { rel: string; status: 'changed' | 'new' | 'missing' }
 
 // ── Helpers ────────────────────────────────────────────────
-function run(cmd: string, args: string[], opts: { cwd?: string; timeout?: number; ignoreError?: boolean } = {}) {
+function run(cmd: string, args: string[], opts: { cwd?: string; timeout?: number; ignoreError?: boolean; stdin?: string } = {}) {
   try {
     const out = execFileSync(cmd, args, {
       cwd: opts.cwd, timeout: opts.timeout ?? 60000,
       stdio: 'pipe', encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024,
+      input: opts.stdin,
     })
     return { ok: true as const, stdout: out.trim(), stderr: '' }
   } catch (e: any) {
@@ -143,8 +144,21 @@ function syncSourceRepo(entry: RegistryEntry): { ok: true; inputDir: string; com
 function getCommitInfo(cp: string, oldCommit: string, newCommit: string) {
   const cR = run('git', ['rev-list', '--count', `${oldCommit}..${newCommit}`], { cwd: cp, ignoreError: true })
   const lR = run('git', ['log', '--oneline', '--no-decorate', `${oldCommit}..${newCommit}`], { cwd: cp, ignoreError: true })
-  const dR = run('git', ['diff', `${oldCommit}..${newCommit}`, '--', ':(exclude)package-lock.json', ':(exclude)yarn.lock', ':(exclude)pnpm-lock.yaml'], { cwd: cp, ignoreError: true, timeout: 15000 })
-  const diff = dR.ok ? dR.stdout : ''
+  const dR = run('git', ['diff', `${oldCommit}..${newCommit}`, '--', ':(exclude)package-lock.json', ':(exclude)yarn.lock', ':(exclude)pnpm-lock.yaml'], { cwd: cp, ignoreError: true, timeout: 30000 })
+  let diff = ''
+  if (dR.ok && dR.stdout) {
+    const parts = dR.stdout.split(/\ndiff --git /)
+    diff = parts.map((p, i) => {
+      if (i === 0 && !p.startsWith('diff --git ')) {
+        // Leading content before first diff (should be empty)
+        return p.trim() ? p : ''
+      }
+      const header = i === 0 ? '' : 'diff --git '
+      const firstLine = (header + p).split('\n')[0]
+      const fileName = firstLine.replace(/^diff --git a\//, '').replace(/ b\/.*$/, '')
+      return `\n<details>\n<summary>${fileName}</summary>\n\n\`\`\`diff\n${header}${p}\n\`\`\`\n\n</details>`
+    }).filter(Boolean).join('\n')
+  }
   return { count: cR.ok ? parseInt(cR.stdout, 10) || 0 : -1, log: lR.ok ? lR.stdout : '', diff }
 }
 
@@ -359,14 +373,7 @@ ${fileTable}
 ${info.log || '(no details available)'}
 \`\`\`
 
-<details>
-<summary>Upstream diff (click to expand)</summary>
-
-\`\`\`diff
-${(info as any).diff || '(no diff available)'}
-\`\`\`
-
-</details>
+${(info as any).diff ? `<details>\n<summary>Upstream diff</summary>\n\n${(info as any).diff}\n\n</details>` : ''}
 ${repoChanged ? `\n> ⚠️ **Repository changed** — this entry previously pointed to \`${baselineRepo}\`. Verify the new repo is the correct upstream.\n` : ''}
 ### Review checklist
 
@@ -381,11 +388,11 @@ ${repoChanged ? `\n> ⚠️ **Repository changed** — this entry previously poi
   const prNum = prData && prData.state === 'OPEN' ? prData.number : null
 
   if (prNum) {
-    run('gh', ['pr', 'edit', String(prNum), '--title', title, '--body', prBody], { timeout: 30000, ignoreError: true })
+    run('gh', ['pr', 'edit', String(prNum), '--title', title, '-F', '-'], { timeout: 30000, ignoreError: true, stdin: prBody })
     log(`Updated PR #${prNum}`)
   } else {
     const defaultBranch = getDefaultBranch()
-    const created = run('gh', ['pr', 'create', '--title', title, '--body', prBody, '--label', 'registry-update', '--base', defaultBranch], { timeout: 30000 })
+    const created = run('gh', ['pr', 'create', '--title', title, '-F', '-', '--label', 'registry-update', '--base', defaultBranch], { timeout: 30000, stdin: prBody })
     if (created.ok) log(`PR created: ${created.stdout}`)
     else {
       // PR creation failed — create an issue as fallback
