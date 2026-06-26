@@ -737,11 +737,11 @@
   },
   "vscode-texlab": {
     "esbuild.mjs": "a0af761c1b418c19a1667f4a4e357e38bdbc45c7dd7d2495ac054c7e8dff1f13",
-    "package.json": "6e2a150e8bac8cde7ad603cf62f36c2ef948a1cf1ad07d18abeb6db731ab6ee4",
+    "package.json": "9a7ec0cda36f7d4473ff365c93c43efcd5621bca7acc3748bf55d69663f5868d",
     "src/index.ts": "dd5f2535908b0576b6c0160670c059a62b310cbdab0e12f73613efb60454bf1c",
     "_source": {
       "repo": "latex-lsp/texlab-vscode",
-      "commit": "b85bcfa79a57d6485a19b1ad198a4fc5c198b3de"
+      "commit": "af63f863217d4222420ae20f1723fdc429c8968c"
     }
   },
   "vscode-html-css-support": {
