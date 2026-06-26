@@ -1,0 +1,48 @@
+{
+  "entryPoint": "src/index.ts",
+  "activationEvents": [
+    "onLanguage:latex",
+    "onLanguage:bibtex",
+    "onLanguage:doctex"
+  ],
+  "keepDeps": {},
+  "serverDeps": {},
+  "serverBinary": {
+    "repo": "latex-lsp/texlab",
+    "asset": "texlab-x86_64-linux.tar.gz",
+    "binaryPath": "texlab",
+    "targetAssets": [
+      {
+        "platform": "linux",
+        "arch": "x64",
+        "file": "texlab-x86_64-linux.tar.gz",
+        "binaryPath": "texlab"
+      },
+      {
+        "platform": "linux",
+        "arch": "arm64",
+        "file": "texlab-aarch64-linux.tar.gz",
+        "binaryPath": "texlab"
+      },
+      {
+        "platform": "darwin",
+        "arch": "x64",
+        "file": "texlab-x86_64-macos.tar.gz",
+        "binaryPath": "texlab"
+      },
+      {
+        "platform": "darwin",
+        "arch": "arm64",
+        "file": "texlab-aarch64-macos.tar.gz",
+        "binaryPath": "texlab"
+      },
+      {
+        "platform": "win32",
+        "arch": "x64",
+        "file": "texlab-x86_64-windows.zip",
+        "binaryPath": "texlab.exe"
+      }
+    ]
+  },
+  "hasLanguageClient": true
+}

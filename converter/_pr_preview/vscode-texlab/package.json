@@ -1,0 +1,95 @@
+{
+  "name": "coc-texlab",
+  "version": "5.26.0",
+  "description": "LaTeX and BibTeX language support for Visual Studio Code",
+  "main": "lib/index.js",
+  "engines": {
+    "coc": "^0.0.82"
+  },
+  "activationEvents": [
+    "onLanguage:latex",
+    "onLanguage:bibtex",
+    "onLanguage:doctex"
+  ],
+  "scripts": {
+    "build": "node esbuild.mjs"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.29.0",
+    "ts-loader": "^9.5.4",
+    "ts-node": "^10.9.2",
+    "vscode-languageclient": "^9.0.1",
+    "webpack": "^5.105.4",
+    "webpack-cli": "^7.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "latex",
+        "aliases": [
+          "LaTeX",
+          "latex"
+        ],
+        "extensions": [
+          ".tex",
+          ".sty",
+          ".cls"
+        ],
+        "configuration": "./languages/latex.json"
+      },
+      {
+        "id": "bibtex",
+        "aliases": [
+          "BibTeX",
+          "bibtex"
+        ],
+        "extensions": [
+          ".bib"
+        ],
+        "configuration": "./languages/bibtex.json"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "texlab",
+      "properties": {}
+    },
+    "commands": [
+      {
+        "command": "latex.build",
+        "title": "Build file"
+      },
+      {
+        "command": "latex.build.cancel",
+        "title": "Cancel build"
+      },
+      {
+        "command": "latex.forwardSearch",
+        "title": "Forward Search"
+      },
+      {
+        "command": "latex.cleanAuxiliary",
+        "title": "Clean auxiliary files (latexmk)"
+      },
+      {
+        "command": "latex.cleanArtifacts",
+        "title": "Clean artifacts (latexmk)"
+      },
+      {
+        "command": "latex.changeEnvironment",
+        "title": "Change environment"
+      },
+      {
+        "command": "latex.findEnvironments",
+        "title": "Find environments"
+      },
+      {
+        "command": "latex.showDependencyGraph",
+        "title": "Show dependency graph"
+      }
+    ]
+  }
+}
