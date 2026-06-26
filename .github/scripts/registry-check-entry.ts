@@ -371,8 +371,9 @@ ${repoChanged ? `\n> ⚠️ **Repository changed** — this entry previously poi
 - [ ] Merge after review`
 
   const title = `chore(registry): update ${entry.name} (upstream changed)`
-  const existingPR = run('gh', ['pr', 'view', branch, '--json', 'number'], { ignoreError: true, timeout: 10000 })
-  const prNum = existingPR.ok ? (JSON.parse(existingPR.stdout)?.number ?? null) : null
+  const existingPR = run('gh', ['pr', 'view', branch, '--json', 'number,state'], { ignoreError: true, timeout: 10000 })
+  const prData = existingPR.ok ? (JSON.parse(existingPR.stdout) ?? null) : null
+  const prNum = prData && prData.state === 'OPEN' ? prData.number : null
 
   if (prNum) {
     run('gh', ['pr', 'edit', String(prNum), '--title', title, '--body', prBody], { timeout: 30000, ignoreError: true })
