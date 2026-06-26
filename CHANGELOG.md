@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.6.2] - 2026-06-26
+
+### Added
+- **Registry update checker CI workflow** — daily automated detection of upstream VS Code extension changes. `registry-check.yml` runs twice daily (04:00/16:00 UTC), auto-creates PRs when converter output differs from baseline, and creates Issues on failures (repo removed, archived, converter errors). Supports max 8 parallel entries.
+  - Matrix generation (`generate-matrix.ts`): flat array output, orphaned entry detection, source repo change detection, corrupted baseline handling
+  - Per-entry checker (`registry-check-entry.ts`): remote HEAD check, source sync, conversion, SHA-256 hashing, baseline comparison, PR/Issue creation with labels (`registry-update`, `repo-removed`, `repo-archived`, `converter-failure`)
+  - PR body includes upstream diff with GitHub compare links, per-file diff details with 25KB/file + 50KB total truncation limits
+  - Caching: repo cache in `~/.cache/coc-converter-smoke/`, remote URL verification before reuse, `git fetch --depth 1` incremental updates
+- **`switch.sh` improvements** — `cleanup_plugins()` removes orphaned `file:` symlink entries when switching modes; auto-builds plugin after local switch; cleans converter-cache; fixes npm 11 path resolution; ensures TypeScript installed in coc-tsserver node_modules
+- **Registry update checker documentation** — full workflow docs translated to English in `docs/registry-update-checker.md`, CI badge and automated change detection section in README, workflow/PR management docs in AGENTS.md, post-merge baseline update instructions in CONTRIBUTING.md
+
+### Fixed
+- **CI robustness** — 20+ fixes to registry-check workflow:
+  - Proper non-zero exit codes on all error paths instead of silent success
+  - `git push --force-with-lease` replaces unsafe `--force`
+  - `git()` wrapper resolves CWD issues when `working-directory: converter`
+  - Default branch detection via API instead of hardcoded `main`
+  - Reorder baseline update to after rebase, preventing unstaged changes conflicts
+  - Rate-limit (429) handling in `getRemoteHead()`, error logging for hash failures
+  - Stale cache detection: verify remote URL before reusing clones
+  - Guard `check` job with `needs.discover.result == 'success'`
+  - Upstream tracking (`-u`) for new branches, skip closed PRs
+  - Label caching for batch entry processing, `checkArchived()` error hardening
+  - Sync commit accuracy: use `synced.commit` instead of `remote.head`
+
+### Changed
+- **Baseline updates** — refreshed for vscode-go, vscode-ruff, vscode-pyright, vscode-ansible, vscode-texlab, vscode-uni-app-snippets, vscode-uni-cloud-snippets, vscode-uni-ui-snippets due to upstream extension changes
+- **plugin**: bump to v1.6.2
+- **converter**: bump to v1.6.2
+
 ## [1.6.1] - 2026-06-24
 
 ### Added
