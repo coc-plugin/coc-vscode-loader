@@ -310,13 +310,7 @@ async function main() {
     process.exit(1)
   }
 
-  // Copy converted output files to repo for PR diff preview
-  const previewDir = path.join(ROOT, 'converter/_pr_preview', entryName)
-  if (fs.existsSync(previewDir)) fs.rmSync(previewDir, { recursive: true, force: true })
-  const outputDir = path.join(TEST_OUTPUT, entryName)
-  if (fs.existsSync(outputDir)) fs.cpSync(outputDir, previewDir, { recursive: true })
-
-  const add = git(['add', 'converter/baseline.json', 'converter/_pr_preview/'])
+  const add = git(['add', 'converter/baseline.json'])
   if (!add.ok) { log(`git add failed: ${add.error}`); process.exit(1) }
 
   const ci = git(['commit', '-m', `chore: update baseline for ${entryName}`], { ignoreError: true })
