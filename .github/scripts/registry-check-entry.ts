@@ -144,12 +144,7 @@ function getCommitInfo(cp: string, oldCommit: string, newCommit: string) {
   const cR = run('git', ['rev-list', '--count', `${oldCommit}..${newCommit}`], { cwd: cp, ignoreError: true })
   const lR = run('git', ['log', '--oneline', '--no-decorate', `${oldCommit}..${newCommit}`], { cwd: cp, ignoreError: true })
   const dR = run('git', ['diff', `${oldCommit}..${newCommit}`, '--', ':(exclude)package-lock.json', ':(exclude)yarn.lock', ':(exclude)pnpm-lock.yaml'], { cwd: cp, ignoreError: true, timeout: 15000 })
-  let diff = ''
-  if (dR.ok && dR.stdout) {
-    const lines = dR.stdout.split('\n')
-    // Truncate to max 200 lines to avoid excessively long PR bodies
-    diff = lines.length > 200 ? lines.slice(0, 200).join('\n') + '\n... (truncated)' : dR.stdout
-  }
+  const diff = dR.ok ? dR.stdout : ''
   return { count: cR.ok ? parseInt(cR.stdout, 10) || 0 : -1, log: lR.ok ? lR.stdout : '', diff }
 }
 
@@ -364,11 +359,14 @@ ${fileTable}
 ${info.log || '(no details available)'}
 \`\`\`
 
-### Upstream diff
+<details>
+<summary>Upstream diff (click to expand)</summary>
 
 \`\`\`diff
 ${(info as any).diff || '(no diff available)'}
 \`\`\`
+
+</details>
 ${repoChanged ? `\n> ⚠️ **Repository changed** — this entry previously pointed to \`${baselineRepo}\`. Verify the new repo is the correct upstream.\n` : ''}
 ### Review checklist
 
