@@ -1715,11 +1715,11 @@
   },
   "vscode-uni-ui-snippets": {
     "coc-convert.json": "8531958e94968c71bca0fc70432e85e6604ca6f3b0a795c6abd2d9618cfcd1c0",
-    "package.json": "8fcab92c39f420bf4a9e0cd8af2dcb31f91d54aced44976469c0cc7a746d7c0e",
+    "package.json": "9cc20af60e73ce15f1a8d0f18d716627bf4e2344e3e2c6bfca9752532568e102",
     "snippets/vue-html.json": "a77eab204726db47c53bec2581956f4015bd86d2b8649cf0729c51de0652f8a6",
     "_source": {
       "repo": "uni-helper/uni-ui-snippets-vscode",
-      "commit": "eba4b3db615f124d216322c15a3646911685c769"
+      "commit": "82463eba0549354ac37a51d94c85013f0bbee873"
     }
   },
   "vscode-ue4-snippets-vs": {
