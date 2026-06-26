@@ -144,36 +144,7 @@ function syncSourceRepo(entry: RegistryEntry): { ok: true; inputDir: string; com
 function getCommitInfo(cp: string, oldCommit: string, newCommit: string) {
   const cR = run('git', ['rev-list', '--count', `${oldCommit}..${newCommit}`], { cwd: cp, ignoreError: true })
   const lR = run('git', ['log', '--oneline', '--no-decorate', `${oldCommit}..${newCommit}`], { cwd: cp, ignoreError: true })
-  const dR = run('git', ['diff', `${oldCommit}..${newCommit}`, '--', ':(exclude)package-lock.json', ':(exclude)yarn.lock', ':(exclude)pnpm-lock.yaml'], { cwd: cp, ignoreError: true, timeout: 30000 })
-  let diff = ''
-  if (dR.ok && dR.stdout) {
-    const FILE_MAX = 25000
-    const TOTAL_MAX = 50000
-    const parts = dR.stdout.split(/\ndiff --git /)
-    const fileDiffs: string[] = []
-    let total = 0
-    for (let i = 0; i < parts.length; i++) {
-      if (total > TOTAL_MAX) {
-        fileDiffs.push(`<details>\n<summary>... and ${parts.length - i} more files (diff truncated at ${TOTAL_MAX} bytes total)</summary>\n\n</details>`)
-        break
-      }
-      if (i === 0 && !parts[i].startsWith('diff --git ')) {
-        if (parts[i].trim()) fileDiffs.push(parts[i])
-        continue
-      }
-      const header = i === 0 ? '' : 'diff --git '
-      const firstLine = (header + parts[i]).split('\n')[0]
-      const fileName = firstLine.replace(/^diff --git a\//, '').replace(/ b\/.*$/, '')
-      const content = header + parts[i]
-      const truncated = content.length > FILE_MAX
-      const body = truncated ? content.slice(0, FILE_MAX) + '\n... (file diff truncated)' : content
-      const block = `<details>\n<summary>${fileName}${truncated ? ` (truncated, ~${content.length} bytes)` : ''}</summary>\n\n\`\`\`diff\n${body}\n\`\`\`\n\n</details>`
-      total += block.length
-      fileDiffs.push(block)
-    }
-    diff = fileDiffs.join('\n')
-  }
-  return { count: cR.ok ? parseInt(cR.stdout, 10) || 0 : -1, log: lR.ok ? lR.stdout : '', diff }
+  return { count: cR.ok ? parseInt(cR.stdout, 10) || 0 : -1, log: lR.ok ? lR.stdout : '' }
 }
 
 // ── Converter ──────────────────────────────────────────────
@@ -387,7 +358,7 @@ ${fileTable}
 ${info.log || '(no details available)'}
 \`\`\`
 
-${(info as any).diff ? `<details>\n<summary>Upstream diff</summary>\n\n${(info as any).diff}\n\n</details>` : ''}
+[View full diff](https://github.com/${repo}/compare/${oldCommit}..${remote.head})
 ${repoChanged ? `\n> ⚠️ **Repository changed** — this entry previously pointed to \`${baselineRepo}\`. Verify the new repo is the correct upstream.\n` : ''}
 ### Review checklist
 
