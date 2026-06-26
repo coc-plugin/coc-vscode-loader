@@ -1,0 +1,771 @@
+{
+  "uni-app VUE3 平台": {
+    "prefix": ["platform-vue3", "vue3"],
+    "body": ["VUE3"],
+    "description": "uni-app VUE3 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app VUE3-VAPOR 平台": {
+    "prefix": ["platform-vue3-vapor", "vue3-vapor"],
+    "body": ["VUE3-VAPOR"],
+    "description": "uni-app VUE3-VAPOR 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app VUE2 平台": {
+    "prefix": ["platform-vue2", "vue2"],
+    "body": ["VUE2"],
+    "description": "uni-app VUE2 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app UNI-APP-X 平台": {
+    "prefix": ["platform-uni-app-x", "uni-app-x"],
+    "body": ["UNI-APP-X"],
+    "description": "uni-app UNI-APP-X 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app uniVersion 平台": {
+    "prefix": [
+      "platform-uni-version",
+      "platform-uniVersion",
+      "uni-version",
+      "uniVersion"
+    ],
+    "body": ["uniVersion"],
+    "description": "uni-app uniVersion 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app APP 平台": {
+    "prefix": ["platform-app", "app"],
+    "body": ["APP"],
+    "description": "uni-app APP 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app APP-PLUS 平台": {
+    "prefix": ["platform-app-plus", "app-plus"],
+    "body": ["APP-PLUS"],
+    "description": "uni-app APP-PLUS 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app APP-PLUS-NVUE 平台": {
+    "prefix": ["platform-app-plus-nvue", "app-plus-nvue"],
+    "body": ["APP-PLUS-NVUE"],
+    "description": "uni-app APP-PLUS-NVUE 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app APP-NVUE 平台": {
+    "prefix": ["platform-app-nvue", "app-nvue"],
+    "body": ["APP-NVUE"],
+    "description": "uni-app APP-NVUE 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app APP-ANDROID 平台": {
+    "prefix": ["platform-app-android", "app-android"],
+    "body": ["APP-ANDROID"],
+    "description": "uni-app APP-ANDROID 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app APP-IOS 平台": {
+    "prefix": ["platform-app-ios", "app-ios"],
+    "body": ["APP-IOS"],
+    "description": "uni-app APP-IOS 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app APP-HARMONY 平台": {
+    "prefix": ["platform-app-harmony", "app-harmony"],
+    "body": ["APP-HARMONY"],
+    "description": "uni-app APP-HARMONY 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app H5 平台": {
+    "prefix": ["platform-h5", "h5"],
+    "body": ["H5"],
+    "description": "uni-app H5 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app WEB 平台": {
+    "prefix": ["platform-web", "web"],
+    "body": ["WEB"],
+    "description": "uni-app WEB 对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 微信小程序平台": {
+    "prefix": [
+      "platform-mp-weixin",
+      "mp-weixin",
+      "platform-weixin",
+      "weixin",
+      "platform-mp-wechat",
+      "mp-wechat",
+      "platform-wechat",
+      "wechat"
+    ],
+    "body": ["MP-WEIXIN"],
+    "description": "uni-app 微信小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 支付宝小程序平台": {
+    "prefix": [
+      "platform-mp-alipay",
+      "mp-alipay",
+      "platform-alipay",
+      "alipay",
+      "platform-mp-ali",
+      "mp-ali",
+      "platform-ali",
+      "ali",
+      "platform-mp-my",
+      "mp-my",
+      "platform-my",
+      "my"
+    ],
+    "body": ["MP-ALIPAY"],
+    "description": "uni-app 支付宝小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 百度小程序平台": {
+    "prefix": [
+      "platform-mp-baidu",
+      "mp-baidu",
+      "platform-baidu",
+      "baidu",
+      "platform-mp-swan",
+      "mp-swan",
+      "platform-swan",
+      "swan"
+    ],
+    "body": ["MP-BAIDU"],
+    "description": "uni-app 百度小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 字节跳动小程序平台": {
+    "prefix": [
+      "platform-mp-toutiao",
+      "mp-toutiao",
+      "platform-toutiao",
+      "toutiao",
+      "platform-mp-bytedance",
+      "mp-bytedance",
+      "platform-bytedance",
+      "bytedance"
+    ],
+    "body": ["MP-TOUTIAO"],
+    "description": "uni-app 字节跳动小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 飞书小程序平台": {
+    "prefix": ["platform-mp-lark", "mp-lark", "platform-lark", "lark"],
+    "body": ["MP-LARK"],
+    "description": "uni-app 飞书小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app QQ 小程序平台": {
+    "prefix": ["platform-mp-qq", "mp-qq", "platform-qq", "qq"],
+    "body": ["MP-QQ"],
+    "description": "uni-app QQ 小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 快手小程序平台": {
+    "prefix": [
+      "platform-mp-kuaishou",
+      "mp-kuaishou",
+      "platform-kuaishou",
+      "kuaishou"
+    ],
+    "body": ["MP-KUAISHOU"],
+    "description": "uni-app 快手小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 京东小程序平台": {
+    "prefix": ["platform-mp-jd", "mp-jd", "platform-jd", "jd"],
+    "body": ["MP-JD"],
+    "description": "uni-app 京东小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 360 小程序平台": {
+    "prefix": ["platform-mp-360", "mp-360", "platform-360", "360"],
+    "body": ["MP-360"],
+    "description": "uni-app 360 小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 鸿蒙元服务小程序平台": {
+    "prefix": ["platform-mp-harmony", "mp-harmony"],
+    "body": ["MP-HARMONY"],
+    "description": "uni-app 鸿蒙元服务小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 小红书小程序平台": {
+    "prefix": ["platform-mp-xhs", "mp-xhs", "platform-xhs", "xhs"],
+    "body": ["MP-XHS"],
+    "description": "uni-app 小红书小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 小程序平台": {
+    "prefix": ["platform-mp", "mp", "platform-miniprogram", "miniprogram"],
+    "body": ["MP"],
+    "description": "uni-app 小程序对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 快应用通用平台": {
+    "prefix": [
+      "platform-quickapp",
+      "quickapp",
+      "platform-quickapp-webview",
+      "quickapp-webview"
+    ],
+    "body": ["QUICKAPP-WEBVIEW"],
+    "description": "uni-app 快应用通用对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 快应用联盟平台": {
+    "prefix": [
+      "platform-quickapp-union",
+      "quickapp-union",
+      "platform-quickapp-webview-union",
+      "quickapp-webview-union"
+    ],
+    "body": ["QUICKAPP-WEBVIEW-UNION"],
+    "description": "uni-app 快应用联盟对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 快应用华为平台": {
+    "prefix": [
+      "platform-quickapp-huawei",
+      "quickapp-huawei",
+      "platform-quickapp-webview-huawei",
+      "quickapp-webview-huawei"
+    ],
+    "body": ["QUICKAPP-WEBVIEW-HUAWEI"],
+    "description": "uni-app 快应用华为对应的 %PLATFORM 值。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 条件编译，处理某平台": {
+    "prefix": ["#ifdef", "ifdef"],
+    "body": [
+      "<!-- #ifdef ${1|VUE3,VUE3-VAPOR,VUE2,UNI-APP-X,uniVersion,APP,APP-PLUS,APP-PLUS-NVUE,APP-NVUE,APP-ANDROID,APP-IOS,APP-HARMONY,H5,WEB,MP-WEIXIN,MP-ALIPAY,MP-BAIDU,MP-TOUTIAO,MP-LARK,MP-QQ,MP-KUAISHOU,MP-360,MP-JD,MP-XHS,MP-HARMONY,MP,QUICKAPP-WEBVIEW,QUICKAPP-WEBVIEW-UNION,QUICKAPP-WEBVIEW-HUAWEI|} -->",
+      "$2",
+      "<!-- #endif -->"
+    ],
+    "description": "uni-app 条件编译，处理某平台。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 条件编译，排除某平台": {
+    "prefix": ["#ifndef", "ifndef"],
+    "body": [
+      "<!-- #ifndef ${1|VUE3,VUE3-VAPOR,VUE2,UNI-APP-X,uniVersion,APP,APP-PLUS,APP-PLUS-NVUE,APP-NVUE,APP-ANDROID,APP-IOS,APP-HARMONY,H5,WEB,MP-WEIXIN,MP-ALIPAY,MP-BAIDU,MP-TOUTIAO,MP-LARK,MP-QQ,MP-KUAISHOU,MP-360,MP-JD,MP-XHS,MP-HARMONY,MP,QUICKAPP-WEBVIEW,QUICKAPP-WEBVIEW-UNION,QUICKAPP-WEBVIEW-HUAWEI|} -->",
+      "$2",
+      "<!-- #endif -->"
+    ],
+    "description": "uni-app 条件编译，排除某平台。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app 结束条件编译": {
+    "prefix": ["#endif", "endif"],
+    "body": ["<!-- #endif -->"],
+    "description": "uni-app 结束条件编译。更多信息查看 <https://uniapp.dcloud.net.cn/tutorial/platform.html>。"
+  },
+  "uni-app view": {
+    "prefix": ["view", "<view>"],
+    "body": ["<view>$1</view>$0"],
+    "description": "uni-app 视图容器，用于包裹各种元素内容。更多信息查看 <https://uniapp.dcloud.net.cn/component/view>。"
+  },
+  "uni-app scroll-view": {
+    "prefix": ["scroll-view", "<scroll-view>"],
+    "body": ["<scroll-view scroll-${1|x,y|}>", "\t$2", "</scroll-view>$0"],
+    "description": "uni-app 可滚动视图区域。竖向滚动时，需要给一个固定高度。更多信息查看 <https://uniapp.dcloud.net.cn/component/scroll-view>。"
+  },
+  "uni-app swiper": {
+    "prefix": ["swiper", "<swiper>"],
+    "body": [
+      "<swiper",
+      "\tindicator-dots",
+      "\tautoplay",
+      "\tcircular",
+      ">",
+      "\t<swiper-item>$1</swiper-item>",
+      "</swiper>$0"
+    ],
+    "description": "uni-app 滑块视图容器。子组件只能是 swiper-item。竖向滑动时，需要给一个固定高度。更多信息查看 <https://uniapp.dcloud.net.cn/component/swiper?id=swiper>。"
+  },
+  "uni-app swiper-item": {
+    "prefix": ["swiper-item", "<swiper-item>"],
+    "body": ["<swiper-item>$1</swiper-item>$0"],
+    "description": "uni-app swiper 的子组件，宽高自动设置为 100%。更多信息查看 <https://uniapp.dcloud.net.cn/component/swiper?id=swiper-item>。"
+  },
+  "uni-app match-media": {
+    "prefix": ["match-media", "<match-media>"],
+    "body": ["<match-media $1>$2</match-media>$0"],
+    "description": "uni-app 可适配不同屏幕的基本视图组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/match-media>。"
+  },
+  "uni-app movable-area": {
+    "prefix": ["movable-area", "<movable-area>"],
+    "body": [
+      "<movable-area>",
+      "\t<movable-view",
+      "\t\tdirection=\"${1|all,vertical,horizontal,none|}\"",
+      "\t\t:x=\"$2\"",
+      "\t\t:y=\"$3\"",
+      "\t\t@change=\"$4\"",
+      "\t\t@scale=\"$5\"",
+      "\t>",
+      "\t\t$6",
+      "\t</movable-view>",
+      "</movable-area>$0"
+    ],
+    "description": "uni-app 可拖动区域组件，指代可拖动的范围。子组件只能是 movable-view。更多信息查看 <https://uniapp.dcloud.net.cn/component/movable-view?id=movable-area>。"
+  },
+  "uni-app movable-view": {
+    "prefix": ["movable-view", "<movable-view>"],
+    "body": [
+      "<movable-view",
+      "\tdirection=\"${1|all,vertical,horizontal,none|}\"",
+      "\t:x=\"$2\"",
+      "\t:y=\"$3\"",
+      "\t@change=\"$4\"",
+      "\t@scale=\"$5\"",
+      ">",
+      "\t$6",
+      "</movable-view>$0"
+    ],
+    "description": "uni-app 可移动的视图容器。只能是 movable-area 的子组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/movable-view?id=movable-view>。"
+  },
+  "uni-app cover-view": {
+    "prefix": ["cover-view", "<cover-view>"],
+    "body": ["<cover-view>$1</cover-view>$0"],
+    "description": "uni-app 覆盖在原生组件上的文本视图。更多信息查看 <https://uniapp.dcloud.net.cn/component/cover-view?id=cover-view>。"
+  },
+  "uni-app cover-image": {
+    "prefix": ["cover-image", "<cover-image>"],
+    "body": ["<cover-image src=\"$1\"></cover-image>$0"],
+    "description": "uni-app 覆盖在原生组件上的图片视图。可以嵌套在 cover-view 里。更多信息查看 <https://uniapp.dcloud.net.cn/component/cover-view?id=cover-image>。"
+  },
+  "uni-app icon": {
+    "prefix": ["icon", "<icon>"],
+    "body": [
+      "<icon",
+      "\ttype=\"$1\"",
+      "\t:size=\"${2:23}\"",
+      "\tcolor=\"$3\"",
+      "/>$0"
+    ],
+    "description": "uni-app 图标。更多信息查看 <https://uniapp.dcloud.net.cn/component/icon>。"
+  },
+  "uni-app text": {
+    "prefix": ["text", "<text>"],
+    "body": ["<text>$1</text>$0"],
+    "description": "uni-app 文本组件。用于包裹文本内容。更多信息查看 <https://uniapp.dcloud.net.cn/component/text>。"
+  },
+  "uni-app rich-text": {
+    "prefix": ["rich-text", "<rich-text>"],
+    "body": ["<rich-text :nodes=\"$1\"></rich-text>$0"],
+    "description": "uni-app 富文本。更多信息查看 <https://uniapp.dcloud.net.cn/component/rich-text>。"
+  },
+  "uni-app progress": {
+    "prefix": ["progress", "<progress>"],
+    "body": ["<progress :percent=\"$1\" />$0"],
+    "description": "uni-app 进度条。更多信息查看 <https://uniapp.dcloud.net.cn/component/progress>。"
+  },
+  "uni-app button": {
+    "prefix": ["button", "<button>"],
+    "body": [
+      "<button",
+      "\t:disabled=\"$1\"",
+      "\t:loading=\"$2\"",
+      "\topen-type=\"$3\"",
+      "\thover-class=\"button-hover\"",
+      "\t@click=\"$4\"",
+      ">",
+      "\t$5",
+      "</button>$0"
+    ],
+    "description": "uni-app 按钮。更多信息查看 <https://uniapp.dcloud.net.cn/component/button>。"
+  },
+  "uni-app checkbox-group": {
+    "prefix": ["checkbox-group", "<checkbox-group>"],
+    "body": [
+      "<checkbox-group @change=\"$1\">",
+      "\t<label>",
+      "\t\t<checkbox",
+      "\t\t\t:value=\"$2\"",
+      "\t\t\t:checked=\"$3\"",
+      "\t\t/>",
+      "\t\t$4",
+      "\t</label>",
+      "</checkbox-group>$0"
+    ],
+    "description": "uni-app 多选框组。更多信息查看 <https://uniapp.dcloud.net.cn/component/checkbox?id=checkbox-group>。"
+  },
+  "uni-app checkbox": {
+    "prefix": ["checkbox", "<checkbox>"],
+    "body": ["<checkbox", "\t:value=\"$1\"", "\t:checked=\"$2\"", "/>$0"],
+    "description": "uni-app 多选框。更多信息查看 <https://uniapp.dcloud.net.cn/component/checkbox?id=checkbox>。"
+  },
+  "uni-app editor": {
+    "prefix": ["editor", "<editor>"],
+    "body": ["<editor $1></editor>$0"],
+    "description": "uni-app 富文本编辑器，可以对图片、文字格式进行编辑和混排。更多信息查看 <https://uniapp.dcloud.net.cn/component/editor>。"
+  },
+  "uni-app form": {
+    "prefix": ["form", "<form>"],
+    "body": [
+      "<form",
+      "\t@submit=\"$1\"",
+      "\t@reset=\"$2\"",
+      ">",
+      "\t$3",
+      "\t<button form-type=\"submit\">${4:提交}</button>",
+      "\t<button form-type=\"reset\">${5:重置}</button>",
+      "</form>$0"
+    ],
+    "description": "uni-app 表单，将组件内的用户输入的 switch input checkbox slider radio picker 提交。更多信息查看 <https://uniapp.dcloud.net.cn/component/form>。"
+  },
+  "uni-app input": {
+    "prefix": ["input", "<input>"],
+    "body": [
+      "<input",
+      "\tv-model=\"$1\"",
+      "\tplaceholder=\"$2\"",
+      "\tplaceholder-class=\"input-placeholder\"",
+      "\t@input=\"$4\"",
+      "/>$0"
+    ],
+    "description": "uni-app 输入框。更多信息查看 <https://uniapp.dcloud.net.cn/component/input>。"
+  },
+  "uni-app label": {
+    "prefix": ["label", "<label>"],
+    "body": ["<label>$1</label>$0"],
+    "description": "uni-app 用来改进表单组件的可用性。更多信息查看 <https://uniapp.dcloud.net.cn/component/label>。"
+  },
+  "uni-app picker-selector": {
+    "prefix": ["picker-selector", "<picker-selector>"],
+    "body": [
+      "<picker",
+      "\tmode=\"selector\"",
+      "\t:range=\"$1\"",
+      "\t:range-key=\"$2\"",
+      "\t:value=\"$3\"",
+      "\t@change=\"$4\"",
+      ">",
+      "\t$5",
+      "</picker>$0"
+    ],
+    "description": "uni-app 单列选择器。更多信息查看 <https://uniapp.dcloud.net.cn/component/picker?id=%e6%99%ae%e9%80%9a%e9%80%89%e6%8b%a9%e5%99%a8>。"
+  },
+  "uni-app picker-multi-selector": {
+    "prefix": [
+      "picker-multi",
+      "picker-multi-selector",
+      "<picker-multi>",
+      "<picker-multi-selector>"
+    ],
+    "body": [
+      "<picker",
+      "\tmode=\"multiSelector\"",
+      "\t:range=\"$1\"",
+      "\t:range-key=\"$2\"",
+      "\t:value=\"$3\"",
+      "\t@change=\"$4\"",
+      ">",
+      "\t$5",
+      "</picker>$0"
+    ],
+    "description": "uni-app 多列选择器。更多信息查看 <https://uniapp.dcloud.net.cn/component/picker?id=%e5%a4%9a%e5%88%97%e9%80%89%e6%8b%a9%e5%99%a8>。"
+  },
+  "uni-app picker-time": {
+    "prefix": ["picker-time", "<picker-time>"],
+    "body": [
+      "<picker",
+      "\tmode=\"time\"",
+      "\t:value=\"$1\"",
+      "\t@change=\"$2\"",
+      ">",
+      "\t$3",
+      "</picker>$0"
+    ],
+    "description": "uni-app 时间选择器。更多信息查看 <https://uniapp.dcloud.net.cn/component/picker?id=%e6%97%b6%e9%97%b4%e9%80%89%e6%8b%a9%e5%99%a8>。"
+  },
+  "uni-app picker-date": {
+    "prefix": ["picker-date", "<picker-date>"],
+    "body": [
+      "<picker",
+      "\tmode=\"date\"",
+      "\t:value=\"$1\"",
+      "\t@change=\"$2\"",
+      ">",
+      "\t$3",
+      "</picker>$0"
+    ],
+    "description": "uni-app 日期选择器。更多信息查看 <https://uniapp.dcloud.net.cn/component/picker?id=%e6%97%a5%e6%9c%9f%e9%80%89%e6%8b%a9%e5%99%a8>。"
+  },
+  "uni-app picker-region": {
+    "prefix": ["picker-region", "<picker-region>"],
+    "body": [
+      "<picker",
+      "\tmode=\"region\"",
+      "\t:value=\"$1\"",
+      "\t@change=\"$2\"",
+      ">",
+      "\t$3",
+      "</picker>$0"
+    ],
+    "description": "uni-app 区域选择器。更多信息查看 <https://uniapp.dcloud.net.cn/component/picker?id=%e7%9c%81%e5%b8%82%e5%8c%ba%e9%80%89%e6%8b%a9%e5%99%a8>。"
+  },
+  "uni-app picker-view": {
+    "prefix": ["picker-view", "<picker-view>"],
+    "body": [
+      "<picker-view",
+      "\t:value=\"$1\"",
+      "\t@change=\"$2\"",
+      ">",
+      "\t<picker-view-column>$3</picker-view-column>",
+      "</picker-view>$0"
+    ],
+    "description": "uni-app 比 picker 更灵活的嵌入页面的滚动选择器。子组件只能是 picker-view-column。更多信息查看 <https://uniapp.dcloud.net.cn/component/picker-view?id=picker-view>。"
+  },
+  "uni-app picker-view-column": {
+    "prefix": ["picker-view-column", "<picker-view-column>"],
+    "body": ["<picker-view-column>$1</picker-view-column>$0"],
+    "description": "uni-app picker-view 的子组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/picker-view?id=picker-view-column>。"
+  },
+  "uni-app radio-group": {
+    "prefix": ["radio-group", "<radio-group>"],
+    "body": [
+      "<radio-group @change=\"$1\">",
+      "\t<label>",
+      "\t\t<radio",
+      "\t\t\t:value=\"$2\"",
+      "\t\t\t:checked=\"$3\"",
+      "\t\t/>",
+      "\t\t$4",
+      "\t</label>",
+      "</radio-group>$0"
+    ],
+    "description": "uni-app 单选框组。更多信息查看 <https://uniapp.dcloud.net.cn/component/radio?id=radio-group>。"
+  },
+  "uni-app radio": {
+    "prefix": ["radio", "<radio>"],
+    "body": ["<radio", "\t:value=\"$1\"", "\t:checked=\"$2\"", "/>$0"],
+    "description": "uni-app 单选框。更多信息查看 <https://uniapp.dcloud.net.cn/component/radio?id=radio>。"
+  },
+  "uni-app slider": {
+    "prefix": ["slider", "<slider>"],
+    "body": ["<slider", "\t:value=\"$1\"", "\t@change=\"$2\"", "/>$0"],
+    "description": "uni-app 滑动选择器。更多信息查看 <https://uniapp.dcloud.net.cn/component/slider>。"
+  },
+  "uni-app switch": {
+    "prefix": ["switch", "<switch>"],
+    "body": ["<switch", "\t:checked=\"$1\"", "\t@change=\"$2\"", "/>$0"],
+    "description": "uni-app 开关选择器。更多信息查看 <https://uniapp.dcloud.net.cn/component/switch>。"
+  },
+  "uni-app textarea": {
+    "prefix": ["textarea", "<textarea>"],
+    "body": [
+      "<textarea",
+      "\tv-model=\"$1\"",
+      "\tplaceholder=\"$2\"",
+      "\tplaceholder-class=\"textarea-placeholder\"",
+      "\t@input=\"$4\"",
+      "/>$0"
+    ],
+    "description": "uni-app 多行输入框。更多信息查看 <https://uniapp.dcloud.net.cn/component/textarea>。"
+  },
+  "uni-app navigator": {
+    "prefix": ["navigator", "<navigator>"],
+    "body": [
+      "<navigator",
+      "\turl=\"/pages/$1\"",
+      "\topen-type=\"${2|navigate,redirect,switchTab,reLaunch,navigateBack,exit|}\"",
+      "\thover-class=\"navigator-hover\"",
+      ">",
+      "\t$3",
+      "</navigator>$0"
+    ],
+    "description": "uni-app 页面跳转组件。只能跳转本地页面。目标页面必须已注册。更多信息查看 <https://uniapp.dcloud.net.cn/component/navigator>。"
+  },
+  "uni-app audio": {
+    "prefix": ["audio", "<audio>"],
+    "body": [
+      "<audio",
+      "\tid=\"$1\"",
+      "\tsrc=\"$2\"",
+      "\t${3:controls}",
+      "\t@error=\"$4\"",
+      "\t@play=\"$5\"",
+      "\t@pause=\"$6\"",
+      "\t@timeupdate=\"$7\"",
+      "\t@ended=\"$8\"",
+      "/>$0"
+    ],
+    "description": "uni-app 音频组件。请考虑使用 uni.createInnerAudioContext 代替。更多信息查看 <https://uniapp.dcloud.net.cn/component/audio>。"
+  },
+  "uni-app camera": {
+    "prefix": ["camera", "<camera>"],
+    "body": [
+      "<camera",
+      "\tmode=\"${1|normal,scanCode|}\"",
+      "\tdevice-position=\"${2|back,front|}\"",
+      "\tflash=\"${3|auto,on,off|}\"",
+      "/>$0"
+    ],
+    "description": "uni-app 页面内嵌的区域相机组件。请考虑使用 uni.chooseImage 或 uni.chooseVideo 代替。更多信息查看 <https://uniapp.dcloud.net.cn/component/camera>。"
+  },
+  "uni-app image": {
+    "prefix": ["image", "<image>"],
+    "body": [
+      "<image",
+      "\tsrc=\"$1\"",
+      "\tmode=\"${2|scaleToFill,aspectFit,aspectFill,widthFix,heightFix,top,bottom,center,left,right,top left,top right,bottom left,bottom right|}\"",
+      "/>$0"
+    ],
+    "description": "uni-app 图片组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/image>。"
+  },
+  "uni-app video": {
+    "prefix": ["video", "<video>"],
+    "body": ["<video src=\"$1\" />$0"],
+    "description": "uni-app 视频组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/video>。"
+  },
+  "uni-app live-player": {
+    "prefix": ["live-player", "<live-player>"],
+    "body": [
+      "<live-player",
+      "\tid=\"$1\"",
+      "\tsrc=\"$2\"",
+      "\t${3:autoplay}",
+      "/>$0"
+    ],
+    "description": "uni-app 直播拉流组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/live-player>。"
+  },
+  "uni-app live-pusher": {
+    "prefix": ["live-pusher", "<live-pusher>"],
+    "body": ["<live-pusher url=\"$1\" />$0"],
+    "description": "uni-app 直播推流组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/live-pusher>。"
+  },
+  "uni-app map": {
+    "prefix": ["map", "<map>"],
+    "body": [
+      "<map",
+      "\tlongitude=\"$1\"",
+      "\tlatitude=\"$2\"",
+      "\tmarkers=\"$3\"",
+      "/>$0"
+    ],
+    "description": "uni-app 地图组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/map>。"
+  },
+  "uni-app canvas": {
+    "prefix": ["canvas", "<canvas>"],
+    "body": ["<canvas canvas-id=\"${1:canvasId}\" />$0"],
+    "description": "uni-app 画布组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/canvas>。"
+  },
+  "uni-app web-view": {
+    "prefix": ["web-view", "<web-view>"],
+    "body": ["<web-view src=\"$1\" />$0"],
+    "description": "uni-app 浏览器组件，自动铺满整个页面。更多信息查看 <https://uniapp.dcloud.net.cn/component/web-view>。"
+  },
+  "uni-app ad": {
+    "prefix": ["ad", "<ad>"],
+    "body": ["<ad $1 />$0"],
+    "description": "uni-app 应用内展示的广告组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/ad>。"
+  },
+  "uni-app ad-draw": {
+    "prefix": ["ad-draw", "<ad-draw>"],
+    "body": ["<ad-draw $1 />$0"],
+    "description": "uni-app 【APP-NVUE 专用】应用内竖屏沉浸视频流广告。更多信息查看 <https://uniapp.dcloud.net.cn/component/ad-draw>。"
+  },
+  "uni-app ad-content-page": {
+    "prefix": ["ad-content-page", "<ad-content-page>"],
+    "body": ["<ad-content-page $1 />$0"],
+    "description": "uni-app 【ANDROID-NVUE 专用】应用内短视频内容联盟组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/ad-content-page>。"
+  },
+  "uni-app page-meta": {
+    "prefix": ["page-meta", "<page-meta>"],
+    "body": ["<page-meta $1>", "\t<navigation-bar $2 />", "</page-meta>$0"],
+    "description": "uni-app 页面属性配置节点，用于指定页面的一些属性、监听页面事件。只能是页面内第一个组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/page-meta>。"
+  },
+  "uni-app navigation-bar": {
+    "prefix": ["navigation-bar", "<navigation-bar>"],
+    "body": ["<navigation-bar $1 />$0"],
+    "description": "uni-app 页面导航条配置节点，用于指定导航栏的一些属性。只能是 page-meta 组件第一个子组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/navigation-bar>。"
+  },
+  "uni-app custom-tab-bar": {
+    "prefix": ["custom-tab-bar", "<custom-tab-bar>"],
+    "body": [
+      "<custom-tab-bar",
+      "\tdirection=\"${1|horizontal,vertical|}\"",
+      "\t:show-icon=\"${2|false,true|}\"",
+      "\t:selected=\"${3:0}\"",
+      "\t@onTabItemTap=\"$4\"",
+      ">",
+      "</custom-tab-bar>$0"
+    ],
+    "description": "uni-app 【H5 专用】自定义 TabBar 组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/custom-tab-bar>。"
+  },
+  "uni-app open-data": {
+    "prefix": ["open-data", "<open-data>"],
+    "body": ["<open-data type=\"$1\" />$0"],
+    "description": "uni-app 用于展示平台开放的数据。更多信息查看 <https://uniapp.dcloud.net.cn/component/open-data>。"
+  },
+  "uni-app barcode": {
+    "prefix": ["barcode", "<barcode>"],
+    "body": ["<barcode $1 />$0"],
+    "description": "uni-app 【APP-NVUE 专用】扫码组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/barcode>。"
+  },
+  "uni-app list": {
+    "prefix": ["list", "<list>"],
+    "body": ["<list $1>$2</list>$0"],
+    "description": "uni-app 【APP-NVUE 专用】列表组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/list>。"
+  },
+  "uni-app cell": {
+    "prefix": ["cell", "<cell>"],
+    "body": ["<cell $1>$2</cell>$0"],
+    "description": "uni-app 【APP-NVUE 专用】列表项组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/cell>。"
+  },
+  "uni-app recycle-list": {
+    "prefix": ["recycle-list", "<recycle-list>"],
+    "body": ["<recycle-list $1>$2</recycle-list>$0"],
+    "description": "uni-app 【APP-NVUE 专用】列表组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/recycle-list>。"
+  },
+  "uni-app cell-slot": {
+    "prefix": ["cell", "<cell>"],
+    "body": ["<cell-slot $1>$2</cell-slot>$0"],
+    "description": "uni-app 【APP-NVUE 专用】列表项组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/recycle-list>。"
+  },
+  "uni-app waterfall": {
+    "prefix": ["waterfall", "<waterfall>"],
+    "body": ["<waterfall $1>$2</waterfall>$0"],
+    "description": "uni-app 【APP-NVUE 专用】瀑布流组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/waterfall>。"
+  },
+  "uni-app refresh": {
+    "prefix": ["refresh", "<refresh>"],
+    "body": ["<refresh $1>$2</refresh>$0"],
+    "description": "uni-app 【APP-NVUE 专用】列表下拉刷新组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/refresh>。"
+  },
+  "uni-app animation-view": {
+    "prefix": ["animation-view", "<animation-view>"],
+    "body": [
+      "<animation-view",
+      "\tpath=\"$1\"",
+      "\t:loop=\"${2|false,true|}\"",
+      "\tautoplay",
+      "\t@bindended=\"$3\"",
+      "/>$0"
+    ],
+    "description": "uni-app Lottie 动画组件，仅 APP 和百度小程序支持。需安装 animation-view 插件。更多信息查看 <https://uniapp.dcloud.net.cn/component/animation-view>。"
+  },
+  "uni-app official-account": {
+    "prefix": ["official-account", "<official-account>"],
+    "body": ["<official-account $1 />$0"],
+    "description": "uni-app 公众号关注组件，仅微信小程序支持。更多信息查看 <https://uniapp.dcloud.net.cn/component/official-account>。"
+  },
+  "uni-app ad-interstitial": {
+    "prefix": ["ad-interstitial", "<ad-interstitial>"],
+    "body": [
+      "<ad-interstitial",
+      "\tadpid=\"$1\"",
+      "\t@load=\"$2\"",
+      "\t@error=\"$3\"",
+      "\t@close=\"$4\"",
+      "/>$0"
+    ],
+    "description": "uni-app 插屏广告组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/ad-interstitial>。"
+  },
+  "uni-app ad-rewarded-video": {
+    "prefix": ["ad-rewarded-video", "<ad-rewarded-video>"],
+    "body": [
+      "<ad-rewarded-video",
+      "\tadpid=\"$1\"",
+      "\t@load=\"$2\"",
+      "\t@error=\"$3\"",
+      "\t@close=\"$4\"",
+      "/>$0"
+    ],
+    "description": "uni-app 激励视频广告组件。更多信息查看 <https://uniapp.dcloud.net.cn/component/ad-rewarded-video>。"
+  },
+  "uni-app ad-drama": {
+    "prefix": ["ad-drama", "<ad-drama>"],
+    "body": ["<ad-drama $1 />$0"],
+    "description": "uni-app 短剧广告组件。更多信息查看 <https://uniapp.dcloud.net.cn/uni-ad/ad-drama>。"
+  },
+  "uni-app ad-grid": {
+    "prefix": ["ad-grid", "<ad-grid>"],
+    "body": ["<ad-grid $1 />$0"],
+    "description": "uni-app 格子广告组件，仅微信小程序支持。更多信息查看 <https://uniapp.dcloud.net.cn/component/ad-grid>。"
+  },
+  "uni-app ad-video": {
+    "prefix": ["ad-video", "<ad-video>"],
+    "body": ["<ad-video $1 />$0"],
+    "description": "uni-app 视频广告组件。更多信息查看 <https://uniapp.dcloud.net.cn/uni-ad/ad-video>。"
+  },
+  "uni-app ad-video-component": {
+    "prefix": ["ad-video-component", "<ad-video-component>"],
+    "body": ["<ad-video-component $1 />$0"],
+    "description": "uni-app 视频贴片广告组件。更多信息查看 <https://uniapp.dcloud.net.cn/uni-ad/ad-video-component>。"
+  }
+}

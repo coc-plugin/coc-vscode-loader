@@ -1,0 +1,21 @@
+{
+  "entryPoint": "src/index.ts",
+  "activationEvents": [
+    "onLanguage:vue-html",
+    "onLanguage:vue",
+    "onLanguage:html",
+    "onLanguage:css",
+    "onLanguage:less",
+    "onLanguage:scss",
+    "onLanguage:sass",
+    "onLanguage:stylus",
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:jsonc"
+  ],
+  "keepDeps": {},
+  "serverDeps": {},
+  "hasLanguageClient": false
+}

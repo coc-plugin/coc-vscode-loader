@@ -1,0 +1,107 @@
+{
+  "name": "coc-uni-app-snippets-vscode",
+  "version": "0.11.2",
+  "description": "uni-app 基本能力代码片段",
+  "main": "lib/index.js",
+  "engines": {
+    "coc": "^0.0.82"
+  },
+  "activationEvents": [
+    "onLanguage:vue-html",
+    "onLanguage:vue",
+    "onLanguage:html",
+    "onLanguage:css",
+    "onLanguage:less",
+    "onLanguage:scss",
+    "onLanguage:sass",
+    "onLanguage:stylus",
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:jsonc"
+  ],
+  "scripts": {
+    "build": "node esbuild.mjs"
+  },
+  "dependencies": {
+    "@biomejs/biome": "~2.4.16",
+    "@tsconfig/node24": "^24.0.4",
+    "@vscode/vsce": "^3.9.2",
+    "bumpp": "^11.1.0",
+    "concurrently": "^10.0.3",
+    "is-ci": "^4.1.0",
+    "lefthook": "^2.1.9",
+    "ovsx": "^1.0.2",
+    "simple-git": "^3.36.0",
+    "tsx": "^4.22.4",
+    "ultracite": "^7.8.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
+  },
+  "contributes": {
+    "snippets": [
+      {
+        "language": "vue-html",
+        "path": "./snippets/vue-html.json"
+      },
+      {
+        "language": "vue",
+        "path": "./snippets/vue-html.json"
+      },
+      {
+        "language": "html",
+        "path": "./snippets/vue-html.json"
+      },
+      {
+        "language": "css",
+        "path": "./snippets/css.json"
+      },
+      {
+        "language": "less",
+        "path": "./snippets/css.json"
+      },
+      {
+        "language": "scss",
+        "path": "./snippets/css.json"
+      },
+      {
+        "language": "sass",
+        "path": "./snippets/css.json"
+      },
+      {
+        "language": "stylus",
+        "path": "./snippets/css.json"
+      },
+      {
+        "language": "vue",
+        "path": "./snippets/css.json"
+      },
+      {
+        "language": "javascript",
+        "path": "./snippets/javascript.json"
+      },
+      {
+        "language": "javascriptreact",
+        "path": "./snippets/javascript.json"
+      },
+      {
+        "language": "typescript",
+        "path": "./snippets/javascript.json"
+      },
+      {
+        "language": "typescriptreact",
+        "path": "./snippets/javascript.json"
+      },
+      {
+        "language": "vue",
+        "path": "./snippets/javascript.json"
+      },
+      {
+        "language": "jsonc",
+        "path": "./snippets/jsonc.json"
+      }
+    ]
+  }
+}
