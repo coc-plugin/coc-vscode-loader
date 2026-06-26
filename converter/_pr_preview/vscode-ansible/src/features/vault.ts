@@ -1,0 +1,531 @@
+import { workspace, Uri } from 'coc.nvim'
+if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
+  try {
+    Object.defineProperty(window, 'activeTextEditor', {
+      get() {
+        try {
+          var doc = typeof workspace !== 'undefined' ? workspace.getDocument() : undefined;
+          return doc ? { document: doc } : undefined;
+        } catch(e) { return undefined }
+      },
+      configurable: true,
+    });
+  } catch {}
+}
+import * as cp from "child_process";
+import * as util from "util";
+
+/* vscode"stdlib" */
+import * as vscode from "coc.nvim";
+
+/* local */
+import { getRootPath, getAnsibleCfg } from "@src/features/utils/ansibleCfg";
+import type { AnsibleVaultConfig } from "@src/features/utils/ansibleCfg";
+import { SettingsManager } from "@src/settings";
+import { withInterpreter } from "@src/features/utils/commandRunner";
+
+const execAsync = util.promisify(cp.exec);
+
+enum MultilineStyle {
+  Literal = "|",
+  Folding = ">",
+}
+
+enum ChompingStyle {
+  Strip = "-",
+  Keep = "+",
+}
+
+async function askForVaultId(ansibleCfg: AnsibleVaultConfig) {
+  const vaultId = "default";
+
+  const identityList = ansibleCfg.defaults.vault_identity_list
+    ?.split(",")
+    .map((id: string) => id.split("@", 2)[0].trim());
+  if (!identityList) {
+    return undefined;
+  }
+
+  if (identityList.length === 1) {
+    return identityList[0];
+  }
+
+  const chosenVault = await vscode.window.showQuickPick(identityList);
+  return chosenVault || vaultId;
+}
+
+function displayInvalidConfigError(): void {
+  vscode.Promise.resolve(vscode.window.showMessage("no valid ansible vault config found, 'error'));
+}
+
+export class Vault {
+  constructor(private extSettings: SettingsManager) {}
+
+  private async ansibleVaultCmd(args: string): Promise<{
+    command: string;
+    env: NodeJS.ProcessEnv;
+  }> {
+    return await withInterpreter(
+      this.extSettings.settings,
+      "ansible-vault",
+      args,
+    );
+  }
+
+  private async resolveVaultId(
+    useVaultIDs: boolean,
+    ansibleConfig: AnsibleVaultConfig,
+  ): Promise<string | undefined> {
+    if (!useVaultIDs) return undefined;
+    const vaultId = await askForVaultId(ansibleConfig);
+    if (!vaultId) {
+      displayInvalidConfigError();
+    }
+    return vaultId;
+  }
+
+  private async encryptInlineSelection(
+    editor: vscode.TextEditor,
+    selection: vscode.Selection,
+    text: string,
+    rootPath: string | undefined,
+    useVaultIDs: boolean,
+    ansibleConfig: AnsibleVaultConfig,
+  ): Promise<void> {
+    console.log("Encrypt selected text");
+    const vaultId = await this.resolveVaultId(useVaultIDs, ansibleConfig);
+    if (useVaultIDs && !vaultId) return;
+
+    const indentationLevel = getIndentationLevel(editor, selection);
+    const rawTabSize = Number(editor.options.tabSize);
+    const tabSize = Number.isFinite(rawTabSize) ? rawTabSize : 4;
+
+    let encryptedText: string;
+    try {
+      encryptedText = await this.encryptInline(
+        text,
+        rootPath,
+        vaultId,
+        indentationLevel,
+        tabSize,
+      );
+    } catch (e) {
+      vscode.Promise.resolve(vscode.window.showMessage(`Inline encryption failed: ${e instanceof Error ? e.message : String(e)}`, 'error'));
+      return;
+    }
+    const leadingSpaces = " ".repeat((indentationLevel + 1) * tabSize);
+    editor.edit((editBuilder) => {
+      editBuilder.replace(
+        selection,
+        encryptedText.replace(/\n\s*/g, `\n${leadingSpaces}`),
+      );
+    });
+  }
+
+  private async decryptInlineSelection(
+    editor: vscode.TextEditor,
+    selection: vscode.Selection,
+    text: string,
+    rootPath: string | undefined,
+  ): Promise<void> {
+    console.log("Decrypt selected text");
+    const indentationLevel = getIndentationLevel(editor, selection);
+    const rawTabSize = Number(editor.options.tabSize);
+    const tabSize = Number.isFinite(rawTabSize) ? rawTabSize : 4;
+
+    let decryptedText: string;
+    try {
+      decryptedText = await this.decryptInline(
+        text,
+        rootPath,
+        indentationLevel,
+        tabSize,
+      );
+    } catch (e) {
+      vscode.Promise.resolve(vscode.window.showMessage(`Inline decryption failed: ${e instanceof Error ? e.message : String(e)}`, 'error'));
+      return;
+    }
+    editor.edit((editBuilder) => {
+      editBuilder.replace(selection, decryptedText);
+    });
+  }
+
+  private async toggleInlineText(
+    editor: vscode.TextEditor,
+    selection: vscode.Selection,
+    text: string,
+    rootPath: string | undefined,
+    useVaultIDs: boolean,
+    ansibleConfig: AnsibleVaultConfig,
+  ): Promise<void> {
+    const type = this.getInlineTextType(text);
+
+    if (type === "plaintext") {
+      await this.encryptInlineSelection(
+        editor,
+        selection,
+        text,
+        rootPath,
+        useVaultIDs,
+        ansibleConfig,
+      );
+    } else if (type === "encrypted") {
+      await this.decryptInlineSelection(editor, selection, text, rootPath);
+    }
+  }
+
+  private async toggleFileEncryption(
+    doc: vscode.TextDocument,
+    rootPath: string | undefined,
+    useVaultIDs: boolean,
+    ansibleConfig: AnsibleVaultConfig,
+  ): Promise<void> {
+    const document = await vscode.workspace.openTextDocument(Uri.parse(doc.uri).fsPath);
+    const type = this.getTextType(document.getText());
+
+    if (type === "plaintext") {
+      console.log("Encrypt entire file");
+      const vaultId = await this.resolveVaultId(useVaultIDs, ansibleConfig);
+      if (useVaultIDs && !vaultId) return;
+
+      vscode.window.activeTextEditor?.document.save();
+      try {
+        await this.encryptFile(Uri.parse(doc.uri).fsPath, rootPath, vaultId);
+        vscode.Promise.resolve(vscode.window.showMessage(`File encrypted: '${Uri.parse(doc.uri).fsPath}'`, 'more'));
+      } catch (e) {
+        vscode.Promise.resolve(vscode.window.showMessage(`Encryption of ${Uri.parse(doc.uri).fsPath} failed: ${e instanceof Error ? e.message : String(e)}`, 'error'));
+      }
+    } else if (type === "encrypted") {
+      console.log("Decrypt entire file");
+      vscode.window.activeTextEditor?.document.save();
+      try {
+        await this.decryptFile(Uri.parse(doc.uri).fsPath, rootPath);
+        vscode.Promise.resolve(vscode.window.showMessage(`File decrypted: '${Uri.parse(doc.uri).fsPath}'`, 'more'));
+      } catch (e) {
+        vscode.Promise.resolve(vscode.window.showMessage(`Decryption of ${Uri.parse(doc.uri).fsPath} failed: ${e instanceof Error ? e.message : String(e)}`, 'error'));
+      }
+    }
+    vscode.commands.executeCommand("workbench.action.files.revert");
+  }
+
+  async toggleEncrypt(): Promise<void> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return;
+    }
+
+    const selection = editor.selection;
+    if (!selection) {
+      return;
+    }
+
+    const rootPath: string | undefined = getRootPath(editor.document.uri);
+    const ansibleConfig = await getAnsibleCfg(rootPath);
+
+    if (!ansibleConfig) {
+      displayInvalidConfigError();
+      return;
+    }
+
+    console.log(`Getting vault keyfile from ${ansibleConfig.path}`);
+    vscode.Promise.resolve(vscode.window.showMessage(`Getting vault keyfile from ${ansibleConfig.path}`, 'more'));
+
+    const text = editor.document.getText(selection);
+    const useVaultIDs = !!ansibleConfig.defaults.vault_identity_list;
+
+    if (text) {
+      await this.toggleInlineText(
+        editor,
+        selection,
+        text,
+        rootPath,
+        useVaultIDs,
+        ansibleConfig,
+      );
+    } else {
+      await this.toggleFileEncryption(
+        editor.document,
+        rootPath,
+        useVaultIDs,
+        ansibleConfig,
+      );
+    }
+  }
+
+  // Returns whether the selected text is encrypted or in plain text.
+  private getInlineTextType(text: string) {
+    if (text.trim().startsWith("!vault |")) {
+      text = text.replace("!vault |", "");
+    }
+
+    return text.trim().startsWith("$ANSIBLE_VAULT;")
+      ? "encrypted"
+      : "plaintext";
+  }
+
+  // Returns whether the file is encrypted or in plain text.
+  private getTextType(text: string) {
+    return text.indexOf("$ANSIBLE_VAULT;") === 0 ? "encrypted" : "plaintext";
+  }
+
+  private async encryptInline(
+    text: string,
+    rootPath: string | undefined,
+    vaultId: string | undefined,
+    indentationLevel: number,
+    tabSize = 0,
+  ) {
+    const encryptedText = await this.encryptText(
+      handleMultiline(text, indentationLevel, tabSize),
+      rootPath,
+      vaultId,
+    );
+    console.debug(`encryptedText == '${encryptedText}'`);
+
+    return encryptedText.trim();
+  }
+
+  private decryptInline = async (
+    text: string,
+    rootPath: string | undefined,
+    indentationLevel: number,
+    tabSize = 0,
+  ) => {
+    // Delete inline vault prefix, then trim spaces and newline from the entire string and, at last, trim the spaces in the multiline string.
+    text = text
+      .replace("!vault |", "")
+      .trim()
+      .replace(/[^\S\r\n]+/gm, "");
+
+    const decryptedText = reindentText(
+      await this.decryptText(text, rootPath),
+      indentationLevel,
+      tabSize,
+    );
+    return decryptedText;
+  };
+
+  private pipeTextThroughCmd(
+    text: string,
+    rootPath: string | undefined,
+    cmd: string,
+    env?: NodeJS.ProcessEnv,
+  ): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      const child = rootPath
+        ? cp.exec(cmd, { cwd: rootPath, env })
+        : cp.exec(cmd, { env });
+      child.stdout?.setEncoding("utf8");
+      let outputText = "";
+      let errorText = "";
+      if (!child.stdin || !child.stdout || !child.stderr) {
+        return undefined;
+      }
+
+      child.stdout.on("data", (data) => (outputText += data));
+      child.stderr.on("data", (data) => (errorText += data));
+
+      child.on("close", (code) => {
+        if (code !== 0) {
+          console.log(`error when running ansible-vault: ${errorText}`);
+          reject(errorText);
+        } else {
+          resolve(outputText);
+        }
+      });
+      child.stdin.write(text);
+      child.stdin.end();
+    });
+  }
+
+  private async encryptText(
+    text: string,
+    rootPath: string | undefined,
+    vaultId: string | undefined,
+  ): Promise<string> {
+    let args = "encrypt_string";
+    if (vaultId) {
+      args += ` --encrypt-vault-id ${vaultId}`;
+    }
+    const { command: cmd, env } = await this.ansibleVaultCmd(args);
+    return this.pipeTextThroughCmd(text, rootPath, cmd, env);
+  }
+
+  private async decryptText(
+    text: string,
+    rootPath: string | undefined,
+  ): Promise<string> {
+    const args = "decrypt";
+    const { command: cmd, env } = await this.ansibleVaultCmd(args);
+    return this.pipeTextThroughCmd(text, rootPath, cmd, env);
+  }
+
+  private async encryptFile(
+    f: string,
+    rootPath: string | undefined,
+    vaultId: string | undefined,
+  ) {
+    console.log(`Encrypt file: ${f}`);
+
+    const args =
+      "encrypt " +
+      (vaultId ? `--encrypt-vault-id="${vaultId}" ` : "") +
+      `"${f}"`;
+    const { command: cmd, env } = await this.ansibleVaultCmd(args);
+
+    return execCwd(cmd, rootPath, env);
+  }
+
+  private decryptFile = async (f: string, rootPath: string | undefined) => {
+    console.log(`Decrypt file: ${f}`);
+    const args = `decrypt "${f}"`;
+    const { command: cmd, env } = await this.ansibleVaultCmd(args);
+
+    return execCwd(cmd, rootPath, env);
+  };
+}
+
+const exec = (cmd: string, opt = {}) => {
+  console.log(`> ${cmd}`);
+  return execAsync(cmd, opt);
+};
+
+const execCwd = (
+  cmd: string,
+  cwd: string | undefined,
+  env?: NodeJS.ProcessEnv,
+) => {
+  if (!cwd) {
+    return exec(cmd, { env });
+  }
+  return exec(cmd, { cwd: cwd, env });
+};
+
+const getIndentationLevel = (
+  editor: vscode.TextEditor,
+  selection: vscode.Selection,
+): number => {
+  if (!editor.options.tabSize) {
+    // according to VS code docs, tabSize is always defined when getting options of an editor
+    throw new Error(
+      "The `tabSize` option is not defined, this should never happen.",
+    );
+  }
+  const startLine = editor.document.lineAt(selection.start.line).text;
+  const indentationMatches = startLine.match(/^\s*/);
+  const leadingWhitespaces = indentationMatches?.[0]?.length || 0;
+  return leadingWhitespaces / Number(editor.options.tabSize);
+};
+
+const foldedMultilineReducer = (
+  accumulator: string,
+  currentValue: string,
+  currentIndex: number,
+  array: string[],
+): string => {
+  if (
+    currentValue === "" ||
+    currentValue.match(/^\s/) ||
+    array[currentIndex - 1].match(/^\s/)
+  ) {
+    return `${accumulator}\n${currentValue}`;
+  }
+  if (accumulator.charAt(accumulator.length - 1) !== "\n") {
+    return `${accumulator} ${currentValue}`;
+  }
+  return `${accumulator}${currentValue}`;
+};
+
+const handleLiteralMultiline = (
+  lines: string[],
+  leadingSpacesCount: number,
+) => {
+  const text = prepareMultiline(lines, leadingSpacesCount).join("\n");
+  const chompingStyle = getChompingStyle(lines);
+  if (chompingStyle === ChompingStyle.Strip) {
+    return text.replace(/\n*$/, "");
+  } else if (chompingStyle === ChompingStyle.Keep) {
+    return `${text}\n`;
+  } else {
+    return text.replace(/\n*$/, "\n");
+  }
+};
+
+const handleFoldedMultiline = (lines: string[], leadingSpacesCount: number) => {
+  const text = prepareMultiline(lines, leadingSpacesCount).reduce(
+    foldedMultilineReducer,
+  );
+  const chompingStyle = getChompingStyle(lines);
+  if (chompingStyle === ChompingStyle.Strip) {
+    return text.replace(/\n*$/g, "");
+  } else if (chompingStyle === ChompingStyle.Keep) {
+    return `${text}\n`;
+  } else {
+    return `${text.replace(/\n$/gm, "")}\n`;
+  }
+};
+
+const handleMultiline = (
+  text: string,
+  indentationLevel: number,
+  tabSize: number,
+) => {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  if (lines.length > 1) {
+    const leadingSpacesCount = (indentationLevel + 1) * tabSize;
+    const multilineStyle = getMultilineStyle(lines);
+    if (multilineStyle === MultilineStyle.Literal) {
+      return handleLiteralMultiline(lines, leadingSpacesCount);
+    } else if (multilineStyle === MultilineStyle.Folding) {
+      return handleFoldedMultiline(lines, leadingSpacesCount);
+    } else {
+      throw new Error("this type of multiline text is not supported");
+    }
+  }
+  return text;
+};
+
+const reindentText = (
+  text: string,
+  indentationLevel: number,
+  tabSize: number,
+) => {
+  const leadingSpacesCount = (indentationLevel + 1) * tabSize;
+  const lines = text.split("\n");
+  let trailingNewlines = 0;
+  for (const line of lines.reverse()) {
+    if (line === "") {
+      trailingNewlines++;
+    } else {
+      break;
+    }
+  }
+  lines.reverse();
+  if (lines.length > 1) {
+    const leadingWhitespaces = " ".repeat(leadingSpacesCount);
+    const rejoinedLines = lines
+      .map((line) => `${leadingWhitespaces}${line}`)
+      .join("\n");
+    rejoinedLines.replace(/\n$/, "");
+    if (trailingNewlines > 1) {
+      return `${MultilineStyle.Literal}${ChompingStyle.Keep}\n${rejoinedLines}`;
+    } else if (trailingNewlines === 0) {
+      return `${MultilineStyle.Literal}${ChompingStyle.Strip}\n${rejoinedLines}`;
+    }
+    return `${MultilineStyle.Literal}\n${rejoinedLines}`;
+  }
+  return text;
+};
+
+const prepareMultiline = (lines: string[], leadingSpacesCount: number) => {
+  const re = new RegExp(`^\\s{${leadingSpacesCount}}`, "");
+  return lines.slice(1, lines.length).map((line) => line.replace(re, ""));
+};
+
+function getMultilineStyle(lines: string[]) {
+  return lines[0].charAt(0);
+}
+
+function getChompingStyle(lines: string[]) {
+  return lines[0].charAt(1);
+}

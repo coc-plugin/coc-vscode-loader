@@ -1,0 +1,12 @@
+{
+  "entryPoint": "src/index.ts",
+  "activationEvents": [
+    "onLanguage:ansible",
+    "onLanguage:yaml"
+  ],
+  "keepDeps": {},
+  "serverDeps": {
+    "@ansible/ansible-language-server": "*"
+  },
+  "hasLanguageClient": true
+}

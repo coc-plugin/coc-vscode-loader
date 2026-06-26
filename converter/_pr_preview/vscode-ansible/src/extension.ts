@@ -1,0 +1,1580 @@
+import { workspace, Uri, ExtensionContext, extensions, window } from 'coc.nvim'
+if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
+  try {
+    Object.defineProperty(window, 'activeTextEditor', {
+      get() {
+        try {
+          var doc = typeof workspace !== 'undefined' ? workspace.getDocument() : undefined;
+          return doc ? { document: doc } : undefined;
+        } catch(e) { return undefined }
+      },
+      configurable: true,
+    });
+  } catch {}
+}
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as vscode from "coc.nvim";
+import { Vault } from "@src/features/vault";
+import { AnsibleCommands } from "@src/definitions/constants";
+import { LightSpeedCommands, UserAction } from "@src/definitions/lightspeed";
+import {
+  TelemetryErrorHandler,
+  TelemetryOutputChannel,
+  TelemetryManager,
+  sendTelemetry,
+} from "@src/utils/telemetryUtils";
+
+/* third-party */
+import {
+  LanguageClient,
+  LanguageClientOptions,
+  NotificationType,
+  ServerOptions,
+  TransportKind,
+  RevealOutputChannelOn,
+} from "vscode-languageclient/node";
+import type {
+  CancellationToken,
+  ConfigurationParams,
+  LSPAny,
+} from "vscode-languageserver-protocol";
+import type { HandlerResult } from "vscode-jsonrpc";
+
+/* local */
+import { SettingsManager } from "@src/settings";
+import { AnsiblePlaybookRunProvider } from "@src/features/runner";
+import {
+  getConflictingExtensions,
+  showUninstallConflictsNotification,
+} from "@src/extensionConflicts";
+import { AnsibleMcpServerProvider } from "@src/utils/mcpProvider";
+import { languageAssociation } from "@src/features/fileAssociation";
+import { MetadataManager } from "@src/features/ansibleMetaData";
+import { updateConfigurationChanges } from "@src/utils/settings";
+import { registerCommandWithTelemetry } from "@src/utils/registerCommands";
+import {
+  isDocumentInRole,
+  isPlaybook,
+} from "@src/features/lightspeed/utils/explanationUtils";
+import { LightSpeedManager } from "@src/features/lightspeed/base";
+import {
+  ignorePendingSuggestion,
+  inlineSuggestionCommitHandler,
+  inlineSuggestionReplaceMarker,
+  inlineSuggestionHideHandler,
+  inlineSuggestionTextDocumentChangeHandler,
+  inlineSuggestionTriggerHandler,
+  LightSpeedInlineSuggestionProvider,
+  rejectPendingSuggestion,
+  setDocumentChanged,
+} from "@src/features/lightspeed/inlineSuggestions";
+import { ContentMatchesWebview } from "@src/features/lightspeed/contentMatchesWebview";
+import { PythonInterpreterManager } from "@src/features/pythonMetadata";
+import { PythonEnvironmentService } from "@src/services/PythonEnvironmentService";
+import { TerminalService } from "@src/services/TerminalService";
+import { AnsibleToxController } from "@src/features/ansibleTox/controller";
+import { AnsibleToxProvider } from "@src/features/ansibleTox/provider";
+import { findProjectDir } from "@src/features/ansibleTox/utils";
+import { QuickLinksWebviewViewProvider } from "@src/features/quickLinks/utils/quickLinksViewProvider";
+import { LlmProviderPanel } from "@src/features/lightspeed/vue/views/llmProviderPanel";
+
+import { WelcomePagePanel } from "@src/features/welcomePage/welcomePagePanel";
+import { withInterpreter } from "@src/features/utils/commandRunner";
+import { ExecException, execSync } from "node:child_process";
+// import { LightspeedExplorerWebviewViewProvider } from '@src/features/lightspeed/explorerWebviewViewProvider';
+import {
+  LightspeedUser,
+  AuthProviderType,
+} from "@src/features/lightspeed/lightspeedUser";
+import {
+  PlaybookFeedbackEvent,
+  RoleFeedbackEvent,
+} from "@src/interfaces/lightspeed";
+import { MainPanel as CreateDevfilePanel } from "@src/features/contentCreator/vue/views/createDevfilePanel";
+import { CreateExecutionEnv } from "@src/features/contentCreator/createExecutionEnvPage";
+import { rightClickEEBuildCommand } from "@src/features/utils/buildExecutionEnvironment";
+import { MainPanel as RoleGenerationPanel } from "@src/features/lightspeed/vue/views/roleGenPanel";
+import { MainPanel as PlaybookGenerationPanel } from "@src/features/lightspeed/vue/views/playbookGenPanel";
+import { MainPanel as ExplanationPanel } from "@src/features/lightspeed/vue/views/explanationPanel";
+import { MainPanel as HelloWorldPanel } from "@src/features/lightspeed/vue/views/helloWorld";
+import { ProviderCommands } from "@src/features/lightspeed/commands/providerCommands";
+import { LlmProviderSettings } from "@src/features/lightspeed/llmProviderSettings";
+import { MainPanel as createAnsibleCollectionPanel } from "@src/features/contentCreator/vue/views/createAnsibleCollectionPanel";
+import { MainPanel as createAnsibleProjectPanel } from "@src/features/contentCreator/vue/views/createAnsibleProjectPanel";
+import { MainPanel as addPluginPanel } from "@src/features/contentCreator/vue/views/addPluginPagePanel";
+import { MainPanel as createRolePanel } from "@src/features/contentCreator/vue/views/createRolePanel";
+import { MainPanel as createDevcontainerPanel } from "@src/features/contentCreator/vue/views/createDevcontainerPanel";
+import { getRoleNameFromFilePath } from "@src/features/lightspeed/utils/getRoleNameFromFilePath";
+import { getRoleNamePathFromFilePath } from "@src/features/lightspeed/utils/getRoleNamePathFromFilePath";
+import { getRoleYamlFiles } from "@src/features/lightspeed/utils/data";
+
+let client: LanguageClient;
+export let lightSpeedManager: LightSpeedManager;
+
+const lsName = "Ansible Support";
+let lsOutputChannel: vscode.OutputChannel;
+
+export async function activate(context: ExtensionContext): Promise<void> {
+  // dynamically associate "ansible" language to the yaml file
+  await languageAssociation(context);
+
+  // Initialize Python Environment Service early
+  const pythonEnvService = PythonEnvironmentService.getInstance();
+  await pythonEnvService.initialize();
+  context.subscriptions.push(pythonEnvService);
+
+  // Initialize Terminal Service
+  const terminalService = TerminalService.getInstance();
+  context.subscriptions.push(terminalService);
+
+  // Create Telemetry Service
+  const telemetry = new TelemetryManager(context);
+  await telemetry.initTelemetryService();
+
+  // Initialize LLM provider settings (uses globalState and secrets)
+  const llmProviderSettings = new LlmProviderSettings(context);
+  await llmProviderSettings.migrateFromSettingsJson();
+
+  // Initialize settings
+  const extSettings = new SettingsManager();
+  extSettings.setLlmProviderSettings(llmProviderSettings);
+  await extSettings.initialize();
+
+  // Vault encrypt/decrypt handler
+  const vault = new Vault(extSettings);
+
+  await registerCommandWithTelemetry(
+    context,
+    telemetry,
+    AnsibleCommands.ANSIBLE_VAULT,
+    vault.toggleEncrypt.bind(vault),
+    true,
+  );
+
+  await registerCommandWithTelemetry(
+    context,
+    telemetry,
+    AnsibleCommands.ANSIBLE_INVENTORY_RESYNC,
+    resyncAnsibleInventory,
+    true,
+  );
+
+  await registerCommandWithTelemetry(
+    context,
+    telemetry,
+    AnsibleCommands.ANSIBLE_PYTHON_SET_INTERPRETER,
+    async () => {
+      await pythonEnvService.selectEnvironment();
+    },
+    true,
+  );
+
+  await registerCommandWithTelemetry(
+    context,
+    telemetry,
+    LightSpeedCommands.LIGHTSPEED_AUTH_REQUEST,
+    lightspeedLogin,
+    true,
+  );
+
+  // start the client and the server
+  const clientStarted = await startClient(context, telemetry, pythonEnvService);
+  if (!clientStarted) return;
+
+  notifyAboutConflicts();
+
+  new AnsiblePlaybookRunProvider(context, extSettings, telemetry);
+
+  // handle metadata status bar
+  const metaData = new MetadataManager(context, client, telemetry, extSettings);
+  await metaData.updateAnsibleInfoInStatusbar();
+
+  // handle python status bar
+  const pythonInterpreterManager = new PythonInterpreterManager(
+    context,
+    telemetry,
+    extSettings,
+    pythonEnvService,
+  );
+  try {
+    await pythonInterpreterManager.updatePythonInfoInStatusbar();
+  } catch (error) {
+    console.error(
+      `Error updating python status bar: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  // Subscribe to Python environment changes to update the status bar and LS
+  context.subscriptions.push(
+    pythonEnvService.onDidChangeEnvironment(async () => {
+      try {
+        if (client && client.isRunning()) {
+          const refreshResult = await client.sendRequest<{
+            success: boolean;
+          }>("ansible/refreshConfiguration", {});
+          if (!refreshResult.success) {
+            console.error(
+              "Language Server configuration refresh failed; status bars may be stale",
+            );
+          }
+        }
+
+        await pythonInterpreterManager.updatePythonInfoInStatusbar();
+        await metaData.updateAnsibleInfoInStatusbar();
+      } catch (error) {
+        console.error(
+          `Error updating after environment change: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }),
+  );
+
+  /**
+   * Handle "Ansible Lightspeed" in the extension
+   */
+  lightSpeedManager = new LightSpeedManager(
+    context,
+    extSettings,
+    telemetry,
+    llmProviderSettings,
+  );
+
+  // Initial async kickoffs, kept out of the (synchronous) constructors above
+  // so construction stays side-effect-free (Sonar S7059).
+  lightSpeedManager.statusBarProvider
+    .updateLightSpeedStatusbar()
+    .catch((error) => {
+      console.error(
+        `[lightspeed] Initial status bar update failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    });
+  // logAuthProviderDebugHints() self-handles its errors, so a bare void is safe.
+  void lightSpeedManager.lightspeedAuthenticatedUser.logAuthProviderDebugHints();
+
+  if (context.extensionMode !== vscode.ExtensionMode.Production) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        "ansible.lightspeed.mockSession",
+        async (session: {
+          accessToken: string;
+          accountId: string;
+          accountLabel: string;
+        }) => {
+          await lightSpeedManager.lightSpeedAuthenticationProvider.setMockSession(
+            session,
+          );
+        },
+      ),
+    );
+  }
+
+  // Register provider management commands
+  const providerCommands = new ProviderCommands(
+    context,
+    lightSpeedManager,
+    llmProviderSettings,
+  );
+  providerCommands.registerCommands();
+
+  vscode.commands.executeCommand("setContext", "lightspeedConnectReady", true);
+
+  const eeBuilderCommand = rightClickEEBuildCommand(
+    "extension.buildExecutionEnvironment",
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      LightSpeedCommands.LIGHTSPEED_STATUS_BAR_CLICK,
+      () =>
+        lightSpeedManager.statusBarProvider.lightSpeedStatusBarClickHandler(),
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      ContentMatchesWebview.viewType,
+      lightSpeedManager.contentMatchesProvider,
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      LightSpeedCommands.LIGHTSPEED_FETCH_TRAINING_MATCHES,
+      () => {
+        void lightSpeedManager.contentMatchesProvider.showContentMatches();
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      LightSpeedCommands.LIGHTSPEED_CLEAR_TRAINING_MATCHES,
+      () => {
+        void lightSpeedManager.contentMatchesProvider.clearContentMatches();
+      },
+    ),
+  );
+
+  const lightSpeedSuggestionProvider = new LightSpeedInlineSuggestionProvider();
+  ["file", "untitled"].forEach((scheme) => {
+    context.subscriptions.push(
+      vscode.languages.registerInlineCompletionItemProvider(
+        { scheme, language: "ansible" },
+        lightSpeedSuggestionProvider,
+      ),
+    );
+  });
+
+  context.subscriptions.push(
+    vscode.commands.registerTextEditorCommand(
+      LightSpeedCommands.LIGHTSPEED_SUGGESTION_COMMIT,
+      inlineSuggestionCommitHandler,
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerTextEditorCommand(
+      LightSpeedCommands.LIGHTSPEED_SUGGESTION_HIDE,
+      async (
+        textEditor: vscode.TextEditor,
+        edit: vscode.TextEditorEdit,
+        userAction?: UserAction,
+      ) => {
+        await inlineSuggestionHideHandler(userAction);
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerTextEditorCommand(
+      LightSpeedCommands.LIGHTSPEED_SUGGESTION_TRIGGER,
+      inlineSuggestionTriggerHandler,
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerTextEditorCommand(
+      LightSpeedCommands.LIGHTSPEED_SUGGESTION_MARKER,
+      (
+        textEditor: vscode.TextEditor,
+        edit: vscode.TextEditorEdit,
+        position: vscode.Position,
+      ) => inlineSuggestionReplaceMarker(position),
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerTextEditorCommand(
+      LightSpeedCommands.LIGHTSPEED_PLAYBOOK_EXPLANATION,
+      async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+          return;
+        }
+
+        const { document } = editor;
+        const fileName = path.basename(Uri.parse(document.uri).fsPath);
+        const content = document.getText();
+
+        if (document.languageId !== "ansible" || !isPlaybook(content)) {
+          return;
+        }
+
+        ExplanationPanel.render(context, "playbook", {
+          content,
+          fileName,
+        });
+      },
+    ),
+  );
+
+  // Listen for text selection changes
+  context.subscriptions.push(
+    vscode.window.onDidChangeTextEditorSelection(async () => {
+      void rejectPendingSuggestion();
+    }),
+  );
+
+  // At window focus change, check if an inline suggestion is pending and ignore it if it exists.
+  context.subscriptions.push(
+    vscode.window.onDidChangeWindowState(async (state: vscode.WindowState) => {
+      if (!state.focused) {
+        void ignorePendingSuggestion();
+      }
+    }),
+  );
+
+  // register ansible meta data in the statusbar tooltip (client-server)
+  context.subscriptions.push(
+    workspace.onDidOpenTextDocument(
+      async (editor: vscode.TextEditor | undefined) => {
+        await updateAnsibleStatusBar(
+          metaData,
+          lightSpeedManager,
+          pythonInterpreterManager,
+        );
+        await updateDocumentInRoleContext();
+        if (!editor) {
+          await ignorePendingSuggestion();
+        }
+        if (!extSettings.settings.lightSpeedService.enabled) {
+          return;
+        }
+        lightSpeedManager.lightspeedExplorerProvider?.refreshWebView();
+      },
+    ),
+  );
+  context.subscriptions.push(
+    workspace.onDidOpenTextDocument(async () => {
+      await updateAnsibleStatusBar(
+        metaData,
+        lightSpeedManager,
+        pythonInterpreterManager,
+      );
+      if (!extSettings.settings.lightSpeedService.enabled) {
+        return;
+      }
+      void metaData.sendAnsibleMetadataTelemetry();
+    }),
+  );
+  context.subscriptions.push(
+    workspace.onDidChangeTextDocument(
+      (event: vscode.TextDocumentChangeEvent) => {
+        if (
+          event.document === vscode.window.activeTextEditor?.document &&
+          event.contentChanges.length > 0 &&
+          event.contentChanges[0].text[0] !== "\n"
+        ) {
+          setDocumentChanged(true);
+        }
+      },
+    ),
+  );
+  context.subscriptions.push(
+    workspace.onDidChangeTextDocument(
+      (event: vscode.TextDocumentChangeEvent) => {
+        if (
+          event.document === vscode.window.activeTextEditor?.document &&
+          event.contentChanges.length > 0 &&
+          event.contentChanges[0].text[0] !== "\n"
+        ) {
+          setDocumentChanged(true);
+        }
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    workspace.onDidChangeConfiguration(async (event) => {
+      // Check if MCP server setting changed
+      if (event.affectsConfiguration("ansible.mcpServer.enabled")) {
+        await handleMcpServerConfigurationChange(
+          extSettings,
+          event,
+          mcpProvider,
+        );
+      }
+
+      await updateConfigurationChanges(
+        metaData,
+        pythonInterpreterManager,
+        extSettings,
+        lightSpeedManager,
+      );
+      await updateAnsibleStatusBar(
+        metaData,
+        lightSpeedManager,
+        pythonInterpreterManager,
+      );
+      void metaData.sendAnsibleMetadataTelemetry();
+    }),
+  );
+
+  context.subscriptions.push(
+    workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
+      void inlineSuggestionTextDocumentChangeHandler(e);
+    }),
+  );
+
+  context.subscriptions.push(
+    workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
+      void inlineSuggestionTextDocumentChangeHandler(e);
+    }),
+  );
+
+  // Initialize QuickLinks provider early so it's available in auth callback
+  const quickLinksHome = new QuickLinksWebviewViewProvider(
+    context.extensionUri,
+    context,
+    llmProviderSettings,
+  );
+
+  context.subscriptions.push(
+    vscode.authentication.onDidChangeSessions(async (e) => {
+      if (!LightspeedUser.isLightspeedUserAuthProviderType(e.provider.id)) {
+        return;
+      }
+      await lightSpeedManager.lightspeedAuthenticatedUser.refreshLightspeedUser();
+      const isAuthenticated =
+        await lightSpeedManager.lightspeedAuthenticatedUser.isAuthenticated();
+
+      if (!isAuthenticated) {
+        lightSpeedManager.currentModelValue = undefined;
+      }
+
+      // Update WCA connection status based on auth state
+      await llmProviderSettings.setConnectionStatus(isAuthenticated, "wca");
+
+      // Refresh LLM Provider Panel if it's open
+      if (LlmProviderPanel.currentPanel) {
+        await LlmProviderPanel.currentPanel.refreshWebView();
+      }
+
+      // Refresh QuickLinks sidebar to update provider status
+      quickLinksHome.refreshProviderInfo();
+
+      if (!extSettings.settings.lightSpeedService.enabled) {
+        return;
+      }
+      lightSpeedManager.lightspeedExplorerProvider?.refreshWebView();
+      void lightSpeedManager.statusBarProvider.updateLightSpeedStatusbar();
+    }),
+  );
+
+  const quickLinksDisposable = window.registerWebviewViewProvider(
+    QuickLinksWebviewViewProvider.viewType,
+    quickLinksHome,
+  );
+
+  context.subscriptions.push(quickLinksDisposable);
+
+  // Register LLM Provider Settings panel command
+  const openLlmProviderSettingsCommand = vscode.commands.registerCommand(
+    LightSpeedCommands.LIGHTSPEED_OPEN_LLM_PROVIDER_SETTINGS,
+    () => {
+      LlmProviderPanel.render(context, {
+        settingsManager: extSettings,
+        providerManager: lightSpeedManager.providerManager,
+        llmProviderSettings: llmProviderSettings,
+        lightspeedUser: lightSpeedManager.lightspeedAuthenticatedUser,
+        quickLinksProvider: quickLinksHome,
+      });
+    },
+  );
+
+  context.subscriptions.push(openLlmProviderSettingsCommand);
+
+  // Register the Sign in with Red Hat command
+  const lightspeedSignInWithRedHatCommand = vscode.commands.registerCommand(
+    LightSpeedCommands.LIGHTSPEED_SIGN_IN_WITH_REDHAT,
+    async () => {
+      // NOTE: We can't gate this check on if this extension is active,
+      // because it only activates on an authentication request.
+      if (!vscode.extensions.getExtensionById("redhat.vscode-redhat-account")) {
+        Promise.resolve(window.showMessage("You must install the Red Hat Authentication extension to sign in with Red Hat.", 'error'));
+        return;
+      }
+      void lightspeedLogin(AuthProviderType.rhsso);
+    },
+  );
+  context.subscriptions.push(lightspeedSignInWithRedHatCommand);
+
+  // Register the Sign in with Lightspeed command
+  const lightspeedSignInWithLightspeedCommand = vscode.commands.registerCommand(
+    LightSpeedCommands.LIGHTSPEED_SIGN_IN_WITH_LIGHTSPEED,
+    () => {
+      void lightspeedLogin(AuthProviderType.lightspeed);
+    },
+  );
+  context.subscriptions.push(lightspeedSignInWithLightspeedCommand);
+
+  /**
+   * Handle "Ansible Tox" in the extension
+   */
+  const ansibleToxController = new AnsibleToxController();
+  context.subscriptions.push(ansibleToxController.create());
+
+  const workspaceTox = findProjectDir();
+
+  if (workspaceTox) {
+    const testProvider = new AnsibleToxProvider(workspaceTox);
+    context.subscriptions.push(
+      vscode.tasks.registerTaskProvider(
+        AnsibleToxProvider.toxType,
+        testProvider,
+      ),
+    );
+  }
+
+  /**
+   * Handle "Ansible Creator" in the extension
+   */
+
+  // pip install ansible-creator
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.content-creator.install",
+      async () => {
+        const extSettings = new SettingsManager();
+        await extSettings.initialize();
+
+        const pythonInterpreter = extSettings.settings.interpreterPath;
+
+        // specify the current python interpreter path in the pip installation
+        const { command, env } = await withInterpreter(
+          extSettings.settings,
+          `${pythonInterpreter} -m pip install ansible-creator`,
+          "--no-input",
+        );
+
+        let terminal: vscode.Terminal;
+        if (
+          vscode.workspace.getConfiguration("ansible.ansible").reuseTerminal
+        ) {
+          const existing = vscode.window.terminals.find(
+            (t) => t.name === "Ansible Terminal",
+          );
+          if (existing) {
+            terminal = existing;
+          } else {
+            terminal = vscode.window.createTerminal({
+              name: "Ansible Terminal",
+              env: env,
+            });
+          }
+        } else {
+          terminal = vscode.window.createTerminal({
+            name: "Ansible Terminal",
+            env: env,
+          });
+        }
+        terminal.show();
+        terminal.sendText(command);
+      },
+    ),
+  );
+
+  // open ansible extension workspace settings directly
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.extension-settings.open",
+      async () => {
+        await vscode.commands.executeCommand(
+          "workbench.action.openWorkspaceSettings",
+          "ansible",
+        );
+      },
+    ),
+  );
+
+  // open ansible-python workspace settings directly
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.python-settings.open",
+      async () => {
+        await vscode.commands.executeCommand(
+          "workbench.action.openWorkspaceSettings",
+          "ansible.python",
+        );
+      },
+    ),
+  );
+
+  // open ansible-content-creator menu
+  context.subscriptions.push(
+    vscode.commands.registerCommand("ansible.content-creator.menu", () => {
+      WelcomePagePanel.render(context);
+    }),
+  );
+
+  // open web-view for creating ansible collection
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.content-creator.create-ansible-collection",
+      () => {
+        createAnsibleCollectionPanel.render(context);
+      },
+    ),
+  );
+
+  // open web-view for creating ansible playbook project
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.content-creator.create-ansible-project",
+      () => {
+        createAnsibleProjectPanel.render(context);
+      },
+    ),
+  );
+
+  // open web-view for creating devfile
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.content-creator.create-devfile",
+      () => {
+        CreateDevfilePanel.render(context);
+      },
+    ),
+  );
+
+  // open web-view for creating Execution Environment file
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.content-creator.create-execution-env-file",
+      () => {
+        CreateExecutionEnv.render(context);
+      },
+    ),
+  );
+
+  // open web-view for adding a plugin in an ansible collection
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.content-creator.add-plugin",
+      () => {
+        addPluginPanel.render(context);
+      },
+    ),
+  );
+
+  // open web-view for adding role in an ansible collection
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.content-creator.create-role",
+      () => {
+        createRolePanel.render(context);
+      },
+    ),
+  );
+
+  // open web-view for creating devcontainer
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.content-creator.create-devcontainer",
+      () => {
+        createDevcontainerPanel.render(context);
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      LightSpeedCommands.LIGHTSPEED_PLAYBOOK_GENERATION,
+      async () => {
+        PlaybookGenerationPanel.render(context);
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      LightSpeedCommands.LIGHTSPEED_ROLE_GENERATION,
+      async () => {
+        RoleGenerationPanel.render(context);
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("ansible.hello.world", async () => {
+      HelloWorldPanel.render(context);
+    }),
+  );
+
+  // Register MCP server provider
+  const mcpProvider = new AnsibleMcpServerProvider(context.extensionPath);
+  const mcpProviderDisposable = vscode.lm.registerMcpServerDefinitionProvider(
+    "ansibleMcpProvider",
+    {
+      onDidChangeMcpServerDefinitions:
+        mcpProvider.onDidChangeMcpServerDefinitions,
+      provideMcpServerDefinitions:
+        mcpProvider.provideMcpServerDefinitions.bind(mcpProvider),
+      resolveMcpServerDefinition:
+        mcpProvider.resolveMcpServerDefinition.bind(mcpProvider),
+    },
+  );
+  context.subscriptions.push(mcpProviderDisposable);
+  context.subscriptions.push(mcpProvider);
+
+  // enable MCP server
+  context.subscriptions.push(
+    vscode.commands.registerCommand("ansible.mcpServer.enabled", async () => {
+      try {
+        // Check if MCP server is already enabled
+        const mcpConfig =
+          vscode.workspace.getConfiguration("ansible.mcpServer");
+        const isEnabled = mcpConfig.get("enabled", false);
+
+        if (isEnabled) {
+          vscode.Promise.resolve(vscode.window.showMessage("Ansible Development Tools MCP Server is already enabled and available.", 'more'));
+          return;
+        }
+
+        // Enable the MCP server setting
+        await vscode.workspace
+          .getConfiguration("ansible.mcpServer")
+          .update("enabled", true, vscode.ConfigurationTarget.Workspace);
+
+        // Reinitialize settings to pick up the change
+        await extSettings.reinitialize();
+
+        // Refresh the MCP provider to register the server
+        mcpProvider.refresh();
+
+        vscode.Promise.resolve(vscode.window.showMessage("Ansible Development Tools MCP Server has been enabled successfully and is now available for AI assistants.", 'more'));
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        vscode.Promise.resolve(vscode.window.showMessage(`Failed to enable MCP Server: ${errorMessage}`, 'error'));
+        console.error("Error enabling MCP Server:", error);
+      }
+    }),
+  );
+
+  // disable MCP server
+  context.subscriptions.push(
+    vscode.commands.registerCommand("ansible.mcpServer.disable", async () => {
+      try {
+        // Check if MCP server is already disabled
+        const mcpConfig =
+          vscode.workspace.getConfiguration("ansible.mcpServer");
+        const isEnabled = mcpConfig.get("enabled", false);
+
+        if (!isEnabled) {
+          vscode.Promise.resolve(vscode.window.showMessage("Ansible Development Tools MCP Server is already disabled.", 'more'));
+          return;
+        }
+
+        // Disable the MCP server setting
+        await vscode.workspace
+          .getConfiguration("ansible.mcpServer")
+          .update("enabled", false, vscode.ConfigurationTarget.Workspace);
+
+        // Reinitialize settings to pick up the change
+        await extSettings.reinitialize();
+
+        // Refresh the MCP provider to unregister the server
+        mcpProvider.refresh();
+
+        vscode.Promise.resolve(vscode.window.showMessage("Ansible Development Tools MCP Server has been disabled.", 'more'));
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        vscode.Promise.resolve(vscode.window.showMessage(`Failed to disable MCP Server: ${errorMessage}`, 'error'));
+        console.error("Error disabling MCP Server:", error);
+      }
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerTextEditorCommand(
+      LightSpeedCommands.LIGHTSPEED_ROLE_EXPLANATION,
+      async () => {
+        if (!vscode.window.activeTextEditor) {
+          return;
+        }
+        const document = vscode.window.activeTextEditor.document;
+        const documentInRole = await isDocumentInRole(document);
+
+        if (!documentInRole) {
+          return;
+        }
+
+        const roleName = getRoleNameFromFilePath(Uri.parse(document.uri).fsPath);
+        const rolePath = getRoleNamePathFromFilePath(Uri.parse(document.uri).fsPath);
+
+        const files = await getRoleYamlFiles(rolePath);
+
+        ExplanationPanel.render(context, "role", {
+          roleName: roleName,
+          files: files,
+        });
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.lightspeed.thumbsUpDown",
+      async (param: PlaybookFeedbackEvent) => {
+        const provider = extSettings.settings.lightSpeedService.provider;
+        // For LLM providers, send telemetry via Segment instead of WCA API
+        if (provider && provider !== "wca") {
+          const isExplanation = !!param.explanationId;
+          const eventName = isExplanation
+            ? "lightspeed.playbookExplanationFeedback"
+            : "lightspeed.playbookOutlineFeedback";
+
+          const telemetryData = {
+            provider: provider,
+            action: param.action,
+            explanationId: param.explanationId || undefined,
+            generationId: param.generationId || undefined,
+            model:
+              extSettings.settings.lightSpeedService.modelName || undefined,
+          };
+
+          // Send telemetry event
+          try {
+            await sendTelemetry(
+              telemetry.telemetryService,
+              telemetry.isTelemetryInit,
+              eventName,
+              telemetryData,
+            );
+          } catch (error) {
+            console.error(
+              `[Lightspeed Playbook Feedback] Telemetry failed: ${error instanceof Error ? error.message : String(error)}`,
+              error,
+            );
+          }
+          // Show success message
+          vscode.Promise.resolve(vscode.window.showMessage("Thanks for your feedback!", 'more'));
+          return;
+        }
+
+        // WCA provider - send to API
+        if (param.explanationId) {
+          void lightSpeedManager.apiInstance.feedbackRequest(
+            { playbookExplanationFeedback: param },
+            true,
+            true,
+          );
+        } else {
+          void lightSpeedManager.apiInstance.feedbackRequest(
+            { playbookOutlineFeedback: param },
+            true,
+            true,
+          );
+        }
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.lightspeed.roleThumbsUpDown",
+      async (param: RoleFeedbackEvent) => {
+        const provider = extSettings.settings.lightSpeedService.provider;
+
+        // For LLM providers, send telemetry via Segment
+        if (provider && provider !== "wca") {
+          // Send telemetry event with same payload structure as WCA
+          try {
+            await sendTelemetry(
+              telemetry.telemetryService,
+              telemetry.isTelemetryInit,
+              "lightspeed.roleExplanationFeedback",
+              {
+                provider: provider,
+                ...param, // Include all original fields
+                model:
+                  extSettings.settings.lightSpeedService.modelName || undefined,
+              },
+            );
+          } catch (error) {
+            console.error(
+              `[Lightspeed Role Feedback] Telemetry failed: ${error instanceof Error ? error.message : String(error)}`,
+              error,
+            );
+          }
+
+          vscode.Promise.resolve(vscode.window.showMessage("Thanks for your feedback!", 'more'));
+          return;
+        }
+
+        // WCA provider - send to API
+        void lightSpeedManager.apiInstance.feedbackRequest(
+          { roleExplanationFeedback: param },
+          true,
+          true,
+        );
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      LightSpeedCommands.LIGHTSPEED_OPEN_TRIAL_PAGE,
+      () => {
+        vscode.env.openExternal(
+          vscode.Uri.parse(
+            lightSpeedManager.settingsManager.settings.lightSpeedService
+              .apiEndpoint + "/trial",
+          ),
+        );
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      LightSpeedCommands.LIGHTSPEED_REFRESH_EXPLORER_VIEW,
+      async () => {
+        console.log("Refreshing Lightspeed Explorer View");
+        await lightSpeedManager.lightspeedAuthenticatedUser.updateUserInformation();
+        lightSpeedManager.lightspeedExplorerProvider?.refreshWebView();
+      },
+    ),
+  );
+
+  // getting started walkthrough command
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.walkthrough.gettingStarted.setLanguage",
+      () => {
+        vscode.commands.executeCommand("runCommands", {
+          commands: [
+            "workbench.action.focusRightGroup",
+            "workbench.action.editor.changeLanguageMode",
+          ],
+        });
+      },
+    ),
+  );
+
+  // install ansible development tools
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.install-ansible-dev-tools",
+      async () => {
+        const extSettings = new SettingsManager();
+        await extSettings.initialize();
+
+        const pythonInterpreter = extSettings.settings.interpreterPath;
+
+        // specify the current python interpreter path in the pip installation
+        const { command, env } = await withInterpreter(
+          extSettings.settings,
+          `${pythonInterpreter} -m pip install ansible-dev-tools`,
+          "--no-input",
+        );
+
+        const outputChannel = window.createOutputChannel(`Ansible Logs`);
+
+        let commandOutput = "";
+        let commandPassed = false;
+
+        vscode.window.withProgress(
+          {
+            title: "Please wait...",
+            location: vscode.ProgressLocation.Notification,
+            cancellable: true,
+          },
+          async (_, token) => {
+            // You code to process the progress
+
+            token.onCancellationRequested(async () => {
+              await vscode.Promise.resolve(vscode.window.showMessage("Installation cancelled", 'error'));
+            });
+
+            try {
+              const result = execSync(command, {
+                env: env,
+              }).toString();
+              commandOutput = result;
+              outputChannel.append(commandOutput);
+              commandPassed = true;
+            } catch (error) {
+              let errorMessage: string;
+              if (error instanceof Error) {
+                const execError = error as ExecException & {
+                  // according to the docs, these are always available
+                  stdout: string;
+                  stderr: string;
+                };
+
+                errorMessage = execError.stdout
+                  ? execError.stdout
+                  : execError.stderr;
+                errorMessage += execError.message;
+              } else {
+                errorMessage = `Exception: ${JSON.stringify(error)}`;
+              }
+
+              commandOutput = errorMessage;
+              outputChannel.append(commandOutput);
+              commandPassed = false;
+            }
+          },
+        );
+
+        if (commandPassed) {
+          const selection = await vscode.Promise.resolve(vscode.window.showMessage("Ansible Development Tools installed successfully.", 'more'));
+
+          if (selection !== undefined) {
+            outputChannel.show();
+          }
+        } else {
+          const selection = await vscode.Promise.resolve(vscode.window.showMessage("Ansible Development Tools failed to install.", 'error'));
+
+          if (selection !== undefined) {
+            outputChannel.show();
+          }
+        }
+      },
+    ),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.open-walkthrough-create-env",
+      () => {
+        vscode.commands.executeCommand(
+          "workbench.action.openWalkthrough",
+          "redhat.ansible#create-ansible-environment",
+          false,
+        );
+      },
+    ),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "ansible.create-playbook-options",
+      async () => {
+        const isAuthenticated =
+          await lightSpeedManager.lightspeedAuthenticatedUser.isAuthenticated();
+        if (isAuthenticated) {
+          vscode.commands.executeCommand(
+            "ansible.lightspeed.playbookGeneration",
+          );
+        } else {
+          vscode.commands.executeCommand("ansible.create-empty-playbook");
+        }
+      },
+    ),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("ansible.create-empty-playbook", () => {
+      const playbookTemplate = `---\n# Write your playbook below.\n# Replace these contents with the tasks you'd like to complete and the modules you need.\n# For help getting started, check out https://www.redhat.com/en/topics/automation/what-is-an-ansible-playbook\n`;
+
+      vscode.workspace
+        .openTextDocument({
+          content: playbookTemplate,
+          language: "ansible",
+        })
+        .then((newDocument) => {
+          vscode.window.showTextDocument(newDocument);
+        });
+    }),
+  );
+  // open ansible language server logs
+  context.subscriptions.push(
+    vscode.commands.registerCommand("ansible.open-language-server-logs", () => {
+      lsOutputChannel.show();
+    }),
+  );
+  context.subscriptions.push(eeBuilderCommand);
+}
+
+const startClient = async (
+  context: ExtensionContext,
+  telemetry: TelemetryManager,
+  pythonEnvService: PythonEnvironmentService,
+): Promise<boolean> => {
+  const distServer = path.join(
+    context.extensionPath,
+    "packages",
+    "ansible-language-server",
+    "dist",
+    "cli.cjs",
+  );
+  const libServer = path.join(
+    context.extensionPath,
+    "packages",
+    "ansible-language-server",
+    "lib",
+    "cli.cjs",
+  );
+  const packageServer = path.join(
+    context.extensionPath,
+    "node_modules",
+    "@ansible",
+    "ansible-language-server",
+    "dist",
+    "cli.js",
+  );
+  const bundledServer = [distServer, libServer, packageServer].find((p) =>
+    fs.existsSync(p),
+  );
+  if (!bundledServer) {
+    Promise.resolve(window.showMessage("Ansible Language Server not found. Please reinstall the extension.", 'error'));
+    return false;
+  }
+
+  // server is run at port 6009 for debugging
+  const debugOptions = { execArgv: ["--nolazy", "--inspect=6010"] };
+
+  const serverOptions: ServerOptions = {
+    run: { module: bundledServer, transport: TransportKind.ipc },
+    debug: {
+      module: bundledServer,
+      transport: TransportKind.ipc,
+      options: debugOptions,
+    },
+  };
+
+  const telemetryErrorHandler = new TelemetryErrorHandler(
+    telemetry.telemetryService,
+    lsName,
+    4,
+  );
+  const outputChannel = window.createOutputChannel(lsName, { log: true });
+  lsOutputChannel = outputChannel;
+
+  const clientOptions: LanguageClientOptions = {
+    documentSelector: [{ scheme: "file", language: "ansible" }],
+    revealOutputChannelOn: RevealOutputChannelOn.Never,
+    errorHandler: telemetryErrorHandler,
+    outputChannel: new TelemetryOutputChannel(
+      outputChannel,
+      telemetry.telemetryService,
+    ),
+    middleware: {
+      workspace: {
+        configuration: makeConfigurationMiddleware(
+          pythonEnvService,
+          outputChannel,
+        ),
+      },
+    },
+  };
+
+  client = new LanguageClient(
+    "ansibleServer",
+    "Ansible Server",
+    serverOptions,
+    clientOptions,
+  );
+
+  // TODO: Temporary pause this telemetry event, will be enabled in future
+  // context.subscriptions.push(
+  //   client.onTelemetry((e) => {
+  //     telemetry.telemetryService.send(e);
+  //   }),
+  // );
+
+  try {
+    await client.start();
+
+    // Level-triggered gate: resolves immediately if docsLibrary is already
+    // ready, otherwise waits for the next ansible/docsLibraryReady notification.
+    // Re-armed only when ansible.* config changes invalidate the library.
+    let docsReady = newDocsReadyGate();
+    let docsLibraryIsReady = false;
+    client.onNotification(
+      new NotificationType("ansible/docsLibraryReady"),
+      () => {
+        docsLibraryIsReady = true;
+        docsReady.resolve();
+      },
+    );
+    context.subscriptions.push(
+      workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration("ansible")) {
+          docsLibraryIsReady = false;
+          docsReady = newDocsReadyGate();
+        }
+      }),
+    );
+    context.subscriptions.push(
+      vscode.commands.registerCommand("ansible.awaitDocsLibraryReady", () =>
+        docsLibraryIsReady ? Promise.resolve() : docsReady.promise,
+      ),
+    );
+
+    // If the extensions change, fire this notification again to pick up on any association changes
+    extensions.onDidChange(() => {
+      notifyAboutConflicts();
+    });
+    // TODO: Temporary pause this telemetry event, will be enabled in future
+    // telemetry.sendStartupTelemetryEvent(true);
+    return true;
+  } catch (err) {
+    let errorMessage: string;
+    if (err instanceof Error) {
+      errorMessage = err.message;
+    } else {
+      errorMessage = String(err);
+    }
+    console.error(`Language Client initialization failed with ${errorMessage}`);
+    // TODO: Temporary pause this telemetry event, will be enabled in future
+    // telemetry.sendStartupTelemetryEvent(false, errorMessage);
+    return false;
+  }
+};
+
+export function deactivate(): Thenable<void> | undefined {
+  if (!client) {
+    return undefined;
+  }
+  return client.stop();
+}
+
+const handleMcpServerConfigurationChange = async (
+  extSettings: SettingsManager,
+  event: vscode.ConfigurationChangeEvent,
+  mcpProvider: AnsibleMcpServerProvider,
+) => {
+  try {
+    // Check if the change affects our MCP setting
+    if (!event.affectsConfiguration("ansible.mcpServer.enabled")) {
+      return;
+    }
+
+    // Wait for the setting to be updated
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Get the current setting value
+    const workspaceConfig = vscode.workspace.getConfiguration(
+      "ansible.mcpServer",
+      vscode.workspace.workspaceFolders?.[0],
+    );
+    const currentSetting = workspaceConfig.get("enabled");
+
+    if (currentSetting) {
+      // MCP server was enabled - refresh the provider to register the server
+      console.log("MCP server enabled, refreshing provider");
+      mcpProvider?.refresh();
+
+      // Show success message
+      vscode.Promise.resolve(vscode.window.showMessage("Ansible Development Tools MCP Server has been enabled successfully and is now available for AI assistants.", 'more'));
+    } else {
+      // MCP server was disabled - refresh the provider to unregister the server
+      console.log("MCP server disabled, refreshing provider");
+      mcpProvider?.refresh();
+
+      // Show success message
+      vscode.Promise.resolve(vscode.window.showMessage("Ansible Development Tools MCP Server has been disabled.", 'more'));
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(
+      `Failed to handle MCP server configuration change: ${errorMessage}`,
+    );
+
+    // Show error to user
+    vscode.Promise.resolve(vscode.window.showMessage(`Failed to update MCP server configuration: ${errorMessage}`, 'error'));
+  }
+};
+
+async function updateAnsibleStatusBar(
+  metaData: MetadataManager,
+  lightSpeedManager: LightSpeedManager,
+  pythonInterpreterManager: PythonInterpreterManager,
+) {
+  await metaData.updateAnsibleInfoInStatusbar();
+  await lightSpeedManager.statusBarProvider.updateLightSpeedStatusbar();
+  await pythonInterpreterManager.updatePythonInfoInStatusbar();
+}
+/**
+ * Finds extensions that conflict with our extension.
+ * If one or more conflicts are found then show an uninstall notification
+ * If no conflicts are found then do nothing
+ */
+function notifyAboutConflicts(): void {
+  const conflictingExtensions = getConflictingExtensions();
+  if (conflictingExtensions.length > 0) {
+    void showUninstallConflictsNotification(conflictingExtensions);
+  }
+}
+
+/**
+ * Sends notification to the server to invalidate ansible inventory service cache
+ * And resync the ansible inventory
+ */
+
+async function resyncAnsibleInventory(): Promise<void> {
+  if (client.isRunning()) {
+    client.onNotification(
+      new NotificationType(`resync/ansible-inventory`),
+      (event) => {
+        console.log("resync ansible inventory event ->", event);
+      },
+    );
+    void client.sendNotification(
+      new NotificationType(`resync/ansible-inventory`),
+    );
+  }
+}
+
+async function lightspeedLogin(
+  providerType: AuthProviderType | undefined,
+): Promise<void> {
+  lightSpeedManager.currentModelValue = undefined;
+  const authenticatedUser =
+    await lightSpeedManager.lightspeedAuthenticatedUser.getLightspeedUserDetails(
+      true,
+      providerType,
+    );
+  if (authenticatedUser) {
+    Promise.resolve(window.showMessage(`Welcome back ${authenticatedUser.displayNameWithUserType}`, 'more'));
+  }
+}
+
+async function updateDocumentInRoleContext() {
+  const document = vscode.window.activeTextEditor?.document;
+  const isInRole = document
+    ? await isDocumentInRole(document).catch(() => false)
+    : false;
+  vscode.commands.executeCommand(
+    "setContext",
+    "redhat.ansible.isDocumentInRole",
+    isInRole,
+  );
+}
+
+/**
+ * Intercepts workspace/configuration requests from the Language Server and
+ * injects the Python interpreter path resolved by PythonEnvironmentService
+ * when the user has not explicitly set `ansible.python.interpreterPath`.
+ */
+export function makeConfigurationMiddleware(
+  pythonEnvService: PythonEnvironmentService,
+  outputChannel: vscode.OutputChannel,
+) {
+  // Per-scope state: track last logged path separately by source to prevent incorrect suppression
+  const lastLoggedUserByScope = new Map<string, string>(); // scopeUri -> user-configured path
+  const lastLoggedResolvedByScope = new Map<string, string>(); // scopeUri -> auto-resolved path or "" for none
+
+  async function resolveUserConfiguredPath(
+    scopeUri: string,
+    rawInterpreterPath: string,
+    config: Record<string, unknown>,
+    pythonConfig: Record<string, unknown> | undefined,
+  ): Promise<Record<string, unknown>> {
+    const scope = scopeUri ? vscode.Uri.parse(scopeUri) : undefined;
+    let resolvedUserPath: string | undefined;
+    try {
+      resolvedUserPath = await pythonEnvService.resolveInterpreterPath(
+        rawInterpreterPath,
+        scope,
+      );
+    } catch (error) {
+      outputChannel.appendLine(
+        `[Ansible] Failed to resolve user-configured interpreterPath: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return config;
+    }
+
+    if (lastLoggedUserByScope.get(scopeUri) !== rawInterpreterPath) {
+      outputChannel.appendLine(
+        `[Ansible] Using user-configured interpreterPath: ${rawInterpreterPath}${resolvedUserPath !== rawInterpreterPath ? ` (resolved: ${resolvedUserPath})` : ""}`,
+      );
+      lastLoggedUserByScope.set(scopeUri, rawInterpreterPath);
+    }
+
+    if (resolvedUserPath && resolvedUserPath !== rawInterpreterPath) {
+      return {
+        ...config,
+        python: { ...pythonConfig, interpreterPath: resolvedUserPath },
+      };
+    }
+    return config;
+  }
+
+  async function resolveAutoDetectedPath(
+    scopeUri: string,
+    config: Record<string, unknown>,
+    pythonConfig: Record<string, unknown> | undefined,
+  ): Promise<Record<string, unknown>> {
+    const scope = scopeUri ? vscode.Uri.parse(scopeUri) : undefined;
+    let resolvedPath: string | undefined;
+    try {
+      resolvedPath = await pythonEnvService.getExecutablePath(scope);
+    } catch (error) {
+      if (lastLoggedResolvedByScope.get(scopeUri) !== "") {
+        outputChannel.appendLine(
+          `[Ansible] Failed to resolve Python environment: ${error instanceof Error ? error.message : String(error)}`,
+        );
+        lastLoggedResolvedByScope.set(scopeUri, "");
+      }
+      return config;
+    }
+
+    if (resolvedPath) {
+      if (lastLoggedResolvedByScope.get(scopeUri) !== resolvedPath) {
+        outputChannel.appendLine(
+          `[Ansible] Python environment changed: ${resolvedPath}`,
+        );
+        lastLoggedResolvedByScope.set(scopeUri, resolvedPath);
+      }
+      return {
+        ...config,
+        python: { ...pythonConfig, interpreterPath: resolvedPath },
+      };
+    }
+
+    if (lastLoggedResolvedByScope.get(scopeUri) !== "") {
+      outputChannel.appendLine("[Ansible] No Python environment available");
+      lastLoggedResolvedByScope.set(scopeUri, "");
+    }
+    return config;
+  }
+
+  return (
+    params: ConfigurationParams,
+    token: CancellationToken,
+    next: (
+      params: ConfigurationParams,
+      token: CancellationToken,
+    ) => HandlerResult<LSPAny[], void>,
+  ): HandlerResult<LSPAny[], void> => {
+    return (async (): Promise<LSPAny[]> => {
+      let originalResult: LSPAny[] | LSPAny;
+      try {
+        originalResult = await next(params, token);
+      } catch (error) {
+        outputChannel.appendLine(
+          `[Ansible] Configuration middleware error: ${error instanceof Error ? error.message : String(error)}`,
+        );
+        return [];
+      }
+
+      if (!Array.isArray(originalResult)) {
+        return originalResult as unknown as LSPAny[];
+      }
+
+      const result = originalResult.slice();
+
+      for (let i = 0; i < params.items.length; i++) {
+        if (params.items[i].section !== "ansible") continue;
+
+        const config = result[i] as Record<string, unknown> | undefined;
+        if (!config) continue;
+
+        const scopeUri = params.items[i].scopeUri ?? "";
+        const pythonConfig = config.python as
+          | Record<string, unknown>
+          | undefined;
+        const rawInterpreterPath = pythonConfig?.interpreterPath;
+
+        if (typeof rawInterpreterPath === "string" && rawInterpreterPath) {
+          result[i] = await resolveUserConfiguredPath(
+            scopeUri,
+            rawInterpreterPath,
+            config,
+            pythonConfig,
+          );
+          continue;
+        }
+
+        result[i] = await resolveAutoDetectedPath(
+          scopeUri,
+          config,
+          pythonConfig,
+        );
+      }
+      return result;
+    })();
+  };
+}
+
+function newDocsReadyGate(): { resolve: () => void; promise: Promise<void> } {
+  let resolve!: () => void;
+  const promise = new Promise<void>((r) => {
+    resolve = r;
+  });
+  return { resolve, promise };
+}
