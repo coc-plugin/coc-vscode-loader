@@ -440,8 +440,8 @@
     }
   },
   "vscode-ansible": {
-    "esbuild.mjs": "eae52b6346a4284405a77d68bf67c45dc61312b478a240a08bd413eb11124995",
-    "package.json": "d207a053a1828727da1f1bd7125d6726521255084850e64ffe55d8a849b92024",
+    "esbuild.mjs": "3cf56dbcd46461e055cd7512e738931d5163bc20225fbf16f40ecede04994560",
+    "package.json": "415d449bf779fdd534e532ac3dae4de88a320365db9bcfe04e5b5575cd6cbe3f",
     "src/definitions/constants.ts": "2178939bde280160d7bcd36eb5be4cc6307dcf9eaacd02d3391f37ea224ca23a",
     "src/definitions/lightspeed.ts": "562937cada1b60b0d8ab20462f8e2c384679d6f3b2770cecc540012091be483d",
     "src/env.d.ts": "82a074b3d1b2a651efa300eb631cc4259092711e7fb2be2ee7b30a7b7cf26008",
@@ -472,7 +472,7 @@
     "src/features/lightspeed/base.ts": "9cdc5e996a30067ef0a9d25d3bb02d88ea8c017e08f8834a67ffe93218a49c9b",
     "src/features/lightspeed/clients/openaiCompatibleClient.ts": "92f094958325e44922b5cce449abb285bda727cef331bb21fdf4355b0fb8be9c",
     "src/features/lightspeed/commands/providerCommands.ts": "aa8ed739313057d710d9b86260c97bb4ae551107702462353f0dcf7ab0bdd806",
-    "src/features/lightspeed/contentMatchesWebview.ts": "6fda7ba01d70288e33837f1174f858a689551bb12ea5023b4cc31d1ef4834f6a",
+    "src/features/lightspeed/contentMatchesWebview.ts": "297bca7b05eeee914b017846ba44baefc05ec5dac2d43a72b83d67174c6d476a",
     "src/features/lightspeed/errors.ts": "88f4de3db13ba032b502c9bb919314e4d74be3f57e1b91b50b6f6ece81144c8c",
     "src/features/lightspeed/explorerWebviewViewProvider.ts": "8a2a711b1b71a87ba32f7cebbc59b3719a2035b5232a0e53c229ba38203206cb",
     "src/features/lightspeed/handleApiError.ts": "422108017a11622be92553f8b47a0d979f64593385e4e6ba241aabd12587efbd",
@@ -482,10 +482,10 @@
     "src/features/lightspeed/lightspeedUser.ts": "bdff46aaa5250f26985b7091ad1459478d6c21007851669b22dcc9401892dcd0",
     "src/features/lightspeed/llmProviderSettings.ts": "2b2f8345835e0a91d599f36e0511f1ffb714e096175eb5400cfa4a0b45994cd3",
     "src/features/lightspeed/providerManager.ts": "3f4c013be24b6c85262a8b5d1cca6697ba3175fa9317c827639c7b7eecbea16d",
-    "src/features/lightspeed/providers/base.ts": "9e3f2421a39d8d2f5e0199699b3ed42c17a31730cf0fec268411d273f3994cb8",
+    "src/features/lightspeed/providers/base.ts": "0afd6456630e873798d54ae0d7aa3b928f167f7865150f5eb176ca2ec17cb9fa",
     "src/features/lightspeed/providers/factory.ts": "c39a56def78165705bd82d26313552c7f9af6a8a11d6c376478a82597cc38c52",
     "src/features/lightspeed/providers/google.ts": "276861a4a5fee25bb418f218ec7baa64d6efc0071bc1f686b06a91d9522cbd08",
-    "src/features/lightspeed/providers/rhcustom.ts": "351330d59c618e0aa40dbab94a6c5f287d1abe586bc3c5aa406a121efa95f174",
+    "src/features/lightspeed/providers/rhcustom.ts": "0d8261fb8bd3e3d881ac58f79b3de55e55a8a41837c57f867604350a63d698f6",
     "src/features/lightspeed/statusBar.ts": "43478c202a3e8305a96cb376eae6274f02ba58a228013dcd6a767cdc966a0086",
     "src/features/lightspeed/utils/data.ts": "e82626aa29e6d1bc7db795ed7bc94b82feba25ab2f402a0a044553b4ebc260cd",
     "src/features/lightspeed/utils/errors.ts": "2298a85d8e4dce697439f44dba7a02da1c776eae5240178701826fa45a773bb8",
@@ -500,7 +500,7 @@
     "src/features/lightspeed/utils/readVarFiles.ts": "0d0d5b6e95b03a974bcd46a3cb1d34f718ac833073aa323640d2b73161940420",
     "src/features/lightspeed/utils/scanner.ts": "8c4c4b4f2d7895855eaaa9fbb6f08a5bbe20ec8bdd97fd795f3840c0b802b377",
     "src/features/lightspeed/utils/updateRolesContext.ts": "cee85467a86aa96af87dba32fe1bd021a3d8309f596b37001c4ef7f38e7e3915",
-    "src/features/lightspeed/utils/watchers.ts": "c715ae8ce751473bcb08cc31575cb5cdb8800329de52b6bd0e9a2cec1ec13a91",
+    "src/features/lightspeed/utils/watchers.ts": "411b1c360e9041f745de677055a670badd458a3694808b1aba69c125ef917a84",
     "src/features/lightspeed/utils/webUtils.ts": "a5c6818652ff9114018599d41623eac01cefd81e2f07f8e748b20aa153192adf",
     "src/features/lightspeed/vue/views/ansibleCreatorUtils.ts": "842b9c0c7c1ee195aec0c2702b1ff51ea99823b908ff8c4cf47c1a222bec4b1e",
     "src/features/lightspeed/vue/views/explanationPanel.ts": "a0c65942bd48a6ea11a35fdbfa0aaf917fe7ad00c803d8e34182c6d97a2538cb",
@@ -520,7 +520,7 @@
     "src/features/utils/ansible.ts": "c90bbfef51003eae9840d36940c3d358a6e733307aee85ed7d5ea1cf45acfe9a",
     "src/features/utils/ansibleCfg.ts": "1b251a4f78452bd1d487158380686c6c983196eedf44a8916cafd8a2cbfd77b7",
     "src/features/utils/applyFileInspectionForKeywords.ts": "4d4aabd522e857b66e9bf5f74f962f6c6b90448457202d5aa81cb261ea751630",
-    "src/features/utils/applyModelines.ts": "1af7c6377e8f78181cda0c22c749f64152f7097900c79f4ded4e06353068e022",
+    "src/features/utils/applyModelines.ts": "2fa07584852cb35e32f95bc47522229ccaf7982d09f9268bb3dfab8e59c50b41",
     "src/features/utils/buildExecutionEnvironment.ts": "c9294af1b56aa6053a20b46209a21bf887f6617daf91bafc37aec829954a2466",
     "src/features/utils/commandRunner.ts": "b87b9d09e5603107725a4d86eedf5b15d9e0292fb5bfc392f9dad08bc1f080d4",
     "src/features/utils/data.ts": "58beca5e50213627972b3540ce622e3e3932e9dd19e96476243743814ce61447",
@@ -529,7 +529,7 @@
     "src/features/utils/getSystemDetails.ts": "744eeb77f33bb5f442c9bb361f833e6995a12be6ef5e16c47848fde2fe83e2a1",
     "src/features/utils/interpreterPathResolver.ts": "26899efcbe4cbd40989a26b0918e8437211fc88e833012b23bbacdca93e19d98",
     "src/features/utils/lightspeed.ts": "dc8619312cc68cb51cef4790cce98237f109831b8994741e5eec38bc7341639a",
-    "src/features/vault.ts": "9ecad6a7203bf3543261f1948d386b2eb078bc5863e5683f3228bab7d5832e1b",
+    "src/features/vault.ts": "1e3271af4bab568734d17b526ebb231addebaaeb56f2bc5d126be1aa81a8ad18",
     "src/features/welcomePage/welcomePagePanel.ts": "94f68f5dc55d5e647b80cf6dcaf8c4fd7df7c3c9e66dd4f29302cb871a7e7758",
     "src/index.ts": "d4332c5dadbd555643304f585c31c9504c3fee91f40d8ae3ec91ffb8b2ffd3f8",
     "src/interfaces/extensionSettings.d.ts": "a81ab1684c64b53ec36bbeaed43cfc1fd40bdba35c50c5a30a8f3ea88113f91e",
@@ -549,7 +549,7 @@
     "src/webviewHtml.ts": "bf4c4ca6d5224e022e4cd6fe4eef4ebab585b4d314701e39bce68710f3509e55",
     "_source": {
       "repo": "ansible/vscode-ansible",
-      "commit": "b3c38067f58150c36a63a46eb696d74cbe296b44"
+      "commit": "beb6dd8a0f878341f965e3f044c62f8c06e0354f"
     }
   },
   "vscode-bash-language-server": {
