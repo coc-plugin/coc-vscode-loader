@@ -244,7 +244,7 @@ if (typeof window !== 'undefined' && !('activeTextEditor' in window)) {
       else if (ch === ',' && depth === 0) break
       firstArg += ch
     }
-    return `${prefix}Promise.resolve(${prefix}window.showMessage(${firstArg.trim()}, '${severity}'))`
+    return `Promise.resolve(${prefix}window.showMessage(${firstArg.trim()}, '${severity}'))`
   }
   newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showInformationMessage\(/, (call) => showMessageWrap(call, 'more'))
   newContent = replaceBalanced(newContent, /(?:vscode\.)?window\.showWarningMessage\(/, (call) => showMessageWrap(call, 'warning'))
