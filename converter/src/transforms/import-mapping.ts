@@ -128,8 +128,10 @@ export const transformImportMapping: Transform = (ctx) => {
     'require(',
   )
   // Bare import(...) (no await) → require(...)
+  // Negative lookbehind for `.`, `)`, and `$` to avoid matching METHOD calls
+  // like .import() or someFn().import() — only matches standalone import(...)
   newContent = newContent.replace(
-    /(?<!\w)\bimport\(/g,
+    /(?<![\w.)$])\bimport\(/g,
     'require(',
   )
   // Fix typeof require(...) → typeof import(...) (typeof import is valid TS type syntax)

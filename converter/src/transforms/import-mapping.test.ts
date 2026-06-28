@@ -124,6 +124,18 @@ describe('import-mapping text replacements', () => {
     expect(result).not.toContain('await import(')
   })
 
+  it('does not convert method call .import() to .require()', () => {
+    const result = applyImportMapping('await instance.import()')
+    expect(result).toContain('.import()')
+    expect(result).not.toContain('.require()')
+  })
+
+  it('does not convert this.import() to this.require()', () => {
+    const result = applyImportMapping('await this.import()')
+    expect(result).toContain('this.import()')
+    expect(result).not.toContain('this.require()')
+  })
+
   it('strips name and alignment from createStatusBarItem', () => {
     const result = applyImportMapping('window.createStatusBarItem("my-item", StatusBarAlignment.Right, 100)')
     expect(result).toBe('window.createStatusBarItem(100)')
