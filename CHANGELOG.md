@@ -1,5 +1,42 @@
 # Changelog
 
+## [1.6.3] - 2026-06-28
+
+### Added
+- **Documentation** — `config-driven-converter.md` and `vscode-vs-coc-api-diff.md`: document `editor.edit()` → `workspace.applyEdit()` replacement strategy and Prettier registry patches with `forceFormatDocument` command alias.
+- **Registry API compatibility patches** — Generic cross-plugin fixes in `coc-vscode-registry`:
+  - `Uri.joinPath()` → `path.join()` replacement pattern for environments without full VS Code URI API
+  - `workspace.fs.writeFile()` → `fs.promises.writeFile()` replacement
+  - `createConfigFile` stub replaced with full implementation using coc.nvim workspace APIs (interactive directory selection, validation, error reporting)
+  - `applyEdit` rule updated to use workspace API
+  - `document.textDocument` fallback for `getText()`/`positionAt()` to support both TextDocument and TextEditor
+  - `allRangeLanguages` extended with css, less, scss, html, markdown, yaml
+
+### Fixed
+- **Prettier compatibility patches** — Comprehensive registry-level fixes for `vscode-prettier-vscode`:
+  - `uri.scheme` checks converted to `String(uri).startsWith('file://')` for cross-editor compatibility
+  - `editor.edit()` replaced with `editor.document.applyEdits()` for coc.nvim (note: `Document.applyEdits()` returns success but doesn't modify Neovim buffer — converter now uses `workspace.applyEdit()` instead)
+  - `uri.fsPath` → `Uri.parse(uri).fsPath` throughout (with negative lookbehind `(?<!\?\.)` to skip optional chaining)
+  - `Uri.joinPath()` → `path.join()` for environments without full VS Code URI API
+  - `workspace.fs.writeFile()` → `require('fs').promises.writeFile()`
+  - `createConfigFile` stub replaced with full implementation using coc.nvim workspace APIs (interactive directory selection via `coc#util#with_callback`, filesystem validation, error reporting)
+  - `document.getText()` → `(document.textDocument || document).getText()` — handles both `Document` and `TextDocument`
+  - `document.positionAt(` → `(document.textDocument || document).positionAt(` — same reason
+  - `rangeEnd`/`rangeStart` strict `undefined` comparison instead of truthy check
+  - `forceFormatDocument` + `formatFile` commands registration — adds `prettier.formatFile` alias
+  - Extended `allRangeLanguages` with css, less, scss, html, markdown, yaml
+- **`import-mapping` `showMessageWrap` — duplicate `vscode.` prefix** — The `${prefix}` template variable was applied twice: once on `Promise.resolve()` and again on `window.showMessage()`, generating malformed output like `vscode.vscode.window.showMessage()`. Removed the redundant outer prefix. Fixes `showInformationMessage`/`showWarningMessage`/`showErrorMessage` conversions for all plugins.
+- **`import-mapping` `.import()` false match** — The `import()` → `require()` regex `(?<!\w)` lookbehind was too broad, incorrectly matching method/property calls like `.import()` or `this.import()`. Tightened to `(?<![\w.)$])` to exclude property access, chained calls, and template literal expressions. Added test coverage for `.import()` and `this.import()`.
+- **vscode-gitignore buffer not refreshing after file generation** — Added source-level registry patches: (1) replace `vscode.Promise.resolve(` with `Promise.resolve(` to fix `showSuccessMessage` crash in coc.nvim; (2) call `workspace.nvim.command('checktime')` after writing `.gitignore` to force Neovim buffer reload from disk.
+
+### Changed
+- **converter**: bump to v1.6.3
+- **plugin**: bump to v1.6.3
+- **Baseline**: updated for multiple entries — rust-analyzer, ng-language-service, deno, astro, yaml, ansible, taplo, gitignore, code-runner (converter changes); prettier-vscode, ruff-vscode, volar, html-language-features, css-ls, tinymist (upstream changes); ansible, biome (upstream baseline sync)
+
+### Registry Updates
+- `vscode-biome` — baseline synced with upstream
+
 ## [1.6.2] - 2026-06-26
 
 ### Added
