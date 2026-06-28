@@ -557,6 +557,12 @@ Prettier uses the `source` step to directly convert prettier-vscode's source cod
 - `registerDocumentFormatProvider(sel, provider, 1)` → priority=1 to avoid being overridden by tsserver
 - `{ fileName } = doc` destructure split → convert.ts generic handling
 
+**Required registry patches** (in `patches` field):
+- `editor.edit()` → `workspace.applyEdit()` — `Document.applyEdits()` returns success but doesn't modify Neovim buffer
+- `document.getText()` → `(document.textDocument || document).getText()` — handles both `Document` and `TextDocument` types
+- `document.positionAt(` → `(document.textDocument || document).positionAt(` — same reason
+- `forceFormatDocument` + `formatFile` commands registration — adds `prettier.formatFile` alias
+
 `keepDeps: ["prettier"]` retains the prettier runtime dependency (the original package.json had prettier filtered out).
 
 ### Tailwind CSS IntelliSense

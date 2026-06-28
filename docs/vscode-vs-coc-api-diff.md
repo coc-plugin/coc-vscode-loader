@@ -228,7 +228,7 @@ coc uses LSP protocol style (values starting from 1), while vscode mostly starts
 | visibleRanges | Yes | Yes | Same |
 | options | Yes | Yes | vscode includes tabSize/indentSize/insertSpaces/cursorStyle/lineNumbers; coc includes tabSize/insertSpaces and others |
 | viewColumn | Yes | **No** | coc has no column concept |
-| edit() | Yes | Yes | Same pattern |
+| edit() | Yes | **No** | converter replaces with `workspace.applyEdit({ changes: { [doc.uri]: edits } })` — `Document.applyEdits()` returns success but doesn't modify buffer |
 | insertSnippet() | Yes | **No** | coc uses `workspace.applyEdit` or `snippetManager` |
 | setDecorations() | Yes | **No** | coc uses `BufferHighlight` / `highlight` API |
 | revealRange() | Yes | **No** | coc uses `window.moveTo` |
