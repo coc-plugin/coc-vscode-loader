@@ -34,7 +34,7 @@
     "src/util.ts": "7fca35b9b00275b3e4e3c5406815445a4305c826c53270d4be65fd7374ebc3d9",
     "_source": {
       "repo": "rust-lang/rust-analyzer",
-      "commit": "ff5fcc70d9bcdc54db365114e2f7b1c18056ed4f"
+      "commit": "5d15d9f5fd939bd8f121ae878d55b30e6a992a32"
     }
   },
   "vscode-go": {
@@ -70,7 +70,7 @@
     "src/index.ts": "31d017025438c9d02668028d211b403720a02bffc2b84d855390745ea8528eec",
     "_source": {
       "repo": "astral-sh/ruff-vscode",
-      "commit": "c6afe17378fddcd89001949523142e9447a30c42"
+      "commit": "d782912125bc0e261e1e323490a9c0772702873b"
     }
   },
   "vscode-ng-language-service": {
@@ -159,7 +159,7 @@
     "src/welcome.ts": "81ed97734fd1206b02b606c6d2435f7965c66d8c9b4740f31b9566cc39fbb9e7",
     "_source": {
       "repo": "vuejs/language-tools",
-      "commit": "bff182a752f5c79fbd475513ad584cfe7ea9d423"
+      "commit": "f69712f8d1f7e705d3ae8a2ee4ef7e91eea9eb62"
     }
   },
   "vscode-eslint": {
@@ -705,7 +705,7 @@
     "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "8d5908d6e6060bdc1303f5336b91286d05fda3c6"
+      "commit": "12149dcfef3472dfea4d4b6da5d044df489c8541"
     }
   },
   "vscode-css-ls": {
@@ -714,7 +714,7 @@
     "src/index.ts": "2b3215aa10f11d8a7178601d4068d80e6090f2357527dc02cc73cbc7aa3cce0f",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "8d5908d6e6060bdc1303f5336b91286d05fda3c6"
+      "commit": "12149dcfef3472dfea4d4b6da5d044df489c8541"
     }
   },
   "vscode-marksman": {
@@ -732,7 +732,7 @@
     "src/index.ts": "7d22c73a6605c39d28d71d8a3d7e9ed682d65df9eb38b4a06a0791b5a6233942",
     "_source": {
       "repo": "Myriad-Dreamin/tinymist",
-      "commit": "6603494a20a711bd84000800d3e40eddec9ac1d6"
+      "commit": "40d90121a6c111f5c9f0e7cd63cea77317025406"
     }
   },
   "vscode-texlab": {
@@ -785,19 +785,19 @@
     "esbuild.mjs": "01a540a1072973d661c5471848defa321888a10a8128d7bedb5f61479307cffa",
     "package.json": "4ea3e1dfa6ee61997b3e290992167227e57797ff9bcd663c45c66259f6bbdde5",
     "src/LoggingService.ts": "def99886c565044954d43a859b3f263dea2aa6672351e5a532372a6588f6a4e9",
-    "src/ModuleResolverNode.ts": "9fd0f592bb3b49aaccdc27700039040ed1fab070531ed7f17c1abb6cb59c5b67",
+    "src/ModuleResolverNode.ts": "81629b7b33c8f91042e346b2cf6fae5423e693cf1e4d79a73a89226641549d29",
     "src/ModuleResolverWeb.ts": "3adb431406d0eae655d97e00908ab282094db3bff2739e619b140bd6b1433ede",
     "src/PrettierCodeActionProvider.ts": "35352072dde7aa12d270608ba4a0ed015e57c0aa67d946458a4831bfda24a893",
     "src/PrettierDynamicInstance.ts": "e06705c17eb37181b72801caa09e3c253721debc63b9d41134084579609c1421",
     "src/PrettierEditProvider.ts": "5bedba9d5e5eaef8337cad7a3a90603a6a5d53a6b59e248e132ab8901a8c9195",
-    "src/PrettierEditService.ts": "39bd3b090d45680f0d3e9f246355bf1adfd08684493e4e31e7c2131e1853beca",
+    "src/PrettierEditService.ts": "3c962fabc96e7e21b455ad6809d24eb0a9b9ffcac0575e600dcdfd178d0d4518",
     "src/StatusBar.ts": "b5f59755ec82df29f312560ae22c21ca7420d63e1b652b1e57b819cf8dcba31f",
-    "src/TemplateService.ts": "58ca06c63a5cedcaea420ccc6b4c6206d346eb93e5ce39c838234d1168762be0",
-    "src/commands.ts": "8c6c34239cff6a0cc1977c5042b035806421edc231421259078ee483ee1f22a0",
-    "src/extension.ts": "7d5abc77a7ea35f179e4afc9b3e1a734dceb6dc5a9eca0ba6988f33aae6c3313",
+    "src/TemplateService.ts": "678d1ea66a5db01c75c8eb729f541021ca05641d38f60741e29e2a04434a6026",
+    "src/commands.ts": "f10782cd58b13f38f51dcc66c33f1820788c560bf95ee9e0373705f700e0ecd9",
+    "src/extension.ts": "60c7146d0942727fb70085df2122afb7c4936679c997e81cc4f710d2667ef92c",
     "src/message.ts": "1bc66979e58a33b0692541c655a5736c15c9034db277b49b189af438e07d0c06",
     "src/test/suite/ModuleResolverNode.test.ts": "ba66c713269ed065909d3ef856242ee0d398f4e3e74ee88cf47717a2303b189d",
-    "src/test/suite/codeAction.test.ts": "eced91e8e8a70b7208c6fd5b3931d5184cd1c7bd11fad19250f9253cddea9587",
+    "src/test/suite/codeAction.test.ts": "2015f54797ceb2e39ea6b020ac804cf52c74103d08e7cfe161d26d5e56bffa53",
     "src/test/suite/config-watcher.test.ts": "b734ad1dc4c123cd3a0ebe1b4422a6c798bb4cad327cd04b64bc95b6f87038b7",
     "src/test/suite/config.test.ts": "c100d7565d6c892b607f3d2e11c20347f2d7055cddaa7093cd5b2c2734ecdb39",
     "src/test/suite/esm-config.test.ts": "b46ad5cbc0f3ee25986fc37536db40193cbd396761f3285ef42d23cbe83268bf",
@@ -819,7 +819,7 @@
     "src/test/suite/yarn-pnp-sdk.test.ts": "fb6bac877353f85dcb67f51da72fcdae9efd5e7172b60d5e14202872b6ac15cb",
     "src/test/web/runTests.ts": "9c87eb6fdfc1f6b5b8dcd3d3534047c0db02493eb8c877048d0c87abafbf3a5e",
     "src/test/web/suite/index.ts": "aa3fb149b9ad27a144f846697de4da82cca99475f060f61734c579af3d0ad3ee",
-    "src/test/web/suite/smoke.test.ts": "aa553d1df4d1b0b0ade8e66643718fbbee2599bc79d964910342675060865e98",
+    "src/test/web/suite/smoke.test.ts": "9607867f5258201a6315c85411f50b3efbe6837c37af2ea0849b88b8596c5a6d",
     "src/types.ts": "d75d3945dd075873c7e3116298730a658b213082aacd9f4ad4dea6bcb575e7a5",
     "src/utils/exec.ts": "22a1b64aef240d03dbe2e61f86b0e26a9ed60cc3bb5f46dfcd5329959108dafd",
     "src/utils/find-up.ts": "ed374b15156b17e161d58fd2ca45de8b50269a3100aa64f684a565ba4ef62c92",
