@@ -48,7 +48,7 @@ jobs:
         run: git clone --depth 1 --single-branch https://github.com/coc-plugin/coc-vscode-registry.git coc-vscode-registry
 
       - name: Cache source repos
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/coc-converter-smoke
           key: smoke-cache-${{ hashFiles('converter/src/**') }}
@@ -77,7 +77,7 @@ jobs:
         run: git clone --depth 1 --single-branch https://github.com/coc-plugin/coc-vscode-registry.git coc-vscode-registry
 
       - name: Cache smoke repos
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/coc-converter-smoke
           key: smoke-cache-${{ hashFiles('converter/src/**') }}
