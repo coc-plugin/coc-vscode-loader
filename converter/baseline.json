@@ -194,7 +194,7 @@
   },
   "vscode-deno": {
     "esbuild.mjs": "6821744548ffa0e82d96e858adb569972cb273bc99d5331bf627c44fd3c91271",
-    "package.json": "c5523971d40007f7c81c85dc8d9a7e2d08702269865dab4652b4e21dd1680b46",
+    "package.json": "80c0bd65abc61edc28d90f6f4d02d387feee02a54a00ef35ddd9c21985074e66",
     "src/client/src/commands.ts": "0a7026a11238a9442730af2a056b6e726b80d7565ea184f32c4136c1d507b998",
     "src/client/src/config_paths.ts": "885d7df98faa525628326594f1f46e84c8d973635d6a2d928b8bcdb3a2715834",
     "src/client/src/constants.ts": "6855bc8a6eb45b16b087f7b4af77891c63260e8a4d56cad178a8b3fa6eedd7f2",
@@ -221,7 +221,7 @@
     "src/typescript-deno-plugin/src/index.ts": "30dfe7a576ea22b3f4af4143f87771e9a0785cacbfcecb4a872997a5140b172c",
     "_source": {
       "repo": "denoland/vscode_deno",
-      "commit": "42fb6559ffad90e567d669020527cb3ea7a1b5d8"
+      "commit": "84ce77afa2968f3e22a2c18e6f25fb6db749a370"
     }
   },
   "vscode-ember": {
