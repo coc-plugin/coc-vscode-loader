@@ -356,8 +356,8 @@ function cocExtensionsDir() {
 ### 9.1 Unit Tests Pass
 
 ```bash
-npm test                    # 165 tests (15 test files)
-npm run test:smoke          # 128 registry entries
+npm test                    # 167 tests (15 test files)
+npm run test:smoke          # 134 registry entries
 ```
 
 ### 9.2 Windows-Specific Tests

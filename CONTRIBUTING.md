@@ -134,10 +134,10 @@ If your change adds or modifies a converter feature, update:
 ### 5. Verify
 
 ```bash
-# Run all unit tests (117 tests, 14 test files)
+# Run all unit tests (167 tests, 15 test files)
 npm test
 
-# Run registry smoke test (converts all 128 entries)
+# Run registry smoke test (converts all 134 entries)
 npm run test:smoke
 
 # Validate registry JSON format

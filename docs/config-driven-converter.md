@@ -692,8 +692,8 @@ Validation is divided into two phases: CI time (PR phase) and conversion time (w
 ### Phase 3: Testing (completed ✅)
 
 - [x] Create `scripts/test-regression.sh` (36 tests covering all step types and edge cases)
-- [x] 165 unit tests (15 files), including fixture tests
-- [x] Smoke test (`test:smoke`): fully convert 128 registry entries, validate output structure
+- [x] 167 unit tests (15 files), including fixture tests
+- [x] Smoke test (`test:smoke`): fully convert 134 registry entries, validate output structure
 - [x] Baseline diff (`diff:check`): compare output file SHA-256 fingerprints, detect unexpected changes
 - [x] `check-tests` enforcement: each source file must have a corresponding `.test.ts` containing at least one `it()`
 - [x] Pre-commit hook auto-runs `npm test`

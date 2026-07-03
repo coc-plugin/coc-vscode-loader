@@ -1,6 +1,6 @@
 # coc-vscode-loader
 
-![TUI preview](https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.5.9a)
+![TUI preview](https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.6.4)
 
 VS Code extension → coc.nvim plugin loader with TUI package manager.
 
@@ -12,7 +12,7 @@ Supports **Neovim 0.8+** (floating window + extmark) and **Vim 9.0+** (split win
 > **After updating, the loader auto-detects which plugins changed** — look for `[changed]` markers in the TUI and reinstall only those.
 > Run `:CocCommand loader.open` → check for `[changed]` markers → press `R` on marked plugins.
 >
-> All 130+ upstream VS Code repos are [**monitored daily**](https://github.com/coc-plugin/coc-vscode-loader/actions/workflows/registry-check.yml) for API-breaking changes. When detected, automated PRs are created for review — so your plugins stay working.
+> All 134 upstream VS Code repos are [**monitored daily**](https://github.com/coc-plugin/coc-vscode-loader/actions/workflows/registry-check.yml) for API-breaking changes. When detected, automated PRs are created for review — so your plugins stay working.
 
 ## Install
 
@@ -87,6 +87,7 @@ On next `:CocRestart`, the plugin will fetch the registry and install any missin
 - **Real conversion pipeline** — git clone → converter → npm install → esbuild → register to coc
 - **Source-compiled servers** — pipeline auto-installs Go servers via `go install` (`goPackages`) and Rust servers via `cargo install` (`cargoPackages`), binaries go to `server/` directory
 - **Binary server download** — auto-downloads pre-built server binaries from GitHub Releases (`.zip`, `.tar.gz`, `.gz`)
+- **Pre-built VSIX server** — auto-downloads & extracts compiled server from VS Code marketplace for `kind: "module"` servers that need compilation (TypeScript, wasm, etc.)
 - **Local server build** — auto-copies `server/` directory from source, installs deps, compiles TypeScript during build
 - **Pip install** — auto-installs Python packages via `pip` for plugins that need them (e.g. ansible-lint)
 - **Auto-fetch registry** — remote registry fetched in background when TUI opens, no manual refresh needed

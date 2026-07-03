@@ -5,7 +5,7 @@
     "src/index.ts": "8d9be2c97cff5d4f24937deee8229c3029aa692af58697e5134e047695cb6022",
     "_source": {
       "repo": "clangd/vscode-clangd",
-      "commit": "e4e2586d30ef92c869b53168e020f766ee82e1be"
+      "commit": "77e36576f46867fe487f95e2d4ec96bb0238827c"
     }
   },
   "vscode-rust-analyzer": {
@@ -34,7 +34,7 @@
     "src/util.ts": "7fca35b9b00275b3e4e3c5406815445a4305c826c53270d4be65fd7374ebc3d9",
     "_source": {
       "repo": "rust-lang/rust-analyzer",
-      "commit": "5d15d9f5fd939bd8f121ae878d55b30e6a992a32"
+      "commit": "943f98b28162d89a496078e61ee5462bd313fce7"
     }
   },
   "vscode-go": {
@@ -61,7 +61,7 @@
     "src/index.ts": "21f17bca573f292f7e4eddaf2cc23791e5131d03d4b190ae343c62d807fa7549",
     "_source": {
       "repo": "microsoft/pyright",
-      "commit": "e1f6805d25ec12725a04d8f315845bedd7328ea4"
+      "commit": "433e84d82d7944d129dbc239499d13eaae5f81ac"
     }
   },
   "vscode-ruff": {
@@ -70,7 +70,7 @@
     "src/index.ts": "31d017025438c9d02668028d211b403720a02bffc2b84d855390745ea8528eec",
     "_source": {
       "repo": "astral-sh/ruff-vscode",
-      "commit": "d782912125bc0e261e1e323490a9c0772702873b"
+      "commit": "1eab35dd0ebf4a4819240647526fa8fe75dc6de2"
     }
   },
   "vscode-ng-language-service": {
@@ -159,7 +159,7 @@
     "src/welcome.ts": "81ed97734fd1206b02b606c6d2435f7965c66d8c9b4740f31b9566cc39fbb9e7",
     "_source": {
       "repo": "vuejs/language-tools",
-      "commit": "4893ec6a4b5ca0d00f8add9aa36c17c47085f05a"
+      "commit": "b1a845257e474f1199eb6372a7189b2b9766d9cf"
     }
   },
   "vscode-eslint": {
@@ -194,7 +194,7 @@
   },
   "vscode-deno": {
     "esbuild.mjs": "6821744548ffa0e82d96e858adb569972cb273bc99d5331bf627c44fd3c91271",
-    "package.json": "c5523971d40007f7c81c85dc8d9a7e2d08702269865dab4652b4e21dd1680b46",
+    "package.json": "80c0bd65abc61edc28d90f6f4d02d387feee02a54a00ef35ddd9c21985074e66",
     "src/client/src/commands.ts": "0a7026a11238a9442730af2a056b6e726b80d7565ea184f32c4136c1d507b998",
     "src/client/src/config_paths.ts": "885d7df98faa525628326594f1f46e84c8d973635d6a2d928b8bcdb3a2715834",
     "src/client/src/constants.ts": "6855bc8a6eb45b16b087f7b4af77891c63260e8a4d56cad178a8b3fa6eedd7f2",
@@ -221,7 +221,7 @@
     "src/typescript-deno-plugin/src/index.ts": "30dfe7a576ea22b3f4af4143f87771e9a0785cacbfcecb4a872997a5140b172c",
     "_source": {
       "repo": "denoland/vscode_deno",
-      "commit": "42fb6559ffad90e567d669020527cb3ea7a1b5d8"
+      "commit": "84ce77afa2968f3e22a2c18e6f25fb6db749a370"
     }
   },
   "vscode-ember": {
@@ -293,7 +293,7 @@
     "src/servers/index.ts": "b58a418ac4a7fd10d6d055bf3e10388071424140105228cffdc37a61fe5b76cf",
     "_source": {
       "repo": "tailwindlabs/tailwindcss-intellisense",
-      "commit": "960b480974f9db3a72c390ed9fe29b81e00a176c"
+      "commit": "b1ac35b60e54b98b24ed3883c774d8d471bceea8"
     }
   },
   "vscode-intelephense": {
@@ -705,7 +705,7 @@
     "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "f0b9006a8e2f175f978d325dc2c5d05b11e147fb"
+      "commit": "4e6fd6e85e2fead73f5278f5f9192fcfacac32c1"
     }
   },
   "vscode-css-ls": {
@@ -714,7 +714,7 @@
     "src/index.ts": "2b3215aa10f11d8a7178601d4068d80e6090f2357527dc02cc73cbc7aa3cce0f",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "f0b9006a8e2f175f978d325dc2c5d05b11e147fb"
+      "commit": "4e6fd6e85e2fead73f5278f5f9192fcfacac32c1"
     }
   },
   "vscode-marksman": {
@@ -732,7 +732,7 @@
     "src/index.ts": "7d22c73a6605c39d28d71d8a3d7e9ed682d65df9eb38b4a06a0791b5a6233942",
     "_source": {
       "repo": "Myriad-Dreamin/tinymist",
-      "commit": "40d90121a6c111f5c9f0e7cd63cea77317025406"
+      "commit": "0583893f4b6590477b2e6b700912649de36f9e2b"
     }
   },
   "vscode-texlab": {
@@ -742,6 +742,40 @@
     "_source": {
       "repo": "latex-lsp/texlab-vscode",
       "commit": "af63f863217d4222420ae20f1723fdc429c8968c"
+    }
+  },
+  "vscode-bitbake": {
+    "esbuild.mjs": "580b94330ba1e6ee01c6278ae471321281ce48987fba73c5c64a2aa66559897b",
+    "package.json": "9732b2f6f3f81d014547a8d0a2cec9b08877ff237b3238ff169fc900b59f57dc",
+    "src/index.ts": "8fc029419fa84eb9ad8b66f7f19ad92e32337d46a1141c03a3262b2a03b8779d",
+    "_source": {
+      "repo": "yoctoproject/vscode-bitbake",
+      "commit": "d480ac1a8ef5cf622c502ba4dc00d39acd721c99"
+    }
+  },
+  "vscode-jq": {
+    "esbuild.mjs": "6821744548ffa0e82d96e858adb569972cb273bc99d5331bf627c44fd3c91271",
+    "package.json": "6eba426382907f3322195aedc9bf9c0e33c4d004f8f975749e5d8bdb428987a1",
+    "src/index.ts": "96296fe50703c94607f0248efdec79fbe6ed435c41cc619dadcf5e102acdfb07",
+    "_source": {
+      "repo": "wader/vscode-jq",
+      "commit": "5aa0f023cc7bf093b82a807011f4c907a64cb2d6"
+    }
+  },
+  "vscode-alex": {
+    "esbuild.mjs": "386e2a33768418682be771490072a965076dcda60e789e45b16738d7b05f8250",
+    "package.json": "5c3a593a004897e96a981e15b86014b779fbcad28312dc28d11bc47942946c25",
+    "src/client/src/extension.ts": "438a80ecf6674eedae35ecaf94d613ff05e1f152e5619ca04ed5b64813735d22",
+    "src/index.ts": "cef4a7363f9b37f1ab2fb5d76cd4bce5252d03c46936de3a84de118c7e05687c",
+    "src/server/src/DocumentManager.ts": "9b93e489288dc4c83bd6d1ea7b2cd2f50b85d9a4b287b2cb1f7291ac098d2881",
+    "src/server/src/alexVSCode.ts": "e830db0463afe6d592977ab7aacc7d83438ac7cbd69616502941c7c054addb08",
+    "src/server/src/clientUtils.ts": "bae0380cc38b52bde77d56cace4c47b8af7a7448ce8fe352b19aeb4092a74adf",
+    "src/server/src/codeActions.ts": "06a976fbdebfa67134cf864da117471f1997a529aaa3c2554f1c8fc8d6c21279",
+    "src/server/src/linter.ts": "a21e64b8fdf2f61137e1aee026f1b2ca4cc4bc9724943432c71baf4c69275dbe",
+    "src/server/src/server.ts": "ebd7d5517317916ce44424732a9d636cbb1d3685d7fa66a346c5446d4b4c684a",
+    "_source": {
+      "repo": "tlahmann/vscode-alex",
+      "commit": "5ee6e1458b79930d64b499e6145c630b87c6a77a"
     }
   },
   "vscode-html-css-support": {
@@ -884,6 +918,16 @@
     "_source": {
       "repo": "formulahendry/vscode-code-runner",
       "commit": "97af1080d09046e0129acce592f0033ff2df9f26"
+    }
+  },
+  "vscode-write-good": {
+    "esbuild.mjs": "ea8e01bd6759cd0dfef35cc0e44a721f93d1e8f308d382185906a073f66c61c1",
+    "package.json": "fb9eacd0dd6f990e54d81405dbaf2e1f25063b16590ff83b60c9c926c0636e23",
+    "src/extension.ts": "79c97e702d93b1353a75cc36536df4daba151613ff8e683f139e260a0d34d642",
+    "src/linter.ts": "d731a49f9588b87aa180086243a61e1b16c90bd9fe8a6a04de64d76de40b976e",
+    "_source": {
+      "repo": "TravisTheTechie/vscode-write-good",
+      "commit": "c1bf30a5983fd390d63e3d2392f84ca162a72e7b"
     }
   },
   "vscode-clojure-lsp": {

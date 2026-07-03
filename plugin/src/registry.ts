@@ -37,6 +37,18 @@ export interface PackageInfo {
   cargoPackages?: Array<{ crate: string; binary?: string } | string>  // Rust crates to install via cargo install, e.g. [{crate: "nil", binary: "nil"}]
   /** v2.0 config-driven conversion steps */
   convert?: any[]          // Array of ConvertStep, passed as --convert JSON to CLI
+  /** Pre-built server download from VSIX (for kind:module servers that need compilation) */
+  prebuilt?: {
+    type: 'vsix'
+    /** VS Marketplace publisher name */
+    publisher: string
+    /** VS Marketplace extension name */
+    extension: string
+    /** Version to download (e.g. "2.9.0") */
+    version: string
+    /** Relative paths inside VSIX to extract into build/server/ */
+    serverPaths?: string[]
+  }
   /** User-visible installation notes/hints displayed in TUI detail popup */
   notes?: string
 }

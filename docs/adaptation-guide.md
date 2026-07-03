@@ -13,7 +13,8 @@
 | `server.patches` | Server post-compilation text patches (v1.4.5+), executed via `server-patches.json` + esbuild prebuild section |
 | `goPackages` / `cargoPackages` | Go/Rust source compilation LSP installation (v1.5.0+), `go install` / `cargo install --root` |
 | `excludeDeps` / `keepDeps` | Precisely controls output `package.json` dependencies (v1.5.7+), excludes/retains specified dependencies |
-| Registry entries | Currently **128 entries** (29 pure-lsp, 1 ts-bridge, 6 direct-api, 92 snippets) |
+| `prebuilt` | Download pre-compiled server from VS Code marketplace instead of building from source (v1.6.4+). `{ type: "vsix", publisher: "...", extension: "...", version: "...", serverPaths: ["server"] }` |
+| Registry entries | Currently **134 entries** (34 pure-lsp, 1 ts-bridge, 7 direct-api, 92 snippets) |
 
 ### Version Compatibility Mechanism
 
@@ -21,17 +22,17 @@
 registry.json entry                    coc-vscode-loader version
 ┌─────────────────────┐               ┌──────────────────┐
 │ name: "deno"        │               │ package.json     │
-│ minPluginVersion:    │──compare──→   │ version: 1.5.8   │
+│ minPluginVersion:    │──compare──→   │ version: 1.6.4   │
 │   "1.1.2"           │               │                  │
 └─────────────────────┘               └──────────────────┘
 
-1.1.2 <= 1.5.8 → visible, user can install
-1.6.0 > 1.5.8 → hidden, user cannot see
+1.1.2 <= 1.6.4 → visible, user can install
+1.7.0 > 1.6.4 → hidden, user cannot see
 ```
 
 This allows submitting new extensions to the registry in advance; they become visible to users automatically after release.
 
-Current version: **v1.5.8** (see `converter/package.json` and `plugin/package.json`).
+Current version: **v1.6.4** (see `converter/package.json` and `plugin/package.json`).
 
 ---
 

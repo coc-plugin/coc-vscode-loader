@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.6.4] - 2026-07-03
+
+### Added
+- **`prebuilt` field for module-kind servers** — New registry field to download pre-compiled server from VS Code marketplace instead of building from source. Pipeline auto-downloads VSIX, extracts server paths into `build/server/`. Used by `vscode-bitbake`.
+- **VSIX download support** — `buildPackage()` in pipeline now handles `prebuilt.type: "vsix"`: downloads VSIX from marketplace API, decompresses gzip, unzips, and extracts specified `serverPaths`.
+- **`pip install --upgrade`** — All pip package installations now use `--upgrade` flag to resolve dependency version conflicts.
+- **4 new registry entries**: `vscode-bitbake`, `vscode-jq`, `vscode-alex`, `vscode-write-good`.
+- **Test projects** — Language sample files for testing: bitbake, jq, alex, write-good.
+
+### Fixed
+- **Local server copy with prebuilt** — If `prebuilt` is set, pipeline downloads from VSIX instead of copying unprocessed server source.
+
+### Changed
+- **converter**: bump to v1.6.4
+- **plugin**: bump to v1.6.4
+
 ## [1.6.3] - 2026-06-28
 
 ### Added

@@ -269,12 +269,45 @@ async function buildPackage(
     && ((s as any).server.package.startsWith('./') || (s as any).server.package.startsWith('../'))
   )
   if (hasLocalServer && inputDir) {
-    const srcServer = path.join(inputDir, 'server')
     const destServer = path.join(build, 'server')
-    if (fs.existsSync(srcServer)) {
-      onProgress(3, 5, 'Copying language server...', `cp ${srcServer} → ${destServer}`)
-      await rimraf(destServer)
-      await cpdir(srcServer, destServer)
+    await rimraf(destServer)
+    fs.mkdirSync(destServer, { recursive: true })
+
+    if (info.prebuilt?.type === 'vsix') {
+      // Download pre-built server from VSIX marketspace instead of building from source
+      const pb = info.prebuilt
+      const vsixUrl = `https://marketplace.visualstudio.com/_apis/public/gallery/publishers/${pb.publisher}/vsextensions/${pb.extension}/${pb.version}/vspackage`
+      onProgress(3, 5, 'Downloading pre-built server...', `${pb.publisher}.${pb.extension}@${pb.version}`)
+      const vsixGzFile = path.join(build, `${info.name}.vsix.gz`)
+      await run('curl', ['-#SL', vsixUrl, '-o', vsixGzFile], build, undefined, undefined, name)
+
+      // Marketplace API returns gzip-compressed VSIX; decompress then unzip
+      const vsixFile = vsixGzFile.replace(/\.gz$/, '')
+      onProgress(3, 5, 'Decompressing...', 'gunzip')
+      await run('gunzip', ['-f', vsixGzFile], build, undefined, undefined, name)
+
+      const tmpExtract = path.join(build, '.vsix-tmp')
+      await rimraf(tmpExtract)
+      fs.mkdirSync(tmpExtract, { recursive: true })
+      onProgress(3, 5, 'Extracting pre-built server...', '')
+      await run('unzip', ['-o', vsixFile, '-d', tmpExtract], build, undefined, undefined, name)
+
+      const serverPaths = pb.serverPaths || ['server']
+      for (const sp of serverPaths) {
+        const src = path.join(tmpExtract, 'extension', sp)
+        if (fs.existsSync(src)) {
+          await cpdir(src, destServer)
+        }
+      }
+
+      await rimraf(tmpExtract)
+      try { fs.unlinkSync(vsixFile) } catch {}
+    } else {
+      const srcServer = path.join(inputDir, 'server')
+      if (fs.existsSync(srcServer)) {
+        onProgress(3, 5, 'Copying language server...', `cp ${srcServer} → ${destServer}`)
+        await cpdir(srcServer, destServer)
+      }
     }
   }
 
@@ -304,7 +337,7 @@ async function buildPackage(
       }
     }
     if (!pythonBin) throw new Error('python3 not found, cannot install pip packages: ' + info.pipPackages.join(', '))
-    const pipArgs = ['-m', 'pip', 'install']
+    const pipArgs = ['-m', 'pip', 'install', '--upgrade']
     // --break-system-packages needed on Linux (PEP 668); check pip version for support
     if (process.platform === 'linux') {
       try {
@@ -356,13 +389,16 @@ async function buildPackage(
   }
 
   // Check for server directory in original source and install its deps
-  const serverDir = path.join(inputDir, 'server')
-  if (fs.existsSync(serverDir) && fs.existsSync(path.join(serverDir, 'package.json'))) {
-    onProgress(3, 5, 'Installing server dependencies...', `npm ${npmInstallArgs().join(' ')} in ${serverDir}`)
-    await run('npm', npmInstallArgs(), serverDir, npmLog, undefined, name)
-    const destServer = path.join(build, 'server')
-    await rimraf(destServer)
-    await cpdir(serverDir, destServer)
+  // Skip if pre-built server was downloaded from VSIX
+  if (info.prebuilt?.type !== 'vsix') {
+    const serverDir = path.join(inputDir, 'server')
+    if (fs.existsSync(serverDir) && fs.existsSync(path.join(serverDir, 'package.json'))) {
+      onProgress(3, 5, 'Installing server dependencies...', `npm ${npmInstallArgs().join(' ')} in ${serverDir}`)
+      await run('npm', npmInstallArgs(), serverDir, npmLog, undefined, name)
+      const destServer = path.join(build, 'server')
+      await rimraf(destServer)
+      await cpdir(serverDir, destServer)
+    }
   }
 
   onProgress(4, 5, 'Building...', 'node esbuild.mjs')

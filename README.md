@@ -10,10 +10,10 @@
 [![Editor](https://img.shields.io/badge/editor-Neovim%200.8%2B%20%7C%20Vim%209.0%2B-blue)]()
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.6.3" alt="TUI preview" width="100%">
+  <img src="https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.6.4" alt="TUI preview" width="100%">
 </p>
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png?v=1.6.3" alt="Registry preview" width="100%">
+  <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png?v=1.6.4" alt="Registry preview" width="100%">
 </p>
 
 Run VS Code extensions seamlessly in coc.nvim. Supports **Neovim 0.8+** and **Vim 9.0+**.
@@ -43,7 +43,7 @@ Every registry entry points to an upstream VS Code extension that evolves indepe
 
 ```mermaid
 flowchart LR
-  A[00:00 / 12:00 Beijing] --> B[Check 130+ repos]
+  A[00:00 / 12:00 Beijing] --> B[Check 134 repos]
   B --> C{Upstream changed?}
   C -->|No| D[Skip]
   C -->|Yes| E[Run converter]
@@ -155,15 +155,15 @@ Input → Scanner (detect `from 'vscode'` / `require('vscode')` files)
 Three test suites, each catching different issues:
 
 ```bash
-npm test                    # Unit tests (165) + fixture tests + test coverage check
+npm test                    # Unit tests (167) + fixture tests + test coverage check
 npm run test:full           # Unit tests + registry baseline diff
-npm run test:smoke          # Registry smoke test (all 128 entries — validates output structure)
+npm run test:smoke          # Registry smoke test (all 134 entries — validates output structure)
 ```
 
 | Suite | What it catches | CI |
 |-------|----------------|----|
 | `npm test` | Transform/fixture correctness (fast, ~1s) | ✅ |
-| `npm run test:full` | Unintended side effects on all 128 registry entries | ❌ (manual) |
+| `npm run test:full` | Unintended side effects on all 134 registry entries | ❌ (manual) |
 | `npm run test:smoke` | Registry entry conversion completeness | ✅ |
 
 **Baseline diff** (`npm run diff:baseline` / `npm run diff:check`):

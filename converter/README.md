@@ -73,7 +73,7 @@ When the language server is a local subdirectory in the source code (not an npm 
 Auto-handles:
 - Simplified code generation (no bin walking)
 - esbuild.mjs auto-installs `@types/node` + compiles server TypeScript
-- pipeline auto-copies server directory
+- pipeline auto-copies server directory (or downloads pre-built from VSIX when `prebuilt` field is set)
 - Registers hover fallback provider
 
 ### Server patches (`server.patches`, v1.4.5+)
@@ -111,7 +111,7 @@ When the language server is a Go or Rust project, the pipeline can compile from 
 | `goPackages` | Pipeline runs `go install`, `GOBIN` points to `server/` | `["golang.org/x/tools/gopls@latest"]` |
 | `cargoPackages` | Pipeline runs `cargo install --root`, copies binary from temp dir to `server/` | `[{ "crate": "nil", "binary": "nil" }]` |
 
-See [AGENTS.md](../AGENTS.md#gopackages--cargopackages-v150) (goPackages/cargoPackages) and [AGENTS.md](../AGENTS.md#plugin-specific-text-patches-patches-v142) (patches).
+See [AGENTS.md](../AGENTS.md#registry-quirk) (goPackages/cargoPackages) and [AGENTS.md](../AGENTS.md#registry-quirk) (patches).
 
 ## Architecture
 
@@ -177,8 +177,8 @@ Bridge presets are defined in [`coc-vscode-registry/presets.json`](https://githu
 ## Testing
 
 ```bash
-npm test                    # Unit tests (165) + fixture tests + test coverage check
-npm run test:smoke          # Registry smoke test (all 128 entries — validates output structure)
+npm test                    # Unit tests (167) + fixture tests + test coverage check
+npm run test:smoke          # Registry smoke test (all 134 entries — validates output structure)
 npm run test:watch          # Watch mode for development
 npm run check:tests         # Verify every source file has a matching test
 ```
@@ -203,9 +203,9 @@ npm run check:tests         # Verify every source file has a matching test
 | `transforms/strip-volar.test.ts` | — | Volar framework stripping |
 | `transforms/__fixtures__.test.ts` | — | Auto-discovered fixture tests |
 
-> Total **165 tests** (15 files), covering all 5 step generators and 5 transforms.
+> Total **167 tests** (15 files), covering all 5 step generators and 5 transforms.
 
-**Smoke test** — `npm run test:smoke` clones all 128 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
+**Smoke test** — `npm run test:smoke` clones all 134 registry entries and runs the full converter on each, validating output structure. Repos are cached and updated incrementally via `git fetch`.
 
 ```bash
 # Force re-clone all repos
@@ -237,7 +237,7 @@ src/
     ├── enum-offset.ts      Enum value offset annotations
     └── strip-volar.ts      Volar framework stripping
 scripts/
-├── smoke-test.ts           Registry smoke test (128 entries)
+├── smoke-test.ts           Registry smoke test (134 entries)
 └── check-tests.ts          Test coverage enforcement
 ```
 

@@ -11,8 +11,8 @@
 :CocCommand loader.uninstall vscode-volar   ← Uninstall
 ```
 
-> Current version: **v1.5.9** — see [CHANGELOG.md](../CHANGELOG.md)
-> Registry: **128 entries**, covering four types: pure-lsp, direct-api, ts-bridge, snippets
+> Current version: **v1.6.4** — see [CHANGELOG.md](../CHANGELOG.md)
+> Registry: **134 entries**, covering four types: pure-lsp, direct-api, ts-bridge, snippets
 
 ---
 
@@ -127,7 +127,7 @@ Just add a new type in `BRIDGE_TEMPLATES` in `bridge.ts` + add a preset definiti
 
 The registry has been separated into its own [coc-vscode-registry](https://github.com/coc-plugin/coc-vscode-registry) repository, [`registry.json`](https://github.com/coc-plugin/coc-vscode-registry/blob/main/registry.json).
 
-Currently **128 entries**, distributed by type:
+Currently **134 entries**, distributed by type:
 
 | type | Count | Description |
 |------|-------|-------------|
@@ -214,7 +214,7 @@ convert <input-vscode-ext> -o <output-dir> --convert <json>
 
 ## 6. Plugin Classification Verification
 
-Verified through actual conversion of 128 registry entries:
+Verified through actual conversion of 134 registry entries:
 
 | Category | Verification Method | Representative Entry |
 |----------|-------------------|---------------------|
@@ -231,7 +231,7 @@ Verified through actual conversion of 128 registry entries:
 
 ## 7. Current Status
 
-### Implemented (v1.5.9)
+### Implemented (v1.6.4)
 
 | Module | Location | Content |
 |--------|----------|---------|
@@ -244,16 +244,16 @@ Verified through actual conversion of 128 registry entries:
 | Pipeline | `plugin/src/pipeline.ts` | git clone, convert, npm install, esbuild, binary download, pip/go/cargo install, installToCoc |
 | TUI | `plugin/src/tui.ts` | Mason-style floating window, 9 tabs, filter/sort/search, inline logs |
 | 11 CocCommands | `plugin/src/index.ts` | 10 user commands (open/install/uninstall/update/reinstall/uninstallAll/updateRegistry/cleanCache/list/whatChanged) + 1 internal (dispatch) |
-| 128 registry entries | coc-vscode-registry/registry.json | 29 pure-lsp + 1 ts-bridge + 6 direct-api + 92 snippets, covering LSP, Formatter, Linter, Completion |
+| 134 registry entries | coc-vscode-registry/registry.json | 34 pure-lsp + 1 ts-bridge + 7 direct-api + 92 snippets, covering LSP, Formatter, Linter, Completion |
 | Baseline diff system | `converter/baseline.json` | SHA-256 output file fingerprint + diff:check |
 
 ### Testing
 
 | Test Type | Count | Description |
 |-----------|-------|-------------|
-| Unit tests | **165** (15 files) | vitest, includes fixture tests |
+| Unit tests | **167** (15 files) | vitest, includes fixture tests |
 | Full test | `npm run test:full` | Unit tests + diff:check |
-| Smoke test | `npm run test:smoke` | Full conversion of 128 entries and verify output structure |
+| Smoke test | `npm run test:smoke` | Full conversion of 134 entries and verify output structure |
 | Regression check | `npm run diff:check` | Output file hash comparison, detect unexpected changes |
 
 ### Pending
