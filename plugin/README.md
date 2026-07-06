@@ -2,7 +2,7 @@
 
 ![TUI preview](https://raw.githubusercontent.com/coc-plugin/coc-vscode-loader/main/plugin/assets/tui-preview.png?v=1.6.4)
 
-VS Code extension → coc.nvim plugin loader with TUI package manager.
+AOT (Ahead-of-Time) converter: install VS Code extensions and convert them to coc.nvim plugins at install time.
 
 Install/update/uninstall converted VS Code extensions via a terminal UI.
 Supports **Neovim 0.8+** (floating window + extmark) and **Vim 9.0+** (split window + text properties).

@@ -16,7 +16,8 @@
   <img src="https://cdn.jsdelivr.net/gh/coc-plugin/coc-vscode-registry@main/assets/registry-preview.png?v=1.6.4" alt="Registry preview" width="100%">
 </p>
 
-Run VS Code extensions seamlessly in coc.nvim. Supports **Neovim 0.8+** and **Vim 9.0+**.
+Convert VS Code extensions into coc.nvim plugins at install time and run them natively.
+Supports **Neovim 0.8+** and **Vim 9.0+**.
 
 [![Browse Registry](https://img.shields.io/badge/🌐_Browse_Available_Extensions-coc--plugin.github.io-blue?style=for-the-badge)](https://coc-plugin.github.io/coc-vscode-registry/)
 
@@ -80,6 +81,14 @@ Then open the TUI to browse and install available extensions:
 :CocCommand loader.open
 ```
 
+**What happens when you install a plugin (AOT — Ahead-of-Time):**
+1. `git clone` the upstream VS Code extension source
+2. Run the converter (ts-morph AST transforms + text replacements) to produce a complete coc.nvim plugin package
+3. `npm install` + `esbuild` to bundle the output
+4. Copy the result to `~/.config/coc/extensions/node_modules/coc-<name>` and register it
+
+No runtime interception or JIT overhead — coc.nvim loads a normal plugin at startup.
+
 Or auto-install extensions via vim variable (no TUI needed):
 
 ```vim
@@ -129,21 +138,24 @@ This repo contains two parts:
 1. **Converter CLI** ([`converter/`](./converter/)) — automatically converts VS Code extensions to coc plugins
 2. **Loader plugin** ([`plugin/`](./plugin/)) — coc.nvim plugin with a TUI to install/update/uninstall converted plugins
 
-### Converter architecture
+### Converter architecture (AOT — runs at install time only)
 
 ```
-Input → Scanner (detect `from 'vscode'` / `require('vscode')` files)
-      → Steps pipeline (5 registered generators):
-      │   ├─ language-client  → LanguageClient code (module/binary server)
-      │   ├─ source           → Copy + 5 AST transforms (import-mapping, class-to-factory,
-      │   │                      provider-register, enum-offset, strip-volar)
-      │   ├─ bridge           → Bridge code from BRIDGE_TEMPLATES (tsserver-forward)
-      │   ├─ snippets         → Copy snippets JSON + stub entry
-      │   └─ mark-unsupported → Remove unsupported API calls
-      → Text replacements (.fileName, .uri.fsPath, getWordRangeAtPosition, WorkspaceEdit)
-      → Plugin patches (per-entry find/replace from registry)
-      → Generate package.json + esbuild.mjs + server-patches.json
-      → Output coc plugin directory
+Input (VS Code extension source)
+  → 1. git clone upstream repo
+  → 2. Scanner — detect files using VS Code API
+  → 3. Steps pipeline (5 registered generators):
+  │     ├─ language-client  → LanguageClient code (module/binary server)
+  │     ├─ source           → Copy + 5 AST transforms (import-mapping, class-to-factory,
+  │     │                    provider-register, enum-offset, strip-volar)
+  │     ├─ bridge           → Bridge code from BRIDGE_TEMPLATES (tsserver-forward)
+  │     ├─ snippets         → Copy snippets JSON + stub entry
+  │     └─ mark-unsupported → Remove unsupported API calls
+  → 4. Text replacements (.fileName, .uri.fsPath, getWordRangeAtPosition, WorkspaceEdit)
+  → 5. Plugin patches (per-entry find/replace from registry)
+  → 6. Generate package.json + esbuild.mjs + server-patches.json
+  → 7. npm install + esbuild → lib/index.js
+  → Output: coc plugin package at ~/.config/coc/extensions/node_modules/coc-<name>
 ```
 
 ---
