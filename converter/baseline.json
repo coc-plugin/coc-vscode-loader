@@ -173,8 +173,8 @@
   },
   "vscode-biome": {
     "esbuild.mjs": "1ce6343ae783b009fb0349fb4d14c10e972f71383d8adc6538a0817f708c9a52",
-    "package.json": "d17836d10e32715cf69847a6d889935a292d6776340fbbca3b63cffe14deac4f",
-    "src/biome.ts": "9f23d45e1aefba95ce94fa0797e8a481a2cf24e260ad641b4acee02c00db4209",
+    "package.json": "59a429c5cb13b4bc35fd586654cb4b0be6af0324c67889c94d5662ab6735481d",
+    "src/biome.ts": "270734b08e227eb843d3a2619c01067f69568fc2a96ac33f32f40be5ead7df0e",
     "src/constants.ts": "f9ea5211c862b155f44277c8733b321b5dc2a7224db25840fe5e4880134274dd",
     "src/extension.ts": "1f6c9a18e2a2de3e5129f65a3b95eb58605c9fd0d80e628b9a47fcbf44ec5dbc",
     "src/gritql/index.ts": "a8276fa7b91e5e7e5c6e6db9b1ff61b2e4b262527a2a21d66ccccd65dd86f1aa",
@@ -183,13 +183,13 @@
     "src/locator.ts": "fd74e5fc4ab8620c737b544cc41348bfbb74f8e97205b056241fb9b68e4062e5",
     "src/logger.ts": "f2390c2d09576fb13a82e19d97a5ed241990f10a30c20d2df7b28c203f7cab14",
     "src/main.ts": "8ca0b3a9a0a99fe7a086cabd349456e8c57de1a0a5cb44bf09105e2be0ec59d2",
-    "src/session.ts": "ca9af6734df43bd54959337aae156c06c2c9c93685055aa735611285745160d8",
+    "src/session.ts": "e2f384a8401d2869c0535fdf6b8ba02f988e7e2ed349dd376f0908347ca143fe",
     "src/status-bar.ts": "c5ee11237579f99548fc41eef9339dc1eaa74919b8c77ff231586e567f0f74ee",
     "src/types.ts": "849b578c0626fe14e456c24816bbdade87b60a672ebfed48d28bb936f8bb3a0a",
     "src/utils.ts": "d097c336e31f3596baea4024eb8a9b8f06e8da3104e43c8630b9193d2e4c585a",
     "_source": {
       "repo": "biomejs/biome-vscode",
-      "commit": "34829a5cd765c0b87ca9e52f1710b86407890297"
+      "commit": "0e1493f3c28c4d9d02cba029ec32f813ca391c22"
     }
   },
   "vscode-deno": {
