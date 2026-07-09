@@ -419,6 +419,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
 
   // Collect all runtime deps from origPkg (deps + devDeps, filtered)
   const excludeDeps = steps.flatMap(s => (s as any).excludeDeps || []) as string[]
+  const hasBridgeStep = steps.some(s => s.type === 'bridge')
   const origDeps: Record<string, string> = {}
   {
     const allPkgDeps = { ...origPkg.devDependencies, ...origPkg.dependencies }
@@ -426,7 +427,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
       const v = ver as string
       if (v.startsWith('workspace:')) continue
       if (dep.startsWith('@types/')) continue
-      if (['typescript', 'mocha', 'c8', 'prettier', 'rollup', 'esbuild', '@vscode/test', '@typescript-eslint', 'eslint'].some(p => dep.startsWith(p))) continue
+      if (!hasBridgeStep && ['typescript', 'mocha', 'c8', 'prettier', 'rollup', 'esbuild', '@vscode/test', '@typescript-eslint', 'eslint'].some(p => dep.startsWith(p))) continue
       if (excludeDeps.some(p => dep === p || dep.startsWith(p))) continue
       origDeps[dep] = v
     }

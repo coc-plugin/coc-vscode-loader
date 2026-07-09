@@ -1,4 +1,13 @@
 import { StepGenerator, StepContext, BridgeStep, StepResult } from '../types.js'
+import * as fs from 'fs'
+import * as path from 'path'
+import { fileURLToPath } from 'url'
+
+const _bridgeDir = path.dirname(fileURLToPath(import.meta.url))
+const _converterPkg = JSON.parse(
+  fs.readFileSync(path.resolve(_bridgeDir, '../../package.json'), 'utf-8')
+)
+const _tsFallback = _converterPkg.dependencies?.typescript || '^6.0.0'
 
 /**
  * Safe, audited bridge code generators.
@@ -91,6 +100,7 @@ ${code}
         entryPoint: 'src/index.ts',
         keepDeps: Object.fromEntries((generated.extraDeps || []).map((d: string) => {
           const ver = ctx.origPkg.dependencies?.[d] || ctx.origPkg.devDependencies?.[d]
+          if (!ver && d === 'typescript') return [d, _tsFallback]
           return [d, ver || '*']
         })),
         activationEvents: ['*'],
@@ -156,6 +166,7 @@ ${code}
       entryPoint: undefined,
       keepDeps: Object.fromEntries((generated.extraDeps || []).map((d: string) => {
         const ver = ctx.origPkg.dependencies?.[d] || ctx.origPkg.devDependencies?.[d]
+        if (!ver && d === 'typescript') return [d, _tsFallback]
         return [d, ver || '*']
       })),
       activationEvents: [],
