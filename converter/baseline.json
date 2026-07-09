@@ -445,7 +445,7 @@
     "src/definitions/constants.ts": "2178939bde280160d7bcd36eb5be4cc6307dcf9eaacd02d3391f37ea224ca23a",
     "src/definitions/lightspeed.ts": "562937cada1b60b0d8ab20462f8e2c384679d6f3b2770cecc540012091be483d",
     "src/env.d.ts": "82a074b3d1b2a651efa300eb631cc4259092711e7fb2be2ee7b30a7b7cf26008",
-    "src/extension.ts": "e3eb2a5a1b7290a499b19fea84a9ed6a33d09e8440962624b5d1743ed71e6f72",
+    "src/extension.ts": "d801f401934990bc991f2deb388ad2c4598b3bbd220850e22bcba41755b5a682",
     "src/extensionConflicts.ts": "4752f78f766b34190a44b198136fd873a03d1a16a3f3b1daaa5df069a645d7b4",
     "src/features/ansibleMetaData.ts": "ec4731e88019ecee569759d55f93c0680da381322d2818ec76a5a0afd3aab4e8",
     "src/features/ansibleTox/constants.ts": "6e53e11dfb015de9034e835fd5a4ed18258ef0dae0380ee2fecafea76456ce11",
@@ -486,7 +486,7 @@
     "src/features/lightspeed/providers/factory.ts": "c39a56def78165705bd82d26313552c7f9af6a8a11d6c376478a82597cc38c52",
     "src/features/lightspeed/providers/google.ts": "276861a4a5fee25bb418f218ec7baa64d6efc0071bc1f686b06a91d9522cbd08",
     "src/features/lightspeed/providers/rhcustom.ts": "0d8261fb8bd3e3d881ac58f79b3de55e55a8a41837c57f867604350a63d698f6",
-    "src/features/lightspeed/statusBar.ts": "311edb4c98868d3d9940ae486dfcdb0738c09f4d2b65bbb438726fea4ddb7898",
+    "src/features/lightspeed/statusBar.ts": "f2190437aca6d6a528b3ce026a071ea1a9fd4d3177a3a2fc156f1b7d70a66197",
     "src/features/lightspeed/utils/data.ts": "e82626aa29e6d1bc7db795ed7bc94b82feba25ab2f402a0a044553b4ebc260cd",
     "src/features/lightspeed/utils/errors.ts": "2298a85d8e4dce697439f44dba7a02da1c776eae5240178701826fa45a773bb8",
     "src/features/lightspeed/utils/explanationUtils.ts": "87e2be6f754771d9f00ed77a7a915f1b792d3cd45dafcec59bb5d2c7205217b0",
@@ -502,7 +502,7 @@
     "src/features/lightspeed/utils/updateRolesContext.ts": "cee85467a86aa96af87dba32fe1bd021a3d8309f596b37001c4ef7f38e7e3915",
     "src/features/lightspeed/utils/watchers.ts": "8949ef654493d9ac8b566e44ee689578d78ee53c754e423989e5a3ef38a91d2d",
     "src/features/lightspeed/utils/webUtils.ts": "a5c6818652ff9114018599d41623eac01cefd81e2f07f8e748b20aa153192adf",
-    "src/features/lightspeed/vue/views/ansibleCreatorUtils.ts": "842b9c0c7c1ee195aec0c2702b1ff51ea99823b908ff8c4cf47c1a222bec4b1e",
+    "src/features/lightspeed/vue/views/ansibleCreatorUtils.ts": "18caca845f65119bea1faddcce613bd811c3c2bcfb7fe062114432fc7de0d769",
     "src/features/lightspeed/vue/views/explanationPanel.ts": "a0c65942bd48a6ea11a35fdbfa0aaf917fe7ad00c803d8e34182c6d97a2538cb",
     "src/features/lightspeed/vue/views/fileOperations.ts": "ab2cf7aa019fe63527c311ee478b5a6d56e6dca37a1205c2c4a663875dad81f2",
     "src/features/lightspeed/vue/views/helloWorld.ts": "7290d477a5536f60417752794b3bbd279bc31b5c7ff229051c1b5aeb8605b9e5",
@@ -513,10 +513,10 @@
     "src/features/lightspeed/vue/views/panelUtils.ts": "83129bd74c42cd90ffea588ba86bd3c8a06733ff90ce7a677b6155b20e9211ba",
     "src/features/lightspeed/vue/views/playbookGenPanel.ts": "fe1bb68af170d1aa022b76f19a1270d3d6508f5a7d17c88bb290a8bdf35765fd",
     "src/features/lightspeed/vue/views/roleGenPanel.ts": "5f0a80352fc2562ccb632f97259caab795eb596ff1fdcd109b893536a6580167",
-    "src/features/lightspeed/vue/views/webviewMessageHandlers.ts": "54f2a86de6bd1ea652eb08658c196ce372c7d6496a47a735f05cfe58812681f9",
+    "src/features/lightspeed/vue/views/webviewMessageHandlers.ts": "28b6e7dbcbfa1aabc6b0b76bbedf7980d2a1f98c8a78aca9bf5c43b9281dffca",
     "src/features/pythonMetadata.ts": "a9347fcc6ad0ffbf976975b7fae148ed238e1f26ea338aa0d4edf54a64aa4efc",
     "src/features/quickLinks/utils/quickLinksViewProvider.ts": "9df74613aea6a20dfe7b063c8dc5c411f1d395460fde7bc28bbbe76aa416642c",
-    "src/features/runner.ts": "f892957053dea23140c9b09fdb4b338a2ca797ed15723a6a4047ca7a985a4c7c",
+    "src/features/runner.ts": "7089d8a3c494f255763788324aae6d0f9f621001fcabcb863618a22d9852f7fd",
     "src/features/utils/ansible.ts": "c90bbfef51003eae9840d36940c3d358a6e733307aee85ed7d5ea1cf45acfe9a",
     "src/features/utils/ansibleCfg.ts": "1b251a4f78452bd1d487158380686c6c983196eedf44a8916cafd8a2cbfd77b7",
     "src/features/utils/applyFileInspectionForKeywords.ts": "4d4aabd522e857b66e9bf5f74f962f6c6b90448457202d5aa81cb261ea751630",
@@ -529,7 +529,7 @@
     "src/features/utils/getSystemDetails.ts": "744eeb77f33bb5f442c9bb361f833e6995a12be6ef5e16c47848fde2fe83e2a1",
     "src/features/utils/interpreterPathResolver.ts": "26899efcbe4cbd40989a26b0918e8437211fc88e833012b23bbacdca93e19d98",
     "src/features/utils/lightspeed.ts": "dc8619312cc68cb51cef4790cce98237f109831b8994741e5eec38bc7341639a",
-    "src/features/vault.ts": "2e5227abc3d44ff81b35fa55ea4bcd24aea6caeabc48e09cbd30283747e552a7",
+    "src/features/vault.ts": "32fecb4a8d2d48bf14a392b798fc5f74832665ffb24d589a3886756c5f1ea727",
     "src/features/welcomePage/welcomePagePanel.ts": "94f68f5dc55d5e647b80cf6dcaf8c4fd7df7c3c9e66dd4f29302cb871a7e7758",
     "src/index.ts": "d4332c5dadbd555643304f585c31c9504c3fee91f40d8ae3ec91ffb8b2ffd3f8",
     "src/interfaces/extensionSettings.d.ts": "a81ab1684c64b53ec36bbeaed43cfc1fd40bdba35c50c5a30a8f3ea88113f91e",
@@ -549,7 +549,7 @@
     "src/webviewHtml.ts": "bf4c4ca6d5224e022e4cd6fe4eef4ebab585b4d314701e39bce68710f3509e55",
     "_source": {
       "repo": "ansible/vscode-ansible",
-      "commit": "598ade8a4ed370a768949506d5110677f0fe74b0"
+      "commit": "3b51cfbd4da6fac5b1304e32259da6ae0b58ed45"
     }
   },
   "vscode-bash-language-server": {
