@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.6.5] - 2026-07-09
+
+### Fixed
+- **Bridge plugin typescript crash** — Bridge step no longer pins `typescript` to `*`, which resolved to TS 7.x and broke `ts.server.protocol`. Now falls back to converter's own TypeScript version (`^6.0.3`) and preserves the extension's explicit version when a bridge step is present.
+
+### Changed
+- **converter**: bump to v1.6.5
+- **plugin**: bump to v1.6.5
+
 ## [1.6.4] - 2026-07-03
 
 ### Added
