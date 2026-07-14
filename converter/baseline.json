@@ -656,7 +656,7 @@
   },
   "vscode-html-ls": {
     "esbuild.mjs": "2521f9623a80a7dad2f85b2ebf5181137450dcb7b6bd012ac4b2571b52e8e586",
-    "package.json": "111010432827aae2dd3a4e1db3e13dccbe9aab49a4f1a3aae0c1e9ed1f944956",
+    "package.json": "389b2f66da33b92adf8adbfec1adc09b6075344ae7ff2b8369579ebe30c2dba2",
     "src/client/src/autoInsertion.ts": "66b699bc8bdf9a3ab930e7e0650e17e70191f2dc15e9da0a82ad544f45653d22",
     "src/client/src/browser/htmlClientMain.ts": "30b9f4f2cc583249ddb64575d911492e29f8dd38260934ad1bf33017334fd942",
     "src/client/src/customData.ts": "53706fd008237b9fe5aaea65972e43beecee3f9837f3b806066fc34feeafaee1",
@@ -705,7 +705,7 @@
     "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "bc9ab02681fa12d2a26f42bb8703a73802ecf166"
+      "commit": "de6ea36c9e3ed055e2ff0dcd00759d672c2f4e96"
     }
   },
   "vscode-css-ls": {
