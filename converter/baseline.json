@@ -572,7 +572,7 @@
   },
   "vscode-stylelint": {
     "esbuild.mjs": "ecaa1282c160892bf2393f3b1f76b934e138930350c529fd6983fe0ba3033cee",
-    "package.json": "e5f32f607310a56bbb08a96e0ae70daa29177e86956212d92833d7ea13ed0b6f",
+    "package.json": "776bc4a7a4e5ad8471fc343b81df206cecf8e8b0c7e2b5b783c4cc92aaf53cb7",
     "src/extension/__tests__/extension.test.ts": "835078287c76d01c70a485baf7c992ff1f0c6b29190a2a2b8f25c43226085deb",
     "src/extension/di-tokens.ts": "e8a156d6d50e932af5c73d74e7ec991db17e452d91bb6e79438aeb3a84764c79",
     "src/extension/extension-runtime.service.ts": "443ed485ce502cfc999fb935f2827ba7f8cf8797b9730bfb760770a5af68ca53",
@@ -592,7 +592,7 @@
     "src/index.ts": "9c990939a7e26b4fcf1b0b33f82935ccdbcf660fcfffe0a7af8e9eebbd5a41a1",
     "_source": {
       "repo": "stylelint/vscode-stylelint",
-      "commit": "16d023138deba841979f826c239c7c389881c370"
+      "commit": "1223943bd48848569bc48135fb64dcfa14b17b5b"
     }
   },
   "vscode-taplo": {
