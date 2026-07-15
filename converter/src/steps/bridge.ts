@@ -1,13 +1,21 @@
 import { StepGenerator, StepContext, BridgeStep, StepResult } from '../types.js'
-import * as fs from 'fs'
-import * as path from 'path'
-import { fileURLToPath } from 'url'
 
-const _bridgeDir = path.dirname(fileURLToPath(import.meta.url))
-const _converterPkg = JSON.parse(
-  fs.readFileSync(path.resolve(_bridgeDir, '../../package.json'), 'utf-8')
-)
-const _tsFallback = _converterPkg.dependencies?.typescript || '^6.0.0'
+// Bridge plugins (e.g. @vue/language-server) rely on ts.server.protocol,
+// which was removed in TS 7.x. Detect compatible version dynamically.
+let _tsFallback: string
+try {
+  // Check the converter's own TypeScript — if it has ts.server, use its major version
+  const ts = require('typescript')
+  if (typeof ts?.server?.protocol?.CommandTypes === 'object') {
+    const major = parseInt(ts.version.split('.')[0], 10)
+    _tsFallback = '^' + major + '.0.0'
+  } else {
+    // TS 7+ removed ts.server — exclude it
+    _tsFallback = '>=5.0.0 <7.0.0'
+  }
+} catch {
+  _tsFallback = '>=5.0.0 <7.0.0'
+}
 
 /**
  * Safe, audited bridge code generators.
