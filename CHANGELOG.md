@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.6.6] - 2026-07-15
+
+### Fixed
+- **Bridge plugin TypeScript 7 crash** — `ts.server.protocol` was removed in TS 7.x, breaking `@vue/language-server`. Bridge step now detects compatibility at runtime: uses its own TS version if it has `ts.server`, otherwise excludes TS 7+ via `>=5.0.0 <7.0.0` range.
+
+### Changed
+- **converter**: upgrade TypeScript from `^6.0.3` to `^7.0.2`, bump to v1.6.6
+- **plugin**: bump to v1.6.6
+
 ## [1.6.5] - 2026-07-09
 
 ### Fixed
