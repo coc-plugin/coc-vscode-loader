@@ -710,11 +710,11 @@
   },
   "vscode-css-ls": {
     "esbuild.mjs": "f179793f38dc82e02eed9e7aa690f5a71aa5a27b3f99b79ff0e2be786d859c17",
-    "package.json": "084743ba3789a36bc1f88edfade655963a757ca47581a2cf7ff5098a88df5faa",
+    "package.json": "cbbd87b61d23bc9892f213c35ed07f5a10d75be9c76b0f2f1b9d599c8c73a5f4",
     "src/index.ts": "2b3215aa10f11d8a7178601d4068d80e6090f2357527dc02cc73cbc7aa3cce0f",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "bc9ab02681fa12d2a26f42bb8703a73802ecf166"
+      "commit": "de6ea36c9e3ed055e2ff0dcd00759d672c2f4e96"
     }
   },
   "vscode-marksman": {
