@@ -55,14 +55,18 @@ async function downloadOrCached(entry: RegistryEntry): Promise<string> {
         // Fetch failed, re-clone
         if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
         fs.mkdirSync(dest, { recursive: true })
-        await gitExec(['clone', '--filter=blob:none', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
+        const reCloneArgs = ['clone', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest]
+        if (src.subdir) reCloneArgs.splice(1, 0, '--filter=blob:none')
+        await gitExec(reCloneArgs, { timeout: 300000 })
         await gitCheckout(dest, src.subdir)
       }
     } else {
       // Fresh clone
       if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
       fs.mkdirSync(dest, { recursive: true })
-      await gitExec(['clone', '--filter=blob:none', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
+      const cloneArgs = ['clone', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest]
+      if (src.subdir) cloneArgs.splice(1, 0, '--filter=blob:none')
+      await gitExec(cloneArgs, { timeout: 300000 })
       await gitCheckout(dest, src.subdir)
     }
 

@@ -79,7 +79,9 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
     try {
       fs.mkdirSync(cachePath, { recursive: true })
       const url = `https://github.com/${entry.source.repo}.git`
-      await gitExec(['clone', '--filter=blob:none', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, cachePath], { timeout: 300000 })
+      const cloneArgs = ['clone', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, cachePath]
+      if (entry.source.subdir) cloneArgs.splice(1, 0, '--filter=blob:none')
+      await gitExec(cloneArgs, { timeout: 300000 })
       await gitCheckout(cachePath, entry.source.subdir)
       rootDir = cachePath
       sourceCommit = await getHeadCommit(rootDir)

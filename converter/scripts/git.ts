@@ -130,8 +130,9 @@ async function tryExec(p: Promise<GitResult>): Promise<boolean> {
  * Clone a GitHub repo without checkout, then checkout HEAD.
  * If dest already has .git, does an incremental fetch + reset instead.
  *
- * Uses --filter=blob:none to avoid downloading file contents for files
- * outside the sparse-checkout cone (when subdir is specified).
+ * Uses --filter=blob:none only when subdir is specified (sparse checkout
+ * means most blobs are never needed). Without subdir, a full shallow clone
+ * is faster — on-demand blob fetching on Windows is slower than bulk download.
  */
 export async function downloadOrUpdateRepo(repo: string, dest: string, subdir?: string): Promise<void> {
   const url = `https://github.com/${repo}.git`
@@ -143,7 +144,12 @@ export async function downloadOrUpdateRepo(repo: string, dest: string, subdir?: 
   } else {
     if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
     fs.mkdirSync(dest, { recursive: true })
-    await gitExec(['clone', '--filter=blob:none', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
+    const cloneArgs = ['clone', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest]
+    if (subdir) {
+      // Only need blobs within the sparse cone — skip the rest
+      cloneArgs.splice(1, 0, '--filter=blob:none')
+    }
+    await gitExec(cloneArgs, { timeout: 300000 })
   }
 
   await gitCheckout(dest, subdir)
