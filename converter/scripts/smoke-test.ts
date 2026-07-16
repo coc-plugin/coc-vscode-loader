@@ -43,7 +43,7 @@ function gitCheckout(dir: string, timeout = 60000): void {
   } catch {
     // Batch checkout failed (e.g., Windows invalid filenames like `:`)
     // Fall back to per-file checkout, skipping problematic files
-    const files = execFileSync('git', ['ls-files'], { cwd: dir, encoding: 'utf-8', timeout }).trim().split('\n').filter(Boolean)
+    const files = execFileSync('git', ['ls-files'], { cwd: dir, encoding: 'utf-8', timeout }).trim().split(/\r?\n/).filter(Boolean)
     for (const file of files) {
       try {
         execFileSync('git', ['checkout', 'HEAD', '--', file], { cwd: dir, stdio: 'pipe', timeout: 10000 })

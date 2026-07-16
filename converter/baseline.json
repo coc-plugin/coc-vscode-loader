@@ -34,7 +34,7 @@
     "src/util.ts": "7fca35b9b00275b3e4e3c5406815445a4305c826c53270d4be65fd7374ebc3d9",
     "_source": {
       "repo": "rust-lang/rust-analyzer",
-      "commit": "7a5ecc88dbdfa13bac99fa4e0f38adcfdca1bb0a"
+      "commit": "76d092ea9d27a66c53aedf630c07e3dae42db1c1"
     }
   },
   "vscode-go": {
@@ -705,7 +705,7 @@
     "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "53e335d0387969ba6b6bd68f2481be89252089ca"
+      "commit": "793c02d06e4644ac6fa5a70edb5b466ee82d96a4"
     }
   },
   "vscode-css-ls": {
@@ -714,7 +714,7 @@
     "src/index.ts": "2b3215aa10f11d8a7178601d4068d80e6090f2357527dc02cc73cbc7aa3cce0f",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "53e335d0387969ba6b6bd68f2481be89252089ca"
+      "commit": "793c02d06e4644ac6fa5a70edb5b466ee82d96a4"
     }
   },
   "vscode-marksman": {
@@ -750,7 +750,7 @@
     "src/index.ts": "8fc029419fa84eb9ad8b66f7f19ad92e32337d46a1141c03a3262b2a03b8779d",
     "_source": {
       "repo": "yoctoproject/vscode-bitbake",
-      "commit": "d480ac1a8ef5cf622c502ba4dc00d39acd721c99"
+      "commit": "d25a097e421ccd3c906a9ee1dc8e4d7aa4b0bffa"
     }
   },
   "vscode-jq": {
