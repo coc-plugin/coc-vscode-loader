@@ -96,9 +96,10 @@ export async function gitCheckout(dir: string, subdir?: string): Promise<void> {
     await setupSparseCheckout(dir, subdir)
   }
 
-  // Fast path: bulk checkout with timeouts
-  // Timeout naturally catches repos that are too large or too slow for bulk
-  const readTreeOk = await tryExec(gitExec(['read-tree', 'HEAD'], { cwd: dir, timeout: 30000 }))
+  // Fast path: bulk checkout
+  // read-tree is a local-only index operation (no network, no file I/O).
+  // Only checkout-index needs a timeout — writing files to disk is the bottleneck.
+  const readTreeOk = await tryExec(gitExec(['read-tree', 'HEAD'], { cwd: dir }))
   if (readTreeOk) {
     const checkoutOk = await tryExec(gitExec(['checkout-index', '-a'], { cwd: dir, timeout: 60000 }))
     if (checkoutOk) return
