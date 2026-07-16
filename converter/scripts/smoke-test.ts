@@ -15,9 +15,10 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
-import { execFileSync, execSync } from 'child_process'
+import { execFileSync } from 'child_process'
 import { convert } from '../src/convert.js'
 import { fileURLToPath } from 'url'
+import { gitExec, gitCheckout } from './git.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REGISTRY_PATH = path.resolve(__dirname, '../../coc-vscode-registry/registry.json')
@@ -37,22 +38,7 @@ function cacheDir(e: RegistryEntry): string {
   return path.join(CACHE_DIR, e.name.replace(/[^a-z0-9_-]/gi, '_'))
 }
 
-function gitCheckout(dir: string): void {
-  try {
-    execFileSync('git', ['read-tree', 'HEAD'], { cwd: dir, stdio: 'ignore', timeout: 30000 })
-    execFileSync('git', ['checkout-index', '-a'], { cwd: dir, stdio: 'ignore', timeout: 60000 })
-  } catch {
-    // Fall back to per-file extraction for repos with invalid filenames
-    const files = execFileSync('git', ['ls-files'], { cwd: dir, encoding: 'utf-8', timeout: 30000 }).trim().split(/\r?\n/).filter(Boolean)
-    for (const file of files) {
-      try {
-        execFileSync('git', ['checkout-index', '--', file], { cwd: dir, stdio: 'ignore', timeout: 10000 })
-      } catch {}
-    }
-  }
-}
-
-function downloadOrCached(entry: RegistryEntry): string {
+async function downloadOrCached(entry: RegistryEntry): Promise<string> {
   const dest = cacheDir(entry)
   const src = entry.source
   const isSnippets = entry.convert.some(s => s.type === 'snippets')
@@ -63,28 +49,26 @@ function downloadOrCached(entry: RegistryEntry): string {
     if (fs.existsSync(path.join(dest, '.git'))) {
       // Fast incremental update
       try {
-        execFileSync('git', ['fetch', '--depth', '1', 'origin', 'main'], { cwd: dest, stdio: 'ignore', timeout: 30000 })
-        execFileSync('git', ['reset', '--hard', 'origin/main'], { cwd: dest, stdio: 'ignore', timeout: 30000 })
+        await gitExec(['fetch', '--depth', '1', '--quiet', 'origin', 'main'], { cwd: dest, timeout: 30000 })
+        await gitExec(['reset', '--hard', '--quiet', 'origin/main'], { cwd: dest, timeout: 30000 })
       } catch {
         // Fetch failed, re-clone
-        fs.rmSync(dest, { recursive: true, force: true })
+        if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
         fs.mkdirSync(dest, { recursive: true })
-        execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, dest], { stdio: 'ignore', timeout: 300000 })
-        gitCheckout(dest)
+        await gitExec(['clone', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
+        await gitCheckout(dest)
       }
     } else {
       // Fresh clone
       if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
       fs.mkdirSync(dest, { recursive: true })
-      // Clone without checkout first (avoids Windows failures on invalid filenames)
-      execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, dest], { stdio: 'ignore', timeout: 300000 })
-      gitCheckout(dest)
+      await gitExec(['clone', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
+      await gitCheckout(dest)
     }
 
     // Validate expected files exist
     const checkDir = src.subdir ? path.join(dest, src.subdir) : dest
     if (isSnippets) {
-      // Snippets need contributes.snippets in package.json
       if (!fs.existsSync(path.join(checkDir, 'package.json')))
         throw new Error(`package.json not found in ${src.subdir ? src.subdir : 'root'} of ${src.repo}`)
     }
@@ -133,7 +117,7 @@ function downloadOrCached(entry: RegistryEntry): string {
 async function testOne(entry: RegistryEntry, presets: any): Promise<string | null> {
   let inputDir: string
   try {
-    inputDir = downloadOrCached(entry)
+    inputDir = await downloadOrCached(entry)
   } catch (e: any) {
     return `download: ${e.message}`
   }
