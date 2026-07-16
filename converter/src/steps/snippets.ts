@@ -1,30 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { execFileSync } from 'child_process'
+import { execFileSync, execSync } from 'child_process'
 import { StepGenerator, StepContext, SnippetsStep, StepResult } from '../types.js'
-
-function parseShellCommand(s: string): string[] {
-  const args: string[] = []
-  let current = ''
-  let inQuote = false
-  let quoteChar = ''
-  for (let i = 0; i < s.length; i++) {
-    const c = s[i]
-    if (inQuote) {
-      if (c === quoteChar) { inQuote = false }
-      else { current += c }
-    } else if (c === '"' || c === "'") {
-      inQuote = true
-      quoteChar = c
-    } else if (c === ' ') {
-      if (current) { args.push(current); current = '' }
-    } else {
-      current += c
-    }
-  }
-  if (current) args.push(current)
-  return args
-}
 
 export const snippetsGenerator: StepGenerator = {
   type: 'snippets',
@@ -100,11 +77,7 @@ export const snippetsGenerator: StepGenerator = {
     if (verbose) console.log(`  snippets: running build: ${ss.build}`)
     try {
       execFileSync('npm', ['install', '--legacy-peer-deps'], { cwd: input, stdio: verbose ? 'inherit' : 'pipe', shell: true })
-      // Parse build command respecting quoted arguments
-      const buildArgs = parseShellCommand(ss.build)
-      const cmd = buildArgs[0]
-      const args = buildArgs.slice(1)
-      execFileSync(cmd, args, { cwd: input, stdio: verbose ? 'inherit' : 'pipe', shell: true })
+      execSync(ss.build, { cwd: input, stdio: verbose ? 'inherit' : 'pipe', shell: true })
     } catch (e: any) {
       if (e.code === 'ENOENT') {
         const cmd = ss.build.split(' ')[0]
