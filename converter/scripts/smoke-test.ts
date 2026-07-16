@@ -55,15 +55,15 @@ async function downloadOrCached(entry: RegistryEntry): Promise<string> {
         // Fetch failed, re-clone
         if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
         fs.mkdirSync(dest, { recursive: true })
-        await gitExec(['clone', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
-        await gitCheckout(dest)
+        await gitExec(['clone', '--filter=blob:none', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
+        await gitCheckout(dest, src.subdir)
       }
     } else {
       // Fresh clone
       if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
       fs.mkdirSync(dest, { recursive: true })
-      await gitExec(['clone', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
-      await gitCheckout(dest)
+      await gitExec(['clone', '--filter=blob:none', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
+      await gitCheckout(dest, src.subdir)
     }
 
     // Validate expected files exist

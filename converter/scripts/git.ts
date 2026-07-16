@@ -1,4 +1,6 @@
 import * as cp from 'child_process'
+import * as fs from 'fs'
+import * as path from 'path'
 
 export interface GitOptions {
   cwd?: string
@@ -11,10 +13,6 @@ export interface GitResult {
   stderr: string
 }
 
-/**
- * Run a git command asynchronously with streaming stdio.
- * Avoids ENOBUFS on Windows because data flows incrementally through pipes.
- */
 export function gitExec(args: string[], options?: GitOptions): Promise<GitResult> {
   return new Promise((resolve, reject) => {
     const child = cp.spawn('git', args, {
@@ -54,37 +52,71 @@ export function gitExec(args: string[], options?: GitOptions): Promise<GitResult
 }
 
 /**
+ * Set up sparse-checkout cone mode for a subdirectory.
+ * Must be called after clone --no-checkout, before checkout.
+ */
+async function setupSparseCheckout(dir: string, subdir: string): Promise<void> {
+  await gitExec(['config', 'core.sparseCheckout', 'true'], { cwd: dir })
+  await gitExec(['config', 'core.sparseCheckoutCone', 'true'], { cwd: dir })
+  // Cone mode pattern: a single directory path with trailing slash
+  const pattern = subdir.replace(/\\/g, '/').replace(/\/?$/, '/')
+  fs.mkdirSync(path.join(dir, '.git', 'info'), { recursive: true })
+  fs.writeFileSync(path.join(dir, '.git', 'info', 'sparse-checkout'), `/${pattern}\n`)
+}
+
+/**
  * Checkout HEAD in a --no-checkout cloned repo.
  * Falls back to per-file extraction for repos with problematic filenames or large trees.
  * Throws if no files could be checked out.
  *
- * Only network operations (clone, fetch) have timeouts; local git operations
- * (read-tree, checkout-index) run until completion — no arbitrary limits.
+ * When subdir is provided, sets up sparse-checkout cone mode to only write
+ * files within that subdirectory — dramatically faster on Windows for large
+ * monorepos where only a subdirectory is needed.
  */
-export async function gitCheckout(dir: string): Promise<void> {
+export async function gitCheckout(dir: string, subdir?: string): Promise<void> {
+  if (subdir) {
+    await setupSparseCheckout(dir, subdir)
+  }
+
   const readTreeOk = await tryExec(gitExec(['read-tree', 'HEAD'], { cwd: dir }))
   if (readTreeOk) {
     const checkoutOk = await tryExec(gitExec(['checkout-index', '-a'], { cwd: dir }))
     if (checkoutOk) return
   }
 
-  // Fall back to per-file extraction
-  const ls = await gitExec(['ls-files'], { cwd: dir })
+  // Fallback: list files without relying on index state
+  const ls = await gitExec(['ls-tree', '-r', '--name-only', 'HEAD'], { cwd: dir })
   if (ls.exitCode !== 0 || !ls.stdout.trim()) {
     throw new Error(`git checkout failed: no files (empty repository or unrecoverable error)`)
   }
 
-  const files = ls.stdout.trim().split(/\r?\n/).filter(Boolean)
-  for (const file of files) {
+  const allFiles = ls.stdout.trim().split(/\r?\n/).filter(Boolean)
+  // If subdir is set, only checkout files within that directory
+  const files = subdir
+    ? allFiles.filter(f => f.startsWith(subdir.replace(/\\/g, '/').replace(/\/?$/, '/') + '/') || f === subdir)
+    : allFiles
+
+  if (files.length === 0) {
+    throw new Error(`git checkout failed: no files match${subdir ? ` subdir "${subdir}"` : ''}`)
+  }
+
+  const MAX_BATCH = 100
+  for (let i = 0; i < files.length; i += MAX_BATCH) {
+    const batch = files.slice(i, i + MAX_BATCH)
     try {
-      await gitExec(['checkout-index', '--quiet', '--', file], { cwd: dir })
+      await gitExec(['checkout-index', '--quiet', '--', ...batch], { cwd: dir })
     } catch {
-      // skip files with invalid filenames on Windows
+      for (const file of batch) {
+        try {
+          await gitExec(['checkout-index', '--quiet', '--', file], { cwd: dir })
+        } catch {
+          // skip files with invalid filenames on Windows
+        }
+      }
     }
   }
 }
 
-/** Run a promise, return true if it resolves with exitCode 0, false otherwise. */
 async function tryExec(p: Promise<GitResult>): Promise<boolean> {
   try {
     const r = await p
@@ -97,28 +129,26 @@ async function tryExec(p: Promise<GitResult>): Promise<boolean> {
 /**
  * Clone a GitHub repo without checkout, then checkout HEAD.
  * If dest already has .git, does an incremental fetch + reset instead.
+ *
+ * Uses --filter=blob:none to avoid downloading file contents for files
+ * outside the sparse-checkout cone (when subdir is specified).
  */
-export async function downloadOrUpdateRepo(repo: string, dest: string): Promise<void> {
-  const { existsSync, rmSync, mkdirSync } = await import('fs')
-  const { join } = await import('path')
+export async function downloadOrUpdateRepo(repo: string, dest: string, subdir?: string): Promise<void> {
   const url = `https://github.com/${repo}.git`
 
-  if (existsSync(join(dest, '.git'))) {
+  if (fs.existsSync(path.join(dest, '.git'))) {
     await gitExec(['fetch', '--depth', '1', '--quiet', 'origin'], { cwd: dest, timeout: 30000 }).catch(() => {})
     await gitExec(['reset', '--hard', '--quiet', 'origin/HEAD'], { cwd: dest, timeout: 30000 }).catch(() => {})
     await gitExec(['clean', '-fd', '--quiet'], { cwd: dest, timeout: 30000 }).catch(() => {})
   } else {
-    if (existsSync(dest)) rmSync(dest, { recursive: true, force: true })
-    mkdirSync(dest, { recursive: true })
-    await gitExec(['clone', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
+    if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
+    fs.mkdirSync(dest, { recursive: true })
+    await gitExec(['clone', '--filter=blob:none', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
   }
 
-  await gitCheckout(dest)
+  await gitCheckout(dest, subdir)
 }
 
-/**
- * Get the HEAD commit SHA of a git repo, or undefined if not available.
- */
 export async function getHeadCommit(dir: string): Promise<string | undefined> {
   try {
     const result = await gitExec(['rev-parse', 'HEAD'], { cwd: dir })
