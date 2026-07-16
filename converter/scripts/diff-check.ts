@@ -66,14 +66,14 @@ function getHeadCommit(repoDir: string): string | undefined {
 
 function gitCheckout(dir: string): void {
   try {
-    execFileSync('git', ['read-tree', 'HEAD'], { cwd: dir, stdio: 'pipe', timeout: 30000 })
-    execFileSync('git', ['checkout-index', '-a'], { cwd: dir, stdio: 'pipe', timeout: 60000 })
+    execFileSync('git', ['read-tree', 'HEAD'], { cwd: dir, stdio: 'ignore', timeout: 30000 })
+    execFileSync('git', ['checkout-index', '-a'], { cwd: dir, stdio: 'ignore', timeout: 60000 })
   } catch {
     // Fall back to per-file extraction for repos with invalid filenames
     const files = execFileSync('git', ['ls-files'], { cwd: dir, encoding: 'utf-8', timeout: 30000 }).trim().split(/\r?\n/).filter(Boolean)
     for (const file of files) {
       try {
-        execFileSync('git', ['checkout-index', '--', file], { cwd: dir, stdio: 'pipe', timeout: 10000 })
+        execFileSync('git', ['checkout-index', '--', file], { cwd: dir, stdio: 'ignore', timeout: 10000 })
       } catch {}
     }
   }
@@ -95,9 +95,9 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
     rootDir = cachePath
     // Fast incremental update
     try {
-      execFileSync('git', ['fetch', '--depth', '1', 'origin'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
-      execFileSync('git', ['reset', '--hard', 'origin/HEAD'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
-      execFileSync('git', ['clean', '-fd'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
+      execFileSync('git', ['fetch', '--depth', '1', 'origin'], { cwd: rootDir, stdio: 'ignore', timeout: 30000 })
+      execFileSync('git', ['reset', '--hard', 'origin/HEAD'], { cwd: rootDir, stdio: 'ignore', timeout: 30000 })
+      execFileSync('git', ['clean', '-fd'], { cwd: rootDir, stdio: 'ignore', timeout: 30000 })
     } catch {}
     sourceCommit = getHeadCommit(rootDir)
     inputDir = entry.source.subdir ? path.join(cachePath, entry.source.subdir) : cachePath
@@ -105,7 +105,7 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
     try {
       fs.mkdirSync(cachePath, { recursive: true })
       const url = `https://github.com/${entry.source.repo}.git`
-      execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, cachePath], { stdio: 'pipe', timeout: 300000 })
+      execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, cachePath], { stdio: 'ignore', timeout: 300000 })
       gitCheckout(cachePath)
       rootDir = cachePath
       sourceCommit = getHeadCommit(rootDir)

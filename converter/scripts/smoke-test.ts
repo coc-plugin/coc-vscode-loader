@@ -39,14 +39,14 @@ function cacheDir(e: RegistryEntry): string {
 
 function gitCheckout(dir: string): void {
   try {
-    execFileSync('git', ['read-tree', 'HEAD'], { cwd: dir, stdio: 'pipe', timeout: 30000 })
-    execFileSync('git', ['checkout-index', '-a'], { cwd: dir, stdio: 'pipe', timeout: 60000 })
+    execFileSync('git', ['read-tree', 'HEAD'], { cwd: dir, stdio: 'ignore', timeout: 30000 })
+    execFileSync('git', ['checkout-index', '-a'], { cwd: dir, stdio: 'ignore', timeout: 60000 })
   } catch {
     // Fall back to per-file extraction for repos with invalid filenames
     const files = execFileSync('git', ['ls-files'], { cwd: dir, encoding: 'utf-8', timeout: 30000 }).trim().split(/\r?\n/).filter(Boolean)
     for (const file of files) {
       try {
-        execFileSync('git', ['checkout-index', '--', file], { cwd: dir, stdio: 'pipe', timeout: 10000 })
+        execFileSync('git', ['checkout-index', '--', file], { cwd: dir, stdio: 'ignore', timeout: 10000 })
       } catch {}
     }
   }
@@ -63,13 +63,13 @@ function downloadOrCached(entry: RegistryEntry): string {
     if (fs.existsSync(path.join(dest, '.git'))) {
       // Fast incremental update
       try {
-        execFileSync('git', ['fetch', '--depth', '1', 'origin', 'main'], { cwd: dest, stdio: 'pipe', timeout: 30000 })
-        execFileSync('git', ['reset', '--hard', 'origin/main'], { cwd: dest, stdio: 'pipe', timeout: 30000 })
+        execFileSync('git', ['fetch', '--depth', '1', 'origin', 'main'], { cwd: dest, stdio: 'ignore', timeout: 30000 })
+        execFileSync('git', ['reset', '--hard', 'origin/main'], { cwd: dest, stdio: 'ignore', timeout: 30000 })
       } catch {
         // Fetch failed, re-clone
         fs.rmSync(dest, { recursive: true, force: true })
         fs.mkdirSync(dest, { recursive: true })
-        execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, dest], { stdio: 'pipe', timeout: 300000 })
+        execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, dest], { stdio: 'ignore', timeout: 300000 })
         gitCheckout(dest)
       }
     } else {
@@ -77,7 +77,7 @@ function downloadOrCached(entry: RegistryEntry): string {
       if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
       fs.mkdirSync(dest, { recursive: true })
       // Clone without checkout first (avoids Windows failures on invalid filenames)
-      execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, dest], { stdio: 'pipe', timeout: 300000 })
+      execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, dest], { stdio: 'ignore', timeout: 300000 })
       gitCheckout(dest)
     }
 
