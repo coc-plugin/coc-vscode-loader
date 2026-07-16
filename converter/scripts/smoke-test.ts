@@ -78,8 +78,7 @@ function downloadOrCached(entry: RegistryEntry): string {
       fs.mkdirSync(dest, { recursive: true })
       // Clone without checkout first (avoids Windows failures on invalid filenames)
       execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, dest], { stdio: 'pipe', timeout: 300000 })
-      // Then check out files, ignoring invalid Windows paths (e.g. filenames with :)
-      execFileSync('git', ['-c', 'core.autocrlf=false', 'checkout', '--ignore-errors', 'HEAD', '--'], { cwd: dest, stdio: 'pipe', timeout: 60000 })
+      gitCheckout(dest)
     }
 
     // Validate expected files exist
