@@ -58,38 +58,14 @@ export const snippetsGenerator: StepGenerator = {
     let copiedCount = 0
     const allLanguages: string[] = []
 
+    // First pass: if any files are missing and a build script exists, run it first
+    // to avoid misleading "file not found" warnings.
+    const missing = new Map<string, string[]>()
     for (const [sourceRelPath, languages] of fileToLanguages) {
       const sourceFile = path.join(input, sourceRelPath)
       if (!fs.existsSync(sourceFile)) {
-        console.warn(`  snippets: source file not found: ${sourceFile}, skipping`)
-        continue
-      }
-      const dest = path.join(output, sourceRelPath)
-      fs.mkdirSync(path.dirname(dest), { recursive: true })
-      fs.copyFileSync(sourceFile, dest)
-      copiedCount++
-      allLanguages.push(...languages)
-      if (verbose) console.log(`  snippets: copied ${sourceRelPath} (${languages.join(', ')})`)
-    }
-
-  if (copiedCount === 0 && ss.build) {
-    // Run build script to generate snippet files (e.g. node merge.js)
-    if (verbose) console.log(`  snippets: running build: ${ss.build}`)
-    try {
-      execFileSync('npm', ['install', '--legacy-peer-deps'], { cwd: input, stdio: verbose ? 'inherit' : 'pipe', shell: true })
-      execSync(ss.build, { cwd: input, stdio: verbose ? 'inherit' : 'pipe', shell: true })
-    } catch (e: any) {
-      if (e.code === 'ENOENT') {
-        const cmd = ss.build.split(' ')[0]
-        console.warn(`  snippets: build tool "${cmd}" not found. Install it and try again, or remove the "build" field from the registry entry.`)
+        missing.set(sourceRelPath, languages)
       } else {
-        console.warn(`  snippets: build failed (${e.message}), skipping`)
-      }
-    }
-    // Retry copying
-    for (const [sourceRelPath, languages] of fileToLanguages) {
-      const sourceFile = path.join(input, sourceRelPath)
-      if (fs.existsSync(sourceFile)) {
         const dest = path.join(output, sourceRelPath)
         fs.mkdirSync(path.dirname(dest), { recursive: true })
         fs.copyFileSync(sourceFile, dest)
@@ -98,7 +74,41 @@ export const snippetsGenerator: StepGenerator = {
         if (verbose) console.log(`  snippets: copied ${sourceRelPath} (${languages.join(', ')})`)
       }
     }
-  }
+
+    if (missing.size > 0 && ss.build) {
+      if (verbose) console.log(`  snippets: running build: ${ss.build}`)
+      try {
+        execFileSync('npm', ['install', '--legacy-peer-deps'], { cwd: input, stdio: verbose ? 'inherit' : 'pipe', shell: true })
+        execSync(ss.build, { cwd: input, stdio: verbose ? 'inherit' : 'pipe', shell: true })
+      } catch (e: any) {
+        if (e.code === 'ENOENT') {
+          const cmd = ss.build.split(' ')[0]
+          console.warn(`  snippets: build tool "${cmd}" not found. Install it and try again, or remove the "build" field from the registry entry.`)
+        } else {
+          console.warn(`  snippets: build failed (${e.message}), skipping`)
+        }
+      }
+      // Retry missing files after build
+      for (const [sourceRelPath, languages] of missing) {
+        const sourceFile = path.join(input, sourceRelPath)
+        if (fs.existsSync(sourceFile)) {
+          const dest = path.join(output, sourceRelPath)
+          fs.mkdirSync(path.dirname(dest), { recursive: true })
+          fs.copyFileSync(sourceFile, dest)
+          copiedCount++
+          allLanguages.push(...languages)
+          if (verbose) console.log(`  snippets: copied ${sourceRelPath} (${languages.join(', ')})`)
+        } else {
+          console.warn(`  snippets: source file not found: ${sourceFile}, skipping`)
+        }
+      }
+    } else if (missing.size > 0) {
+      // No build step — warn about genuinely missing files
+      for (const [sourceRelPath, languages] of missing) {
+        const sourceFile = path.join(input, sourceRelPath)
+        console.warn(`  snippets: source file not found: ${sourceFile}, skipping`)
+      }
+    }
 
     if (copiedCount === 0) {
       throw new Error('snippets step: no snippet files were copied')
