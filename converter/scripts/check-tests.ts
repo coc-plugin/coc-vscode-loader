@@ -1,7 +1,8 @@
 import { readdirSync, existsSync, readFileSync } from 'fs'
 import { join, relative } from 'path'
+import { fileURLToPath } from 'url'
 
-const srcDir = new URL('../src', import.meta.url).pathname
+const srcDir = fileURLToPath(new URL('../src', import.meta.url))
 
 const EXEMPT = ['types.ts', 'index.ts', 'cli.ts']
 const MIN_TEST_SIZE = 50

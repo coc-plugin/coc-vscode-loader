@@ -9,9 +9,11 @@ on:
 
 jobs:
   unit:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-24.04, macos-14, windows-2022]
         node-version: [20, 22]
 
     steps:
@@ -35,7 +37,11 @@ jobs:
 
   diff:
     needs: unit
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14, windows-2022]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
@@ -51,7 +57,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache/coc-converter-smoke
-          key: smoke-cache-${{ hashFiles('converter/src/**') }}
+          key: smoke-cache-${{ matrix.os }}-${{ hashFiles('converter/src/**') }}
           restore-keys: smoke-cache-
 
       - name: Install dependencies
@@ -64,7 +70,11 @@ jobs:
 
   smoke:
     needs: diff
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14, windows-2022]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
@@ -80,7 +90,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: ~/.cache/coc-converter-smoke
-          key: smoke-cache-${{ hashFiles('converter/src/**') }}
+          key: smoke-cache-${{ matrix.os }}-${{ hashFiles('converter/src/**') }}
           restore-keys: smoke-cache-
 
       - name: Install dependencies
