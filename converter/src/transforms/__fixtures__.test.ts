@@ -11,6 +11,10 @@ import { transformLanguageClient } from './language-client.js'
 
 const FIXTURES_DIR = path.resolve(import.meta.dirname, '../__fixtures__')
 
+function normalizeEOL(s: string): string {
+  return s.replace(/\r\n/g, '\n').replace(/\n$/, '')
+}
+
 interface FixtureCase {
   name: string
   input: string
@@ -33,8 +37,8 @@ function loadFixtures(transformName: string): FixtureCase[] {
     const opts = fs.existsSync(optsPath) ? JSON.parse(fs.readFileSync(optsPath, 'utf-8')) : {}
     cases.push({
       name: entry.name,
-      input: fs.readFileSync(inputPath, 'utf-8').replace(/\n$/, ''),
-      expected: fs.readFileSync(outputPath, 'utf-8').replace(/\n$/, ''),
+      input: normalizeEOL(fs.readFileSync(inputPath, 'utf-8')),
+      expected: normalizeEOL(fs.readFileSync(outputPath, 'utf-8')),
       transformName,
       pluginName: opts.pluginName,
       filePath: opts.filePath,
@@ -151,8 +155,8 @@ if (pipelineCases.length > 0) {
         // Check all expected files exist in output
         for (const rel of expectedFiles) {
           expect(outputFiles).toContain(rel)
-          const expectedContent = fs.readFileSync(path.join(expectedRoot, rel), 'utf-8').replace(/\n$/, '')
-          const actualContent = fs.readFileSync(path.join(outdir, rel), 'utf-8').replace(/\n$/, '')
+          const expectedContent = normalizeEOL(fs.readFileSync(path.join(expectedRoot, rel), 'utf-8'))
+          const actualContent = normalizeEOL(fs.readFileSync(path.join(outdir, rel), 'utf-8'))
           expect(actualContent).toBe(expectedContent)
         }
       })
