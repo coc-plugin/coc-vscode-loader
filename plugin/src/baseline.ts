@@ -1,10 +1,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
-import * as os from 'os'
 import { getAllPackages } from './registry'
-
-const SNAPSHOT_PATH = path.join(os.homedir(), '.config', 'coc', 'converter-cache', 'baseline-snapshot.json')
-const CHANGED_MARKERS_PATH = path.join(os.homedir(), '.config', 'coc', 'converter-cache', 'changed-markers.json')
+import { SNAPSHOT_PATH, CHANGED_MARKERS_PATH } from './paths'
 
 export function pluginVersion(): string {
   try {

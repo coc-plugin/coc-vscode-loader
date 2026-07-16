@@ -232,7 +232,7 @@ cd plugin && npm run build  # build plugin only
 ### OS
 - **Linux** ✅ Fully supported
 - **macOS** ✅ Fully supported
-- **Windows** ❌ Not supported (compatibility plans in [`docs/windows-compatibility.md`](./docs/windows-compatibility.md), but pipeline currently requires Unix shell commands)
+- **Windows** ✅ Supported (paths auto-detect `%APPDATA%/coc`, archive extraction uses `tar.exe` and Node.js `zlib`)
 
 ### Editor
 
@@ -250,10 +250,9 @@ These must be installed and available on `PATH`:
 | `git` | Source download & update checks | |
 | `node` / `npm` / `npx` | Plugin build, converter runtime | Node.js >= 18 |
 | `curl` | Registry fetch fallback, binary server download | |
-| `unzip` | Binary server extraction | |
-| `tar` / `gunzip` | Binary server extraction | |
-| `python3` | Pip package installation (e.g. ansible-lint) | Only if plugin requires pip packages |
-| `pip` (via `python3 -m pip`) | Python dependency installation | Only if plugin requires pip packages |
+| `unzip` | Binary server extraction (Linux/macOS) | Windows uses built-in `tar.exe` |
+| `tar` / `gunzip` | Binary server extraction | `gunzip` uses Node.js `zlib` internally |
+| `python3` / `python` | Pip package installation (e.g. ansible-lint) | Only if plugin requires pip packages; Windows falls back to `python` / `py` |
 
 All commands are pre-installed on typical macOS/Linux development machines or available via the system package manager (`apt`, `brew`, etc.).
 

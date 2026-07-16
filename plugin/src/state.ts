@@ -1,13 +1,11 @@
 import { getAllPackages, PackageInfo } from './registry'
 import * as path from 'path'
 import * as fs from 'fs'
-import * as os from 'os'
-
-const EXT_DIR = path.join(os.homedir(), '.config', 'coc', 'extensions', 'node_modules')
+import { EXTENSIONS_NM_DIR, CACHE_ROOT } from './paths'
 
 function getInstalledSet(): Set<string> {
   try {
-    const entries = fs.readdirSync(EXT_DIR)
+    const entries = fs.readdirSync(EXTENSIONS_NM_DIR)
     return new Set(entries.filter(n => n.startsWith('coc-')).map(n => n.slice(4)))
   } catch {
     return new Set()
@@ -71,7 +69,7 @@ export function createInitialState(): AppState {
     if (installed) {
       try {
         const meta = JSON.parse(
-          fs.readFileSync(path.join(os.homedir(), '.config', 'coc', 'converter-cache', info.name, 'meta.json'), 'utf-8')
+          fs.readFileSync(path.join(CACHE_ROOT, info.name, 'meta.json'), 'utf-8')
         )
         commit = meta.commit || undefined
         commitMsg = meta.msg || undefined

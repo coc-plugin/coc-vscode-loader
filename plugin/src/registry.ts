@@ -1,7 +1,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
-import * as os from 'os'
 import { execFile } from 'child_process'
+import { CACHE_ROOT, REGISTRY_CACHE_PATH } from './paths'
 
 export interface RegistrySource {
   type: 'github' | 'npm'
@@ -62,7 +62,7 @@ function pluginVersion(): string {
 }
 
 const REMOTE_REGISTRY_URL = 'https://raw.githubusercontent.com/coc-plugin/coc-vscode-registry/main/registry.json'
-const CACHE_PATH = path.join(os.homedir(), '.config', 'coc', 'converter-cache', 'registry.json')
+const CACHE_PATH = REGISTRY_CACHE_PATH
 
 let cached: PackageInfo[] | null = null
 let registryFetching: Promise<number> | null = null
@@ -153,7 +153,7 @@ export async function updateRegistry(onProgress?: ProgressCallback): Promise<num
     if (onProgress) onProgress('Reading local registry...')
     const data: PackageInfo[] = JSON.parse(fs.readFileSync(localPath, 'utf-8'))
     if (!Array.isArray(data)) throw new Error('Invalid registry format')
-    fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true })
+    fs.mkdirSync(CACHE_ROOT, { recursive: true })
     const tmp = CACHE_PATH + '.tmp'
     fs.writeFileSync(tmp, JSON.stringify(data, null, 2))
     fs.renameSync(tmp, CACHE_PATH)
@@ -166,7 +166,7 @@ export async function updateRegistry(onProgress?: ProgressCallback): Promise<num
   registryFetching = (async () => {
     const data: PackageInfo[] = await fetchRegistryJSON(REMOTE_REGISTRY_URL, onProgress)
     if (!Array.isArray(data)) throw new Error('Invalid registry format')
-    fs.mkdirSync(path.dirname(CACHE_PATH), { recursive: true })
+    fs.mkdirSync(CACHE_ROOT, { recursive: true })
     // Atomic write via temp + rename to avoid corruption on crash
     const tmp = CACHE_PATH + '.tmp'
     fs.writeFileSync(tmp, JSON.stringify(data, null, 2))

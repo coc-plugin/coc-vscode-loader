@@ -2,32 +2,15 @@ import { StateManager } from './state'
 import { getPackage, PackageInfo } from './registry'
 import { clearChangedMarker } from './baseline'
 import { spawn, execFile, execSync } from 'child_process'
+import { createGunzip } from 'zlib'
 import { window as cocWindow } from 'coc.nvim'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as os from 'os'
-
-const CACHE_ROOT = path.join(os.homedir(), '.config', 'coc', 'converter-cache')
-
-function cacheDir(name: string): string {
-  return path.join(CACHE_ROOT, name)
-}
-
-function sourceDir(name: string): string {
-  return path.join(cacheDir(name), 'source')
-}
-
-function buildDir(name: string): string {
-  return path.join(cacheDir(name), 'build')
-}
-
-function pluginDir(name: string): string {
-  return path.join(os.homedir(), '.config', 'coc', 'extensions', 'node_modules', `coc-${name}`)
-}
-
-function extensionsPkgPath(): string {
-  return path.join(os.homedir(), '.config', 'coc', 'extensions', 'package.json')
-}
+import {
+  cacheDir, sourceDir, buildDir, pluginDir, extensionsPkgPath,
+  CACHE_ROOT
+} from './paths'
 
 function converterCliPath(): string {
   const base = path.resolve(__dirname, '..')
@@ -86,10 +69,31 @@ function withPkgJsonLock<T>(fn: () => Promise<T>): Promise<T> {
   return prev.then(() => fn()).finally(() => release!())
 }
 
+function killChild(child: import('child_process').ChildProcess): void {
+  if (process.platform === 'win32' && child.pid) {
+    try {
+      spawn('taskkill', ['/pid', String(child.pid), '/f', '/t'], { stdio: 'ignore' })
+    } catch {}
+  } else {
+    try { child.kill('SIGTERM') } catch {}
+  }
+}
+
+function gunzipFile(src: string, dest: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const rs = fs.createReadStream(src)
+    const ws = fs.createWriteStream(dest)
+    rs.pipe(createGunzip()).pipe(ws)
+    ws.on('finish', resolve)
+    ws.on('error', reject)
+    rs.on('error', reject)
+  })
+}
+
 export function cancelPackage(name: string): boolean {
   const proc = runningProcesses.get(name)
   if (!proc) return false
-  try { proc.kill('SIGTERM') } catch {}
+  killChild(proc)
   return true
 }
 
@@ -106,7 +110,7 @@ async function run(
     const timer = setTimeout(() => {
       if (settled) return; settled = true
       if (pkgName) runningProcesses.delete(pkgName)
-      child.kill('SIGTERM')
+      killChild(child)
       reject(new Error(`Timed out after ${CMD_TIMEOUT / 1000}s: ${cmd} ${args.join(' ')}`))
     }, CMD_TIMEOUT)
     let stderrBuf = ''
@@ -284,13 +288,17 @@ async function buildPackage(
       // Marketplace API returns gzip-compressed VSIX; decompress then unzip
       const vsixFile = vsixGzFile.replace(/\.gz$/, '')
       onProgress(3, 5, 'Decompressing...', 'gunzip')
-      await run('gunzip', ['-f', vsixGzFile], build, undefined, undefined, name)
+      await gunzipFile(vsixGzFile, vsixFile)
 
       const tmpExtract = path.join(build, '.vsix-tmp')
       await rimraf(tmpExtract)
       fs.mkdirSync(tmpExtract, { recursive: true })
       onProgress(3, 5, 'Extracting pre-built server...', '')
-      await run('unzip', ['-o', vsixFile, '-d', tmpExtract], build, undefined, undefined, name)
+      if (process.platform === 'win32') {
+        await run('tar', ['-xf', vsixFile, '-C', tmpExtract], build, undefined, undefined, name)
+      } else {
+        await run('unzip', ['-o', vsixFile, '-d', tmpExtract], build, undefined, undefined, name)
+      }
 
       const serverPaths = pb.serverPaths || ['server']
       for (const sp of serverPaths) {
@@ -322,16 +330,13 @@ async function buildPackage(
   if (info.pipPackages?.length) {
     const pipLog = (chunk: string) => onProgress(3, 5, chunk.trim(), '')
     // Try multiple python binary paths (coc's process may not have Homebrew in PATH)
-    const pythonPaths = [
-      '/opt/homebrew/bin/python3',
-      '/usr/local/bin/python3',
-      '/usr/bin/python3',
-      'python3',
-    ]
+    const pythonCandidates = process.platform === 'win32'
+      ? ['python', 'py', 'python3']
+      : ['/opt/homebrew/bin/python3', '/usr/local/bin/python3', '/usr/bin/python3', 'python3', 'python']
     let pythonBin = ''
-    for (const p of pythonPaths) {
-      if (p === 'python3') {
-        try { await run('python3', ['--version'], build, undefined, undefined, name); pythonBin = 'python3'; break } catch { continue }
+    for (const p of pythonCandidates) {
+      if (!path.isAbsolute(p)) {
+        try { await run(p, ['--version'], build, undefined, undefined, name); pythonBin = p; break } catch { continue }
       } else if (fs.existsSync(p)) {
         pythonBin = p; break
       }
@@ -495,14 +500,20 @@ async function buildPackage(
       fs.mkdirSync(serverDir, { recursive: true })
 
       if (filename.endsWith('.zip')) {
-        await run('unzip', ['-o', filename, '-d', serverDir], build, undefined, undefined, name)
+        if (process.platform === 'win32') {
+          await run('tar', ['-xf', filename, '-C', serverDir], build, undefined, undefined, name)
+        } else {
+          await run('unzip', ['-o', filename, '-d', serverDir], build, undefined, undefined, name)
+        }
       } else if (filename.endsWith('.tar.gz') || filename.endsWith('.tgz')) {
         await run('tar', ['xzf', filename, '-C', serverDir], build, undefined, undefined, name)
       } else if (filename.endsWith('.gz') && !filename.endsWith('.tar.gz')) {
         // Single-file gzip: decompress then move to server dir
         const outName = filename.replace(/\.gz$/, '')
-        await run('gunzip', ['-f', filename], build, undefined, undefined, name)
-        fs.renameSync(path.join(build, outName), path.join(serverDir, outName))
+        const gzPath = path.join(build, filename)
+        const outPath = path.join(build, outName)
+        await gunzipFile(gzPath, outPath)
+        fs.renameSync(outPath, path.join(serverDir, outName))
       } else {
         // Raw binary: move to server dir, creating subdirs if needed
         const binName = resolvedBinaryPath || filename
@@ -669,19 +680,26 @@ export async function installPackage(state: StateManager, name: string): Promise
   }
 }
 
-function spawnPromise(cmd: string, args: string[]): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { stdio: 'ignore' })
-    child.on('close', code => code === 0 ? resolve() : reject(new Error(`${cmd} exited ${code}`)))
-    child.on('error', reject)
-  })
-}
-
 export async function rimraf(dir: string): Promise<void> {
   if (!fs.existsSync(dir)) return
-  // chmod before rm to handle Go module cache (dirs are 0555 = unwritable, rm -rf fails)
-  try { await spawnPromise('chmod', ['-R', 'u+w', dir]) } catch {}
-  await spawnPromise('rm', ['-rf', dir])
+  try {
+    fs.rmSync(dir, { recursive: true, force: true })
+  } catch {
+    // Go module cache dirs are 0555 (unwritable); chmod through Node then retry
+    try {
+      chmodRecursiveSync(dir, 0o644)
+      fs.rmSync(dir, { recursive: true, force: true })
+    } catch {}
+  }
+}
+
+function chmodRecursiveSync(d: string, mode: number): void {
+  for (const entry of fs.readdirSync(d, { withFileTypes: true })) {
+    const fp = path.join(d, entry.name)
+    if (entry.isDirectory()) chmodRecursiveSync(fp, mode)
+    else fs.chmodSync(fp, mode)
+  }
+  fs.chmodSync(d, mode | 0o111)
 }
 
 function cpdir(src: string, dest: string): Promise<void> {
@@ -814,12 +832,12 @@ async function runWithOutput(cmd: string, args: string[], cwd: string): Promise<
     const child = spawn(cmd, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], shell: false })
     const timer = setTimeout(() => {
       if (settled) return; settled = true
-      child.kill('SIGTERM')
+      killChild(child)
       reject(new Error(`Timed out after ${CMD_TIMEOUT / 1000}s: ${cmd} ${args.join(' ')}`))
     }, CMD_TIMEOUT)
     let out = ''
     child.stdout.on('data', (d: Buffer) => { out += d.toString() })
-    child.stderr.on('data', (d: Buffer) => { /* discard stderr to avoid corrupting output parsing */ })
+    child.stderr.on('data', (d: Buffer) => {})
     child.on('close', (code, signal) => {
       if (settled) return; settled = true
       clearTimeout(timer)

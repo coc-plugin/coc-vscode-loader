@@ -6,9 +6,7 @@ import { updateRegistry, findPackage } from './registry'
 import { whatChanged, saveSnapshot, autoCheck } from './baseline'
 import * as path from 'path'
 import * as fs from 'fs'
-import * as os from 'os'
-
-const CACHE_ROOT = path.join(os.homedir(), '.config', 'coc', 'converter-cache')
+import { CACHE_ROOT } from './paths'
 
 function dirSize(dir: string): number {
   try {

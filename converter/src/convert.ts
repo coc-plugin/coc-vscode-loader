@@ -445,12 +445,17 @@ export async function convert(opts: ConvertOptions): Promise<void> {
 
   // Detect local language servers (relative path packages) for server compilation + build scripts
   const hasLocalServer = steps.some(s => isLanguageClientStep(s) && s.server.kind === 'module' && (s.server.package.startsWith('./') || s.server.package.startsWith('../')))
+  const isWin = process.platform === 'win32'
 
   const scripts: Record<string, string> = {
     build: `node esbuild.mjs`,
   }
   if (hasLocalServer) {
-    scripts['postinstall'] = 'if [ -d server ] && [ -f server/package.json ]; then (cd server && npm install --legacy-peer-deps); fi'
+    if (isWin) {
+      scripts['postinstall'] = 'node scripts/postinstall.js'
+    } else {
+      scripts['postinstall'] = 'if [ -d server ] && [ -f server/package.json ]; then (cd server && npm install --legacy-peer-deps); fi'
+    }
   }
 
   const pkg = {
@@ -505,6 +510,8 @@ export async function convert(opts: ConvertOptions): Promise<void> {
     return n.split('/')[0]
   }).filter((v, i, a) => v && a.indexOf(v) === i)
 
+  const tscMatchRe = isWin ? '/^src[/\\\\](.+?)\\(\\d+,\\d+\\): error/gm' : '/^src\\/(.+?\\.ts)\\(\\d+,\\d+\\): error/gm'
+  const tscReplaceRe = isWin ? '/^src[/\\\\]/' : '/^src\\//'
   const prebuildSection = hasLocalServer ? `\
 import { execSync } from 'child_process'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
@@ -539,7 +546,7 @@ if (existsSync(join(serverDir, 'tsconfig.json'))) {
   // Dry run first to find files with pre-existing errors
   const checkOut = execSync('npx tsc --skipLibCheck --strict false --noEmit 2>&1; exit 0', { cwd: serverDir, encoding: 'utf-8', shell: true })
   // tsc error format: src/file.ts(line,col): error TSxxxx: message
-  const errorFiles = new Set(checkOut.match(/^src\\/(.+?\\.ts)\\(\\d+,\\d+\\): error/gm)?.map(s => s.split('(')[0].replace(/^src\\//, '')) || [])
+  const errorFiles = new Set(checkOut.match(${tscMatchRe})?.map(s => s.split('(')[0].replace(${tscReplaceRe}, '')) || [])
   if (errorFiles.size > 0) {
     for (const f of errorFiles) {
       const fp = join(serverDir, 'src', f)
@@ -596,6 +603,25 @@ if (result.errors.length) {
 }
 `
   fs.writeFileSync(path.join(output, 'esbuild.mjs'), esbuildConfig)
+
+  // Write postinstall.js for cross-platform server dep install (Windows only)
+  if (hasLocalServer && isWin) {
+    const postinstallScript = `\
+const { execSync } = require('child_process')
+const { existsSync } = require('fs')
+const { join } = require('path')
+
+const serverDir = join(__dirname, '..', 'server')
+const serverPkg = join(serverDir, 'package.json')
+
+if (existsSync(serverDir) && existsSync(serverPkg)) {
+  execSync('npm install --legacy-peer-deps', { cwd: serverDir, stdio: 'inherit' })
+}
+`
+    const scriptsDir = path.join(output, 'scripts')
+    fs.mkdirSync(scriptsDir, { recursive: true })
+    fs.writeFileSync(path.join(scriptsDir, 'postinstall.js'), postinstallScript)
+  }
 
   // Write server patches file for post-compilation patches
   const serverPatches: Array<{ file: string; find: string; replace: string }> = []
