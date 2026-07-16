@@ -90,19 +90,6 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
   let inputDir: string | null = null
   let rootDir: string | null = null // git root for getting commit
   let sourceCommit: string | undefined
-  try {
-    execFileSync('git', ['-c', 'core.autocrlf=false', 'checkout', 'HEAD', '--'], { cwd: dir, stdio: 'pipe', timeout })
-  } catch {
-    // Batch checkout failed (e.g., Windows invalid filenames like `:`)
-    // Fall back to per-file checkout, skipping problematic files
-    const files = execFileSync('git', ['ls-files'], { cwd: dir, encoding: 'utf-8', timeout }).trim().split('\n').filter(Boolean)
-    for (const file of files) {
-      try {
-        execFileSync('git', ['checkout', 'HEAD', '--', file], { cwd: dir, stdio: 'pipe', timeout: 10000 })
-      } catch {}
-    }
-  }
-}
 
   if (fs.existsSync(cachePath) && fs.existsSync(path.join(cachePath, '.git'))) {
     rootDir = cachePath
