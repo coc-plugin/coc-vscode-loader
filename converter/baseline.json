@@ -163,7 +163,7 @@
     }
   },
   "vscode-eslint": {
-    "esbuild.mjs": "4c632f1481fde50d8ef211ea50889f182cf052e4460a0dfb03f9ef6cc5fdfbbf",
+    "esbuild.mjs": "618f1d9b3b123a9c50884838459136d1f0ae1a3416567760e3c8152590810a48",
     "package.json": "887b32c076bb84638e388e65a6c6eaf032110ae1e0accfcd95d8014d35caad20",
     "src/index.ts": "8cf0e1fc0b9d3666e730bb0df33c7b1734f8039d28aa9ea06b866c73feca4e2e",
     "_source": {
@@ -549,7 +549,7 @@
     "src/webviewHtml.ts": "bf4c4ca6d5224e022e4cd6fe4eef4ebab585b4d314701e39bce68710f3509e55",
     "_source": {
       "repo": "ansible/vscode-ansible",
-      "commit": "78a6875f2cdc7ce7d48456572e91066295cb97f8"
+      "commit": "03b16d9d56c1dbdd47d54dfca055f5e46fb77b4f"
     }
   },
   "vscode-bash-language-server": {
@@ -627,7 +627,7 @@
     }
   },
   "vscode-css-peek": {
-    "esbuild.mjs": "137369cacd5def861f4ce1e0a9500ef9eb9ba9d4bb95c46d713d98b13b7d411b",
+    "esbuild.mjs": "11482425c59a3ce2377a64bb3a6d509db2095409a2ca40c0174c10b7c685793a",
     "package.json": "6ecd79c1186177e91a4e57b04cee4cdb93b6eca710a9e6d682e487c470d5986c",
     "src/client/src/extension.ts": "95c7222f7f66215692570e24b9cf09dd545b5b0c0f8fcdbea1a9b9b535358398",
     "src/client/src/gitignore.ts": "391e98890a06c44d38f04d26a4b9a8791201596b9ba7c554e1330765752de562",
@@ -655,7 +655,7 @@
     }
   },
   "vscode-html-ls": {
-    "esbuild.mjs": "2521f9623a80a7dad2f85b2ebf5181137450dcb7b6bd012ac4b2571b52e8e586",
+    "esbuild.mjs": "b7f88c3e96928d820b9636c935dee4843637067d47e68c14af5d7ef51a83a896",
     "package.json": "389b2f66da33b92adf8adbfec1adc09b6075344ae7ff2b8369579ebe30c2dba2",
     "src/client/src/autoInsertion.ts": "66b699bc8bdf9a3ab930e7e0650e17e70191f2dc15e9da0a82ad544f45653d22",
     "src/client/src/browser/htmlClientMain.ts": "30b9f4f2cc583249ddb64575d911492e29f8dd38260934ad1bf33017334fd942",
@@ -709,7 +709,7 @@
     }
   },
   "vscode-css-ls": {
-    "esbuild.mjs": "f179793f38dc82e02eed9e7aa690f5a71aa5a27b3f99b79ff0e2be786d859c17",
+    "esbuild.mjs": "ac1846bb5e862458853d0a057855f3f6c1d1f041fa07eb86a0cd5889e4045126",
     "package.json": "cbbd87b61d23bc9892f213c35ed07f5a10d75be9c76b0f2f1b9d599c8c73a5f4",
     "src/index.ts": "2b3215aa10f11d8a7178601d4068d80e6090f2357527dc02cc73cbc7aa3cce0f",
     "_source": {
@@ -745,7 +745,7 @@
     }
   },
   "vscode-bitbake": {
-    "esbuild.mjs": "580b94330ba1e6ee01c6278ae471321281ce48987fba73c5c64a2aa66559897b",
+    "esbuild.mjs": "52f30577da4e71fca14d77d22dbcd9b933d8bf1d23e49ab12d3f303104a7e91d",
     "package.json": "9732b2f6f3f81d014547a8d0a2cec9b08877ff237b3238ff169fc900b59f57dc",
     "src/index.ts": "8fc029419fa84eb9ad8b66f7f19ad92e32337d46a1141c03a3262b2a03b8779d",
     "_source": {
@@ -910,11 +910,11 @@
   "vscode-code-runner": {
     "esbuild.mjs": "a347825d52e648087e26214dec7ecd5d69b9a06c02babd96b361c513be79f920",
     "package.json": "b6545be7be3df340750369f754811805a0577edcfded0830b0fe922ec9216312",
-    "src/appInsightsClient.ts": "a84ba4ecdfb337bea8f9ddfd5f787a322403de565c3f5009e58ce7034802db9c",
+    "src/appInsightsClient.ts": "fb11ba46b7669117285de0236ee6d8048c2c37689fba892e02a70703cfdb13b8",
     "src/codeManager.ts": "3f2bae946cf7fd265919bf225adf876046700b2482b97f1907f8bd31316519c2",
-    "src/constants.ts": "15d8bcf85b6da391059a7528f4008f2666ca5b6396bc26540dc26cf8ed4827db",
+    "src/constants.ts": "20a2dc893ce46a630ea44b9b65efc336512642751a3637edc3fcb46eb58106a5",
     "src/extension.ts": "17a23852141ca80017d0de97a444b9264267d80bdc6d47fa62c33de93941449e",
-    "src/utility.ts": "593a96c8e13dc98506b231d3fb8e194a3a60e3defce645dd26862bb98f7bcdeb",
+    "src/utility.ts": "d63d40a3a5175efc0af2279b8f0a5fac8fb32fae21f380af6f2bf515efb41d53",
     "_source": {
       "repo": "formulahendry/vscode-code-runner",
       "commit": "97af1080d09046e0129acce592f0033ff2df9f26"
@@ -923,7 +923,7 @@
   "vscode-write-good": {
     "esbuild.mjs": "ea8e01bd6759cd0dfef35cc0e44a721f93d1e8f308d382185906a073f66c61c1",
     "package.json": "fb9eacd0dd6f990e54d81405dbaf2e1f25063b16590ff83b60c9c926c0636e23",
-    "src/extension.ts": "79c97e702d93b1353a75cc36536df4daba151613ff8e683f139e260a0d34d642",
+    "src/extension.ts": "4c7257f6d0338aadc9bfea18802ee6e8d4f90aed37b9ca7747c00652f63825ff",
     "src/linter.ts": "d731a49f9588b87aa180086243a61e1b16c90bd9fe8a6a04de64d76de40b976e",
     "_source": {
       "repo": "TravisTheTechie/vscode-write-good",
@@ -1397,27 +1397,27 @@
   "vscode-python-snippet-pack-2.0": {
     "coc-convert.json": "55eeb101b4a1506e559389d6a02c4a68e8c619536de44b938ef54a1a85b09c25",
     "package.json": "7a8e334243601e98f6e157046cdcb5007ab91039830d96b433dfb830efca7f09",
-    "snippets/PyMySQL_snippets.json": "a034e21b470ccbc1c914fd0035447a1703a0e4fea684f2785a1cecc6c7863d90",
+    "snippets/PyMySQL_snippets.json": "5994b98d5f1b62e3b47cdc761aea07c6a50c7f63e86401722583db3c214975d0",
     "snippets/algo_snippets.json": "2fc0208f6c76118ffb5d4619231eb0eea177ee733d24a33aef91eb9c3bbaba0e",
-    "snippets/class_snippets.json": "9e84084c4be611bb122440804808c4bd629d0ffaeaed080214d1e0e17d3be574",
-    "snippets/control_flow.json": "3e3bc96714835aa12c1a6b36e0c38add721b1feb0eaddd9cea1cd66b793e8fa1",
+    "snippets/class_snippets.json": "768cdf54a8c30efd56a80c567ef0f49fdb7999fdd8418da64f36c11902533671",
+    "snippets/control_flow.json": "0dc1bc20106e662fb5d8a4ac9e0a3f96a4d6cb8ac07434f42953c5b34a3ad3db",
     "snippets/datetime_snippets.json": "d0b2622505c14a51e0094dfd59abd3281077a335234045d70a74ce325e1e86d6",
-    "snippets/def_function.json": "b2f7c74d9fe8c1ed937bcaa392f62cfb7784a6c7b8e4eacd4ae167e74b0c6433",
-    "snippets/dict_snippets.json": "53b168be3099367c01425d9a89d105ae04d556a85c76e97190a244635673db32",
-    "snippets/django_snippets.json": "05986a3b1b581b7c4cf7e4ef9ea05619d12cb36db56e217cbbc6ada78ad21d52",
-    "snippets/django_template.json": "ef93068513d3af42c037e28a92b1d9feaa778d395be4e49c8837e9dc11d460ee",
-    "snippets/end_snippets.json": "040e3c2e6a576db22fdc6402d14c682f190e843bd9f71625f07ff022e32e1c67",
-    "snippets/file_snippets.json": "fae1c01e29ad07385227da4251c2f7c3e548eb5569425c5b0d9cb28463372ade",
-    "snippets/list_snippets.json": "bafe6681da8db33595758a277018156160f1722808b8230bc47fe2c613e09a4d",
-    "snippets/np_snippets.json": "2fcfd2a8a47f5c69cf6a5a2e5ba533fe2e8336ef240d61da3f212bd44ce8e324",
-    "snippets/plt_snippets.json": "ddce77dea16df33fe8b929318a33723420030e47abc07784ccd13359606c8c91",
-    "snippets/print_snippets.json": "869c27f6d0106ba6df7b76e1ccbf75997deeb3c73ddee671190419284a3320c5",
+    "snippets/def_function.json": "7736298caab3fbca1bd4d36121de2c0d566a5262457b956973164af8a0055757",
+    "snippets/dict_snippets.json": "c4a2f53a294ead640aef1caeebf08a009ae065cce0175dd0daf4002f3fa111d3",
+    "snippets/django_snippets.json": "503407eeb34ec8ff930808f4776ff265d1e8382371b78f399fae37560222b44a",
+    "snippets/django_template.json": "e6394959efbf9f2c9b2a0fb9619241b179e1f487701ade6aca02ee978eb8d01d",
+    "snippets/end_snippets.json": "cce3cf2c56687441d10e2f3fe8082d0547a5cdb5fb514bde8fcc995b297db9b9",
+    "snippets/file_snippets.json": "57cca6700224b97385fd45a590d456b23e6e0e3a0249c050a1d14e4047219d67",
+    "snippets/list_snippets.json": "b055540c17e390811ba84853b2ec3d98f8d90dba4f037eb6184335eacc0f6aca",
+    "snippets/np_snippets.json": "0dab9420f238add3a83f07747961d9660c094814c91c0295d2f3e4a29b3cae87",
+    "snippets/plt_snippets.json": "bc078c1842c570a44429c0d523910e9888bc4025342fef176318acec6052261d",
+    "snippets/print_snippets.json": "2dd80cb8ef260cffdaf1e97a7694d5a7c0216534e1560f0c79b4cd07a982ed17",
     "snippets/python_snippets.json": "07d71082c50c6a2894667e5b36cd71c1eb3f55ede45d9274f21d0a7534ecb166",
-    "snippets/random_snippets.json": "87be501ac61cd689080ada002c9daaebd7a83cdda5e2af3a79eea826b5f0156e",
-    "snippets/sets_snippets.json": "6506d8e4a04636e4cbfd0326104f3f4999b53b77887fd18fb91a7494c96f4886",
-    "snippets/shortcut.json": "a315d7087ae9e52b91415cad8f0282d2dc299d2ccfcb6af8c1229e0bbb3a442f",
-    "snippets/str_snippets.json": "55847a5479b3cc253233df00cc45896badb9531ca9ede654b3f955ba5dcbfb24",
-    "snippets/tuple_snippets.json": "4e846a88d7a83ae2178683d49de8963b46f6dca1c8174c40eea52c4777ec4bf1",
+    "snippets/random_snippets.json": "f475bc472162f347cd9d2317cb9d83d05041139b4366cca812b8afc5b38a4b51",
+    "snippets/sets_snippets.json": "17254b76d4320e6c67a82f3c5a05d0ba0ccc4f07c38f2440173dcdf81915281e",
+    "snippets/shortcut.json": "d06fa48ad6cab2184ba8d63d5d5754267c35b6846be7a68aa85b75c14b257e29",
+    "snippets/str_snippets.json": "2531c0c2f3a25c4c08344a6ac229f4657445f639938d01041b4be8ddf773a9ac",
+    "snippets/tuple_snippets.json": "43faf7255efd88d47ea564b32dad08e60900aa9389537659a860d861a843ab6c",
     "_source": {
       "repo": "ericsia/vscode-python-snippet-pack-2.0",
       "commit": "a37c28b71ba740e330554c7efeabc0909a0ce55c"

@@ -99,12 +99,12 @@ export const snippetsGenerator: StepGenerator = {
     // Run build script to generate snippet files (e.g. node merge.js)
     if (verbose) console.log(`  snippets: running build: ${ss.build}`)
     try {
-      execFileSync('npm', ['install', '--legacy-peer-deps'], { cwd: input, stdio: verbose ? 'inherit' : 'pipe' })
+      execFileSync('npm', ['install', '--legacy-peer-deps'], { cwd: input, stdio: verbose ? 'inherit' : 'pipe', shell: true })
       // Parse build command respecting quoted arguments
       const buildArgs = parseShellCommand(ss.build)
       const cmd = buildArgs[0]
       const args = buildArgs.slice(1)
-      execFileSync(cmd, args, { cwd: input, stdio: verbose ? 'inherit' : 'pipe' })
+      execFileSync(cmd, args, { cwd: input, stdio: verbose ? 'inherit' : 'pipe', shell: true })
     } catch (e: any) {
       if (e.code === 'ENOENT') {
         const cmd = ss.build.split(' ')[0]

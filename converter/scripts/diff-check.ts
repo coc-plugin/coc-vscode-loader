@@ -151,7 +151,7 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
             // Build-generated snippet files are platform-dependent — use placeholder hash
             hashes[rel] = EXISTENCE_PLACEHOLDER
           } else {
-            const content = fs.readFileSync(full, 'utf-8')
+            const content = fs.readFileSync(full, 'utf-8').replace(/\r\n/g, '\n')
             hashes[rel] = crypto.createHash('sha256').update(content).digest('hex')
           }
         } catch {}
