@@ -34,7 +34,7 @@ CACHE_TTL=14 npm run test:smoke           # cache TTL in days (default 7)
 
 CI (`.github/workflows/ci.yml`): 3 jobs, all with OS matrix.
 - `unit`: `ubuntu-24.04`, `macos-14`, `windows-2022` × Node 20/22, `fail-fast: false`
-- `diff`: same 3 OS × Node 22, baseline diff check
+- `diff`: `ubuntu-24.04`, `macos-14` × Node 22 (baseline comparison — Windows skipped due to platform output differences)
 - `smoke`: same 3 OS × Node 22, full registry conversion (134 entries)
 - `registry-check.yml` runs daily (00:00/12:00 Beijing) detecting upstream changes
 
