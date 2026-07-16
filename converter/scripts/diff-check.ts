@@ -64,16 +64,16 @@ function getHeadCommit(repoDir: string): string | undefined {
   }
 }
 
-function gitCheckout(dir: string, timeout = 60000): void {
+function gitCheckout(dir: string): void {
   try {
-    execFileSync('git', ['-c', 'core.autocrlf=false', 'checkout', 'HEAD', '--'], { cwd: dir, stdio: 'pipe', timeout })
+    execFileSync('git', ['read-tree', 'HEAD'], { cwd: dir, stdio: 'pipe', timeout: 30000 })
+    execFileSync('git', ['checkout-index', '-a'], { cwd: dir, stdio: 'pipe', timeout: 60000 })
   } catch {
-    // Batch checkout failed (e.g., Windows invalid filenames like `:`)
-    // Fall back to per-file checkout, skipping problematic files
-    const files = execFileSync('git', ['ls-files'], { cwd: dir, encoding: 'utf-8', timeout }).trim().split(/\r?\n/).filter(Boolean)
+    // Fall back to per-file extraction for repos with invalid filenames
+    const files = execFileSync('git', ['ls-files'], { cwd: dir, encoding: 'utf-8', timeout: 30000 }).trim().split(/\r?\n/).filter(Boolean)
     for (const file of files) {
       try {
-        execFileSync('git', ['checkout', 'HEAD', '--', file], { cwd: dir, stdio: 'pipe', timeout: 10000 })
+        execFileSync('git', ['checkout-index', '--', file], { cwd: dir, stdio: 'pipe', timeout: 10000 })
       } catch {}
     }
   }
