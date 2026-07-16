@@ -90,7 +90,8 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
     try {
       fs.mkdirSync(cachePath, { recursive: true })
       const url = `https://github.com/${entry.source.repo}.git`
-      execFileSync('git', ['-c', 'core.autocrlf=false', 'clone', '--depth', '1', '--single-branch', url, cachePath], { stdio: 'pipe', timeout: 300000 })
+      execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, cachePath], { stdio: 'pipe', timeout: 300000 })
+      execFileSync('git', ['-c', 'core.autocrlf=false', 'checkout', '--ignore-errors', 'HEAD', '--'], { cwd: cachePath, stdio: 'pipe', timeout: 60000 })
       rootDir = cachePath
       sourceCommit = getHeadCommit(rootDir)
       inputDir = entry.source.subdir ? path.join(cachePath, entry.source.subdir) : cachePath
