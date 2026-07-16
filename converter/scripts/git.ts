@@ -114,7 +114,7 @@ export async function gitCheckout(dir: string, subdir?: string): Promise<void> {
 
   const allFiles = ls.stdout.trim().split(/\r?\n/).filter(Boolean)
   const files = subdir
-    ? allFiles.filter(f => f.startsWith(subdir.replace(/\\/g, '/').replace(/\/?$/, '/') + '/') || f === subdir)
+    ? allFiles.filter(f => f.startsWith(subdir.replace(/\\/g, '/').replace(/\/?$/, '/')) || f === subdir)
     : allFiles
 
   if (files.length === 0) {
