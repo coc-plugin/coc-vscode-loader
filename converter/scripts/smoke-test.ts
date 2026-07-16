@@ -49,18 +49,18 @@ function downloadOrCached(entry: RegistryEntry): string {
       // Fast incremental update
       try {
         execFileSync('git', ['fetch', '--depth', '1', 'origin', 'main'], { cwd: dest, stdio: 'pipe', timeout: 30000 })
-        execFileSync('git', ['reset', '--hard', 'origin/main'], { cwd: dest, stdio: 'pipe', timeout: 30000 })
+        execFileSync('git', ['-c', 'core.autocrlf=false', 'reset', '--hard', 'origin/main'], { cwd: dest, stdio: 'pipe', timeout: 30000 })
       } catch {
         // Fetch failed, re-clone
         fs.rmSync(dest, { recursive: true, force: true })
         fs.mkdirSync(dest, { recursive: true })
-        execFileSync('git', ['clone', '--depth', '1', '--single-branch', url, dest], { stdio: 'pipe', timeout: 300000 })
+        execFileSync('git', ['-c', 'core.autocrlf=false', 'clone', '--depth', '1', '--single-branch', url, dest], { stdio: 'pipe', timeout: 300000 })
       }
     } else {
       // Fresh clone
       if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
       fs.mkdirSync(dest, { recursive: true })
-      execFileSync('git', ['clone', '--depth', '1', '--single-branch', url, dest], { stdio: 'pipe', timeout: 300000 })
+      execFileSync('git', ['-c', 'core.autocrlf=false', 'clone', '--depth', '1', '--single-branch', url, dest], { stdio: 'pipe', timeout: 300000 })
     }
 
     // Validate expected files exist

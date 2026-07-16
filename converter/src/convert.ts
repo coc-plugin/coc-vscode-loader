@@ -379,7 +379,7 @@ export async function convert(opts: ConvertOptions): Promise<void> {
   let esbuildEntry = 'src/index.ts'
   if (!hasLanguageClient) {
     esbuildEntry = merged.entryPoint
-      ? `src/${merged.entryPoint.replace(/^src\//, '')}`
+      ? `src/${merged.entryPoint.replace(/^src[/\\]/, '')}`
       : 'src/extension.ts'
   }
 
@@ -526,7 +526,7 @@ if (existsSync(join(serverDir, 'tsconfig.json'))) {
   // Ensure @types/node is available for the server
   if (!existsSync(join(serverDir, 'node_modules', '@types', 'node'))) {
     console.log('[build] Installing @types/node for server...')
-    execSync('npm install --save-dev @types/node --legacy-peer-deps', { cwd: serverDir, stdio: 'inherit' })
+    execSync('npm install --save-dev @types/node --legacy-peer-deps', { cwd: serverDir, stdio: 'inherit', shell: true })
   }
   // Patch tsconfig to be self-contained — handle monorepo extends
   const tsconfigPath = join(serverDir, 'tsconfig.json')
@@ -544,7 +544,12 @@ if (existsSync(join(serverDir, 'tsconfig.json'))) {
   // Compile server TypeScript — retry with @ts-nocheck on failing files if first attempt fails
   console.log('[build] Compiling server TypeScript...')
   // Dry run first to find files with pre-existing errors
-  const checkOut = execSync('npx tsc --skipLibCheck --strict false --noEmit 2>&1; exit 0', { cwd: serverDir, encoding: 'utf-8', shell: true })
+  let checkOut = ''
+  try {
+    checkOut = execSync('npx tsc --skipLibCheck --strict false --noEmit', { cwd: serverDir, encoding: 'utf-8', stdio: 'pipe' })
+  } catch (e) {
+    checkOut = e.stdout + (e.stderr || '')
+  }
   // tsc error format: src/file.ts(line,col): error TSxxxx: message
   const errorFiles = new Set(checkOut.match(${tscMatchRe})?.map(s => s.split('(')[0].replace(${tscReplaceRe}, '')) || [])
   if (errorFiles.size > 0) {
@@ -560,7 +565,7 @@ if (existsSync(join(serverDir, 'tsconfig.json'))) {
   }
   // Compile for real — wrapped to avoid crash on residual TS errors
   try {
-    execSync('npx tsc --skipLibCheck --strict false', { cwd: serverDir, stdio: 'inherit' })
+    execSync('npx tsc --skipLibCheck --strict false', { cwd: serverDir, stdio: 'inherit', shell: true })
     console.log('[build] Server compiled successfully')
   } catch {
     console.log('[build] Server compilation had errors (likely TS type issues), but build will continue')
@@ -615,7 +620,7 @@ const serverDir = join(__dirname, '..', 'server')
 const serverPkg = join(serverDir, 'package.json')
 
 if (existsSync(serverDir) && existsSync(serverPkg)) {
-  execSync('npm install --legacy-peer-deps', { cwd: serverDir, stdio: 'inherit' })
+  execSync('npm install --legacy-peer-deps', { cwd: serverDir, stdio: 'inherit', shell: true })
 }
 `
     const scriptsDir = path.join(output, 'scripts')

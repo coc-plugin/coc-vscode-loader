@@ -81,7 +81,7 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
     // Fast incremental update
     try {
       execFileSync('git', ['fetch', '--depth', '1', 'origin'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
-      execFileSync('git', ['reset', '--hard', 'origin/HEAD'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
+      execFileSync('git', ['-c', 'core.autocrlf=false', 'reset', '--hard', 'origin/HEAD'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
       execFileSync('git', ['clean', '-fd'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
     } catch {}
     sourceCommit = getHeadCommit(rootDir)
@@ -90,7 +90,7 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
     try {
       fs.mkdirSync(cachePath, { recursive: true })
       const url = `https://github.com/${entry.source.repo}.git`
-      execFileSync('git', ['clone', '--depth', '1', '--single-branch', url, cachePath], { stdio: 'pipe', timeout: 300000 })
+      execFileSync('git', ['-c', 'core.autocrlf=false', 'clone', '--depth', '1', '--single-branch', url, cachePath], { stdio: 'pipe', timeout: 300000 })
       rootDir = cachePath
       sourceCommit = getHeadCommit(rootDir)
       inputDir = entry.source.subdir ? path.join(cachePath, entry.source.subdir) : cachePath
