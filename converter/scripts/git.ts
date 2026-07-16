@@ -104,9 +104,8 @@ export async function gitCheckout(dir: string, subdir?: string): Promise<void> {
     if (checkoutOk) return
   }
 
-  // Fallback: list files and checkout in batches.
-  // Batch size 500 hits the sweet spot: reduces process spawn overhead
-  // on Windows without hitting command line length limits.
+  // Fallback: extract files via git show (doesn't need a populated index).
+  // checkout-index requires the index, which may be missing if read-tree failed.
   const ls = await gitExec(['ls-tree', '-r', '--name-only', 'HEAD'], { cwd: dir })
   if (ls.exitCode !== 0 || !ls.stdout.trim()) {
     throw new Error(`git checkout failed: no files (empty repository or unrecoverable error)`)
@@ -121,20 +120,22 @@ export async function gitCheckout(dir: string, subdir?: string): Promise<void> {
     throw new Error(`git checkout failed: no files match${subdir ? ` subdir "${subdir}"` : ''}`)
   }
 
-  const BATCH_SIZE = 500
-  for (let i = 0; i < files.length; i += BATCH_SIZE) {
-    const batch = files.slice(i, i + BATCH_SIZE)
+  let written = 0
+  for (const file of files) {
     try {
-      await gitExec(['checkout-index', '--quiet', '--', ...batch], { cwd: dir })
+      const content = await gitExec(['cat-file', '-p', `HEAD:${file}`], { cwd: dir })
+      if (content.exitCode !== 0) continue
+      const fullPath = path.join(dir, file)
+      fs.mkdirSync(path.dirname(fullPath), { recursive: true })
+      fs.writeFileSync(fullPath, content.stdout, 'utf-8')
+      written++
     } catch {
-      for (const file of batch) {
-        try {
-          await gitExec(['checkout-index', '--quiet', '--', file], { cwd: dir })
-        } catch {
-          // skip files with invalid filenames on Windows
-        }
-      }
+      // skip files with invalid filenames on Windows
     }
+  }
+
+  if (written === 0) {
+    throw new Error(`git checkout failed: could not extract any of ${files.length} file(s)`)
   }
 }
 
