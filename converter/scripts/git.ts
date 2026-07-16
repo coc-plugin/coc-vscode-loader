@@ -33,8 +33,6 @@ export function gitExec(args: string[], options?: GitOptions): Promise<GitResult
       child.stderr.on('data', (chunk: Buffer) => stderrChunks.push(chunk))
     }
 
-    child.on('error', reject)
-
     child.on('exit', (code) => {
       // close usually follows exit quickly, but on Windows it can be delayed
       // indefinitely. Set a guard to resolve with what we have after 5s.
@@ -42,6 +40,9 @@ export function gitExec(args: string[], options?: GitOptions): Promise<GitResult
         if (!resolved) {
           resolved = true
           if (timeoutId) clearTimeout(timeoutId)
+          // Close stdio streams to release event loop handles
+          if (child.stdout) child.stdout.destroy()
+          if (child.stderr) child.stderr.destroy()
           resolve({
             exitCode: code ?? -1,
             stdout: Buffer.concat(stdoutChunks).toString('utf-8'),
@@ -62,6 +63,13 @@ export function gitExec(args: string[], options?: GitOptions): Promise<GitResult
           stderr: Buffer.concat(stderrChunks).toString('utf-8'),
         })
       }
+    })
+
+    // Also destroy streams when error occurs
+    child.on('error', (err) => {
+      if (child.stdout) child.stdout.destroy()
+      if (child.stderr) child.stderr.destroy()
+      reject(err)
     })
 
     if (options?.timeout) {
