@@ -24,7 +24,7 @@ const files = walk(srcDir)
 let exitCode = 0
 
 for (const fp of files) {
-  const name = relative(srcDir, fp)
+  const name = relative(srcDir, fp).replace(/\\/g, '/')
   if (name.endsWith('.test.ts')) continue
   if (EXEMPT.some(e => name === e || name.endsWith('/' + e))) continue
 
@@ -51,7 +51,7 @@ for (const fp of files) {
 
 if (exitCode === 0) {
   const sourceFiles = files.filter(f => {
-    const name = relative(srcDir, f)
+    const name = relative(srcDir, f).replace(/\\/g, '/')
     return !name.endsWith('.test.ts') && !EXEMPT.some(e => name === e || name.endsWith('/' + e))
   })
   console.log(`All ${sourceFiles.length} source files have valid tests`)
