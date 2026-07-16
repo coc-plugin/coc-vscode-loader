@@ -64,6 +64,21 @@ function getHeadCommit(repoDir: string): string | undefined {
   }
 }
 
+function gitCheckout(dir: string, timeout = 60000): void {
+  try {
+    execFileSync('git', ['-c', 'core.autocrlf=false', 'checkout', 'HEAD', '--'], { cwd: dir, stdio: 'pipe', timeout })
+  } catch {
+    // Batch checkout failed (e.g., Windows invalid filenames like `:`)
+    // Fall back to per-file checkout, skipping problematic files
+    const files = execFileSync('git', ['ls-files'], { cwd: dir, encoding: 'utf-8', timeout }).trim().split('\n').filter(Boolean)
+    for (const file of files) {
+      try {
+        execFileSync('git', ['checkout', 'HEAD', '--', file], { cwd: dir, stdio: 'pipe', timeout: 10000 })
+      } catch {}
+    }
+  }
+}
+
 async function processEntry(entry: RegistryEntry, presets: any): Promise<{
   name: string
   error?: string
@@ -75,13 +90,26 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
   let inputDir: string | null = null
   let rootDir: string | null = null // git root for getting commit
   let sourceCommit: string | undefined
+  try {
+    execFileSync('git', ['-c', 'core.autocrlf=false', 'checkout', 'HEAD', '--'], { cwd: dir, stdio: 'pipe', timeout })
+  } catch {
+    // Batch checkout failed (e.g., Windows invalid filenames like `:`)
+    // Fall back to per-file checkout, skipping problematic files
+    const files = execFileSync('git', ['ls-files'], { cwd: dir, encoding: 'utf-8', timeout }).trim().split('\n').filter(Boolean)
+    for (const file of files) {
+      try {
+        execFileSync('git', ['checkout', 'HEAD', '--', file], { cwd: dir, stdio: 'pipe', timeout: 10000 })
+      } catch {}
+    }
+  }
+}
 
   if (fs.existsSync(cachePath) && fs.existsSync(path.join(cachePath, '.git'))) {
     rootDir = cachePath
     // Fast incremental update
     try {
       execFileSync('git', ['fetch', '--depth', '1', 'origin'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
-      execFileSync('git', ['-c', 'core.autocrlf=false', 'reset', '--hard', 'origin/HEAD'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
+      execFileSync('git', ['reset', '--hard', 'origin/HEAD'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
       execFileSync('git', ['clean', '-fd'], { cwd: rootDir, stdio: 'pipe', timeout: 30000 })
     } catch {}
     sourceCommit = getHeadCommit(rootDir)
@@ -91,7 +119,7 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
       fs.mkdirSync(cachePath, { recursive: true })
       const url = `https://github.com/${entry.source.repo}.git`
       execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, cachePath], { stdio: 'pipe', timeout: 300000 })
-      execFileSync('git', ['-c', 'core.autocrlf=false', 'checkout', '--ignore-errors', 'HEAD', '--'], { cwd: cachePath, stdio: 'pipe', timeout: 60000 })
+      gitCheckout(cachePath)
       rootDir = cachePath
       sourceCommit = getHeadCommit(rootDir)
       inputDir = entry.source.subdir ? path.join(cachePath, entry.source.subdir) : cachePath

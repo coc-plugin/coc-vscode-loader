@@ -37,6 +37,21 @@ function cacheDir(e: RegistryEntry): string {
   return path.join(CACHE_DIR, e.name.replace(/[^a-z0-9_-]/gi, '_'))
 }
 
+function gitCheckout(dir: string, timeout = 60000): void {
+  try {
+    execFileSync('git', ['-c', 'core.autocrlf=false', 'checkout', 'HEAD', '--'], { cwd: dir, stdio: 'pipe', timeout })
+  } catch {
+    // Batch checkout failed (e.g., Windows invalid filenames like `:`)
+    // Fall back to per-file checkout, skipping problematic files
+    const files = execFileSync('git', ['ls-files'], { cwd: dir, encoding: 'utf-8', timeout }).trim().split('\n').filter(Boolean)
+    for (const file of files) {
+      try {
+        execFileSync('git', ['checkout', 'HEAD', '--', file], { cwd: dir, stdio: 'pipe', timeout: 10000 })
+      } catch {}
+    }
+  }
+}
+
 function downloadOrCached(entry: RegistryEntry): string {
   const dest = cacheDir(entry)
   const src = entry.source
@@ -49,13 +64,13 @@ function downloadOrCached(entry: RegistryEntry): string {
       // Fast incremental update
       try {
         execFileSync('git', ['fetch', '--depth', '1', 'origin', 'main'], { cwd: dest, stdio: 'pipe', timeout: 30000 })
-        execFileSync('git', ['-c', 'core.autocrlf=false', 'reset', '--hard', 'origin/main'], { cwd: dest, stdio: 'pipe', timeout: 30000 })
+        execFileSync('git', ['reset', '--hard', 'origin/main'], { cwd: dest, stdio: 'pipe', timeout: 30000 })
       } catch {
         // Fetch failed, re-clone
         fs.rmSync(dest, { recursive: true, force: true })
         fs.mkdirSync(dest, { recursive: true })
         execFileSync('git', ['clone', '--no-checkout', '--depth', '1', '--single-branch', url, dest], { stdio: 'pipe', timeout: 300000 })
-        execFileSync('git', ['-c', 'core.autocrlf=false', 'checkout', '--ignore-errors', 'HEAD', '--'], { cwd: dest, stdio: 'pipe', timeout: 60000 })
+        gitCheckout(dest)
       }
     } else {
       // Fresh clone
