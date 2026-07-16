@@ -55,30 +55,42 @@ export function gitExec(args: string[], options?: GitOptions): Promise<GitResult
 
 /**
  * Checkout HEAD in a --no-checkout cloned repo.
- * Falls back to per-file extraction for repos with problematic filenames.
+ * Falls back to per-file extraction for repos with problematic filenames or large trees.
  * Throws if no files could be checked out.
+ *
+ * Only network operations (clone, fetch) have timeouts; local git operations
+ * (read-tree, checkout-index) run until completion — no arbitrary limits.
  */
 export async function gitCheckout(dir: string): Promise<void> {
-  const r = await gitExec(['read-tree', 'HEAD'], { cwd: dir, timeout: 30000 })
-  if (r.exitCode !== 0) {
-    throw new Error(`git read-tree failed: ${r.stderr}`)
+  const readTreeOk = await tryExec(gitExec(['read-tree', 'HEAD'], { cwd: dir }))
+  if (readTreeOk) {
+    const checkoutOk = await tryExec(gitExec(['checkout-index', '-a'], { cwd: dir }))
+    if (checkoutOk) return
   }
 
-  const co = await gitExec(['checkout-index', '-a'], { cwd: dir, timeout: 60000 })
-  if (co.exitCode === 0) return
-
-  const ls = await gitExec(['ls-files'], { cwd: dir, timeout: 30000 })
+  // Fall back to per-file extraction
+  const ls = await gitExec(['ls-files'], { cwd: dir })
   if (ls.exitCode !== 0 || !ls.stdout.trim()) {
-    throw new Error(`git checkout failed: no files (${co.stderr || 'empty repository'})`)
+    throw new Error(`git checkout failed: no files (empty repository or unrecoverable error)`)
   }
 
   const files = ls.stdout.trim().split(/\r?\n/).filter(Boolean)
   for (const file of files) {
     try {
-      await gitExec(['checkout-index', '--quiet', '--', file], { cwd: dir, timeout: 10000 })
+      await gitExec(['checkout-index', '--quiet', '--', file], { cwd: dir })
     } catch {
       // skip files with invalid filenames on Windows
     }
+  }
+}
+
+/** Run a promise, return true if it resolves with exitCode 0, false otherwise. */
+async function tryExec(p: Promise<GitResult>): Promise<boolean> {
+  try {
+    const r = await p
+    return r.exitCode === 0
+  } catch {
+    return false
   }
 }
 
