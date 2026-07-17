@@ -49,8 +49,11 @@ async function downloadOrCached(entry: RegistryEntry): Promise<string> {
     if (fs.existsSync(path.join(dest, '.git'))) {
       // Fast incremental update
       try {
-        await gitExec(['fetch', '--depth', '1', '--quiet', 'origin', 'main'], { cwd: dest, timeout: 30000 })
-        await gitExec(['reset', '--hard', '--quiet', 'origin/main'], { cwd: dest, timeout: 30000 })
+        await gitExec(['fetch', '--depth', '1', '--quiet', 'origin'], { cwd: dest, timeout: 30000 })
+        await gitExec(['reset', '--hard', '--quiet', 'origin/HEAD'], { cwd: dest, timeout: 30000 })
+        await gitExec(['clean', '-fd', '--quiet'], { cwd: dest, timeout: 30000 })
+        // Re-apply sparse checkout — fetch/reset/clean can lose it for monorepos with subdir
+        await gitCheckout(dest, src.subdir)
       } catch {
         // Fetch failed, re-clone
         if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
