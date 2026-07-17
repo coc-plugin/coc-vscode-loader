@@ -72,6 +72,8 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
       await gitExec(['fetch', '--depth', '1', '--quiet', 'origin'], { cwd: rootDir, timeout: 30000 })
       await gitExec(['reset', '--hard', '--quiet', 'origin/HEAD'], { cwd: rootDir, timeout: 30000 })
       await gitExec(['clean', '-fd', '--quiet'], { cwd: rootDir, timeout: 30000 })
+      // Re-apply sparse checkout config — fetch/reset/clean can lose it for monorepos with subdir
+      await gitCheckout(rootDir, entry.source.subdir)
     } catch {}
     sourceCommit = await getHeadCommit(rootDir)
     inputDir = entry.source.subdir ? path.join(cachePath, entry.source.subdir) : cachePath
