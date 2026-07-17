@@ -232,7 +232,7 @@ cd plugin && npm run build  # build plugin only
 ### OS
 - **Linux** ✅ Fully supported
 - **macOS** ✅ Fully supported
-- **Windows** ✅ Supported (paths auto-detect `%APPDATA%/coc`, archive extraction uses `tar.exe` and Node.js `zlib`)
+- **Windows** ✅ Fully supported
 
 ### Editor
 
