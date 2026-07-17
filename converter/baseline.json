@@ -151,7 +151,7 @@
   },
   "vscode-tailwindcss": {
     "esbuild.mjs": "445f707c0df9f1b5c77f675eed7ddd7004a9f9d8033a8d52cc14b87700b95bc2",
-    "package.json": "35d5cb808a96b5232f586b3b27239206443076619dbf65c791d1dba454657b27",
+    "package.json": "2091e646da198c0f807fdf4ac28ba1bf1ef467913d3362b82c6707213f06ded6",
     "src/analyze.ts": "60932b2b89c87e8238865f6ec047551ee0ddfd9df65ddedc90fd576749e5c939",
     "src/api.ts": "006dae0259c1047a055be49652dfa3c01276d37fcd8833f4519c2dc412e87f7d",
     "src/cssServer.ts": "c8710c0278db0425ad10d1a2fc7efcaeedb14624b2336c8e162da84c667016e6",
@@ -164,7 +164,7 @@
     "src/servers/index.ts": "b58a418ac4a7fd10d6d055bf3e10388071424140105228cffdc37a61fe5b76cf",
     "_source": {
       "repo": "tailwindlabs/tailwindcss-intellisense",
-      "commit": "364dd9ae9a1fd17ce1d826cff02c82a6ccfcfad8"
+      "commit": "5067ff7ec0b4b8bb5c3325a69c1f3410eb5b350a"
     }
   },
   "vscode-ember": {
