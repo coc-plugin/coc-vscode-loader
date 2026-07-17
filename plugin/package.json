@@ -56,6 +56,32 @@
     "onCommand:loader._dispatch"
   ],
   "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "coc-vscode-loader",
+      "properties": {
+        "coc-vscode-loader.icons.package_available": {
+          "type": "string",
+          "default": "◍",
+          "description": "Icon for available (not installed) packages"
+        },
+        "coc-vscode-loader.icons.package_installed": {
+          "type": "string",
+          "default": "◍",
+          "description": "Icon for installed packages"
+        },
+        "coc-vscode-loader.icons.package_pending": {
+          "type": "string",
+          "default": "◍",
+          "description": "Icon for installing/updating/uninstalling packages"
+        },
+        "coc-vscode-loader.icons.package_failed": {
+          "type": "string",
+          "default": "◍",
+          "description": "Icon for failed packages"
+        }
+      }
+    },
     "commands": [
       {
         "command": "loader.open",
