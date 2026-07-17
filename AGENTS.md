@@ -5,23 +5,27 @@ Monorepo with two independent packages. **Converter CLI** (`converter/`) transfo
 ## Commands
 
 ```bash
-# Root
+# Root (zero own deps; only coordinator scripts)
 npm test                    # → converter unit tests (check:tests + vitest)
 npm run test:full           # unit + diff:check
-npm run test:smoke          # full registry (133 entries, network, slow)
+npm run test:smoke          # full registry (network, slow; skip with SKIP_SMOKE=1)
 npm run diff:baseline       # snapshot SHA-256 hashes of converted output
 npm run diff:check          # fail if output changed vs baseline
+npm run build               # BROKEN — converter has no build script, this fails at build:converter step; use build:plugin
 npm run build:plugin        # bundle-converter + esbuild → plugin/lib/index.js
-npm run build               # BROKEN — converter has no build script; use build:plugin
 npm run switch:local|npm|status
+npm run pr                  # bash scripts/create-pr.sh
 
-# Converter (from converter/ or root)
+# Converter (converter/ — all deps live here)
 npm test                    # check:tests → vitest run
 npm run check:tests         # every source file must have matching .test.ts
+npm run test:watch          # vitest watch mode
 npm run convert             # tsx src/cli.ts (CLI entrypoint)
+npm run test:smoke          # tsx scripts/smoke-test.ts (needs coc-vscode-registry/ sibling)
 
-# Plugin (from plugin/ or root: npm run build:plugin)
+# Plugin (plugin/)
 npm run build               # bundle-converter + esbuild → lib/index.js
+npm install                 # triggers prepare script = full build
 
 # Smoke test overrides
 NO_CACHE=1 npm run test:smoke        # re-clone all repos (default: cached)
@@ -29,20 +33,22 @@ CONCURRENCY=12 npm run test:smoke    # parallel downloads (default 8)
 CACHE_TTL=14 npm run test:smoke      # cache TTL in days (default 7)
 ```
 
-**Pre-push hook** (`.githooks/pre-push`, enabled by postinstall): runs `npm test` + `npm run test:smoke`. Skip with `SKIP_SMOKE=1 git push`, `bash dev.sh`, or `git push --no-verify`.
+**Pre-push hook** (`.githooks/pre-push`, auto-configured by `npm run postinstall`): runs `npm test` + `npm run test:smoke`. Skip with `SKIP_SMOKE=1 git push`, `bash dev.sh`, or `git push --no-verify`.
 
 ## CI (`.github/workflows/ci.yml`)
 
-3 serial jobs, all `fail-fast: false`, OS matrix:
+3 serial jobs (`fail-fast: false`), OS matrix:
 - `unit` → ubuntu-24.04, macos-14, windows-2022 × Node 20/22
 - `diff` → ubuntu-24.04, macos-14 × Node 22 (Windows skipped — platform output differences)
-- `smoke` → same 3 OS × Node 22, full registry (133 entries)
+- `smoke` → same 3 OS × Node 22, full registry
 
 `registry-check.yml` runs 2x daily (00:00/12:00 Beijing), detects upstream changes, creates PRs on output delta.
 
+CI runs `npm ci` in `converter/` (not root). Registry cloned fresh as sibling `coc-vscode-registry/`.
+
 ## Registry
 
-`coc-vscode-registry/` must exist as sibling directory (CI clones it fresh). **Registry edits go in [separate repo](https://github.com/coc-plugin/coc-vscode-registry)** — not here. Entry naming: `vscode-<short-name>`.
+`coc-vscode-registry/` must exist as sibling directory. **Registry edits go in [separate repo](https://github.com/coc-plugin/coc-vscode-registry)** — not here. Entry naming: `vscode-<short-name>`.
 
 `baseline.json` stores SHA-256 hashes. After changing converter code or registry entries, run `npm run diff:baseline` and commit.
 

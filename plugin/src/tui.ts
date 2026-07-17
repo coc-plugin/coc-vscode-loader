@@ -13,6 +13,35 @@ const VERSION: string = (() => {
   } catch { return '0.0.0' }
 })()
 
+interface TUIIcons {
+  installed: string
+  available: string
+  pending: string
+  failed: string
+}
+
+const DEFAULT_ICONS: TUIIcons = {
+  installed: '◍',
+  available: '◍',
+  pending: '◍',
+  failed: '◍',
+}
+
+function loadIcons(): TUIIcons {
+  try {
+    const cfg = workspace.getConfiguration('coc-vscode-loader')
+    const raw = cfg.get<Record<string, string>>('icons', {})
+    return {
+      installed: raw.package_installed ?? DEFAULT_ICONS.installed,
+      available: raw.package_available ?? DEFAULT_ICONS.available,
+      pending: raw.package_pending ?? DEFAULT_ICONS.pending,
+      failed: raw.package_failed ?? DEFAULT_ICONS.failed,
+    }
+  } catch {
+    return { ...DEFAULT_ICONS }
+  }
+}
+
 // Per-tab educational content (Mason-style, concise)
 const TAB_HELP_CONTENT: Record<string, string[]> = {
   'All': [
@@ -89,9 +118,11 @@ export class TUI {
   private backdropBufnr: number = 0
   private backdropWinid: number = 0
   latestLoaderVersion: string | null = null
+  icons: TUIIcons
 
   constructor(state: StateManager) {
     this.state = state
+    this.icons = loadIcons()
   }
 
   async open() {
@@ -681,17 +712,22 @@ export class TUI {
     pkgLineMap.set(pkgLine, entry.info.name)
 
     let iconHl: string
+    let icon: string
     if (entry.status === 'failed') {
       iconHl = 'CocLoaderError'
+      icon = this.icons.failed
     } else if (entry.status === 'installed') {
       iconHl = 'CocLoaderHighlight'
+      icon = this.icons.installed
     } else if (['installing', 'updating', 'uninstalling'].includes(entry.status)) {
       iconHl = 'CocLoaderHighlight'
+      icon = this.icons.pending
     } else {
       iconHl = 'CocLoaderMuted'
+      icon = this.icons.available
     }
     buf.append('  ')
-    buf.append('◍', iconHl)
+    buf.append(icon, iconHl)
     buf.append(' ')
     const isExpanded = ['installed', 'not-installed', 'failed'].includes(entry.status) && entry.expanded
     if (isExpanded) {
