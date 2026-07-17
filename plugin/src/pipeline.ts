@@ -394,8 +394,8 @@ async function buildPackage(
   }
 
   // Check for server directory in original source and install its deps
-  // Skip if pre-built server was downloaded from VSIX
-  if (info.prebuilt?.type !== 'vsix') {
+  // Skip if pre-built server was downloaded from VSIX, or if server comes from npm (not local)
+  if (info.prebuilt?.type !== 'vsix' && hasLocalServer) {
     const serverDir = path.join(inputDir, 'server')
     if (fs.existsSync(serverDir) && fs.existsSync(path.join(serverDir, 'package.json'))) {
       onProgress(3, 5, 'Installing server dependencies...', `npm ${npmInstallArgs().join(' ')} in ${serverDir}`)
