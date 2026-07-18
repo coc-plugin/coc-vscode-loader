@@ -68,8 +68,15 @@ async function downloadOrCached(entry: RegistryEntry): Promise<string> {
       if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
       fs.mkdirSync(dest, { recursive: true })
       const cloneArgs = ['clone', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest]
-      if (src.subdir) cloneArgs.splice(1, 0, '--filter=blob:none')
-      await gitExec(cloneArgs, { timeout: 300000 })
+      try {
+        await gitExec(cloneArgs, { timeout: 300000 })
+      } catch {
+        // Some repos have git protocol issues on Windows CI — retry with
+        // blobless filter to avoid downloading file contents during clone.
+        if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true })
+        fs.mkdirSync(dest, { recursive: true })
+        await gitExec(['clone', '--filter=blob:none', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, dest], { timeout: 300000 })
+      }
       await gitCheckout(dest, src.subdir)
     }
 
