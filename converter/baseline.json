@@ -644,11 +644,11 @@
   },
   "vscode-jq": {
     "esbuild.mjs": "6821744548ffa0e82d96e858adb569972cb273bc99d5331bf627c44fd3c91271",
-    "package.json": "6eba426382907f3322195aedc9bf9c0e33c4d004f8f975749e5d8bdb428987a1",
+    "package.json": "03c1d69db1345dcb49701bceaba386a9ca932b8b501693bdae1e57c785c3f32e",
     "src/index.ts": "96296fe50703c94607f0248efdec79fbe6ed435c41cc619dadcf5e102acdfb07",
     "_source": {
       "repo": "wader/vscode-jq",
-      "commit": "5aa0f023cc7bf093b82a807011f4c907a64cb2d6"
+      "commit": "9aa7db79f72a7946d3847d0859c20eb927d9c3a3"
     }
   },
   "vscode-html-ls": {
