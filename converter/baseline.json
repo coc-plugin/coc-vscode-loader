@@ -1070,15 +1070,15 @@
   },
   "vscode-angular": {
     "coc-convert.json": "5565751d15f2827e46bee621795b5c62e6e8a7cfb797c00aeb77f9cbc86c21ba",
-    "package.json": "55c260fc10df5b96f1e36197ab6dfbe30538aa1be6c328598ef9f9ae1dc7cf54",
+    "package.json": "99d6ec870441deb68ee6f97e8d5cf9fb23a57537d48686b76239ef7c547f27fd",
     "snippets/dockerfile.json": "a387fbfde945cb4c53c098e273cd67679f702938535b5c68a050c93448978024",
-    "snippets/html.json": "3afffde284fd4939be212e9ff01e6b731ed08d5959928647b29782cbe2d27fed",
+    "snippets/html.json": "e0dcd1ec95523c1a73d969af6de241a56c754a153428c79ae327d175d103fd5e",
     "snippets/javascript.json": "6ef6318483c9e7206f172ff9871de710986843e52b1ba9389d721f5f70299067",
-    "snippets/jsonc.json": "6822d6873315dd200a9687b67a503240c66638126e4fcb0a29fd844906db4d63",
-    "snippets/typescript.json": "f0f6c1d93dd12393e81e559ddbdd04848a850748a13a9a13ac5369a5942a2c8b",
+    "snippets/jsonc.json": "e6c02dac6e4a1844d760a7dfa4c0beaacbf190fcb7c8dc18ed36155aa6aba704",
+    "snippets/typescript.json": "06451642544002b9c26b376c20e74f4633f77382cc0f6e9fe14c1bb242a7318a",
     "_source": {
       "repo": "johnpapa/vscode-angular-snippets",
-      "commit": "12d694c7692514fdaae2d6a5718752e5b786d403"
+      "commit": "6a438919d30cd8507b7096afc52ec65e16c3e7a7"
     }
   },
   "vscode-angular1": {
