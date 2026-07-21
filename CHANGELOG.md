@@ -5,6 +5,10 @@
 ### Added
 - **Windows support** — Full cross-platform compatibility for Windows 10/11 (WSL not required). Centralized path detection, `taskkill` for process cleanup, Node.js zlib for gzip, `tar.exe` for extraction, platform-specific Python detection.
 - **TUI customizable icons** — New `coc-vscode-loader.icons` settings (`package_available`, `package_installed`, `package_pending`, `package_failed`) with Nerd Font defaults.
+- **`{pluginDir}` template in server args** — Language server arguments can reference the plugin directory via `{pluginDir}`, resolved at install time. Used by `vscode-ng-language-service`.
+- **Snippets build step** — Snippet entries can define a `build` script that runs before snippet file collection, enabling generated snippets.
+- **`targetAssets` for binary servers** — Platform/arch-specific binary download URLs, enabling single entries for multi-platform servers.
+- **`prebuilt` (VSIX) server support** — Registry field to download pre-compiled servers from marketplace instead of building from source.
 - **CI cross-platform matrix** — All CI jobs now run on ubuntu-24.04, macos-14, and windows-2022.
 - **`fail-fast: false` on registry check** — One entry failure no longer cancels all other concurrent checks.
 
@@ -13,11 +17,16 @@
 - **check-repo-status.ts missing file crash** — `repo-status.json` deletion caused unhandled exception. Now defaults to empty object if file doesn't exist.
 - **git checkout reliability** — Sparse checkout cone mode, `--filter=blob:none` for monorepos, per-file `cat-file` fallback when bulk checkout fails (invalid filenames on Windows).
 - **Bridge plugin TypeScript 7 crash regression** — Runtime detection caps TS to `<7.0.0` for bridge plugins.
+- **Line ending normalization** — CRLF→LF in hash computation, fixture comparisons, and path handling for cross-platform consistency.
 
 ### Changed
 - **converter**: bump to v1.6.7, upgrade ts-morph to ^28.0.0
 - **plugin**: bump to v1.6.7
-- **Registry**: update `vscode-docker` source from archived `microsoft/vscode-docker` to `microsoft/vscode-containers`
+- **Registry**: 24 new entries added, many requiring v1.6.x features
+- **git clone/checkout**: Refactored into shared async module, sparse checkout cone mode for monorepo subdirs, `--filter=blob:none` to reduce network transfer
+
+### New Registry Entries
+- `vscode-ng-language-service` (Angular, v1.6.7) — Angular template language server with `{pluginDir}` arg resolution (requires v1.6.7)
 
 ## [1.6.6] - 2026-07-15
 
