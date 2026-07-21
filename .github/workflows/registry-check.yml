@@ -46,6 +46,7 @@ jobs:
     if: ${{ needs.discover.result == 'success' && needs.discover.outputs.matrix != '[]' }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.discover.outputs.matrix) }}
       max-parallel: 8
