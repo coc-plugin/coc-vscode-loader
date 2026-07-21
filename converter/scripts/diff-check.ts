@@ -74,7 +74,21 @@ async function processEntry(entry: RegistryEntry, presets: any): Promise<{
       await gitExec(['clean', '-fd', '--quiet'], { cwd: rootDir, timeout: 30000 })
       // Re-apply sparse checkout config — fetch/reset/clean can lose it for monorepos with subdir
       await gitCheckout(rootDir, entry.source.subdir)
-    } catch {}
+    } catch {
+      // Cached repo stale or subdir missing (source repo changed) — re-clone fresh
+      try {
+        if (fs.existsSync(cachePath)) fs.rmSync(cachePath, { recursive: true, force: true })
+        fs.mkdirSync(cachePath, { recursive: true })
+        const url = `https://github.com/${entry.source.repo}.git`
+        const cloneArgs = ['clone', '--no-checkout', '--depth', '1', '--single-branch', '--quiet', url, cachePath]
+        if (entry.source.subdir) cloneArgs.splice(1, 0, '--filter=blob:none')
+        await gitExec(cloneArgs, { timeout: 300000 })
+        await gitCheckout(cachePath, entry.source.subdir)
+        rootDir = cachePath
+      } catch (e: any) {
+        return { name: entry.name, error: `source download: ${e.message}` }
+      }
+    }
     sourceCommit = await getHeadCommit(rootDir)
     inputDir = entry.source.subdir ? path.join(cachePath, entry.source.subdir) : cachePath
   } else if (entry.source.type === 'github' && entry.source.repo) {
