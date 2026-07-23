@@ -1,22 +1,4 @@
 {
-  "vscode-clangd": {
-    "esbuild.mjs": "f26c1389529f37b0ca1d3e2bbfa049c260baf4fa2dffcf01af2683eeb1dce396",
-    "package.json": "2e0e8613d7de1721b6c8d174f801c331e6c9b6bf91181a2177816978fa31258c",
-    "src/index.ts": "8d9be2c97cff5d4f24937deee8229c3029aa692af58697e5134e047695cb6022",
-    "_source": {
-      "repo": "clangd/vscode-clangd",
-      "commit": "77e36576f46867fe487f95e2d4ec96bb0238827c"
-    }
-  },
-  "vscode-ruff": {
-    "esbuild.mjs": "9860acd4fab8a7987734b75acd0c248c56be25fa0a4f8586f7f60c9877580c5a",
-    "package.json": "e66dfa5369a97d5b09c40676fd8200fb34dceef4a627ff8829dfa44ed4b5ff3c",
-    "src/index.ts": "31d017025438c9d02668028d211b403720a02bffc2b84d855390745ea8528eec",
-    "_source": {
-      "repo": "astral-sh/ruff-vscode",
-      "commit": "c886b4ba39d237f5d7bf095aba9b1d936ca44fb3"
-    }
-  },
   "vscode-gleam": {
     "esbuild.mjs": "091538f6b932a4c081324a2b30584ea77ca0fd1ec84eeadc537bfa0d62d36466",
     "package.json": "1a3a4271948ddb6d4f95981f41f8a04872b148dc72bd40178f020e25e7108a2f",
@@ -24,6 +6,15 @@
     "_source": {
       "repo": "gleam-lang/vscode-gleam",
       "commit": "1aa610135f1b3f3835109b3ccf0985a12445fba1"
+    }
+  },
+  "vscode-pyright": {
+    "esbuild.mjs": "3315fb7bdeae449c43dd37893169507dfb127a16e085741cc33bfd4d8a6838e7",
+    "package.json": "c3ca30438144fca3a83162bcf0a276f78302c6dafa2e53567e83b8aa2a94399d",
+    "src/index.ts": "21f17bca573f292f7e4eddaf2cc23791e5131d03d4b190ae343c62d807fa7549",
+    "_source": {
+      "repo": "microsoft/pyright",
+      "commit": "93ea6468a40c7c8cdab5643f66411da5e0414742"
     }
   },
   "vscode-rust-analyzer": {
@@ -55,22 +46,22 @@
       "commit": "1174734d9c6453d13d2b5e3d578512c579ca37f1"
     }
   },
-  "vscode-pyright": {
-    "esbuild.mjs": "3315fb7bdeae449c43dd37893169507dfb127a16e085741cc33bfd4d8a6838e7",
-    "package.json": "c3ca30438144fca3a83162bcf0a276f78302c6dafa2e53567e83b8aa2a94399d",
-    "src/index.ts": "21f17bca573f292f7e4eddaf2cc23791e5131d03d4b190ae343c62d807fa7549",
+  "vscode-clangd": {
+    "esbuild.mjs": "f26c1389529f37b0ca1d3e2bbfa049c260baf4fa2dffcf01af2683eeb1dce396",
+    "package.json": "2e0e8613d7de1721b6c8d174f801c331e6c9b6bf91181a2177816978fa31258c",
+    "src/index.ts": "8d9be2c97cff5d4f24937deee8229c3029aa692af58697e5134e047695cb6022",
     "_source": {
-      "repo": "microsoft/pyright",
-      "commit": "93ea6468a40c7c8cdab5643f66411da5e0414742"
+      "repo": "clangd/vscode-clangd",
+      "commit": "77e36576f46867fe487f95e2d4ec96bb0238827c"
     }
   },
-  "vscode-go": {
-    "esbuild.mjs": "b122af4583ed84ef62cb35807263a3a59058ab7f691c2f3d4748fc6cad77af84",
-    "package.json": "95b6fc0ba3639440052fcd832c33f7ec06836b6c414c6346bc262a1022cae68a",
-    "src/index.ts": "375e6842df954721bd34a0ffdf2479b4ec38735573f824cba6781cad6b2f604a",
+  "vscode-ruff": {
+    "esbuild.mjs": "9860acd4fab8a7987734b75acd0c248c56be25fa0a4f8586f7f60c9877580c5a",
+    "package.json": "e66dfa5369a97d5b09c40676fd8200fb34dceef4a627ff8829dfa44ed4b5ff3c",
+    "src/index.ts": "31d017025438c9d02668028d211b403720a02bffc2b84d855390745ea8528eec",
     "_source": {
-      "repo": "golang/vscode-go",
-      "commit": "e1869f77017a1cb99d02317dc6682ccda3b7e90a"
+      "repo": "astral-sh/ruff-vscode",
+      "commit": "c886b4ba39d237f5d7bf095aba9b1d936ca44fb3"
     }
   },
   "vscode-volar": {
@@ -85,27 +76,6 @@
     "_source": {
       "repo": "vuejs/language-tools",
       "commit": "876b0278ad0d1995c74c975c1f9fd4a8dc00e092"
-    }
-  },
-  "vscode-biome": {
-    "esbuild.mjs": "1ce6343ae783b009fb0349fb4d14c10e972f71383d8adc6538a0817f708c9a52",
-    "package.json": "13e048b10ed379a2216a3bb51091a3602975d4f330d927eb70aa7a03ea6a424d",
-    "src/biome.ts": "270734b08e227eb843d3a2619c01067f69568fc2a96ac33f32f40be5ead7df0e",
-    "src/constants.ts": "f9ea5211c862b155f44277c8733b321b5dc2a7224db25840fe5e4880134274dd",
-    "src/extension.ts": "1f6c9a18e2a2de3e5129f65a3b95eb58605c9fd0d80e628b9a47fcbf44ec5dbc",
-    "src/gritql/index.ts": "a8276fa7b91e5e7e5c6e6db9b1ff61b2e4b262527a2a21d66ccccd65dd86f1aa",
-    "src/gritql/node_to_token.ts": "76b77c2dcb42acc7d08685b1b6ddcb7548282965ac62c5a486441f5bac5b00d5",
-    "src/index.ts": "689da4e7df7ad6551c86944574d7a22e8d818daf78b7d591d1f3edb13107c6e9",
-    "src/locator.ts": "fd74e5fc4ab8620c737b544cc41348bfbb74f8e97205b056241fb9b68e4062e5",
-    "src/logger.ts": "f2390c2d09576fb13a82e19d97a5ed241990f10a30c20d2df7b28c203f7cab14",
-    "src/main.ts": "8ca0b3a9a0a99fe7a086cabd349456e8c57de1a0a5cb44bf09105e2be0ec59d2",
-    "src/session.ts": "e2f384a8401d2869c0535fdf6b8ba02f988e7e2ed349dd376f0908347ca143fe",
-    "src/status-bar.ts": "c5ee11237579f99548fc41eef9339dc1eaa74919b8c77ff231586e567f0f74ee",
-    "src/types.ts": "849b578c0626fe14e456c24816bbdade87b60a672ebfed48d28bb936f8bb3a0a",
-    "src/utils.ts": "d097c336e31f3596baea4024eb8a9b8f06e8da3104e43c8630b9193d2e4c585a",
-    "_source": {
-      "repo": "biomejs/biome-vscode",
-      "commit": "1f66d0fefe01597da7fc5652661144fce25c253b"
     }
   },
   "vscode-deno": {
@@ -140,13 +110,25 @@
       "commit": "84ce77afa2968f3e22a2c18e6f25fb6db749a370"
     }
   },
-  "vscode-eslint": {
-    "esbuild.mjs": "618f1d9b3b123a9c50884838459136d1f0ae1a3416567760e3c8152590810a48",
-    "package.json": "f336b597b05dda91a833f7266da255b5c9b7036509bb2cd3697ad17d4d33a9f7",
-    "src/index.ts": "8cf0e1fc0b9d3666e730bb0df33c7b1734f8039d28aa9ea06b866c73feca4e2e",
+  "vscode-biome": {
+    "esbuild.mjs": "1ce6343ae783b009fb0349fb4d14c10e972f71383d8adc6538a0817f708c9a52",
+    "package.json": "13e048b10ed379a2216a3bb51091a3602975d4f330d927eb70aa7a03ea6a424d",
+    "src/biome.ts": "270734b08e227eb843d3a2619c01067f69568fc2a96ac33f32f40be5ead7df0e",
+    "src/constants.ts": "f9ea5211c862b155f44277c8733b321b5dc2a7224db25840fe5e4880134274dd",
+    "src/extension.ts": "1f6c9a18e2a2de3e5129f65a3b95eb58605c9fd0d80e628b9a47fcbf44ec5dbc",
+    "src/gritql/index.ts": "a8276fa7b91e5e7e5c6e6db9b1ff61b2e4b262527a2a21d66ccccd65dd86f1aa",
+    "src/gritql/node_to_token.ts": "76b77c2dcb42acc7d08685b1b6ddcb7548282965ac62c5a486441f5bac5b00d5",
+    "src/index.ts": "689da4e7df7ad6551c86944574d7a22e8d818daf78b7d591d1f3edb13107c6e9",
+    "src/locator.ts": "fd74e5fc4ab8620c737b544cc41348bfbb74f8e97205b056241fb9b68e4062e5",
+    "src/logger.ts": "f2390c2d09576fb13a82e19d97a5ed241990f10a30c20d2df7b28c203f7cab14",
+    "src/main.ts": "8ca0b3a9a0a99fe7a086cabd349456e8c57de1a0a5cb44bf09105e2be0ec59d2",
+    "src/session.ts": "e2f384a8401d2869c0535fdf6b8ba02f988e7e2ed349dd376f0908347ca143fe",
+    "src/status-bar.ts": "c5ee11237579f99548fc41eef9339dc1eaa74919b8c77ff231586e567f0f74ee",
+    "src/types.ts": "849b578c0626fe14e456c24816bbdade87b60a672ebfed48d28bb936f8bb3a0a",
+    "src/utils.ts": "d097c336e31f3596baea4024eb8a9b8f06e8da3104e43c8630b9193d2e4c585a",
     "_source": {
-      "repo": "microsoft/vscode-eslint",
-      "commit": "22853d89978f3a3715dafbe6a668b5bbf854f3ef"
+      "repo": "biomejs/biome-vscode",
+      "commit": "1f66d0fefe01597da7fc5652661144fce25c253b"
     }
   },
   "vscode-ember": {
@@ -158,22 +140,34 @@
       "commit": "f7e4c4290831893b4c17adfb68127adc2e44337e"
     }
   },
-  "vscode-tailwindcss": {
-    "esbuild.mjs": "445f707c0df9f1b5c77f675eed7ddd7004a9f9d8033a8d52cc14b87700b95bc2",
-    "package.json": "2091e646da198c0f807fdf4ac28ba1bf1ef467913d3362b82c6707213f06ded6",
-    "src/analyze.ts": "60932b2b89c87e8238865f6ec047551ee0ddfd9df65ddedc90fd576749e5c939",
-    "src/api.ts": "006dae0259c1047a055be49652dfa3c01276d37fcd8833f4519c2dc412e87f7d",
-    "src/cssServer.ts": "c8710c0278db0425ad10d1a2fc7efcaeedb14624b2336c8e162da84c667016e6",
-    "src/exclusions.ts": "24cfdab3f5594c3d238e139689949540a6a6388b22639bf5c79efb9de6d7bd30",
-    "src/extension.ts": "b0adedf243a3e92a1cffc99c796095cb999d89fff6c673693a73d77ed45c9b52",
-    "src/index.ts": "01759e31064b84a7f86fab269f79b62dc3d2af69b4730da6ff77fb4983fd5213",
-    "src/oxide-helper.ts": "0748a32387dd5e29d95631e958d7aea0261a9fd5c5080f5fabfd20fb45e184cb",
-    "src/server.ts": "165964bd5d246c072d58c607986175868094a3433553899de71163c032697059",
-    "src/servers/css.ts": "dc7e01d4e8e86ebc55a5efc0682bd4f23ebe5877e27d411e5dca83df23392c13",
-    "src/servers/index.ts": "b58a418ac4a7fd10d6d055bf3e10388071424140105228cffdc37a61fe5b76cf",
+  "vscode-go": {
+    "esbuild.mjs": "b122af4583ed84ef62cb35807263a3a59058ab7f691c2f3d4748fc6cad77af84",
+    "package.json": "95b6fc0ba3639440052fcd832c33f7ec06836b6c414c6346bc262a1022cae68a",
+    "src/index.ts": "375e6842df954721bd34a0ffdf2479b4ec38735573f824cba6781cad6b2f604a",
     "_source": {
-      "repo": "tailwindlabs/tailwindcss-intellisense",
-      "commit": "5067ff7ec0b4b8bb5c3325a69c1f3410eb5b350a"
+      "repo": "golang/vscode-go",
+      "commit": "e1869f77017a1cb99d02317dc6682ccda3b7e90a"
+    }
+  },
+  "vscode-eslint": {
+    "esbuild.mjs": "618f1d9b3b123a9c50884838459136d1f0ae1a3416567760e3c8152590810a48",
+    "package.json": "f336b597b05dda91a833f7266da255b5c9b7036509bb2cd3697ad17d4d33a9f7",
+    "src/index.ts": "8cf0e1fc0b9d3666e730bb0df33c7b1734f8039d28aa9ea06b866c73feca4e2e",
+    "_source": {
+      "repo": "microsoft/vscode-eslint",
+      "commit": "22853d89978f3a3715dafbe6a668b5bbf854f3ef"
+    }
+  },
+  "vscode-intelephense": {
+    "esbuild.mjs": "3aaad11ccb853149ae612c1693250edb38db19bd979fa6fe425105f33bd8f281",
+    "package.json": "d72686720ad2a5fbe87d7b492e8726a4643d8a483fd8ce83b287052461cd68aa",
+    "src/embeddedContentUri.ts": "a5d4e576feeddf16ea451efca1ecdd0433e74ffea7d017b81bf33d348f1d8710",
+    "src/extension.ts": "22e4d7914decdf5e2eadfec474e3eaa158775a9d349fbd4a2850330f194b2aff",
+    "src/index.ts": "168f89e90fd8e75c8a82b2944fd517c337f43968c1272cf9758b5b5fda6d9b4c",
+    "src/middleware.ts": "15483dcaa3884c67f77d2026a3e381344f70fe74554bef7151b3519ef70eb34c",
+    "_source": {
+      "repo": "bmewburn/vscode-intelephense",
+      "commit": "8935a6dba162b36ea22137baa14934544ea7cd43"
     }
   },
   "vscode-svelte": {
@@ -211,18 +205,6 @@
       "commit": "84d54a142ebf1f29d24a7e64237310f57aa07312"
     }
   },
-  "vscode-intelephense": {
-    "esbuild.mjs": "3aaad11ccb853149ae612c1693250edb38db19bd979fa6fe425105f33bd8f281",
-    "package.json": "d72686720ad2a5fbe87d7b492e8726a4643d8a483fd8ce83b287052461cd68aa",
-    "src/embeddedContentUri.ts": "a5d4e576feeddf16ea451efca1ecdd0433e74ffea7d017b81bf33d348f1d8710",
-    "src/extension.ts": "22e4d7914decdf5e2eadfec474e3eaa158775a9d349fbd4a2850330f194b2aff",
-    "src/index.ts": "168f89e90fd8e75c8a82b2944fd517c337f43968c1272cf9758b5b5fda6d9b4c",
-    "src/middleware.ts": "15483dcaa3884c67f77d2026a3e381344f70fe74554bef7151b3519ef70eb34c",
-    "_source": {
-      "repo": "bmewburn/vscode-intelephense",
-      "commit": "8935a6dba162b36ea22137baa14934544ea7cd43"
-    }
-  },
   "vscode-language-viml": {
     "esbuild.mjs": "247517c1ab1a8ae73800883a4e1761125901d6b7da65d7efdaffe7c6ed213a7c",
     "package.json": "f2f4db3aaaf440326b2834937a6166f8c50b3ab20b2fce42e91d975292f03c4b",
@@ -230,6 +212,24 @@
     "_source": {
       "repo": "XadillaX/vscode-language-viml",
       "commit": "f31f4ede6e1586c4b4ee946228a704f9f1f320d7"
+    }
+  },
+  "vscode-tailwindcss": {
+    "esbuild.mjs": "445f707c0df9f1b5c77f675eed7ddd7004a9f9d8033a8d52cc14b87700b95bc2",
+    "package.json": "2091e646da198c0f807fdf4ac28ba1bf1ef467913d3362b82c6707213f06ded6",
+    "src/analyze.ts": "60932b2b89c87e8238865f6ec047551ee0ddfd9df65ddedc90fd576749e5c939",
+    "src/api.ts": "006dae0259c1047a055be49652dfa3c01276d37fcd8833f4519c2dc412e87f7d",
+    "src/cssServer.ts": "c8710c0278db0425ad10d1a2fc7efcaeedb14624b2336c8e162da84c667016e6",
+    "src/exclusions.ts": "24cfdab3f5594c3d238e139689949540a6a6388b22639bf5c79efb9de6d7bd30",
+    "src/extension.ts": "b0adedf243a3e92a1cffc99c796095cb999d89fff6c673693a73d77ed45c9b52",
+    "src/index.ts": "01759e31064b84a7f86fab269f79b62dc3d2af69b4730da6ff77fb4983fd5213",
+    "src/oxide-helper.ts": "0748a32387dd5e29d95631e958d7aea0261a9fd5c5080f5fabfd20fb45e184cb",
+    "src/server.ts": "165964bd5d246c072d58c607986175868094a3433553899de71163c032697059",
+    "src/servers/css.ts": "dc7e01d4e8e86ebc55a5efc0682bd4f23ebe5877e27d411e5dca83df23392c13",
+    "src/servers/index.ts": "b58a418ac4a7fd10d6d055bf3e10388071424140105228cffdc37a61fe5b76cf",
+    "_source": {
+      "repo": "tailwindlabs/tailwindcss-intellisense",
+      "commit": "5067ff7ec0b4b8bb5c3325a69c1f3410eb5b350a"
     }
   },
   "vscode-lua": {
@@ -267,6 +267,67 @@
     "_source": {
       "repo": "sumneko/vscode-lua",
       "commit": "d9042c543e50ca6e9cc3ac1f9d703c25d37f7ffe"
+    }
+  },
+  "vscode-prisma": {
+    "esbuild.mjs": "6be05034e374bf67ca100c59d92289a7cdd16e1513ee2b0271589167b9003d26",
+    "package.json": "3ba4dd6305e85eb8d377d34b875d33392067bbda629e0d64de50e1f4c59e7da7",
+    "src/CodeLensProvider.ts": "68b98245ff699dbc9ed62ca02c398602e0ec9c902f8146ad2afbcf6d45a9e163",
+    "src/__test__/helper.ts": "61d82466969475462e83c2b14a8e3c04925106f1f62a7b0d865965d7637fc78f",
+    "src/__test__/index.ts": "eaa1e12939dc8d3a9cc56bbe25f00e4928bca136927795a95a91a6129d0abcc2",
+    "src/__test__/language-server/completion.test.ts": "a1243aee29e3c3de201f4dd35fc4063f904a6f458fa111e69bd1c478d8dc4a00",
+    "src/__test__/language-server/format.test.ts": "c14dc3d7c31c0a0d6d2e28b5fb4d3c61717864ce0f21beb30ff9f88797bfce31",
+    "src/__test__/language-server/hover.test.ts": "a7e95b1a74de2be4359d6bb7f4305fb092190345ce3a82d77a87efd1ba081117",
+    "src/__test__/language-server/jumpToDefinition.test.ts": "75aa4f918bd4f000bd7a5ca72b774459fb4ec4cfb532942b1a1a88a83b3d079d",
+    "src/__test__/language-server/linting.test.ts": "91f6897a8b46cdbb9ca19b5460b12c9c0167a2e6325ba4a90de3ea0204325ce4",
+    "src/__test__/language-server/prisma6Handling.test.ts": "cd82b99bdcb7c747a30734cdf09500d466af724e85fa5cdf46bc065770440b6b",
+    "src/__test__/language-server/prismaNext.test.ts": "9329f149d45c6b884ddca1227354f8095e23405823e21770419cda92c2381764",
+    "src/__test__/runTest.ts": "c6f493da3621b7e3bdf3d8716deeddbb96952e56f65b5e806080c1f271a33b0d",
+    "src/denyListColorThemes.ts": "117a15311b74a354a7ff2abe72365e7c1b96f0b64c1db7f15c5dc740df656872",
+    "src/extension.ts": "8b074d5946ddabb6f296171498d3fcd6d5ad139abae82b66735c993e838fb37a",
+    "src/getPackageJSON.ts": "f658cc416776c4589ec9c4cff2e27234202f03c681e42d74335b409a215ca830",
+    "src/hashes.ts": "43beec11fd1eec15d45b6ff80113ee16871fdf9b9e1f90631dddd16b0651f7ea",
+    "src/index.ts": "4691104090317863ffb5c958f68ddf1248377ee41df724f2f5dcd3e76ca7af8d",
+    "src/manual-test-client-raw-sql-highlight.ts": "530ffb4fc7048378bd03744834cdae8fa2c561c255f8845b9266c084ae9f9706",
+    "src/plugins/ai-tools/index.ts": "4daabe93cc2ebdb9538d30d0da648049536994a7acc298de43deaad7cbbc451c",
+    "src/plugins/index.ts": "fd8d329ac7c79392da4e2f5741c2c796fd60a6f129c67eb6365c3c70a8db4056",
+    "src/plugins/prisma-language-server/index.ts": "fb36b88f688d443bc13ae6a9e39909713b7c7fb9bee8513f40243c900c6032bd",
+    "src/plugins/prisma-postgres-manager/ConnectionStringStorage.ts": "5137b97158e565785411e7be167f42c333af85d973c57f8f687fe3cb2cff67ff",
+    "src/plugins/prisma-postgres-manager/PrismaDevRepository.ts": "3224c9c53042e09f5bda5e83def88cc5a1bce806e44587f303fbf23262ff90ff",
+    "src/plugins/prisma-postgres-manager/PrismaDevTreeDataProvider.ts": "023593d9dfb0674764470f6b03c72a2836ea1d0c0aff9c56ecbac4bcc3532cac",
+    "src/plugins/prisma-postgres-manager/PrismaPostgresRepository.ts": "b029432639da8e0a8d63fbaa21a0d986f36b45e3b1f005a1d2524d993a0ccf8c",
+    "src/plugins/prisma-postgres-manager/PrismaPostgresTreeDataProvider.ts": "be4e691042a1c3f22de058ca3e79e259b6a5fe41a2fa761a4f1a8e6e199fac92",
+    "src/plugins/prisma-postgres-manager/WorkspaceTokenStorage.ts": "090f7ef4a8e11cbdda014b91e6f9c7cf8e0cb456e8c454a8afc334bd197911b3",
+    "src/plugins/prisma-postgres-manager/ai-tools/PDPAuthLoginTool.ts": "3a2c79da5e86211356f69a5d045198a981a8bf1a974ee57721f1de10452f8799",
+    "src/plugins/prisma-postgres-manager/ai-tools/PDPCreatePPGTool.ts": "8cd526b6e0290a83dcd48bd33f0ab9bf2a9a00ba67df6f280241f8b362fc6d06",
+    "src/plugins/prisma-postgres-manager/commands/createProjectInclDatabase.ts": "5a9e1251b06364477e4a281a1766d2668d691df3c4bc9f27e838ce29581af162",
+    "src/plugins/prisma-postgres-manager/commands/createRemoteDatabase.ts": "271c1f7c3fcd049d1660caf5f78bcb504c08b190bd368668fc1244c6c9e54b74",
+    "src/plugins/prisma-postgres-manager/commands/deleteProject.ts": "416a79fd8dd4bace0e73628aa00042b220a794a6c71f8733567896b24b61160a",
+    "src/plugins/prisma-postgres-manager/commands/deleteRemoteDatabase.ts": "a7163909fd070c3550885cc06163c43398af5401b10542db369d69b30b14d5a5",
+    "src/plugins/prisma-postgres-manager/commands/deployPrismaDevInstance.ts": "56d7f87cea7016f2f812001101be0c19d17c8227507342c1c10ac2c6e8ddfc9d",
+    "src/plugins/prisma-postgres-manager/commands/getRemoteDatabaseConnectionString.ts": "6d45c5f03ec9d8257e954b467d09a814f063f9e9d68a8997e9c97165085aaa30",
+    "src/plugins/prisma-postgres-manager/commands/launchStudio.ts": "57c0df26ff8a32c501cb7dc4d112cf13c6c0f25b612ad0c8592fdedaca58c820",
+    "src/plugins/prisma-postgres-manager/commands/login.ts": "c5e1c42163813d821bc558acf34bea0936a4ca7f24ae758f2e3040576299c1dc",
+    "src/plugins/prisma-postgres-manager/commands/logout.ts": "a3efd7097a60931c69f48cbbd1dfa9f2c2e607a397fab804e60e14b29c88f0b6",
+    "src/plugins/prisma-postgres-manager/index.ts": "2051e661442ec90d11c6d9efc1041171ed91e0593bda4ea608f4f22136c863d5",
+    "src/plugins/prisma-postgres-manager/shared-ui/connectionStringMessage.ts": "7f4894c457b02789fffdf1e97285e81d7ec1a062feb0f2684ed476550f4f3107",
+    "src/plugins/prisma-postgres-manager/shared-ui/handleCommandError.ts": "06ccc047dc70382257ca5400f13b24487afd88ef06004b1c8c6c1ed3f7f49349",
+    "src/plugins/prisma-postgres-manager/shared-ui/pickRegion.ts": "cd67dd4357a2a0c14b17eef8f4e6fd1cf543222c4e520866fc6a6dd30afe932a",
+    "src/plugins/prisma-postgres-manager/shared-ui/pickWorkspace.ts": "2acf015c8de04ef7b641786d77f6ed40da5de69aeccf851010d467fc95ff6cf0",
+    "src/plugins/prisma-postgres-manager/utils/ensureLoggedIn.ts": "ddda9484e366b6449ca1cc60b5a75a06192c78176e5ecfe1f258a81bbeaec6e5",
+    "src/plugins/prisma-studio/commands/launch/getStudioPageHtml.ts": "47b63cfef80feaa5e281c529388d2681e4eee3c795f5aca1defc056499ada1f9",
+    "src/plugins/prisma-studio/commands/launch/openNewStudioTab.ts": "faba081fa62454edbfcd7d98f0d08c79542675d9094fc99ad321d1f2b36aacc7",
+    "src/plugins/prisma-studio/commands/launch/startStudioServer.ts": "b66c3079318c30038bc80ce5c78e267f07e08e18bc9fe6ddeb9498cb63fe66fc",
+    "src/plugins/prisma-studio/commands/launch.ts": "f026feb8ae27df12e83da1d5f0ad55752ab8b9f30bfd56e42549910f46d4c744",
+    "src/plugins/prisma-studio/index.ts": "4d49d636de93aae25db81fd6dfa725615a5a5c54b0352b5f55514178d85c887a",
+    "src/plugins/types.ts": "79c95e41b9f4b75e44fb1f0416dd37ab16ae4edaf597c1c5b21c0ea038d927ad",
+    "src/prisma6Handling.ts": "4ee9e8a0f1fe02f6429ebbaef0fcbb86ea53fcefd5919a99e44ff4ca0dcc94cd",
+    "src/telemetryReporter.ts": "1e9d69598ea1b39a9efabd024378a8223cb2bee4f3ae503580369913384eb3c2",
+    "src/util.ts": "7dc13ea23ca339bea3b758251f03e9f292920e824960fe83319243c3363e2312",
+    "src/workers/prisma6-language-server.ts": "8c87b243098a85a5bb2b3583621ad96e74d50556be60ceefada41fb15f01b8dd",
+    "_source": {
+      "repo": "prisma/language-tools",
+      "commit": "9c8f5b88cd7ac0502e76933cb4244c2ed198d3af"
     }
   },
   "vscode-yaml": {
@@ -339,67 +400,6 @@
       "commit": "3218a314d333b96f00cbe28e073a75425083fcbd"
     }
   },
-  "vscode-prisma": {
-    "esbuild.mjs": "6be05034e374bf67ca100c59d92289a7cdd16e1513ee2b0271589167b9003d26",
-    "package.json": "3ba4dd6305e85eb8d377d34b875d33392067bbda629e0d64de50e1f4c59e7da7",
-    "src/CodeLensProvider.ts": "68b98245ff699dbc9ed62ca02c398602e0ec9c902f8146ad2afbcf6d45a9e163",
-    "src/__test__/helper.ts": "61d82466969475462e83c2b14a8e3c04925106f1f62a7b0d865965d7637fc78f",
-    "src/__test__/index.ts": "eaa1e12939dc8d3a9cc56bbe25f00e4928bca136927795a95a91a6129d0abcc2",
-    "src/__test__/language-server/completion.test.ts": "a1243aee29e3c3de201f4dd35fc4063f904a6f458fa111e69bd1c478d8dc4a00",
-    "src/__test__/language-server/format.test.ts": "c14dc3d7c31c0a0d6d2e28b5fb4d3c61717864ce0f21beb30ff9f88797bfce31",
-    "src/__test__/language-server/hover.test.ts": "a7e95b1a74de2be4359d6bb7f4305fb092190345ce3a82d77a87efd1ba081117",
-    "src/__test__/language-server/jumpToDefinition.test.ts": "75aa4f918bd4f000bd7a5ca72b774459fb4ec4cfb532942b1a1a88a83b3d079d",
-    "src/__test__/language-server/linting.test.ts": "91f6897a8b46cdbb9ca19b5460b12c9c0167a2e6325ba4a90de3ea0204325ce4",
-    "src/__test__/language-server/prisma6Handling.test.ts": "cd82b99bdcb7c747a30734cdf09500d466af724e85fa5cdf46bc065770440b6b",
-    "src/__test__/language-server/prismaNext.test.ts": "9329f149d45c6b884ddca1227354f8095e23405823e21770419cda92c2381764",
-    "src/__test__/runTest.ts": "c6f493da3621b7e3bdf3d8716deeddbb96952e56f65b5e806080c1f271a33b0d",
-    "src/denyListColorThemes.ts": "117a15311b74a354a7ff2abe72365e7c1b96f0b64c1db7f15c5dc740df656872",
-    "src/extension.ts": "8b074d5946ddabb6f296171498d3fcd6d5ad139abae82b66735c993e838fb37a",
-    "src/getPackageJSON.ts": "f658cc416776c4589ec9c4cff2e27234202f03c681e42d74335b409a215ca830",
-    "src/hashes.ts": "43beec11fd1eec15d45b6ff80113ee16871fdf9b9e1f90631dddd16b0651f7ea",
-    "src/index.ts": "4691104090317863ffb5c958f68ddf1248377ee41df724f2f5dcd3e76ca7af8d",
-    "src/manual-test-client-raw-sql-highlight.ts": "530ffb4fc7048378bd03744834cdae8fa2c561c255f8845b9266c084ae9f9706",
-    "src/plugins/ai-tools/index.ts": "4daabe93cc2ebdb9538d30d0da648049536994a7acc298de43deaad7cbbc451c",
-    "src/plugins/index.ts": "fd8d329ac7c79392da4e2f5741c2c796fd60a6f129c67eb6365c3c70a8db4056",
-    "src/plugins/prisma-language-server/index.ts": "fb36b88f688d443bc13ae6a9e39909713b7c7fb9bee8513f40243c900c6032bd",
-    "src/plugins/prisma-postgres-manager/ConnectionStringStorage.ts": "5137b97158e565785411e7be167f42c333af85d973c57f8f687fe3cb2cff67ff",
-    "src/plugins/prisma-postgres-manager/PrismaDevRepository.ts": "3224c9c53042e09f5bda5e83def88cc5a1bce806e44587f303fbf23262ff90ff",
-    "src/plugins/prisma-postgres-manager/PrismaDevTreeDataProvider.ts": "023593d9dfb0674764470f6b03c72a2836ea1d0c0aff9c56ecbac4bcc3532cac",
-    "src/plugins/prisma-postgres-manager/PrismaPostgresRepository.ts": "b029432639da8e0a8d63fbaa21a0d986f36b45e3b1f005a1d2524d993a0ccf8c",
-    "src/plugins/prisma-postgres-manager/PrismaPostgresTreeDataProvider.ts": "be4e691042a1c3f22de058ca3e79e259b6a5fe41a2fa761a4f1a8e6e199fac92",
-    "src/plugins/prisma-postgres-manager/WorkspaceTokenStorage.ts": "090f7ef4a8e11cbdda014b91e6f9c7cf8e0cb456e8c454a8afc334bd197911b3",
-    "src/plugins/prisma-postgres-manager/ai-tools/PDPAuthLoginTool.ts": "3a2c79da5e86211356f69a5d045198a981a8bf1a974ee57721f1de10452f8799",
-    "src/plugins/prisma-postgres-manager/ai-tools/PDPCreatePPGTool.ts": "8cd526b6e0290a83dcd48bd33f0ab9bf2a9a00ba67df6f280241f8b362fc6d06",
-    "src/plugins/prisma-postgres-manager/commands/createProjectInclDatabase.ts": "5a9e1251b06364477e4a281a1766d2668d691df3c4bc9f27e838ce29581af162",
-    "src/plugins/prisma-postgres-manager/commands/createRemoteDatabase.ts": "271c1f7c3fcd049d1660caf5f78bcb504c08b190bd368668fc1244c6c9e54b74",
-    "src/plugins/prisma-postgres-manager/commands/deleteProject.ts": "416a79fd8dd4bace0e73628aa00042b220a794a6c71f8733567896b24b61160a",
-    "src/plugins/prisma-postgres-manager/commands/deleteRemoteDatabase.ts": "a7163909fd070c3550885cc06163c43398af5401b10542db369d69b30b14d5a5",
-    "src/plugins/prisma-postgres-manager/commands/deployPrismaDevInstance.ts": "56d7f87cea7016f2f812001101be0c19d17c8227507342c1c10ac2c6e8ddfc9d",
-    "src/plugins/prisma-postgres-manager/commands/getRemoteDatabaseConnectionString.ts": "6d45c5f03ec9d8257e954b467d09a814f063f9e9d68a8997e9c97165085aaa30",
-    "src/plugins/prisma-postgres-manager/commands/launchStudio.ts": "57c0df26ff8a32c501cb7dc4d112cf13c6c0f25b612ad0c8592fdedaca58c820",
-    "src/plugins/prisma-postgres-manager/commands/login.ts": "c5e1c42163813d821bc558acf34bea0936a4ca7f24ae758f2e3040576299c1dc",
-    "src/plugins/prisma-postgres-manager/commands/logout.ts": "a3efd7097a60931c69f48cbbd1dfa9f2c2e607a397fab804e60e14b29c88f0b6",
-    "src/plugins/prisma-postgres-manager/index.ts": "2051e661442ec90d11c6d9efc1041171ed91e0593bda4ea608f4f22136c863d5",
-    "src/plugins/prisma-postgres-manager/shared-ui/connectionStringMessage.ts": "7f4894c457b02789fffdf1e97285e81d7ec1a062feb0f2684ed476550f4f3107",
-    "src/plugins/prisma-postgres-manager/shared-ui/handleCommandError.ts": "06ccc047dc70382257ca5400f13b24487afd88ef06004b1c8c6c1ed3f7f49349",
-    "src/plugins/prisma-postgres-manager/shared-ui/pickRegion.ts": "cd67dd4357a2a0c14b17eef8f4e6fd1cf543222c4e520866fc6a6dd30afe932a",
-    "src/plugins/prisma-postgres-manager/shared-ui/pickWorkspace.ts": "2acf015c8de04ef7b641786d77f6ed40da5de69aeccf851010d467fc95ff6cf0",
-    "src/plugins/prisma-postgres-manager/utils/ensureLoggedIn.ts": "ddda9484e366b6449ca1cc60b5a75a06192c78176e5ecfe1f258a81bbeaec6e5",
-    "src/plugins/prisma-studio/commands/launch/getStudioPageHtml.ts": "47b63cfef80feaa5e281c529388d2681e4eee3c795f5aca1defc056499ada1f9",
-    "src/plugins/prisma-studio/commands/launch/openNewStudioTab.ts": "faba081fa62454edbfcd7d98f0d08c79542675d9094fc99ad321d1f2b36aacc7",
-    "src/plugins/prisma-studio/commands/launch/startStudioServer.ts": "b66c3079318c30038bc80ce5c78e267f07e08e18bc9fe6ddeb9498cb63fe66fc",
-    "src/plugins/prisma-studio/commands/launch.ts": "f026feb8ae27df12e83da1d5f0ad55752ab8b9f30bfd56e42549910f46d4c744",
-    "src/plugins/prisma-studio/index.ts": "4d49d636de93aae25db81fd6dfa725615a5a5c54b0352b5f55514178d85c887a",
-    "src/plugins/types.ts": "79c95e41b9f4b75e44fb1f0416dd37ab16ae4edaf597c1c5b21c0ea038d927ad",
-    "src/prisma6Handling.ts": "4ee9e8a0f1fe02f6429ebbaef0fcbb86ea53fcefd5919a99e44ff4ca0dcc94cd",
-    "src/telemetryReporter.ts": "1e9d69598ea1b39a9efabd024378a8223cb2bee4f3ae503580369913384eb3c2",
-    "src/util.ts": "7dc13ea23ca339bea3b758251f03e9f292920e824960fe83319243c3363e2312",
-    "src/workers/prisma6-language-server.ts": "8c87b243098a85a5bb2b3583621ad96e74d50556be60ceefada41fb15f01b8dd",
-    "_source": {
-      "repo": "prisma/language-tools",
-      "commit": "9c8f5b88cd7ac0502e76933cb4244c2ed198d3af"
-    }
-  },
   "vscode-taplo": {
     "esbuild.mjs": "633b5cebe1a7bab6f20a147a60f39e39f5ac81fe440702e4f08e1f85641e1586",
     "package.json": "f3b46d12b5a2dc6002f900d98f6e867de9f4322e227ec57cbf63eb4abc4a53af",
@@ -429,6 +429,59 @@
     "_source": {
       "repo": "tamasfe/taplo",
       "commit": "b673b44df2773db8673a00df2e7654b769f7fde7"
+    }
+  },
+  "vscode-css-peek": {
+    "esbuild.mjs": "11482425c59a3ce2377a64bb3a6d509db2095409a2ca40c0174c10b7c685793a",
+    "package.json": "6ecd79c1186177e91a4e57b04cee4cdb93b6eca710a9e6d682e487c470d5986c",
+    "src/client/src/extension.ts": "95c7222f7f66215692570e24b9cf09dd545b5b0c0f8fcdbea1a9b9b535358398",
+    "src/client/src/gitignore.ts": "391e98890a06c44d38f04d26a4b9a8791201596b9ba7c554e1330765752de562",
+    "src/client/src/telemetry.ts": "d268e8fa51bad3cad00c2cafe0833f026e24dc9e17074e2f7861e9aa3b89328d",
+    "src/index.ts": "ccf5387a03d9f64534faeee7255d20589d0cb3e7c0567b90913418eb6d7926c2",
+    "src/server/src/core/embeddedStyles.ts": "490bf34ffaf9c6cd60fc2f3caf338f7c04685b1c0234b764cc15c43bf17db8d6",
+    "src/server/src/core/findDefinition.ts": "1c7cff8ae812eae323c7c6758ad00c240c6b618a216e717a52caf25f16ad2252",
+    "src/server/src/core/findHover.ts": "e894833cf0c67c7a71753e2b2aa06fd2a7a757fd88746dc9d29a756134e22964",
+    "src/server/src/core/findSelector.ts": "636fdc4617b34fb158fafa3187d1c9aeb5a6a0ff3482d51f8a68e3ba1b00a2a2",
+    "src/server/src/logger/index.ts": "0723dc5547c8813a2f5a6751f10e0d4ee8d8aec420555368a3a43b71d8239941",
+    "src/server/src/server.ts": "f3b4d6a32d705c1bf7ee4c79e81d0dd79a73e64aac22d0c6ee7c6fb76966a9bd",
+    "src/server/src/types.ts": "4d89f35b3704e5ddd7fe23b2e813e23a8c343262b07b7f76e1b0ce24d8cd948f",
+    "src/server/src/utils/linkedStylesheets.ts": "16bf7851afc8ad9043407f5aaa71feb91850f99ebf11b0ff7f77eec272a26ab0",
+    "src/server/src/utils/selectorToString.ts": "012cd6749193d6d59b43b71f75a432950362a04c4b810390bbe2fba0b81a422a",
+    "src/tests/src/findDefinition.test.ts": "6d1cef78c63a1cdde0cae2fd8bc13d2cdb93df360596003d69d611f1e447f3d2",
+    "src/tests/src/findHover.test.ts": "042befcd556dcb1c765a741396769abce92eeab8fc5c0ed47c76d5ee271264f4",
+    "src/tests/src/findSelector.test.ts": "29c49f8c0146141c2a774d173f591fbe5112e6ab3ded776643d1bc8f4e682133",
+    "src/tests/src/gitignore.test.ts": "f9067ea59bab00d7b7096da744134c44b60789c624dbf455a4ed91e029cb876f",
+    "src/tests/src/linkedOnly.test.ts": "e954b00e908e371027727b4588c84d99e100726d5bf59b24f11b811390975ea3",
+    "src/tests/src/selectorToString.test.ts": "1fc6d6ad9b39a4fa245bb428fd31a965b19295ee9aec679ac9e28162ad69b155",
+    "src/tests/src/stylesheetLifecycle.test.ts": "cd18ad7815a8de8a25f5182fc72bde2f7ba1de0705cdad8cdff064b4a6ec7a52",
+    "_source": {
+      "repo": "pranaygp/vscode-css-peek",
+      "commit": "402f861143dc6473b5c04db7b7ceceac1ae3e166"
+    }
+  },
+  "vscode-stylelint": {
+    "esbuild.mjs": "ecaa1282c160892bf2393f3b1f76b934e138930350c529fd6983fe0ba3033cee",
+    "package.json": "776bc4a7a4e5ad8471fc343b81df206cecf8e8b0c7e2b5b783c4cc92aaf53cb7",
+    "src/extension/__tests__/extension.test.ts": "835078287c76d01c70a485baf7c992ff1f0c6b29190a2a2b8f25c43226085deb",
+    "src/extension/di-tokens.ts": "e8a156d6d50e932af5c73d74e7ec991db17e452d91bb6e79438aeb3a84764c79",
+    "src/extension/extension-runtime.service.ts": "443ed485ce502cfc999fb935f2827ba7f8cf8797b9730bfb760770a5af68ca53",
+    "src/extension/extension.module.ts": "b21fa360108cf241a59aab854fe343a1768171f810808607b8e1f61a432bc2f2",
+    "src/extension/extension.ts": "ea555565162af0f02330a967e775a64dbc8454ae6b29ac47e841bc8b1255c819",
+    "src/extension/index.ts": "af3f93968ae1ff527b361c3e402491e4d043d20075a7aade37eadb8641eddde0",
+    "src/extension/platform.module.ts": "721913e51942919962fb9dd56dcd4b14ffd9397af7f2c672987f39f5527411f0",
+    "src/extension/services/__tests__/language-client.service.test.ts": "1e3f8f16096cf19c1c3dbab28eb712a100151f601fda991f73dc1341c9e12b22",
+    "src/extension/services/__tests__/language-client.test.ts": "52bc31a016eb63ce772ce73a2eb0d2c1ff30b8d8cc06bfc9fffc009ec5848218",
+    "src/extension/services/__tests__/server-options.service.test.ts": "4d08b6485c7c66d9d5948dff720bad3fc6dcebcf34f36231a9ada363dcf0f512",
+    "src/extension/services/environment.ts": "86c6deb2ac79f00aaf42413e31568f442838ce82d419c5af339dc71933723f0a",
+    "src/extension/services/index.ts": "9f4207056f6652065b0c829b8f605deab0db0850dc5e62c465bf203187db9e23",
+    "src/extension/services/language-client.service.ts": "0eb209301934fd2a53b25d2ba3cb941501e80f62f49fa5547b86222f413d56a8",
+    "src/extension/services/language-client.ts": "3bfe68159f1a718c8bb57e8d2fa94a3226b6cde141c927edb0d63582c4d8d911",
+    "src/extension/services/server-options.service.ts": "7fae23877f1acaa766f2b6a0ac3053ed5560e38f9f2f566594faf4f48542c36a",
+    "src/extension/start-server.ts": "3ea9468f4387e01cbad5c2e6e0dab0d864439e874a62428964a1d0bb17a5dbac",
+    "src/index.ts": "9c990939a7e26b4fcf1b0b33f82935ccdbcf660fcfffe0a7af8e9eebbd5a41a1",
+    "_source": {
+      "repo": "stylelint/vscode-stylelint",
+      "commit": "1223943bd48848569bc48135fb64dcfa14b17b5b"
     }
   },
   "vscode-ansible": {
@@ -541,60 +594,7 @@
     "src/webviewHtml.ts": "bf4c4ca6d5224e022e4cd6fe4eef4ebab585b4d314701e39bce68710f3509e55",
     "_source": {
       "repo": "ansible/vscode-ansible",
-      "commit": "4790c4877884084f39adb2f0ebab86b1de9f72be"
-    }
-  },
-  "vscode-stylelint": {
-    "esbuild.mjs": "ecaa1282c160892bf2393f3b1f76b934e138930350c529fd6983fe0ba3033cee",
-    "package.json": "776bc4a7a4e5ad8471fc343b81df206cecf8e8b0c7e2b5b783c4cc92aaf53cb7",
-    "src/extension/__tests__/extension.test.ts": "835078287c76d01c70a485baf7c992ff1f0c6b29190a2a2b8f25c43226085deb",
-    "src/extension/di-tokens.ts": "e8a156d6d50e932af5c73d74e7ec991db17e452d91bb6e79438aeb3a84764c79",
-    "src/extension/extension-runtime.service.ts": "443ed485ce502cfc999fb935f2827ba7f8cf8797b9730bfb760770a5af68ca53",
-    "src/extension/extension.module.ts": "b21fa360108cf241a59aab854fe343a1768171f810808607b8e1f61a432bc2f2",
-    "src/extension/extension.ts": "ea555565162af0f02330a967e775a64dbc8454ae6b29ac47e841bc8b1255c819",
-    "src/extension/index.ts": "af3f93968ae1ff527b361c3e402491e4d043d20075a7aade37eadb8641eddde0",
-    "src/extension/platform.module.ts": "721913e51942919962fb9dd56dcd4b14ffd9397af7f2c672987f39f5527411f0",
-    "src/extension/services/__tests__/language-client.service.test.ts": "1e3f8f16096cf19c1c3dbab28eb712a100151f601fda991f73dc1341c9e12b22",
-    "src/extension/services/__tests__/language-client.test.ts": "52bc31a016eb63ce772ce73a2eb0d2c1ff30b8d8cc06bfc9fffc009ec5848218",
-    "src/extension/services/__tests__/server-options.service.test.ts": "4d08b6485c7c66d9d5948dff720bad3fc6dcebcf34f36231a9ada363dcf0f512",
-    "src/extension/services/environment.ts": "86c6deb2ac79f00aaf42413e31568f442838ce82d419c5af339dc71933723f0a",
-    "src/extension/services/index.ts": "9f4207056f6652065b0c829b8f605deab0db0850dc5e62c465bf203187db9e23",
-    "src/extension/services/language-client.service.ts": "0eb209301934fd2a53b25d2ba3cb941501e80f62f49fa5547b86222f413d56a8",
-    "src/extension/services/language-client.ts": "3bfe68159f1a718c8bb57e8d2fa94a3226b6cde141c927edb0d63582c4d8d911",
-    "src/extension/services/server-options.service.ts": "7fae23877f1acaa766f2b6a0ac3053ed5560e38f9f2f566594faf4f48542c36a",
-    "src/extension/start-server.ts": "3ea9468f4387e01cbad5c2e6e0dab0d864439e874a62428964a1d0bb17a5dbac",
-    "src/index.ts": "9c990939a7e26b4fcf1b0b33f82935ccdbcf660fcfffe0a7af8e9eebbd5a41a1",
-    "_source": {
-      "repo": "stylelint/vscode-stylelint",
-      "commit": "1223943bd48848569bc48135fb64dcfa14b17b5b"
-    }
-  },
-  "vscode-css-peek": {
-    "esbuild.mjs": "11482425c59a3ce2377a64bb3a6d509db2095409a2ca40c0174c10b7c685793a",
-    "package.json": "6ecd79c1186177e91a4e57b04cee4cdb93b6eca710a9e6d682e487c470d5986c",
-    "src/client/src/extension.ts": "95c7222f7f66215692570e24b9cf09dd545b5b0c0f8fcdbea1a9b9b535358398",
-    "src/client/src/gitignore.ts": "391e98890a06c44d38f04d26a4b9a8791201596b9ba7c554e1330765752de562",
-    "src/client/src/telemetry.ts": "d268e8fa51bad3cad00c2cafe0833f026e24dc9e17074e2f7861e9aa3b89328d",
-    "src/index.ts": "ccf5387a03d9f64534faeee7255d20589d0cb3e7c0567b90913418eb6d7926c2",
-    "src/server/src/core/embeddedStyles.ts": "490bf34ffaf9c6cd60fc2f3caf338f7c04685b1c0234b764cc15c43bf17db8d6",
-    "src/server/src/core/findDefinition.ts": "1c7cff8ae812eae323c7c6758ad00c240c6b618a216e717a52caf25f16ad2252",
-    "src/server/src/core/findHover.ts": "e894833cf0c67c7a71753e2b2aa06fd2a7a757fd88746dc9d29a756134e22964",
-    "src/server/src/core/findSelector.ts": "636fdc4617b34fb158fafa3187d1c9aeb5a6a0ff3482d51f8a68e3ba1b00a2a2",
-    "src/server/src/logger/index.ts": "0723dc5547c8813a2f5a6751f10e0d4ee8d8aec420555368a3a43b71d8239941",
-    "src/server/src/server.ts": "f3b4d6a32d705c1bf7ee4c79e81d0dd79a73e64aac22d0c6ee7c6fb76966a9bd",
-    "src/server/src/types.ts": "4d89f35b3704e5ddd7fe23b2e813e23a8c343262b07b7f76e1b0ce24d8cd948f",
-    "src/server/src/utils/linkedStylesheets.ts": "16bf7851afc8ad9043407f5aaa71feb91850f99ebf11b0ff7f77eec272a26ab0",
-    "src/server/src/utils/selectorToString.ts": "012cd6749193d6d59b43b71f75a432950362a04c4b810390bbe2fba0b81a422a",
-    "src/tests/src/findDefinition.test.ts": "6d1cef78c63a1cdde0cae2fd8bc13d2cdb93df360596003d69d611f1e447f3d2",
-    "src/tests/src/findHover.test.ts": "042befcd556dcb1c765a741396769abce92eeab8fc5c0ed47c76d5ee271264f4",
-    "src/tests/src/findSelector.test.ts": "29c49f8c0146141c2a774d173f591fbe5112e6ab3ded776643d1bc8f4e682133",
-    "src/tests/src/gitignore.test.ts": "f9067ea59bab00d7b7096da744134c44b60789c624dbf455a4ed91e029cb876f",
-    "src/tests/src/linkedOnly.test.ts": "e954b00e908e371027727b4588c84d99e100726d5bf59b24f11b811390975ea3",
-    "src/tests/src/selectorToString.test.ts": "1fc6d6ad9b39a4fa245bb428fd31a965b19295ee9aec679ac9e28162ad69b155",
-    "src/tests/src/stylesheetLifecycle.test.ts": "cd18ad7815a8de8a25f5182fc72bde2f7ba1de0705cdad8cdff064b4a6ec7a52",
-    "_source": {
-      "repo": "pranaygp/vscode-css-peek",
-      "commit": "402f861143dc6473b5c04db7b7ceceac1ae3e166"
+      "commit": "9470b701ae495f1817317a82cc6f3707afb8c044"
     }
   },
   "vscode-marksman": {
@@ -657,7 +657,7 @@
     "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "7e2c92ba29411be5dfe7ef8526846f5193e881a1"
+      "commit": "396ff629f0fcec277ed6e235e3d5a5a865e0e06c"
     }
   },
   "vscode-texlab": {
@@ -675,16 +675,7 @@
     "src/index.ts": "2b3215aa10f11d8a7178601d4068d80e6090f2357527dc02cc73cbc7aa3cce0f",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "2ce20beec7356f57caed4020169f989bbb405554"
-    }
-  },
-  "vscode-bitbake": {
-    "esbuild.mjs": "52f30577da4e71fca14d77d22dbcd9b933d8bf1d23e49ab12d3f303104a7e91d",
-    "package.json": "9732b2f6f3f81d014547a8d0a2cec9b08877ff237b3238ff169fc900b59f57dc",
-    "src/index.ts": "8fc029419fa84eb9ad8b66f7f19ad92e32337d46a1141c03a3262b2a03b8779d",
-    "_source": {
-      "repo": "yoctoproject/vscode-bitbake",
-      "commit": "d25a097e421ccd3c906a9ee1dc8e4d7aa4b0bffa"
+      "commit": "396ff629f0fcec277ed6e235e3d5a5a865e0e06c"
     }
   },
   "vscode-jq": {
@@ -823,6 +814,15 @@
       "commit": "d4cd4a90bb232b8d861d5f026713519cb12693f1"
     }
   },
+  "vscode-docker": {
+    "esbuild.mjs": "a829710b490cb937e9740e428c14956b71ececd901ded2c0d17f3f13f85beee9",
+    "package.json": "038c74df63294e3fb0e377789e73b0ace54158792d05d376e317b85a8f4d224a",
+    "src/index.ts": "7db626772b103bc127d5ccc533c71ecb3e02a45db260d9fd711818475332aea3",
+    "_source": {
+      "repo": "microsoft/vscode-containers",
+      "commit": "22db362843f4e4b2069f7f4fd9df9d3d1e42bbe4"
+    }
+  },
   "vscode-live-server": {
     "esbuild.mjs": "935f41f24455964c6a1417a67d6aa78603903d96c4ba7f782f60f69379590e82",
     "package.json": "fe644fdabdc5124c4f0e19eac0625467f42e1aa8362163191bb6194b395f3e90",
@@ -841,6 +841,16 @@
       "commit": "4153b4ba737f003804c3d9acbce78ad4fad19b36"
     }
   },
+  "vscode-write-good": {
+    "esbuild.mjs": "ea8e01bd6759cd0dfef35cc0e44a721f93d1e8f308d382185906a073f66c61c1",
+    "package.json": "fb9eacd0dd6f990e54d81405dbaf2e1f25063b16590ff83b60c9c926c0636e23",
+    "src/extension.ts": "4c7257f6d0338aadc9bfea18802ee6e8d4f90aed37b9ca7747c00652f63825ff",
+    "src/linter.ts": "d731a49f9588b87aa180086243a61e1b16c90bd9fe8a6a04de64d76de40b976e",
+    "_source": {
+      "repo": "TravisTheTechie/vscode-write-good",
+      "commit": "c1bf30a5983fd390d63e3d2392f84ca162a72e7b"
+    }
+  },
   "vscode-code-runner": {
     "esbuild.mjs": "a347825d52e648087e26214dec7ecd5d69b9a06c02babd96b361c513be79f920",
     "package.json": "b6545be7be3df340750369f754811805a0577edcfded0830b0fe922ec9216312",
@@ -852,16 +862,6 @@
     "_source": {
       "repo": "formulahendry/vscode-code-runner",
       "commit": "97af1080d09046e0129acce592f0033ff2df9f26"
-    }
-  },
-  "vscode-write-good": {
-    "esbuild.mjs": "ea8e01bd6759cd0dfef35cc0e44a721f93d1e8f308d382185906a073f66c61c1",
-    "package.json": "fb9eacd0dd6f990e54d81405dbaf2e1f25063b16590ff83b60c9c926c0636e23",
-    "src/extension.ts": "4c7257f6d0338aadc9bfea18802ee6e8d4f90aed37b9ca7747c00652f63825ff",
-    "src/linter.ts": "d731a49f9588b87aa180086243a61e1b16c90bd9fe8a6a04de64d76de40b976e",
-    "_source": {
-      "repo": "TravisTheTechie/vscode-write-good",
-      "commit": "c1bf30a5983fd390d63e3d2392f84ca162a72e7b"
     }
   },
   "vscode-clojure-lsp": {
@@ -890,18 +890,6 @@
       "commit": "ef6181aabe4d54fe024202a6dd8c80c79fe55e5b"
     }
   },
-  "vscode-vue2": {
-    "coc-convert.json": "5fe2a69e2d85ebfc374901c4cbd18a4142f52eb63061db6a6ec53354be6b9848",
-    "package.json": "fabf13764b49f848b6c10d7ef70f073fa2c92ee17c28820908a170916feda2f7",
-    "snippets/css.json": "0000000000000000000000000000000000000000000000000000000000000000",
-    "snippets/html.json": "0000000000000000000000000000000000000000000000000000000000000000",
-    "snippets/javascript.json": "0000000000000000000000000000000000000000000000000000000000000000",
-    "snippets/vue.json": "0000000000000000000000000000000000000000000000000000000000000000",
-    "_source": {
-      "repo": "xianghongai/vscode-vue2-snippets",
-      "commit": "9a1e249060ff6d09d71f203cc225ae552f28c60a"
-    }
-  },
   "vscode-vue3-snippets": {
     "coc-convert.json": "f9d6044474fa4b2772226c27bf060adcc80c97956c29ec0c43c6207041b2c419",
     "package.json": "f9351710c97e31f00a0ff5d7f12b018ac4b5ce237bc014056d2a8d72ae93731c",
@@ -912,6 +900,18 @@
     "_source": {
       "repo": "hollowtree/vscode-vue-snippets",
       "commit": "6d1c4f6b20e289d6c15a2f9ad87c47d0b4bbdefc"
+    }
+  },
+  "vscode-vue2": {
+    "coc-convert.json": "5fe2a69e2d85ebfc374901c4cbd18a4142f52eb63061db6a6ec53354be6b9848",
+    "package.json": "fabf13764b49f848b6c10d7ef70f073fa2c92ee17c28820908a170916feda2f7",
+    "snippets/css.json": "0000000000000000000000000000000000000000000000000000000000000000",
+    "snippets/html.json": "0000000000000000000000000000000000000000000000000000000000000000",
+    "snippets/javascript.json": "0000000000000000000000000000000000000000000000000000000000000000",
+    "snippets/vue.json": "0000000000000000000000000000000000000000000000000000000000000000",
+    "_source": {
+      "repo": "xianghongai/vscode-vue2-snippets",
+      "commit": "9a1e249060ff6d09d71f203cc225ae552f28c60a"
     }
   },
   "vscode-vue3-snippets-for": {
@@ -933,15 +933,6 @@
     "_source": {
       "repo": "rodrigovallades/vscode-es7-javascript-react-snippets",
       "commit": "018da751eb32eb63927fbb6276947b4e81f6ca2d"
-    }
-  },
-  "vscode-tinymist": {
-    "esbuild.mjs": "7f8daeb2738bef8c10749ac47366910986422e30db026df99a4e1e16413281fe",
-    "package.json": "07dca886fb43c63f005897b28e6b1726d43fc53174eeb3054c37fd266e62d492",
-    "src/index.ts": "7d22c73a6605c39d28d71d8a3d7e9ed682d65df9eb38b4a06a0791b5a6233942",
-    "_source": {
-      "repo": "Myriad-Dreamin/tinymist",
-      "commit": "9a88a206abd7729506876fee55119775075d1dd9"
     }
   },
   "vscode-es7-react-snippets": {
@@ -971,15 +962,6 @@
       "commit": "5dc80e535367c1a021976e4af32d66bec4f892a3"
     }
   },
-  "vscode-react-snippets": {
-    "coc-convert.json": "78ba994c82a6d328c5cd9c3d269f3fefa8caed194dc2fc36c799f5f668a6392d",
-    "package.json": "28a6a2f0ec9781a868341145aa8c6bd4f3c9d9e570be9f83b9ce8509dd6055c0",
-    "snippets/snippets.json": "2bf9cdf8e644b888903315df955fc8e8bdfd64ce20cad80358cc3c41926e75e4",
-    "_source": {
-      "repo": "xabikos/vscode-react",
-      "commit": "9c54fbfbb4e299035439f32d63ed50fd70832fd5"
-    }
-  },
   "vscode-react-native-redux-snippets": {
     "coc-convert.json": "dcfe501e95385b2a0df1391679ec5a4b97bda1b025ee674f3cc0754d5205445b",
     "package.json": "ca042c0df5185e949df1dce14d284c8b859a3383a1e7114a8641ac558ddc138a",
@@ -987,6 +969,15 @@
     "_source": {
       "repo": "EQuimper/VSC-React-Native-React-Redux-Snippets",
       "commit": "c3a5165546caea90ccc3caf07ae073e3f8d3573f"
+    }
+  },
+  "vscode-bitbake": {
+    "esbuild.mjs": "52f30577da4e71fca14d77d22dbcd9b933d8bf1d23e49ab12d3f303104a7e91d",
+    "package.json": "9732b2f6f3f81d014547a8d0a2cec9b08877ff237b3238ff169fc900b59f57dc",
+    "src/index.ts": "8fc029419fa84eb9ad8b66f7f19ad92e32337d46a1141c03a3262b2a03b8779d",
+    "_source": {
+      "repo": "yoctoproject/vscode-bitbake",
+      "commit": "d25a097e421ccd3c906a9ee1dc8e4d7aa4b0bffa"
     }
   },
   "vscode-react-redux-react-router": {
@@ -998,13 +989,13 @@
       "commit": "7702625f96c9cf38a795a6cdf7f5ccfa31228fbe"
     }
   },
-  "vscode-styled-components-snippets": {
-    "coc-convert.json": "4e18f007b46c9a8de8438446fe5325b04e500cd93991a69f1c1d366f507528a4",
-    "package.json": "709447d1f03c97808bae14d6d044c10c73e0f0fd611742bbef3995881406cf10",
-    "snippets/snippets.json": "a4d9d063ed831e9f8440fca8f8b46ee5d2e2ece1c5d6986cb96be10249d0a16d",
+  "vscode-react-snippets": {
+    "coc-convert.json": "78ba994c82a6d328c5cd9c3d269f3fefa8caed194dc2fc36c799f5f668a6392d",
+    "package.json": "28a6a2f0ec9781a868341145aa8c6bd4f3c9d9e570be9f83b9ce8509dd6055c0",
+    "snippets/snippets.json": "2bf9cdf8e644b888903315df955fc8e8bdfd64ce20cad80358cc3c41926e75e4",
     "_source": {
-      "repo": "jonkwheeler/styled-components-snippets-vscode",
-      "commit": "0d541dc25bbc54e653ec58b27617bc39443a4560"
+      "repo": "xabikos/vscode-react",
+      "commit": "9c54fbfbb4e299035439f32d63ed50fd70832fd5"
     }
   },
   "vscode-simple-react-snippets": {
@@ -1015,6 +1006,15 @@
     "_source": {
       "repo": "burkeholland/simple-react-snippets",
       "commit": "b85240f17d6622648cbd1e285c161334fb1730bd"
+    }
+  },
+  "vscode-styled-components-snippets": {
+    "coc-convert.json": "4e18f007b46c9a8de8438446fe5325b04e500cd93991a69f1c1d366f507528a4",
+    "package.json": "709447d1f03c97808bae14d6d044c10c73e0f0fd611742bbef3995881406cf10",
+    "snippets/snippets.json": "a4d9d063ed831e9f8440fca8f8b46ee5d2e2ece1c5d6986cb96be10249d0a16d",
+    "_source": {
+      "repo": "jonkwheeler/styled-components-snippets-vscode",
+      "commit": "0d541dc25bbc54e653ec58b27617bc39443a4560"
     }
   },
   "vscode-typescript-react-snippets": {
@@ -1058,17 +1058,13 @@
       "commit": "b02b3cd966f54bc5eb148618f4960f24c727cf48"
     }
   },
-  "vscode-angular": {
-    "coc-convert.json": "5565751d15f2827e46bee621795b5c62e6e8a7cfb797c00aeb77f9cbc86c21ba",
-    "package.json": "99d6ec870441deb68ee6f97e8d5cf9fb23a57537d48686b76239ef7c547f27fd",
-    "snippets/dockerfile.json": "a387fbfde945cb4c53c098e273cd67679f702938535b5c68a050c93448978024",
-    "snippets/html.json": "e0dcd1ec95523c1a73d969af6de241a56c754a153428c79ae327d175d103fd5e",
-    "snippets/javascript.json": "6ef6318483c9e7206f172ff9871de710986843e52b1ba9389d721f5f70299067",
-    "snippets/jsonc.json": "e6c02dac6e4a1844d760a7dfa4c0beaacbf190fcb7c8dc18ed36155aa6aba704",
-    "snippets/typescript.json": "06451642544002b9c26b376c20e74f4633f77382cc0f6e9fe14c1bb242a7318a",
+  "vscode-tinymist": {
+    "esbuild.mjs": "7f8daeb2738bef8c10749ac47366910986422e30db026df99a4e1e16413281fe",
+    "package.json": "07dca886fb43c63f005897b28e6b1726d43fc53174eeb3054c37fd266e62d492",
+    "src/index.ts": "7d22c73a6605c39d28d71d8a3d7e9ed682d65df9eb38b4a06a0791b5a6233942",
     "_source": {
-      "repo": "johnpapa/vscode-angular-snippets",
-      "commit": "6a438919d30cd8507b7096afc52ec65e16c3e7a7"
+      "repo": "Myriad-Dreamin/tinymist",
+      "commit": "6dcee3285f7eb4af51e3b1efc6e664096fbfcb1f"
     }
   },
   "vscode-angular-2": {
@@ -1091,6 +1087,19 @@
       "commit": "3cc48c7bcf410c7167a00e0ceeec77b1b20afea9"
     }
   },
+  "vscode-angular": {
+    "coc-convert.json": "5565751d15f2827e46bee621795b5c62e6e8a7cfb797c00aeb77f9cbc86c21ba",
+    "package.json": "99d6ec870441deb68ee6f97e8d5cf9fb23a57537d48686b76239ef7c547f27fd",
+    "snippets/dockerfile.json": "a387fbfde945cb4c53c098e273cd67679f702938535b5c68a050c93448978024",
+    "snippets/html.json": "e0dcd1ec95523c1a73d969af6de241a56c754a153428c79ae327d175d103fd5e",
+    "snippets/javascript.json": "6ef6318483c9e7206f172ff9871de710986843e52b1ba9389d721f5f70299067",
+    "snippets/jsonc.json": "e6c02dac6e4a1844d760a7dfa4c0beaacbf190fcb7c8dc18ed36155aa6aba704",
+    "snippets/typescript.json": "06451642544002b9c26b376c20e74f4633f77382cc0f6e9fe14c1bb242a7318a",
+    "_source": {
+      "repo": "johnpapa/vscode-angular-snippets",
+      "commit": "6a438919d30cd8507b7096afc52ec65e16c3e7a7"
+    }
+  },
   "vscode-angular-ngrx-snippets": {
     "coc-convert.json": "b2c13472a61fcfd5af1d464d601ac9eceb7edafd9401da99068a586d5105a638",
     "package.json": "0a9ea8752df1cd46c9168036850d6a9cf765a89ac084c087600b84ae8de2692c",
@@ -1100,15 +1109,6 @@
     "_source": {
       "repo": "BeastCode/VSCode-Angular-TypeScript-Snippets",
       "commit": "64059a59039905bad17f1900f4b28c253e648125"
-    }
-  },
-  "vscode-angular2-test": {
-    "coc-convert.json": "4c0eab54e86e3453d0e72f47773ab62625d24cd4352f09b1ce1137e4c8b196a2",
-    "package.json": "b4d7f1270dd12e3b95b49c96ccce7f8d135c3165264a2bffc21c99391cd8a7b9",
-    "snippets/typescript.json": "b0a6a4cc2039af20fe031f507834aaf0100a473a5f8470dc416aa6443984988c",
-    "_source": {
-      "repo": "marinho/vscode-angular2-test-snippets",
-      "commit": "95f97b94c2bdd4ccdcccb72b6449bbd0f55618ea"
     }
   },
   "vscode-angular1": {
@@ -1121,13 +1121,13 @@
       "commit": "f6d62364534ddb6fcd3dfea9d1944dd50df2f4d5"
     }
   },
-  "vscode-ng2-typescript": {
+  "vscode-angular2-test": {
     "coc-convert.json": "4c0eab54e86e3453d0e72f47773ab62625d24cd4352f09b1ce1137e4c8b196a2",
-    "package.json": "d2ec7b7f136248901a760521ff6ebfa50d545379d2a9ed17b2dbd77af564e0b3",
-    "snippets/typescript.json": "f72ea748d270dbe72602d69f398225ab9b982b0f66541ebaeb0de92d932085e8",
+    "package.json": "b4d7f1270dd12e3b95b49c96ccce7f8d135c3165264a2bffc21c99391cd8a7b9",
+    "snippets/typescript.json": "b0a6a4cc2039af20fe031f507834aaf0100a473a5f8470dc416aa6443984988c",
     "_source": {
-      "repo": "ultrasonicsoft/vscode-ng2-typescript-snippets",
-      "commit": "2c03a621a7e93ef68e103200568817515972240a"
+      "repo": "marinho/vscode-angular2-test-snippets",
+      "commit": "95f97b94c2bdd4ccdcccb72b6449bbd0f55618ea"
     }
   },
   "vscode-svelte-2": {
@@ -1139,6 +1139,15 @@
     "_source": {
       "repo": "fivethree-team/vscode-svelte-snippets",
       "commit": "564ac3300bfeda01ff0bf6b89152cef43f85a4ce"
+    }
+  },
+  "vscode-ng2-typescript": {
+    "coc-convert.json": "4c0eab54e86e3453d0e72f47773ab62625d24cd4352f09b1ce1137e4c8b196a2",
+    "package.json": "d2ec7b7f136248901a760521ff6ebfa50d545379d2a9ed17b2dbd77af564e0b3",
+    "snippets/typescript.json": "f72ea748d270dbe72602d69f398225ab9b982b0f66541ebaeb0de92d932085e8",
+    "_source": {
+      "repo": "ultrasonicsoft/vscode-ng2-typescript-snippets",
+      "commit": "2c03a621a7e93ef68e103200568817515972240a"
     }
   },
   "vscode-svelte-snippets": {
@@ -1169,15 +1178,6 @@
       "commit": "22f2503e27e11f54e226a033086626d166d6f432"
     }
   },
-  "vscode-javascript-snippets": {
-    "coc-convert.json": "8546c7f9a6cb17ea79c488502687e469504bc8c868aaa2c2af9aa0513c58a5a5",
-    "package.json": "b7290c27437cb56ea4b4301c0d78a265d5e6906f445dfbdf16b609ee376afd26",
-    "snippets/snippets.json": "a44b86c9ee4323bdc9a5f107e562581459555d03ecb2a982e5aca0ec84329ad3",
-    "_source": {
-      "repo": "xabikos/vscode-javascript",
-      "commit": "cec7ed6cb44ae354df02bbd367b1e5a005978b1a"
-    }
-  },
   "vscode-node": {
     "coc-convert.json": "f41bc30587fe80d961fa8e5cc1395576bdb27752da8475031c0b881b83ddf75d",
     "package.json": "86f7fe3bec05b078cbc69fd416b7dd4e872636da5595a75c695dbd550f921552",
@@ -1185,6 +1185,15 @@
     "_source": {
       "repo": "softchris/node-snippets",
       "commit": "8b2cb2ddb6696de5e1e9c682f90cc8042a1c131f"
+    }
+  },
+  "vscode-javascript-snippets": {
+    "coc-convert.json": "8546c7f9a6cb17ea79c488502687e469504bc8c868aaa2c2af9aa0513c58a5a5",
+    "package.json": "b7290c27437cb56ea4b4301c0d78a265d5e6906f445dfbdf16b609ee376afd26",
+    "snippets/snippets.json": "a44b86c9ee4323bdc9a5f107e562581459555d03ecb2a982e5aca0ec84329ad3",
+    "_source": {
+      "repo": "xabikos/vscode-javascript",
+      "commit": "cec7ed6cb44ae354df02bbd367b1e5a005978b1a"
     }
   },
   "vscode-bootstrap5-snippets": {
@@ -1202,6 +1211,18 @@
     "_source": {
       "repo": "abdoseadaa/node-js-snippets",
       "commit": "f595df4ca91cfb088b9e9c92a1b29fd9971eb333"
+    }
+  },
+  "vscode-standardjs": {
+    "coc-convert.json": "f41bc30587fe80d961fa8e5cc1395576bdb27752da8475031c0b881b83ddf75d",
+    "package.json": "9380dc166147adad4d04c92547bb0367e61dd06e893f52fb16e2503adb56e631",
+    "snippets/apollo.json": "c12ad9d0bf8ee4bd08b33ca097bf291ca7933fb445262d979372797f61d574fc",
+    "snippets/javascript.json": "c8aa392e0fa9968378aa0066529611a547e58d0a2c61ca0e0036a03bb670f393",
+    "snippets/react-ts.json": "45b963d01e546ac25bf58fc6a15d3a71f0078d828889e773726cb6acf09757ce",
+    "snippets/react.json": "268ab8d1a24f6e2d9015ed82da3281cde5c4fae7801695f834705a02712e1859",
+    "_source": {
+      "repo": "capaj/vscode-standardjs-snippets",
+      "commit": "76a82d459e2c1c027a4b7aeb63cc9f69616e0a78"
     }
   },
   "vscode-djaneiro": {
@@ -1235,27 +1256,6 @@
       "commit": "f1386bf938cd4d3ca4da190961f4202ce97a8cbd"
     }
   },
-  "vscode-standardjs": {
-    "coc-convert.json": "f41bc30587fe80d961fa8e5cc1395576bdb27752da8475031c0b881b83ddf75d",
-    "package.json": "9380dc166147adad4d04c92547bb0367e61dd06e893f52fb16e2503adb56e631",
-    "snippets/apollo.json": "c12ad9d0bf8ee4bd08b33ca097bf291ca7933fb445262d979372797f61d574fc",
-    "snippets/javascript.json": "c8aa392e0fa9968378aa0066529611a547e58d0a2c61ca0e0036a03bb670f393",
-    "snippets/react-ts.json": "45b963d01e546ac25bf58fc6a15d3a71f0078d828889e773726cb6acf09757ce",
-    "snippets/react.json": "268ab8d1a24f6e2d9015ed82da3281cde5c4fae7801695f834705a02712e1859",
-    "_source": {
-      "repo": "capaj/vscode-standardjs-snippets",
-      "commit": "76a82d459e2c1c027a4b7aeb63cc9f69616e0a78"
-    }
-  },
-  "vscode-django": {
-    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
-    "package.json": "976af195d671a917089aca72dca022bf9d88e64039f36ca8cbae851f4f644fd7",
-    "snippets/django-snippets.json": "850d68d1014579cb30526f7a12df5c53e7fcbfd2a11513f6f7fb13ef5b29143f",
-    "_source": {
-      "repo": "iambibhas/vscode-django-snippets",
-      "commit": "df45c956c8cf04b90c4b8e6e13ca4c59bc9eff9d"
-    }
-  },
   "vscode-fastapi-snippets": {
     "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
     "package.json": "8b50b4f75303792da9597fc5ae946d1c363e638a05d01fa4213ed715d15cf8cf",
@@ -1286,6 +1286,15 @@
       "commit": "09a834f3fcc7159fb307aadd5e704f1a75df31ee"
     }
   },
+  "vscode-django": {
+    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
+    "package.json": "976af195d671a917089aca72dca022bf9d88e64039f36ca8cbae851f4f644fd7",
+    "snippets/django-snippets.json": "850d68d1014579cb30526f7a12df5c53e7fcbfd2a11513f6f7fb13ef5b29143f",
+    "_source": {
+      "repo": "iambibhas/vscode-django-snippets",
+      "commit": "df45c956c8cf04b90c4b8e6e13ca4c59bc9eff9d"
+    }
+  },
   "vscode-pygame-snippets": {
     "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
     "package.json": "074150df0f623879e19f9af336902fa0401532240c648b453c5f306fad4d687c",
@@ -1302,6 +1311,501 @@
     "_source": {
       "repo": "ylcnfrht/vscode-python-snippet-pack",
       "commit": "7fa16e40449c3edac77e9fabf66ae53658949ee6"
+    }
+  },
+  "vscode-pytorch": {
+    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
+    "package.json": "ef9316c506b9b2b0c47108285f7c27040fc0e832cfb8e0c2dfea0f5a3b9c9a0b",
+    "snippets/pytorch.json": "00d6ece334c6627927f375c2800e11efd90da3e87c08eebc13c401915f488ae3",
+    "snippets/torchvision.json": "77d94c63044f3d1ee449fd7acc1440b00b0b1bb1fdf6d30c3d78f740ee240534",
+    "_source": {
+      "repo": "SvenBecker/vscode-pytorch",
+      "commit": "6cdf65101dfaf66609fa94387c57b12282d7ac77"
+    }
+  },
+  "vscode-tensorflow2snippets": {
+    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
+    "package.json": "5f85163ab89ecddee0a479c155a9131cab2a9d41e199ce0972259a5389dbf02a",
+    "src/snippets.json": "12b2f54ccfa9b26f85b6e998b901d96c6b22e81484450fc96bb8f2b9af8a21a4",
+    "_source": {
+      "repo": "changkaiyan/tensorflow2snippets",
+      "commit": "b7867b484ec1dc466f580af25857935bb3ea688e"
+    }
+  },
+  "vscode-snp-pandas-basic": {
+    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
+    "package.json": "1fef417124df318bbf20dddfda9997e0ec1ac963e35e23b67fd10e66cbf26eda",
+    "_source": {
+      "repo": "snippington/snp-pandas-basic",
+      "commit": "ae21e0497c910273b91672a0d587df2215fd294d"
+    }
+  },
+  "vscode-tkinter": {
+    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
+    "package.json": "4ebea762cdf639470ae8f633f41e36245ffd6f424776d5eb00a3154344d2479d",
+    "_source": {
+      "repo": "lunaluvgood/tkinter-snippets",
+      "commit": "9d385d360802848ed754ec86f86f323df83019bd"
+    }
+  },
+  "vscode-python-snippet-pack-2.0": {
+    "coc-convert.json": "55eeb101b4a1506e559389d6a02c4a68e8c619536de44b938ef54a1a85b09c25",
+    "package.json": "7a8e334243601e98f6e157046cdcb5007ab91039830d96b433dfb830efca7f09",
+    "snippets/PyMySQL_snippets.json": "5994b98d5f1b62e3b47cdc761aea07c6a50c7f63e86401722583db3c214975d0",
+    "snippets/algo_snippets.json": "2fc0208f6c76118ffb5d4619231eb0eea177ee733d24a33aef91eb9c3bbaba0e",
+    "snippets/class_snippets.json": "768cdf54a8c30efd56a80c567ef0f49fdb7999fdd8418da64f36c11902533671",
+    "snippets/control_flow.json": "0dc1bc20106e662fb5d8a4ac9e0a3f96a4d6cb8ac07434f42953c5b34a3ad3db",
+    "snippets/datetime_snippets.json": "d0b2622505c14a51e0094dfd59abd3281077a335234045d70a74ce325e1e86d6",
+    "snippets/def_function.json": "7736298caab3fbca1bd4d36121de2c0d566a5262457b956973164af8a0055757",
+    "snippets/dict_snippets.json": "c4a2f53a294ead640aef1caeebf08a009ae065cce0175dd0daf4002f3fa111d3",
+    "snippets/django_snippets.json": "503407eeb34ec8ff930808f4776ff265d1e8382371b78f399fae37560222b44a",
+    "snippets/django_template.json": "e6394959efbf9f2c9b2a0fb9619241b179e1f487701ade6aca02ee978eb8d01d",
+    "snippets/end_snippets.json": "cce3cf2c56687441d10e2f3fe8082d0547a5cdb5fb514bde8fcc995b297db9b9",
+    "snippets/file_snippets.json": "57cca6700224b97385fd45a590d456b23e6e0e3a0249c050a1d14e4047219d67",
+    "snippets/list_snippets.json": "b055540c17e390811ba84853b2ec3d98f8d90dba4f037eb6184335eacc0f6aca",
+    "snippets/np_snippets.json": "0dab9420f238add3a83f07747961d9660c094814c91c0295d2f3e4a29b3cae87",
+    "snippets/plt_snippets.json": "bc078c1842c570a44429c0d523910e9888bc4025342fef176318acec6052261d",
+    "snippets/print_snippets.json": "2dd80cb8ef260cffdaf1e97a7694d5a7c0216534e1560f0c79b4cd07a982ed17",
+    "snippets/python_snippets.json": "07d71082c50c6a2894667e5b36cd71c1eb3f55ede45d9274f21d0a7534ecb166",
+    "snippets/random_snippets.json": "f475bc472162f347cd9d2317cb9d83d05041139b4366cca812b8afc5b38a4b51",
+    "snippets/sets_snippets.json": "17254b76d4320e6c67a82f3c5a05d0ba0ccc4f07c38f2440173dcdf81915281e",
+    "snippets/shortcut.json": "d06fa48ad6cab2184ba8d63d5d5754267c35b6846be7a68aa85b75c14b257e29",
+    "snippets/str_snippets.json": "2531c0c2f3a25c4c08344a6ac229f4657445f639938d01041b4be8ddf773a9ac",
+    "snippets/tuple_snippets.json": "43faf7255efd88d47ea564b32dad08e60900aa9389537659a860d861a843ab6c",
+    "_source": {
+      "repo": "ericsia/vscode-python-snippet-pack-2.0",
+      "commit": "a37c28b71ba740e330554c7efeabc0909a0ce55c"
+    }
+  },
+  "vscode-wordpress-toolbox": {
+    "coc-convert.json": "88d760be20f995e3126ce637838d5be74742b6f890629a4177fd0c7945ecc321",
+    "package.json": "fafc27519d8444fbf7d08e0dfa466caaa0e8025aa150113f1147284e3da1e345",
+    "snippets/snippets.json": "05562fbe3d49773cf3f358d14aa1bab7df826771bda8e868d0d63c90f07a0b38",
+    "_source": {
+      "repo": "jason-pomerleau/vscode-wordpress-toolbox",
+      "commit": "f1875ed43b44238a7052c3f677fdcc33aede126d"
+    }
+  },
+  "vscode-php-awesome": {
+    "coc-convert.json": "000012b14b9d0c698d4724e6104ee01e4927d9b3b6852259f18e1fa18c22ce3f",
+    "package.json": "81d9a38419a40d89ea65ca39934ab0beca3fcaf17f216ffd051f5f7cb538bb6d",
+    "snippets/array.json": "43178f834181be58dc7d24561ff20ff8d966b3d3ce34cdde4bbc44c559b871e1",
+    "snippets/class.json": "c74d5822bff1ca55bcb619cb5c75371cd759f3af8341e5a5894f0f69cf95c4ce",
+    "snippets/control.json": "0c3c3965b3fd60773bda31ab5b2acad92b6548a4a97b79572c341ba4ed49e202",
+    "snippets/error.json": "70f42d19b793ce2afa716ebd6715df111c6e47374c569752c5c3d980f8610432",
+    "snippets/function.json": "5d59feb1ff5813193eb7a222e192f2d0ec5770fd82720c150963b05398ffb336",
+    "snippets/function.php5.json": "5d712a3922208bd31a87c12d8e32064a2540f6bff6f3db8808cf32a02d328d2c",
+    "snippets/globalvar.json": "874bea867e341458db9a52c970d4d8b837c6f155d67c5073f1d35e846683adab",
+    "snippets/loop.json": "8350c57f061dfda7853f138356c8a75775aeae049ecd0d10e1ea05ca0d54a659",
+    "snippets/method.json": "843ed450e737bab6b7051a9a33dc18ab471483fa25a024d72126e021a7e4061a",
+    "snippets/method.php5.json": "0656865edf9466b9a3560f52b57cb8943be5c9f15b063341a2bc39d42eee53a3",
+    "snippets/statement.json": "c318d3b1c4876214519e5de5f323cde8f630dfd17b71481204e95035cd74877a",
+    "snippets/tag.json": "0c37b287d9bbbb504386951124e60ba21d72aeb4b26a1261f11bc1e3e1c48901",
+    "_source": {
+      "repo": "h4kst3r/php-awesome-snippets",
+      "commit": "df0fa89381b2c1b3af5fe128dafabf2240e1d266"
+    }
+  },
+  "vscode-laravel5-snippets": {
+    "coc-convert.json": "88d760be20f995e3126ce637838d5be74742b6f890629a4177fd0c7945ecc321",
+    "package.json": "b353f7f305e7d4d69f1cfe0558c28cf7ac23a5c30eeacae668def635ac6c4413",
+    "snippets/arr.json": "08916f6b424058814cd1f76efa3b940bd5cfdebdca4d3fa9d5cc3331ff6e1ab4",
+    "snippets/auth.json": "25e777bb3ef05257e210821935907869209a92ca73c8d2fcc97c01486b206f7e",
+    "snippets/broadcast.json": "f5b205361b2fcda03fcab5db7fef426d52fbd2f963a9333873acfe23ff157811",
+    "snippets/cache.json": "2f5495813dae2c14339b34f837924dbf469af99f99a80a427bd1d0684a2c3751",
+    "snippets/collective_form_html.json": "cfbc330cbee5d71c8baee2d1028103bcb406e656fbe4f703799ff44d48a1712c",
+    "snippets/config.json": "ae14614321bb11cfc4682d429417ce9ac72902e67de6921caa120b9be3020e90",
+    "snippets/console.json": "02b9a3b3a0f441137fc3f19cd170f3db01abde67bd970b6fc854f98b418757da",
+    "snippets/cookie.json": "ea8b802cc35a31e87cdb89611ac5c0c626fb5e220ceffcb3cd54e3244f7fdc86",
+    "snippets/crypt.json": "a2b1ddb9826aafbc5dfbaf2ec3206dc1b62354e429fd843c0f2a756f1851d819",
+    "snippets/db.json": "1b1149b1f945bac0a4e9c745e47679175ada2e52bf1e9cd7bef57191bffde746",
+    "snippets/eloquent.json": "4546b5d153e17edf01c1be9fff5275bd4f2123ea1da8550ea2d2dda1a6568c7f",
+    "snippets/event.json": "ae0075c9cb6021e51b19d2d169fbc068342cd412c3440d206645eaa863c1d3d2",
+    "snippets/hash.json": "ac0c293196a1d46df9431f026c165dac8213d8d8535c78a1748279400ea32612",
+    "snippets/helper.json": "015a7a05013cce8bd81d67c2575be1f02d24b2394b613c3a22236e7363cfbe95",
+    "snippets/log.json": "564d9c4bb1f795a66998dfdbef756ce7929ea19048125bc2ab6cf4b3dd689131",
+    "snippets/mail.json": "1f13a2d7f1022e5e37e29ba85a346f767c99e940dac282f85555c95f5aa945ee",
+    "snippets/model.json": "42e6f111ae4a644f7bb429fb46e33d775569cbeb8f7e8d0e439c99dd27aaf016",
+    "snippets/passport.json": "f213fd1a5e95299524ad78ae5159ad9b41e7ef60d684a631f4fadf2e979f8b83",
+    "snippets/redirect.json": "80e435d72055f67760598223aebe1d641055c6bb0b21c5804ffe527623e1a026",
+    "snippets/relation.json": "42b08e7b31d34dff706df4c0267fd86e9e207465ae8966894332870495921a01",
+    "snippets/request.json": "2c24122235a9472ceabc503a87b893c44dd9d79e2561702f6124a07212381ab8",
+    "snippets/response.json": "0deeb4f8e425aafb7d5405478289a2ace34f9829885a6fc15d627431d51d250b",
+    "snippets/route.json": "a2f48acc0bc9ff2ac1d67b561c77392d94d65641c11ff4f829e473d490fc81be",
+    "snippets/schema.json": "d72fcb534bb4b7176bcd5c6214224d3968025ad37afa2f4d7387294e9ab98d96",
+    "snippets/session.json": "7ef387b78a21825b7c205e9540b32dc8b2997abd3ad07f8d7dfefbc396da3206",
+    "snippets/storage.json": "12cc3e2c424d675aab193695cf9368616713ce23a5fc400a0ded2f44d901b310",
+    "snippets/str.json": "e1f1daa824b9623f2a7912310a5c8f96a9dbe0a29d40a7c01a7e628ead15f95c",
+    "snippets/view.json": "1e17950cd01f4369b75f9364cd0dce693bc684a80f61bd8a1f46ae6fa9d12668",
+    "_source": {
+      "repo": "onecentlin/laravel5-snippets-vscode",
+      "commit": "c47f80f835d273e10f919a51aa7e1cbd436f60cd"
+    }
+  },
+  "vscode-phpstorm-snippets-for": {
+    "coc-convert.json": "0afdda769b41970712eb60f1856d07b9b7d61b432e050a90f39697f6d5637732",
+    "package.json": "5d36f7c68ed93e6cb079efe8ceeee32b35fc85529594e39add8bbcf1160afb9d",
+    "snippets/snippets.json": "15bb393b514e5dfb672ebe5347436c570a51b255b32f80f00ea66f55c06bba84",
+    "_source": {
+      "repo": "phiterf/phpstorm-snippets-for-vscode",
+      "commit": "eeffdbf774ad5ce91eb9cddaec321729c7eb86ac"
+    }
+  },
+  "vscode-arduino": {
+    "coc-convert.json": "6e2c4f4a51fa08b5e27583528663ad9b45c941cd0f362f652f6f28a439e4d3c9",
+    "package.json": "15b63db91f6fbc132d657f46fa66961a921df42de4bc08087e00181d4c3fb85d",
+    "snippets/snippets.json": "12f6dafe627d5d59111bab3bab754978b76cb6851b7dcc606d9b7d872caceaca",
+    "_source": {
+      "repo": "ronaldosena/arduino-snippets",
+      "commit": "7030a50be9f7cb3daf295f23a3ec4281e4be6cd7"
+    }
+  },
+  "vscode-cpp": {
+    "coc-convert.json": "c99b8ca1d5a395a17be1154d7b5e6c301ee10955628d5c5023cdc1c53dc9bcf9",
+    "package.json": "0242549d3940ed999de14b4e17e9ee0495d8a215f3bce67ac63faa73dda8a8e6",
+    "snippets/c.json": "fc700cb411791ce11238c377034b5e255959934faf3166ce9c9b4b54015fbd02",
+    "snippets/cpp.json": "792c604bb0e511f73f358e0348dae5f72b9e1508f27f7daa52f8e398eda32c40",
+    "_source": {
+      "repo": "one-harsh/vscode-cpp-snippets",
+      "commit": "f481dcfe34ef410ce71f67500706a3043e81ca03"
+    }
+  },
+  "vscode-rust-flash": {
+    "coc-convert.json": "fee0f692637300399ab7629002dbd3ec5917bf7a1f9e59e5e9d610978b7a0469",
+    "package.json": "a03b10995d823a5c0298c6fe6045dce6474676b341941f5a2a5b865d1361665c",
+    "_source": {
+      "repo": "Metalymph/rust-flash-snippets",
+      "commit": "76e7cda54910c2f8455cd717c18bb9843f5af3df"
+    }
+  },
+  "vscode-csharp": {
+    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
+    "package.json": "c9ceba55dafeb7c46677d997e9f6e15662bc61ec7ea9f04cb02028e983947efb",
+    "snippets/csharp.json": "49d049291bfbfac6684e26b5a126dbdf4f95de23adc7a3dcdf2e974f3b667b4b",
+    "_source": {
+      "repo": "J0rgeSerran0/vscode-csharp-snippets",
+      "commit": "3522981cf1700ce0e7ae13a5b57cfd5d2b67a9d8"
+    }
+  },
+  "vscode-java-imports-snippets": {
+    "coc-convert.json": "fc5bee0b08dd2b3af5909a69a468cae38748ab3fffae4f8470639e12df7cc85a",
+    "package.json": "0ba5a71360a128b91508bcc502188960e6bd6d0388568c666d5e63c43031ae3e",
+    "snippets/basic.json": "1660be17d7836d09d52b341ceac895f8e1761ec149785e713a598e979686f73c",
+    "snippets/java_imports.json": "457765856af7c6e497b9fd6563833aa2fe7fd323d8175f73cf5ea179f5ea9a49",
+    "_source": {
+      "repo": "tushortz/vscode-Java-Imports",
+      "commit": "dd6a44a5a1fcec0c040ac625706d5b554cc8c908"
+    }
+  },
+  "vscode-flutter": {
+    "coc-convert.json": "ff9d52b425b84c0eab59ba1b5149d487fa2e0b114a741130664564ab8dc2c426",
+    "package.json": "dcf4904e08437320d84db722d52a70d0918bedef2533f7718b9f5ad7599eee2f",
+    "snippets/dart.json": "7a3916e6a68cd9c4879a053484b2ac787bd85e9fee39fa57ac57a2c7f67d8919",
+    "_source": {
+      "repo": "Alexisvt/flutter-snippets",
+      "commit": "6186b0fc875af7ef1f91d2b3ba8f1aea55c7b925"
+    }
+  },
+  "vscode-awesome-flutter": {
+    "coc-convert.json": "ff9d52b425b84c0eab59ba1b5149d487fa2e0b114a741130664564ab8dc2c426",
+    "package.json": "5fc41b13df34e866b06c524c28c41473219518b8aba292951a24826c90eece1c",
+    "snippets/snippets.json": "3a90688c436f302fc74519f613c2948adaf0523ebf353af19549a5cb70abb320",
+    "_source": {
+      "repo": "Neevash/awesome-flutter-snippets",
+      "commit": "48d4b8ba44dc0133c2299d9d810eceb5efa441a7"
+    }
+  },
+  "vscode-flutter-2": {
+    "coc-convert.json": "ff9d52b425b84c0eab59ba1b5149d487fa2e0b114a741130664564ab8dc2c426",
+    "package.json": "946cecf3d1b0caef0697fdc8d533cb16db220a822923929ba0721200edb134ef",
+    "snippets/android_permissions.snippets.json": "679558b89de682a400b2a977f337cf58c06d7a01586d445945f9d166f92435c2",
+    "snippets/flutter.snippets.json": "2aeed7474b8a30359690cd9bcfd48b6302e88ddbb3546d4331ab3f314868edcf",
+    "snippets/import.snippets.json": "b2bcb9360b67f18f402632ae9e968f568a9e2b93d54221d58158430f23281766",
+    "snippets/riverpod.snippets.json": "007be02cc27d63c2fd20d8c75cf0cfc3d867283ba2877d8b751f0accd39e3616",
+    "snippets/shortcuts.snippets.json": "5fc95248abb3e10d82a7e0dcc687899ddc1ed724ba149228f29eef0e350c528b",
+    "_source": {
+      "repo": "zyllus17/flutter-snippets",
+      "commit": "3a1c728e6e4780eda4eb75f2138e8e63e073f1a6"
+    }
+  },
+  "vscode-express": {
+    "coc-convert.json": "33bb8c6b3862bdc43c1a7a21cb523d11468c3b367acf982eb5b5a10ad16e3c9b",
+    "package.json": "88142f5529f4de3f37aa03018c60f560255b402e3726d4e7e298b9d682d86955",
+    "snippets/snippets.json": "2bfffa88b4a0b9ab1f19b4473e4595ecad2a4a33960bdb81321e00fb38537cb7",
+    "_source": {
+      "repo": "robsonkades/vscode-express-snippets",
+      "commit": "ef475b08ce19830b3cd9558c1932d2e13ccdda5d"
+    }
+  },
+  "vscode-flutter-riverpod": {
+    "coc-convert.json": "ff9d52b425b84c0eab59ba1b5149d487fa2e0b114a741130664564ab8dc2c426",
+    "package.json": "66374bc3129253adbe7b78ddb39703d1c4892fda41e539cc69a61e766ac19265",
+    "_source": {
+      "repo": "RobertBrunhage/flutter-riverpod-snippets",
+      "commit": "69223eb1dc52893a43b91f02698b3bfee5d0f30d"
+    }
+  },
+  "vscode-nestsjs": {
+    "coc-convert.json": "4c0eab54e86e3453d0e72f47773ab62625d24cd4352f09b1ce1137e4c8b196a2",
+    "package.json": "84672d38aa1c7e3b524724c373dc4a36fc6ccbf5213bcff1cf9a39f92e19ae4b",
+    "snippets/snippets.json": "f10673b96f7dac4e5c42c3490365e779883cace8c5c04cee3061bdf211c0fa12",
+    "_source": {
+      "repo": "ashinzekene/vscode-nestsjs-snippets",
+      "commit": "8b1d0f0d2f2a192d72058b0b1c48fa1de54bc754"
+    }
+  },
+  "vscode-nestjs-snippets": {
+    "coc-convert.json": "226b8e701826c0a356be9c7a2d540a905eb17ec6c7330f7732bd0c70f4614524",
+    "package.json": "40ebdb04b9efa7ed73dcaf328ae91e9ad7feef0b3df8d0a0cc0d3af48ada7907",
+    "_source": {
+      "repo": "ManuelGil/vscode-nestjs-snippets",
+      "commit": "804f182d8b69332cf5a6c5aa891fa17af7521179"
+    }
+  },
+  "vscode-springboot": {
+    "coc-convert.json": "df7660b5ddbe6ca63bf770157c26b895e9f7e296ce54a82769647df0162eddfa",
+    "package.json": "53a9072e85a7d676012bcf50adc59c77fe0c681b6916e093d3cca17a9a669925",
+    "snippets/java.json": "259af18940dd1fca29854632d6d357b986b2ab0516af48ad97720e2b8282c0d3",
+    "snippets/spring-boot-properties-yaml.json": "76745cbb2a20877e7650e797b6f9100c4764646e22445bb41bb7e7330d40839e",
+    "snippets/spring-boot-properties.json": "08d3a44b3935293bb7122f9842e19ec01e5c4d40cde8b9c059081dc6fdc01a2e",
+    "_source": {
+      "repo": "DeveloperSoapbox/vscode-springboot-snippets",
+      "commit": "33aea3237d6519c91dfa0acdb5668f2082e37a32"
+    }
+  },
+  "vscode-chai-snippets": {
+    "coc-convert.json": "33bb8c6b3862bdc43c1a7a21cb523d11468c3b367acf982eb5b5a10ad16e3c9b",
+    "package.json": "a79143c5eaec4a8578c0db19cd1e45d9d1ab719b902e1f79d00300300f61fe84",
+    "snippets/snippets.json": "d34415b785d353886e5619d5963b466da7c3baf3429b710d12edf95b51691813",
+    "_source": {
+      "repo": "nwhatt/vs-chai-snippets",
+      "commit": "beb1e3e4068d8e28c304d91200d7128d3acf2f11"
+    }
+  },
+  "vscode-cypress-snippets": {
+    "coc-convert.json": "78ba994c82a6d328c5cd9c3d269f3fefa8caed194dc2fc36c799f5f668a6392d",
+    "package.json": "9707b8858b695fe46e58cd73fb3458d522be90675cfaf549508b72e607a778ef",
+    "snippets/snippets.json": "794ff3bdf253fcbb689c2b3f2f4fa4bf5da5064d699edec0614d3a5612faa8a9",
+    "_source": {
+      "repo": "ijsto/cypress-snippets",
+      "commit": "c9f182884ab1aa180e69a212257ade0f4aaef0ec"
+    }
+  },
+  "vscode-jest": {
+    "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
+    "package.json": "80a8cb5963ad82aa6db858a4c759990e03cb91259273d6850281f0705db987ec",
+    "snippets/snippets.json": "e9a0020404c223ad51934edf01f4f69372baf0a5c5e08caffb1fa1526f8698a8",
+    "_source": {
+      "repo": "andys8/vscode-jest-snippets",
+      "commit": "2ea81c27c53f1709d94d9940c94986a5fc2c7fc8"
+    }
+  },
+  "vscode-playwright-snippets": {
+    "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
+    "package.json": "82d0dd6ca86276aa6ea7d73b93ae4adfca1e629d930f86b1a22f2c07417df990",
+    "snippets/snippets.json": "8555c8b8c4d8a53028d47ebb39c50f015889d4b98ac96174d69e2da84d473d33",
+    "_source": {
+      "repo": "nitayneeman/vscode-playwright-snippets",
+      "commit": "acdca57f6a4a3c2c8a12b88690e96d6f23d19f4e"
+    }
+  },
+  "vscode-mysql-snippets": {
+    "coc-convert.json": "2822d7d3ec2b4137ede868da1c5b468fa248eb10134f72a6c1ad2c57903d2afc",
+    "package.json": "56f6e1f77357aa768e5a549f24b95c4aa5eefe2b5c296be6217d8910b718a27e",
+    "snippets/mysql.code-snippets.json": "539ba78227a3198f6cda72b4e3d2ecb2dbd46afabbbf7cf58a27e022a865b5ec",
+    "_source": {
+      "repo": "zendobk/vscode-mysql",
+      "commit": "7f108bdd732d3bd304b2dac48aa1f50288d42295"
+    }
+  },
+  "vscode-uni-app-snippets": {
+    "coc-convert.json": "f81a09116efddf940b6830e9669167a50a91427b9391667eafa8dcf8c32d673e",
+    "package.json": "1f7030da60cb75fd78a9a2389c83b9ca3919b15025a65c7ea0761f5744ff3354",
+    "snippets/css.json": "d0e6465bc0dc7218b771d4c39920a0a543c9593c517ca2b16b5641d9248c7df9",
+    "snippets/javascript.json": "22549cef52f0f29b37dc4ff0a79decbdf092e059f6a606f438d5e993cfdb3580",
+    "snippets/jsonc.json": "6f3c836e2aa8e8e403309203480552b5830a522d60660b2de01853547ca3e5f4",
+    "snippets/vue-html.json": "cdb060f0fcb87ce8db6a94d0eb1241561026553e85bc25f9caffa97a46a07cce",
+    "_source": {
+      "repo": "uni-helper/uni-app-snippets-vscode",
+      "commit": "31bfcb4d622976e7c5012336e6209ec3283aa5f2"
+    }
+  },
+  "vscode-postgresql-snippets": {
+    "coc-convert.json": "25cc32bb422d8f8fcc4a24d370dc04ebcf11643da922c73daecd5348dba24dff",
+    "package.json": "56823e91daf31738c1020380d6bbc55acd56505d22fc6411c449a7d17d120078",
+    "_source": {
+      "repo": "Manuel7806/postgresql-snippets",
+      "commit": "3e4129db275564b0f494a012f0ea4fca7b920d5a"
+    }
+  },
+  "vscode-uni-cloud-snippets": {
+    "coc-convert.json": "c77ea56b75f4d37bf7b4929e3d3188034e30e13e035569dfcbbd499460843e79",
+    "package.json": "0f40d5bda5a63264c526a8f264ae678c8731a712c83795a39b26235c54e2ddd3",
+    "snippets/javascript.json": "e9cb17054458dcec0900477dce09f18341ad6dc41b7e246082f688a403ff5887",
+    "snippets/vue-html.json": "f165a9e3b7dae37b90a52fbf7e4833374eedb36043598ac532f08432cf2fb5ad",
+    "_source": {
+      "repo": "uni-helper/uni-cloud-snippets-vscode",
+      "commit": "0c0f588e7f6f14e22b1556461ac36b68fb1b7a4d"
+    }
+  },
+  "vscode-unity": {
+    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
+    "package.json": "77dd112ac07f498ef6d863cf8a44d30c0b7a36df94ba6c6bd3574749afad6dd0",
+    "snippets/snippets.json": "2229216a578c41164c072ad1192fc4ca617678b04c3ff0bb574005e3befd6cef",
+    "_source": {
+      "repo": "YclepticStudios/vscode-unity-snippets",
+      "commit": "32021f2aa91211ac198c71f01ad5207fbfb766a9"
+    }
+  },
+  "vscode-uni-ui-snippets": {
+    "coc-convert.json": "8531958e94968c71bca0fc70432e85e6604ca6f3b0a795c6abd2d9618cfcd1c0",
+    "package.json": "9cc20af60e73ce15f1a8d0f18d716627bf4e2344e3e2c6bfca9752532568e102",
+    "snippets/vue-html.json": "a77eab204726db47c53bec2581956f4015bd86d2b8649cf0729c51de0652f8a6",
+    "_source": {
+      "repo": "uni-helper/uni-ui-snippets-vscode",
+      "commit": "82463eba0549354ac37a51d94c85013f0bbee873"
+    }
+  },
+  "vscode-unity-2": {
+    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
+    "package.json": "d17775eededd813ba85801d5df448e0d951209af971ed020b463050d654bfb59",
+    "snippets/snippets.json": "b9bc9da52472e2f04e11206207a79a8d87afdec872431f0243c80e0b342e3412",
+    "_source": {
+      "repo": "lionize/vscode-unity-snippets",
+      "commit": "837f998f7134e287eff843f40132475c81eb72e8"
+    }
+  },
+  "vscode-ue4-snippets-vs": {
+    "coc-convert.json": "6e2c4f4a51fa08b5e27583528663ad9b45c941cd0f362f652f6f28a439e4d3c9",
+    "package.json": "6d6fc09ece9ec47e1195dc41b880992e7fdebf43a10493e147dc572e8e4fcc95",
+    "snippets/snippets.json": "938916a3106d2482df3eb3839deb5c78a9970f3f7874405319f0194a85b37871",
+    "_source": {
+      "repo": "CAPTNCAPS/ue4-snippets-vs",
+      "commit": "17ddf8688f60edc34156aeffab84dc401844cf31"
+    }
+  },
+  "vscode-apacheconf": {
+    "coc-convert.json": "e0bbe02ec1a6e5a48d9498e72406d33d360b78495c1d3081cdffb89c672d7bed",
+    "package.json": "c7169689ab6ba1a6123ee6b29c0546e644d43c38c6b92c384c682324cba8d93d",
+    "snippets/apacheconf.json": "f341f97c273cd97a325d8a4107c2aca3a0dd015a14c5931d89c97d0df7ad58bc",
+    "_source": {
+      "repo": "hrdtbs/vscode-apacheconf-snippets",
+      "commit": "5472944d8151404cbd0ab9748b3a140166c55c01"
+    }
+  },
+  "vscode-unity-code": {
+    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
+    "package.json": "b5a66c94c1fe341c370f5cb2df0e48860c058e4ae528ee24e0a9ec621a721b87",
+    "snippets/snippets.json": "b3043de33f5059a28bb41f81bceacc58864d909cbb0d87ccabeffdc3f32e6788",
+    "_source": {
+      "repo": "cemuka/vscode-unity-code-snippets",
+      "commit": "9e16518be84932976b07f965279ab78b5406d780"
+    }
+  },
+  "vscode-classic-asp": {
+    "coc-convert.json": "104d8a803cbfa960761e2506903924405672879a9460e1c68815576395147f58",
+    "package.json": "c50904c0b59668a7ceda3a4ac20aedf13af31b883dc99a883f0b9d597505c77c",
+    "snippets/asp.json": "e107d1ded69890914f9274fdf0bc4ed5626cdad32c2f234ecbf5ef060469d5ce",
+    "_source": {
+      "repo": "jtjoo/vscode-classic-asp-extension",
+      "commit": "68ed4f6716ed69278832a8cefeb902d5b74665b1"
+    }
+  },
+  "vscode-ejs-snippets": {
+    "coc-convert.json": "43850e7c3b5a9abadce3ef3d78b246b2cedab6a802e58b692861d804ba1a1270",
+    "package.json": "6c8359136a4a9f6f035a8229e28b6c3803028e0072a2300f4fbbd12332e24ffe",
+    "snippets/snippets.json": "518f1967f719cdf9cf1a5d043aee908cb9dda5786bd5534cc962a7cee34ebf2b",
+    "_source": {
+      "repo": "theranbrig/ejs-snippets",
+      "commit": "09551911613eb93aaec8495cf7817716ea09f373"
+    }
+  },
+  "vscode-eslint-disable": {
+    "coc-convert.json": "4c1491cdafeb581924dd63e1ef855032c383607c5b2681b93c3e36a920849616",
+    "package.json": "7c16f92bd81642934ed446fbed729174e69fda10a8132fd34013585233d139f8",
+    "snippets/snippets.json": "9a929e0a2f8dc580b3d67366bcef8273506410adde4144ada3ddba2406dd4956",
+    "_source": {
+      "repo": "drKnoxy/eslint-disable-snippets",
+      "commit": "6fe121af0bd11259e80cc3afe5cf8700f4b02628"
+    }
+  },
+  "vscode-emoji-snippets": {
+    "coc-convert.json": "fc5af2cc49218171d700b885d3a0405afde6e2158ab879a6403d25e339a8e849",
+    "package.json": "6b2fc4cc32b2a202f93dac40cfc04fcd7963630c9c9fcb55d50e9100cd6958c3",
+    "snippets/snippets.json": "39004852ce1ac71614f4ec29744a7a8c86139eb627e834227706612776477a67",
+    "_source": {
+      "repo": "Devzstudio/Vscode-Emoji-Snippets",
+      "commit": "6f861b9a298f87f09ed43d4240556cae1ff87ed0"
+    }
+  },
+  "vscode-font-awesome-codes-html": {
+    "coc-convert.json": "48069a978a308bd6e3ad238a186026e00c088f963b3865eaea8f0b0c4fb0c0bd",
+    "package.json": "1d9f350b2ac5db1f68619704258a88a43a93f6896a5272928aae16a6c08c750d",
+    "snippets/snippets.json": "8ca410f59e028071cf275f0fe5dc3f1667d5eb0334eebaa5e02beb0dba42d5d8",
+    "_source": {
+      "repo": "dslpp056193/font-awesome-codes-html",
+      "commit": "1552f0f3ca5f1d3dd808b92745e4212ea4f103f7"
+    }
+  },
+  "vscode-jquery-snippets": {
+    "coc-convert.json": "330f665ab12c445f28a98ced40ef1096bdb83a1e9aed057e4a4fd8857ece2f51",
+    "package.json": "170e5f7bf828429b9a204a347ea38ec81ff6da6cce73c9e3258a456b2853e3e4",
+    "snippets/javascript.json": "91c2760eb82d4d4f9901c053bf357430fc6fa46efeb2a6f35b896b741cdb27f0",
+    "_source": {
+      "repo": "DonJayamanne/jquerysnippets",
+      "commit": "f1c2f7e27f292e581a95038c7af1a0c67c28db03"
+    }
+  },
+  "vscode-ionic": {
+    "coc-convert.json": "307f4f06e29b937dd59404bc44a9718c819b47f459be26395f119dcfb92c11d6",
+    "package.json": "9e1deee7bfa18bbd507e25781dae9c70fab14d85b04095bfb00e7d2d607abcda",
+    "snippets/angular/html-utils.json": "1d00eb2454ae17445e5df8f7a2e0563a5f85790ab68b2dbf7d2331aa359d420d",
+    "snippets/angular/html.json": "9210bd5f422f658d74f15828a66f991a8e622c4ff6acb39f1d15e79d6583601e",
+    "snippets/angular/typescript.json": "3662574e95dedf7164f55bafb606adf18da01deebceaed91157dad7a00cd742f",
+    "snippets/react/html-tsx.json": "a8f85a1645221f6d3f6598a37db1ef0e5c26c5c47a1d9d08085ee3befa47eeb2",
+    "snippets/scss.json": "57c51e61cbbe3202c7cfbf4149c32a4b469c538d5f4d62717edd691cd4231257",
+    "snippets/stencil/html-tsx.json": "f09bbf1d1da10bb0379e5158d504bf4174ddccebd9be1031509c3beec54147e9",
+    "snippets/vue/html.json": "4409ee6002a2b1d18694a05cc6667be07a91696f0d295737abc17f1eb7ffcf98",
+    "_source": {
+      "repo": "fivethree-team/vscode-ionic-snippets",
+      "commit": "a7f519d68805488e112d2accf0d13f522147915b"
+    }
+  },
+  "vscode-rxjs-snippets": {
+    "coc-convert.json": "33bb8c6b3862bdc43c1a7a21cb523d11468c3b367acf982eb5b5a10ad16e3c9b",
+    "package.json": "0f3ad005c7521fa3a66c404e7686b2588135056b78bda89ba02e6c0c2656b82e",
+    "src/javascript.json": "f33ed0b246aaf0661dcce430e2103da20c239b9e4f3e284113f8cab26f0a792c",
+    "_source": {
+      "repo": "prashantkoshta/rxjs-snippets-vscode",
+      "commit": "87918045d12f6b0620f1b87ded51d27d428afbf6"
+    }
+  },
+  "vscode-liquid": {
+    "coc-convert.json": "9aca7a7dc74b3b0f2c7a36e5e5f91f63c289a752cd60b2df6abe2a42ee9d6227",
+    "package.json": "e9d9c5ca46d853cde254df30c81347ec62ae97b037faf47a2d03bbdfa63310eb",
+    "snippets/liquid.json": "fefe4041225a9c2ee6271d76b05620553bd824d03460d9bd502a27baf28754ec",
+    "_source": {
+      "repo": "killalau/vscode-liquid-snippets",
+      "commit": "3b7b77c836fd3524e1330b2c375713d898993ed6"
+    }
+  },
+  "vscode-vsc_html5_boilerplate": {
+    "coc-convert.json": "066dc7683a74d618a9603afd82b4447d1c63ae794105802981c4738857c21ef6",
+    "package.json": "246fabe6adbf41169c375a7dde00db20f483aa1b19c661ab933fdf094770b6a5",
+    "snippets/html.json": "cecefbffbf17a3d56ca933e45ad7d6e62612a6efa097e2b12b07519c370b9a54",
+    "_source": {
+      "repo": "sidthesloth92/vsc_html5_boilerplate",
+      "commit": "a7eeb66f1525226e7c7a6419c6f9b507b0441aa3"
+    }
+  },
+  "vscode-astro": {
+    "esbuild.mjs": "d79c7b59ed3d98e942d93531793e4386452d749428d04376137344e20275d255",
+    "package.json": "2c6b47f4c027dc3906558cd2d0a777abbe1226d6c1605a9ac766cdb1451e0ccf",
+    "src/client.ts": "0271f79c4d194bae7ef6139137fb28aaa7cfeb0bc0dde49f7d998bb9ca634c56",
+    "src/index.ts": "b3b5b1b3e27c044e509212020019a80c479cb1c359ff2de47f6c67077c8f719e",
+    "_source": {
+      "repo": "withastro/astro",
+      "commit": "8e2b64b66ae52e0a3767b10bb82fa617c365c9e4"
     }
   },
   "vscode-ng-language-service": {
@@ -1387,511 +1891,7 @@
     "src/syntaxes/test/driver.ts": "4133559698fefcaf5fb2535160be3fc3d430b7b7a9b2f6e774780dd4b8e16989",
     "_source": {
       "repo": "angular/angular",
-      "commit": "49672c437b440564e9c20b77a7ff151fbf316706"
-    }
-  },
-  "vscode-python-snippet-pack-2.0": {
-    "coc-convert.json": "55eeb101b4a1506e559389d6a02c4a68e8c619536de44b938ef54a1a85b09c25",
-    "package.json": "7a8e334243601e98f6e157046cdcb5007ab91039830d96b433dfb830efca7f09",
-    "snippets/PyMySQL_snippets.json": "5994b98d5f1b62e3b47cdc761aea07c6a50c7f63e86401722583db3c214975d0",
-    "snippets/algo_snippets.json": "2fc0208f6c76118ffb5d4619231eb0eea177ee733d24a33aef91eb9c3bbaba0e",
-    "snippets/class_snippets.json": "768cdf54a8c30efd56a80c567ef0f49fdb7999fdd8418da64f36c11902533671",
-    "snippets/control_flow.json": "0dc1bc20106e662fb5d8a4ac9e0a3f96a4d6cb8ac07434f42953c5b34a3ad3db",
-    "snippets/datetime_snippets.json": "d0b2622505c14a51e0094dfd59abd3281077a335234045d70a74ce325e1e86d6",
-    "snippets/def_function.json": "7736298caab3fbca1bd4d36121de2c0d566a5262457b956973164af8a0055757",
-    "snippets/dict_snippets.json": "c4a2f53a294ead640aef1caeebf08a009ae065cce0175dd0daf4002f3fa111d3",
-    "snippets/django_snippets.json": "503407eeb34ec8ff930808f4776ff265d1e8382371b78f399fae37560222b44a",
-    "snippets/django_template.json": "e6394959efbf9f2c9b2a0fb9619241b179e1f487701ade6aca02ee978eb8d01d",
-    "snippets/end_snippets.json": "cce3cf2c56687441d10e2f3fe8082d0547a5cdb5fb514bde8fcc995b297db9b9",
-    "snippets/file_snippets.json": "57cca6700224b97385fd45a590d456b23e6e0e3a0249c050a1d14e4047219d67",
-    "snippets/list_snippets.json": "b055540c17e390811ba84853b2ec3d98f8d90dba4f037eb6184335eacc0f6aca",
-    "snippets/np_snippets.json": "0dab9420f238add3a83f07747961d9660c094814c91c0295d2f3e4a29b3cae87",
-    "snippets/plt_snippets.json": "bc078c1842c570a44429c0d523910e9888bc4025342fef176318acec6052261d",
-    "snippets/print_snippets.json": "2dd80cb8ef260cffdaf1e97a7694d5a7c0216534e1560f0c79b4cd07a982ed17",
-    "snippets/python_snippets.json": "07d71082c50c6a2894667e5b36cd71c1eb3f55ede45d9274f21d0a7534ecb166",
-    "snippets/random_snippets.json": "f475bc472162f347cd9d2317cb9d83d05041139b4366cca812b8afc5b38a4b51",
-    "snippets/sets_snippets.json": "17254b76d4320e6c67a82f3c5a05d0ba0ccc4f07c38f2440173dcdf81915281e",
-    "snippets/shortcut.json": "d06fa48ad6cab2184ba8d63d5d5754267c35b6846be7a68aa85b75c14b257e29",
-    "snippets/str_snippets.json": "2531c0c2f3a25c4c08344a6ac229f4657445f639938d01041b4be8ddf773a9ac",
-    "snippets/tuple_snippets.json": "43faf7255efd88d47ea564b32dad08e60900aa9389537659a860d861a843ab6c",
-    "_source": {
-      "repo": "ericsia/vscode-python-snippet-pack-2.0",
-      "commit": "a37c28b71ba740e330554c7efeabc0909a0ce55c"
-    }
-  },
-  "vscode-snp-pandas-basic": {
-    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
-    "package.json": "1fef417124df318bbf20dddfda9997e0ec1ac963e35e23b67fd10e66cbf26eda",
-    "_source": {
-      "repo": "snippington/snp-pandas-basic",
-      "commit": "ae21e0497c910273b91672a0d587df2215fd294d"
-    }
-  },
-  "vscode-pytorch": {
-    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
-    "package.json": "ef9316c506b9b2b0c47108285f7c27040fc0e832cfb8e0c2dfea0f5a3b9c9a0b",
-    "snippets/pytorch.json": "00d6ece334c6627927f375c2800e11efd90da3e87c08eebc13c401915f488ae3",
-    "snippets/torchvision.json": "77d94c63044f3d1ee449fd7acc1440b00b0b1bb1fdf6d30c3d78f740ee240534",
-    "_source": {
-      "repo": "SvenBecker/vscode-pytorch",
-      "commit": "6cdf65101dfaf66609fa94387c57b12282d7ac77"
-    }
-  },
-  "vscode-tensorflow2snippets": {
-    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
-    "package.json": "5f85163ab89ecddee0a479c155a9131cab2a9d41e199ce0972259a5389dbf02a",
-    "src/snippets.json": "12b2f54ccfa9b26f85b6e998b901d96c6b22e81484450fc96bb8f2b9af8a21a4",
-    "_source": {
-      "repo": "changkaiyan/tensorflow2snippets",
-      "commit": "b7867b484ec1dc466f580af25857935bb3ea688e"
-    }
-  },
-  "vscode-tkinter": {
-    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
-    "package.json": "4ebea762cdf639470ae8f633f41e36245ffd6f424776d5eb00a3154344d2479d",
-    "_source": {
-      "repo": "lunaluvgood/tkinter-snippets",
-      "commit": "9d385d360802848ed754ec86f86f323df83019bd"
-    }
-  },
-  "vscode-astro": {
-    "esbuild.mjs": "d79c7b59ed3d98e942d93531793e4386452d749428d04376137344e20275d255",
-    "package.json": "2c6b47f4c027dc3906558cd2d0a777abbe1226d6c1605a9ac766cdb1451e0ccf",
-    "src/client.ts": "0271f79c4d194bae7ef6139137fb28aaa7cfeb0bc0dde49f7d998bb9ca634c56",
-    "src/index.ts": "b3b5b1b3e27c044e509212020019a80c479cb1c359ff2de47f6c67077c8f719e",
-    "_source": {
-      "repo": "withastro/astro",
-      "commit": "4dc590c8fcdd9207492914dddb8e861c532ed904"
-    }
-  },
-  "vscode-php-awesome": {
-    "coc-convert.json": "000012b14b9d0c698d4724e6104ee01e4927d9b3b6852259f18e1fa18c22ce3f",
-    "package.json": "81d9a38419a40d89ea65ca39934ab0beca3fcaf17f216ffd051f5f7cb538bb6d",
-    "snippets/array.json": "43178f834181be58dc7d24561ff20ff8d966b3d3ce34cdde4bbc44c559b871e1",
-    "snippets/class.json": "c74d5822bff1ca55bcb619cb5c75371cd759f3af8341e5a5894f0f69cf95c4ce",
-    "snippets/control.json": "0c3c3965b3fd60773bda31ab5b2acad92b6548a4a97b79572c341ba4ed49e202",
-    "snippets/error.json": "70f42d19b793ce2afa716ebd6715df111c6e47374c569752c5c3d980f8610432",
-    "snippets/function.json": "5d59feb1ff5813193eb7a222e192f2d0ec5770fd82720c150963b05398ffb336",
-    "snippets/function.php5.json": "5d712a3922208bd31a87c12d8e32064a2540f6bff6f3db8808cf32a02d328d2c",
-    "snippets/globalvar.json": "874bea867e341458db9a52c970d4d8b837c6f155d67c5073f1d35e846683adab",
-    "snippets/loop.json": "8350c57f061dfda7853f138356c8a75775aeae049ecd0d10e1ea05ca0d54a659",
-    "snippets/method.json": "843ed450e737bab6b7051a9a33dc18ab471483fa25a024d72126e021a7e4061a",
-    "snippets/method.php5.json": "0656865edf9466b9a3560f52b57cb8943be5c9f15b063341a2bc39d42eee53a3",
-    "snippets/statement.json": "c318d3b1c4876214519e5de5f323cde8f630dfd17b71481204e95035cd74877a",
-    "snippets/tag.json": "0c37b287d9bbbb504386951124e60ba21d72aeb4b26a1261f11bc1e3e1c48901",
-    "_source": {
-      "repo": "h4kst3r/php-awesome-snippets",
-      "commit": "df0fa89381b2c1b3af5fe128dafabf2240e1d266"
-    }
-  },
-  "vscode-laravel5-snippets": {
-    "coc-convert.json": "88d760be20f995e3126ce637838d5be74742b6f890629a4177fd0c7945ecc321",
-    "package.json": "b353f7f305e7d4d69f1cfe0558c28cf7ac23a5c30eeacae668def635ac6c4413",
-    "snippets/arr.json": "08916f6b424058814cd1f76efa3b940bd5cfdebdca4d3fa9d5cc3331ff6e1ab4",
-    "snippets/auth.json": "25e777bb3ef05257e210821935907869209a92ca73c8d2fcc97c01486b206f7e",
-    "snippets/broadcast.json": "f5b205361b2fcda03fcab5db7fef426d52fbd2f963a9333873acfe23ff157811",
-    "snippets/cache.json": "2f5495813dae2c14339b34f837924dbf469af99f99a80a427bd1d0684a2c3751",
-    "snippets/collective_form_html.json": "cfbc330cbee5d71c8baee2d1028103bcb406e656fbe4f703799ff44d48a1712c",
-    "snippets/config.json": "ae14614321bb11cfc4682d429417ce9ac72902e67de6921caa120b9be3020e90",
-    "snippets/console.json": "02b9a3b3a0f441137fc3f19cd170f3db01abde67bd970b6fc854f98b418757da",
-    "snippets/cookie.json": "ea8b802cc35a31e87cdb89611ac5c0c626fb5e220ceffcb3cd54e3244f7fdc86",
-    "snippets/crypt.json": "a2b1ddb9826aafbc5dfbaf2ec3206dc1b62354e429fd843c0f2a756f1851d819",
-    "snippets/db.json": "1b1149b1f945bac0a4e9c745e47679175ada2e52bf1e9cd7bef57191bffde746",
-    "snippets/eloquent.json": "4546b5d153e17edf01c1be9fff5275bd4f2123ea1da8550ea2d2dda1a6568c7f",
-    "snippets/event.json": "ae0075c9cb6021e51b19d2d169fbc068342cd412c3440d206645eaa863c1d3d2",
-    "snippets/hash.json": "ac0c293196a1d46df9431f026c165dac8213d8d8535c78a1748279400ea32612",
-    "snippets/helper.json": "015a7a05013cce8bd81d67c2575be1f02d24b2394b613c3a22236e7363cfbe95",
-    "snippets/log.json": "564d9c4bb1f795a66998dfdbef756ce7929ea19048125bc2ab6cf4b3dd689131",
-    "snippets/mail.json": "1f13a2d7f1022e5e37e29ba85a346f767c99e940dac282f85555c95f5aa945ee",
-    "snippets/model.json": "42e6f111ae4a644f7bb429fb46e33d775569cbeb8f7e8d0e439c99dd27aaf016",
-    "snippets/passport.json": "f213fd1a5e95299524ad78ae5159ad9b41e7ef60d684a631f4fadf2e979f8b83",
-    "snippets/redirect.json": "80e435d72055f67760598223aebe1d641055c6bb0b21c5804ffe527623e1a026",
-    "snippets/relation.json": "42b08e7b31d34dff706df4c0267fd86e9e207465ae8966894332870495921a01",
-    "snippets/request.json": "2c24122235a9472ceabc503a87b893c44dd9d79e2561702f6124a07212381ab8",
-    "snippets/response.json": "0deeb4f8e425aafb7d5405478289a2ace34f9829885a6fc15d627431d51d250b",
-    "snippets/route.json": "a2f48acc0bc9ff2ac1d67b561c77392d94d65641c11ff4f829e473d490fc81be",
-    "snippets/schema.json": "d72fcb534bb4b7176bcd5c6214224d3968025ad37afa2f4d7387294e9ab98d96",
-    "snippets/session.json": "7ef387b78a21825b7c205e9540b32dc8b2997abd3ad07f8d7dfefbc396da3206",
-    "snippets/storage.json": "12cc3e2c424d675aab193695cf9368616713ce23a5fc400a0ded2f44d901b310",
-    "snippets/str.json": "e1f1daa824b9623f2a7912310a5c8f96a9dbe0a29d40a7c01a7e628ead15f95c",
-    "snippets/view.json": "1e17950cd01f4369b75f9364cd0dce693bc684a80f61bd8a1f46ae6fa9d12668",
-    "_source": {
-      "repo": "onecentlin/laravel5-snippets-vscode",
-      "commit": "c47f80f835d273e10f919a51aa7e1cbd436f60cd"
-    }
-  },
-  "vscode-phpstorm-snippets-for": {
-    "coc-convert.json": "0afdda769b41970712eb60f1856d07b9b7d61b432e050a90f39697f6d5637732",
-    "package.json": "5d36f7c68ed93e6cb079efe8ceeee32b35fc85529594e39add8bbcf1160afb9d",
-    "snippets/snippets.json": "15bb393b514e5dfb672ebe5347436c570a51b255b32f80f00ea66f55c06bba84",
-    "_source": {
-      "repo": "phiterf/phpstorm-snippets-for-vscode",
-      "commit": "eeffdbf774ad5ce91eb9cddaec321729c7eb86ac"
-    }
-  },
-  "vscode-wordpress-toolbox": {
-    "coc-convert.json": "88d760be20f995e3126ce637838d5be74742b6f890629a4177fd0c7945ecc321",
-    "package.json": "fafc27519d8444fbf7d08e0dfa466caaa0e8025aa150113f1147284e3da1e345",
-    "snippets/snippets.json": "05562fbe3d49773cf3f358d14aa1bab7df826771bda8e868d0d63c90f07a0b38",
-    "_source": {
-      "repo": "jason-pomerleau/vscode-wordpress-toolbox",
-      "commit": "f1875ed43b44238a7052c3f677fdcc33aede126d"
-    }
-  },
-  "vscode-rust-flash": {
-    "coc-convert.json": "fee0f692637300399ab7629002dbd3ec5917bf7a1f9e59e5e9d610978b7a0469",
-    "package.json": "a03b10995d823a5c0298c6fe6045dce6474676b341941f5a2a5b865d1361665c",
-    "_source": {
-      "repo": "Metalymph/rust-flash-snippets",
-      "commit": "76e7cda54910c2f8455cd717c18bb9843f5af3df"
-    }
-  },
-  "vscode-arduino": {
-    "coc-convert.json": "6e2c4f4a51fa08b5e27583528663ad9b45c941cd0f362f652f6f28a439e4d3c9",
-    "package.json": "15b63db91f6fbc132d657f46fa66961a921df42de4bc08087e00181d4c3fb85d",
-    "snippets/snippets.json": "12f6dafe627d5d59111bab3bab754978b76cb6851b7dcc606d9b7d872caceaca",
-    "_source": {
-      "repo": "ronaldosena/arduino-snippets",
-      "commit": "7030a50be9f7cb3daf295f23a3ec4281e4be6cd7"
-    }
-  },
-  "vscode-cpp": {
-    "coc-convert.json": "c99b8ca1d5a395a17be1154d7b5e6c301ee10955628d5c5023cdc1c53dc9bcf9",
-    "package.json": "0242549d3940ed999de14b4e17e9ee0495d8a215f3bce67ac63faa73dda8a8e6",
-    "snippets/c.json": "fc700cb411791ce11238c377034b5e255959934faf3166ce9c9b4b54015fbd02",
-    "snippets/cpp.json": "792c604bb0e511f73f358e0348dae5f72b9e1508f27f7daa52f8e398eda32c40",
-    "_source": {
-      "repo": "one-harsh/vscode-cpp-snippets",
-      "commit": "f481dcfe34ef410ce71f67500706a3043e81ca03"
-    }
-  },
-  "vscode-csharp": {
-    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
-    "package.json": "c9ceba55dafeb7c46677d997e9f6e15662bc61ec7ea9f04cb02028e983947efb",
-    "snippets/csharp.json": "49d049291bfbfac6684e26b5a126dbdf4f95de23adc7a3dcdf2e974f3b667b4b",
-    "_source": {
-      "repo": "J0rgeSerran0/vscode-csharp-snippets",
-      "commit": "3522981cf1700ce0e7ae13a5b57cfd5d2b67a9d8"
-    }
-  },
-  "vscode-docker": {
-    "esbuild.mjs": "a829710b490cb937e9740e428c14956b71ececd901ded2c0d17f3f13f85beee9",
-    "package.json": "038c74df63294e3fb0e377789e73b0ace54158792d05d376e317b85a8f4d224a",
-    "src/index.ts": "7db626772b103bc127d5ccc533c71ecb3e02a45db260d9fd711818475332aea3",
-    "_source": {
-      "repo": "microsoft/vscode-containers",
-      "commit": "d06cfccdf4f07c65f5cf772fd686b4689e62782b"
-    }
-  },
-  "vscode-java-imports-snippets": {
-    "coc-convert.json": "fc5bee0b08dd2b3af5909a69a468cae38748ab3fffae4f8470639e12df7cc85a",
-    "package.json": "0ba5a71360a128b91508bcc502188960e6bd6d0388568c666d5e63c43031ae3e",
-    "snippets/basic.json": "1660be17d7836d09d52b341ceac895f8e1761ec149785e713a598e979686f73c",
-    "snippets/java_imports.json": "457765856af7c6e497b9fd6563833aa2fe7fd323d8175f73cf5ea179f5ea9a49",
-    "_source": {
-      "repo": "tushortz/vscode-Java-Imports",
-      "commit": "dd6a44a5a1fcec0c040ac625706d5b554cc8c908"
-    }
-  },
-  "vscode-flutter": {
-    "coc-convert.json": "ff9d52b425b84c0eab59ba1b5149d487fa2e0b114a741130664564ab8dc2c426",
-    "package.json": "dcf4904e08437320d84db722d52a70d0918bedef2533f7718b9f5ad7599eee2f",
-    "snippets/dart.json": "7a3916e6a68cd9c4879a053484b2ac787bd85e9fee39fa57ac57a2c7f67d8919",
-    "_source": {
-      "repo": "Alexisvt/flutter-snippets",
-      "commit": "6186b0fc875af7ef1f91d2b3ba8f1aea55c7b925"
-    }
-  },
-  "vscode-flutter-2": {
-    "coc-convert.json": "ff9d52b425b84c0eab59ba1b5149d487fa2e0b114a741130664564ab8dc2c426",
-    "package.json": "946cecf3d1b0caef0697fdc8d533cb16db220a822923929ba0721200edb134ef",
-    "snippets/android_permissions.snippets.json": "679558b89de682a400b2a977f337cf58c06d7a01586d445945f9d166f92435c2",
-    "snippets/flutter.snippets.json": "2aeed7474b8a30359690cd9bcfd48b6302e88ddbb3546d4331ab3f314868edcf",
-    "snippets/import.snippets.json": "b2bcb9360b67f18f402632ae9e968f568a9e2b93d54221d58158430f23281766",
-    "snippets/riverpod.snippets.json": "007be02cc27d63c2fd20d8c75cf0cfc3d867283ba2877d8b751f0accd39e3616",
-    "snippets/shortcuts.snippets.json": "5fc95248abb3e10d82a7e0dcc687899ddc1ed724ba149228f29eef0e350c528b",
-    "_source": {
-      "repo": "zyllus17/flutter-snippets",
-      "commit": "3a1c728e6e4780eda4eb75f2138e8e63e073f1a6"
-    }
-  },
-  "vscode-awesome-flutter": {
-    "coc-convert.json": "ff9d52b425b84c0eab59ba1b5149d487fa2e0b114a741130664564ab8dc2c426",
-    "package.json": "5fc41b13df34e866b06c524c28c41473219518b8aba292951a24826c90eece1c",
-    "snippets/snippets.json": "3a90688c436f302fc74519f613c2948adaf0523ebf353af19549a5cb70abb320",
-    "_source": {
-      "repo": "Neevash/awesome-flutter-snippets",
-      "commit": "48d4b8ba44dc0133c2299d9d810eceb5efa441a7"
-    }
-  },
-  "vscode-flutter-riverpod": {
-    "coc-convert.json": "ff9d52b425b84c0eab59ba1b5149d487fa2e0b114a741130664564ab8dc2c426",
-    "package.json": "66374bc3129253adbe7b78ddb39703d1c4892fda41e539cc69a61e766ac19265",
-    "_source": {
-      "repo": "RobertBrunhage/flutter-riverpod-snippets",
-      "commit": "69223eb1dc52893a43b91f02698b3bfee5d0f30d"
-    }
-  },
-  "vscode-nestjs-snippets": {
-    "coc-convert.json": "226b8e701826c0a356be9c7a2d540a905eb17ec6c7330f7732bd0c70f4614524",
-    "package.json": "40ebdb04b9efa7ed73dcaf328ae91e9ad7feef0b3df8d0a0cc0d3af48ada7907",
-    "_source": {
-      "repo": "ManuelGil/vscode-nestjs-snippets",
-      "commit": "804f182d8b69332cf5a6c5aa891fa17af7521179"
-    }
-  },
-  "vscode-nestsjs": {
-    "coc-convert.json": "4c0eab54e86e3453d0e72f47773ab62625d24cd4352f09b1ce1137e4c8b196a2",
-    "package.json": "84672d38aa1c7e3b524724c373dc4a36fc6ccbf5213bcff1cf9a39f92e19ae4b",
-    "snippets/snippets.json": "f10673b96f7dac4e5c42c3490365e779883cace8c5c04cee3061bdf211c0fa12",
-    "_source": {
-      "repo": "ashinzekene/vscode-nestsjs-snippets",
-      "commit": "8b1d0f0d2f2a192d72058b0b1c48fa1de54bc754"
-    }
-  },
-  "vscode-springboot": {
-    "coc-convert.json": "df7660b5ddbe6ca63bf770157c26b895e9f7e296ce54a82769647df0162eddfa",
-    "package.json": "53a9072e85a7d676012bcf50adc59c77fe0c681b6916e093d3cca17a9a669925",
-    "snippets/java.json": "259af18940dd1fca29854632d6d357b986b2ab0516af48ad97720e2b8282c0d3",
-    "snippets/spring-boot-properties-yaml.json": "76745cbb2a20877e7650e797b6f9100c4764646e22445bb41bb7e7330d40839e",
-    "snippets/spring-boot-properties.json": "08d3a44b3935293bb7122f9842e19ec01e5c4d40cde8b9c059081dc6fdc01a2e",
-    "_source": {
-      "repo": "DeveloperSoapbox/vscode-springboot-snippets",
-      "commit": "33aea3237d6519c91dfa0acdb5668f2082e37a32"
-    }
-  },
-  "vscode-chai-snippets": {
-    "coc-convert.json": "33bb8c6b3862bdc43c1a7a21cb523d11468c3b367acf982eb5b5a10ad16e3c9b",
-    "package.json": "a79143c5eaec4a8578c0db19cd1e45d9d1ab719b902e1f79d00300300f61fe84",
-    "snippets/snippets.json": "d34415b785d353886e5619d5963b466da7c3baf3429b710d12edf95b51691813",
-    "_source": {
-      "repo": "nwhatt/vs-chai-snippets",
-      "commit": "beb1e3e4068d8e28c304d91200d7128d3acf2f11"
-    }
-  },
-  "vscode-cypress-snippets": {
-    "coc-convert.json": "78ba994c82a6d328c5cd9c3d269f3fefa8caed194dc2fc36c799f5f668a6392d",
-    "package.json": "9707b8858b695fe46e58cd73fb3458d522be90675cfaf549508b72e607a778ef",
-    "snippets/snippets.json": "794ff3bdf253fcbb689c2b3f2f4fa4bf5da5064d699edec0614d3a5612faa8a9",
-    "_source": {
-      "repo": "ijsto/cypress-snippets",
-      "commit": "c9f182884ab1aa180e69a212257ade0f4aaef0ec"
-    }
-  },
-  "vscode-jest": {
-    "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
-    "package.json": "80a8cb5963ad82aa6db858a4c759990e03cb91259273d6850281f0705db987ec",
-    "snippets/snippets.json": "e9a0020404c223ad51934edf01f4f69372baf0a5c5e08caffb1fa1526f8698a8",
-    "_source": {
-      "repo": "andys8/vscode-jest-snippets",
-      "commit": "2ea81c27c53f1709d94d9940c94986a5fc2c7fc8"
-    }
-  },
-  "vscode-express": {
-    "coc-convert.json": "33bb8c6b3862bdc43c1a7a21cb523d11468c3b367acf982eb5b5a10ad16e3c9b",
-    "package.json": "88142f5529f4de3f37aa03018c60f560255b402e3726d4e7e298b9d682d86955",
-    "snippets/snippets.json": "2bfffa88b4a0b9ab1f19b4473e4595ecad2a4a33960bdb81321e00fb38537cb7",
-    "_source": {
-      "repo": "robsonkades/vscode-express-snippets",
-      "commit": "ef475b08ce19830b3cd9558c1932d2e13ccdda5d"
-    }
-  },
-  "vscode-mysql-snippets": {
-    "coc-convert.json": "2822d7d3ec2b4137ede868da1c5b468fa248eb10134f72a6c1ad2c57903d2afc",
-    "package.json": "56f6e1f77357aa768e5a549f24b95c4aa5eefe2b5c296be6217d8910b718a27e",
-    "snippets/mysql.code-snippets.json": "539ba78227a3198f6cda72b4e3d2ecb2dbd46afabbbf7cf58a27e022a865b5ec",
-    "_source": {
-      "repo": "zendobk/vscode-mysql",
-      "commit": "7f108bdd732d3bd304b2dac48aa1f50288d42295"
-    }
-  },
-  "vscode-playwright-snippets": {
-    "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
-    "package.json": "82d0dd6ca86276aa6ea7d73b93ae4adfca1e629d930f86b1a22f2c07417df990",
-    "snippets/snippets.json": "8555c8b8c4d8a53028d47ebb39c50f015889d4b98ac96174d69e2da84d473d33",
-    "_source": {
-      "repo": "nitayneeman/vscode-playwright-snippets",
-      "commit": "acdca57f6a4a3c2c8a12b88690e96d6f23d19f4e"
-    }
-  },
-  "vscode-postgresql-snippets": {
-    "coc-convert.json": "25cc32bb422d8f8fcc4a24d370dc04ebcf11643da922c73daecd5348dba24dff",
-    "package.json": "56823e91daf31738c1020380d6bbc55acd56505d22fc6411c449a7d17d120078",
-    "_source": {
-      "repo": "Manuel7806/postgresql-snippets",
-      "commit": "3e4129db275564b0f494a012f0ea4fca7b920d5a"
-    }
-  },
-  "vscode-uni-cloud-snippets": {
-    "coc-convert.json": "c77ea56b75f4d37bf7b4929e3d3188034e30e13e035569dfcbbd499460843e79",
-    "package.json": "0f40d5bda5a63264c526a8f264ae678c8731a712c83795a39b26235c54e2ddd3",
-    "snippets/javascript.json": "e9cb17054458dcec0900477dce09f18341ad6dc41b7e246082f688a403ff5887",
-    "snippets/vue-html.json": "f165a9e3b7dae37b90a52fbf7e4833374eedb36043598ac532f08432cf2fb5ad",
-    "_source": {
-      "repo": "uni-helper/uni-cloud-snippets-vscode",
-      "commit": "0c0f588e7f6f14e22b1556461ac36b68fb1b7a4d"
-    }
-  },
-  "vscode-uni-ui-snippets": {
-    "coc-convert.json": "8531958e94968c71bca0fc70432e85e6604ca6f3b0a795c6abd2d9618cfcd1c0",
-    "package.json": "9cc20af60e73ce15f1a8d0f18d716627bf4e2344e3e2c6bfca9752532568e102",
-    "snippets/vue-html.json": "a77eab204726db47c53bec2581956f4015bd86d2b8649cf0729c51de0652f8a6",
-    "_source": {
-      "repo": "uni-helper/uni-ui-snippets-vscode",
-      "commit": "82463eba0549354ac37a51d94c85013f0bbee873"
-    }
-  },
-  "vscode-uni-app-snippets": {
-    "coc-convert.json": "f81a09116efddf940b6830e9669167a50a91427b9391667eafa8dcf8c32d673e",
-    "package.json": "1f7030da60cb75fd78a9a2389c83b9ca3919b15025a65c7ea0761f5744ff3354",
-    "snippets/css.json": "d0e6465bc0dc7218b771d4c39920a0a543c9593c517ca2b16b5641d9248c7df9",
-    "snippets/javascript.json": "22549cef52f0f29b37dc4ff0a79decbdf092e059f6a606f438d5e993cfdb3580",
-    "snippets/jsonc.json": "6f3c836e2aa8e8e403309203480552b5830a522d60660b2de01853547ca3e5f4",
-    "snippets/vue-html.json": "cdb060f0fcb87ce8db6a94d0eb1241561026553e85bc25f9caffa97a46a07cce",
-    "_source": {
-      "repo": "uni-helper/uni-app-snippets-vscode",
-      "commit": "31bfcb4d622976e7c5012336e6209ec3283aa5f2"
-    }
-  },
-  "vscode-ue4-snippets-vs": {
-    "coc-convert.json": "6e2c4f4a51fa08b5e27583528663ad9b45c941cd0f362f652f6f28a439e4d3c9",
-    "package.json": "6d6fc09ece9ec47e1195dc41b880992e7fdebf43a10493e147dc572e8e4fcc95",
-    "snippets/snippets.json": "938916a3106d2482df3eb3839deb5c78a9970f3f7874405319f0194a85b37871",
-    "_source": {
-      "repo": "CAPTNCAPS/ue4-snippets-vs",
-      "commit": "17ddf8688f60edc34156aeffab84dc401844cf31"
-    }
-  },
-  "vscode-unity": {
-    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
-    "package.json": "77dd112ac07f498ef6d863cf8a44d30c0b7a36df94ba6c6bd3574749afad6dd0",
-    "snippets/snippets.json": "2229216a578c41164c072ad1192fc4ca617678b04c3ff0bb574005e3befd6cef",
-    "_source": {
-      "repo": "YclepticStudios/vscode-unity-snippets",
-      "commit": "32021f2aa91211ac198c71f01ad5207fbfb766a9"
-    }
-  },
-  "vscode-unity-2": {
-    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
-    "package.json": "d17775eededd813ba85801d5df448e0d951209af971ed020b463050d654bfb59",
-    "snippets/snippets.json": "b9bc9da52472e2f04e11206207a79a8d87afdec872431f0243c80e0b342e3412",
-    "_source": {
-      "repo": "lionize/vscode-unity-snippets",
-      "commit": "837f998f7134e287eff843f40132475c81eb72e8"
-    }
-  },
-  "vscode-unity-code": {
-    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
-    "package.json": "b5a66c94c1fe341c370f5cb2df0e48860c058e4ae528ee24e0a9ec621a721b87",
-    "snippets/snippets.json": "b3043de33f5059a28bb41f81bceacc58864d909cbb0d87ccabeffdc3f32e6788",
-    "_source": {
-      "repo": "cemuka/vscode-unity-code-snippets",
-      "commit": "9e16518be84932976b07f965279ab78b5406d780"
-    }
-  },
-  "vscode-apacheconf": {
-    "coc-convert.json": "e0bbe02ec1a6e5a48d9498e72406d33d360b78495c1d3081cdffb89c672d7bed",
-    "package.json": "c7169689ab6ba1a6123ee6b29c0546e644d43c38c6b92c384c682324cba8d93d",
-    "snippets/apacheconf.json": "f341f97c273cd97a325d8a4107c2aca3a0dd015a14c5931d89c97d0df7ad58bc",
-    "_source": {
-      "repo": "hrdtbs/vscode-apacheconf-snippets",
-      "commit": "5472944d8151404cbd0ab9748b3a140166c55c01"
-    }
-  },
-  "vscode-classic-asp": {
-    "coc-convert.json": "104d8a803cbfa960761e2506903924405672879a9460e1c68815576395147f58",
-    "package.json": "c50904c0b59668a7ceda3a4ac20aedf13af31b883dc99a883f0b9d597505c77c",
-    "snippets/asp.json": "e107d1ded69890914f9274fdf0bc4ed5626cdad32c2f234ecbf5ef060469d5ce",
-    "_source": {
-      "repo": "jtjoo/vscode-classic-asp-extension",
-      "commit": "68ed4f6716ed69278832a8cefeb902d5b74665b1"
-    }
-  },
-  "vscode-ejs-snippets": {
-    "coc-convert.json": "43850e7c3b5a9abadce3ef3d78b246b2cedab6a802e58b692861d804ba1a1270",
-    "package.json": "6c8359136a4a9f6f035a8229e28b6c3803028e0072a2300f4fbbd12332e24ffe",
-    "snippets/snippets.json": "518f1967f719cdf9cf1a5d043aee908cb9dda5786bd5534cc962a7cee34ebf2b",
-    "_source": {
-      "repo": "theranbrig/ejs-snippets",
-      "commit": "09551911613eb93aaec8495cf7817716ea09f373"
-    }
-  },
-  "vscode-emoji-snippets": {
-    "coc-convert.json": "fc5af2cc49218171d700b885d3a0405afde6e2158ab879a6403d25e339a8e849",
-    "package.json": "6b2fc4cc32b2a202f93dac40cfc04fcd7963630c9c9fcb55d50e9100cd6958c3",
-    "snippets/snippets.json": "39004852ce1ac71614f4ec29744a7a8c86139eb627e834227706612776477a67",
-    "_source": {
-      "repo": "Devzstudio/Vscode-Emoji-Snippets",
-      "commit": "6f861b9a298f87f09ed43d4240556cae1ff87ed0"
-    }
-  },
-  "vscode-eslint-disable": {
-    "coc-convert.json": "4c1491cdafeb581924dd63e1ef855032c383607c5b2681b93c3e36a920849616",
-    "package.json": "7c16f92bd81642934ed446fbed729174e69fda10a8132fd34013585233d139f8",
-    "snippets/snippets.json": "9a929e0a2f8dc580b3d67366bcef8273506410adde4144ada3ddba2406dd4956",
-    "_source": {
-      "repo": "drKnoxy/eslint-disable-snippets",
-      "commit": "6fe121af0bd11259e80cc3afe5cf8700f4b02628"
-    }
-  },
-  "vscode-font-awesome-codes-html": {
-    "coc-convert.json": "48069a978a308bd6e3ad238a186026e00c088f963b3865eaea8f0b0c4fb0c0bd",
-    "package.json": "1d9f350b2ac5db1f68619704258a88a43a93f6896a5272928aae16a6c08c750d",
-    "snippets/snippets.json": "8ca410f59e028071cf275f0fe5dc3f1667d5eb0334eebaa5e02beb0dba42d5d8",
-    "_source": {
-      "repo": "dslpp056193/font-awesome-codes-html",
-      "commit": "1552f0f3ca5f1d3dd808b92745e4212ea4f103f7"
-    }
-  },
-  "vscode-ionic": {
-    "coc-convert.json": "307f4f06e29b937dd59404bc44a9718c819b47f459be26395f119dcfb92c11d6",
-    "package.json": "9e1deee7bfa18bbd507e25781dae9c70fab14d85b04095bfb00e7d2d607abcda",
-    "snippets/angular/html-utils.json": "1d00eb2454ae17445e5df8f7a2e0563a5f85790ab68b2dbf7d2331aa359d420d",
-    "snippets/angular/html.json": "9210bd5f422f658d74f15828a66f991a8e622c4ff6acb39f1d15e79d6583601e",
-    "snippets/angular/typescript.json": "3662574e95dedf7164f55bafb606adf18da01deebceaed91157dad7a00cd742f",
-    "snippets/react/html-tsx.json": "a8f85a1645221f6d3f6598a37db1ef0e5c26c5c47a1d9d08085ee3befa47eeb2",
-    "snippets/scss.json": "57c51e61cbbe3202c7cfbf4149c32a4b469c538d5f4d62717edd691cd4231257",
-    "snippets/stencil/html-tsx.json": "f09bbf1d1da10bb0379e5158d504bf4174ddccebd9be1031509c3beec54147e9",
-    "snippets/vue/html.json": "4409ee6002a2b1d18694a05cc6667be07a91696f0d295737abc17f1eb7ffcf98",
-    "_source": {
-      "repo": "fivethree-team/vscode-ionic-snippets",
-      "commit": "a7f519d68805488e112d2accf0d13f522147915b"
-    }
-  },
-  "vscode-jquery-snippets": {
-    "coc-convert.json": "330f665ab12c445f28a98ced40ef1096bdb83a1e9aed057e4a4fd8857ece2f51",
-    "package.json": "170e5f7bf828429b9a204a347ea38ec81ff6da6cce73c9e3258a456b2853e3e4",
-    "snippets/javascript.json": "91c2760eb82d4d4f9901c053bf357430fc6fa46efeb2a6f35b896b741cdb27f0",
-    "_source": {
-      "repo": "DonJayamanne/jquerysnippets",
-      "commit": "f1c2f7e27f292e581a95038c7af1a0c67c28db03"
-    }
-  },
-  "vscode-liquid": {
-    "coc-convert.json": "9aca7a7dc74b3b0f2c7a36e5e5f91f63c289a752cd60b2df6abe2a42ee9d6227",
-    "package.json": "e9d9c5ca46d853cde254df30c81347ec62ae97b037faf47a2d03bbdfa63310eb",
-    "snippets/liquid.json": "fefe4041225a9c2ee6271d76b05620553bd824d03460d9bd502a27baf28754ec",
-    "_source": {
-      "repo": "killalau/vscode-liquid-snippets",
-      "commit": "3b7b77c836fd3524e1330b2c375713d898993ed6"
-    }
-  },
-  "vscode-rxjs-snippets": {
-    "coc-convert.json": "33bb8c6b3862bdc43c1a7a21cb523d11468c3b367acf982eb5b5a10ad16e3c9b",
-    "package.json": "0f3ad005c7521fa3a66c404e7686b2588135056b78bda89ba02e6c0c2656b82e",
-    "src/javascript.json": "f33ed0b246aaf0661dcce430e2103da20c239b9e4f3e284113f8cab26f0a792c",
-    "_source": {
-      "repo": "prashantkoshta/rxjs-snippets-vscode",
-      "commit": "87918045d12f6b0620f1b87ded51d27d428afbf6"
-    }
-  },
-  "vscode-vsc_html5_boilerplate": {
-    "coc-convert.json": "066dc7683a74d618a9603afd82b4447d1c63ae794105802981c4738857c21ef6",
-    "package.json": "246fabe6adbf41169c375a7dde00db20f483aa1b19c661ab933fdf094770b6a5",
-    "snippets/html.json": "cecefbffbf17a3d56ca933e45ad7d6e62612a6efa097e2b12b07519c370b9a54",
-    "_source": {
-      "repo": "sidthesloth92/vsc_html5_boilerplate",
-      "commit": "a7eeb66f1525226e7c7a6419c6f9b507b0441aa3"
+      "commit": "3bf24306be2ad639fa6bbe4a45dee546534f3a58"
     }
   }
 }
