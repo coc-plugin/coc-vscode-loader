@@ -128,3 +128,14 @@ On next `:CocRestart`, the plugin will fetch the registry and install any missin
 npm install
 npm run build    # esbuild → lib/index.js
 ```
+
+## Test
+
+Integration tests use [coc-test](https://github.com/neoclide/coc-test), which
+starts Vim/Neovim with coc.nvim and the activated extension:
+
+```bash
+npm test              # Neovim (default)
+npm run test:vim      # Vim
+npm run test:watch    # watch mode
+```
