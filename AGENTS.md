@@ -26,6 +26,9 @@ npm run test:smoke          # tsx scripts/smoke-test.ts (needs coc-vscode-regist
 # Plugin (plugin/)
 npm run build               # bundle-converter + esbuild → lib/index.js
 npm install                 # triggers prepare script = full build
+npm test                    # coc-test integration tests (needs vim/nvim + Node >=22.14; runs esbuild first)
+npm run test:vim            # same suite on Vim
+npm run test:watch          # coc-test watch mode
 
 # Smoke test overrides
 NO_CACHE=1 npm run test:smoke        # re-clone all repos (default: cached)
@@ -47,11 +50,13 @@ VERBOSE=1 npm run test:smoke         # detailed output
 
 `registry-check.yml` runs 2x daily (00:00/12:00 Beijing), detects upstream changes, creates PRs on output delta.
 
+`plugin-test.yml` runs the coc-test integration suite on ubuntu-24.04 × Node 22, matrix nvim/vim.
+
 CI runs `npm ci` in `converter/` (not root). Registry cloned fresh as sibling `coc-vscode-registry/`.
 
 ## Registry
 
-`coc-vscode-registry/` must exist as sibling directory. **Registry edits go in [separate repo](https://github.com/coc-plugin/coc-vscode-registry)** — not here. Entry naming: `vscode-<short-name>`.
+`coc-vscode-registry/` must exist as sibling directory. **Registry edits go in [separate repo](https://github.com/coc-plugin/coc-vscode-registry)** — not here. Entry naming: `vscode-<short-name>`. File layout: `registry.json` (entries) + `presets.json` (bridge presets) — these paths are hardcoded in `converter/scripts/smoke-test.ts`, `converter/scripts/diff-check.ts`, and `.github/scripts/*`.
 
 `converter/baseline.json` stores SHA-256 hashes. After changing converter code or registry entries, run `npm run diff:baseline` and commit. Use `npm run diff:check -- --verbose` for per-file detail on changes.
 
@@ -70,8 +75,9 @@ For `kind: "module"` servers needing compilation, prefer `prebuilt` (`type: "vsi
 ## Gotchas
 
 - **No eslint/prettier/tsc** — style enforced only by `.editorconfig` (2-space indent, single quotes, no semicolons, LF). No typecheck step.
-- **Bridge TS version hazard** — TS 7+ removed `ts.server.protocol`. Bridge plugins (like Volar) cap dependency to `<7.0.0` via runtime detection.
-- **Plugin `prepare` script** — `npm install` in `plugin/` auto-runs `bundle-converter + esbuild`. Installing deps = full build. Plugin esbuild.mjs supports `--watch` flag.
+- **coc-test needs recent Node** — plugin integration tests require Node >=22.14 (coc-test engines + rolldown bindings), even though the repo otherwise targets Node >=18. First run downloads the coc.nvim source from GitHub; on slow networks use `--coc-path` with a pre-downloaded checkout.
+- **Bridge TS version hazard** — TS 7+ removed `ts.server.protocol`. Bridge plugins (like Volar) cap dependency to `<7.0.0` via runtime detection. Same range (`>=5.0.0 <7.0.0`) is used to compile local module servers.
+- **Plugin `prepare` script** — `npm install` in `plugin/` auto-runs `bundle-converter + esbuild`. Installing deps = full build. Plugin esbuild.mjs supports `--watch` flag. `plugin/converter/` and `plugin/lib/` are gitignored build artifacts (created by bundle-converter/esbuild) — never commit them.
 - **Code injection system** — steps inject imports/code via `codeInjections` into previously generated files.
 - **Smoke test cache** — `~/.cache/coc-converter-smoke/` (git fetch, TTL 7 days).
 - **Switch script** (`switch.sh local|npm`) — modifies `~/.config/coc/extensions/package.json`. Run `:CocRestart` after switching.

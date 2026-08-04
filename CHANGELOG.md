@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.6.8] - 2026-08-04
+
+### Added
+- **Plugin integration tests with coc-test** — `plugin/` now has a test suite via [coc-test](https://github.com/neoclide/coc-test), which boots a real Vim/Neovim with coc.nvim and the activated extension. Covers extension activation, `loader.*` command registration, editor communication, and `StateManager` logic. New `test` / `test:nvim` / `test:vim` / `test:watch` scripts in `plugin/`, plus `test:plugin` / `test:all` at the root and a dedicated `plugin-test.yml` CI job running on both editors.
+- **Root `test:plugin` / `test:all` scripts** — Run plugin tests from the monorepo root.
+
+### Fixed
+- **Local module servers compiled with wrong TypeScript** — Generated `esbuild.mjs` prebuild ran `npx tsc` against the stub `tsc` package because `typescript` was never installed, producing no `out/` and failing server startup. Now installs `typescript@">=5.0.0 <7.0.0"` before compiling (same range as the bridge step); TS 7 removed the legacy API surface (`ScriptKind`, `ScriptTarget`, `ts.server.protocol`) that servers import at runtime. Affects css-ls, html-ls, eslint, css-peek.
+- **Platform-specific binary path resolution** — Binary servers using `targetAssets` may have platform-specific binary names (e.g. lemminx on darwin-arm64), but the generated fallback baked in the static top-level `binaryPath`, so spawn failed with `ENOENT` on other platforms. The `language-client` step now emits a `{{serverBinary}}` placeholder that the loader pipeline resolves to the platform-matched binary name after download.
+
+### Changed
+- **converter**: bump to v1.6.8
+- **plugin**: bump to v1.6.8
+- **Registry**: refreshed baselines for multiple extensions (volar, ansible, html, astro, ng-language-service, tinymist, docker, ruff, rust-analyzer, css-ls, es7-react-snippets, vscode-api-tests); `baseline.json` entries re-sorted alphabetically
+
 ## [1.6.7] - 2026-07-21
 
 ### Added
