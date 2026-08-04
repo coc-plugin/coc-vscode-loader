@@ -528,6 +528,15 @@ if (existsSync(join(serverDir, 'tsconfig.json'))) {
     console.log('[build] Installing @types/node for server...')
     execSync('npm install --save-dev @types/node --legacy-peer-deps', { cwd: serverDir, stdio: 'inherit', shell: true })
   }
+  // Ensure the TypeScript compiler is available — npx tsc would otherwise
+  // resolve to the stub 'tsc' package and silently skip compilation.
+  // Cap to <7.0.0 (same range as the bridge step): TS 7 removed the legacy
+  // API surface (ScriptKind, ScriptTarget, ts.server.protocol, ...) that
+  // servers import at runtime. The converter's own TS 7 must NOT be used here.
+  if (!existsSync(join(serverDir, 'node_modules', 'typescript'))) {
+    console.log('[build] Installing typescript for server...')
+    execSync('npm install --save-dev typescript@">=5.0.0 <7.0.0" --legacy-peer-deps', { cwd: serverDir, stdio: 'inherit', shell: true })
+  }
   // Patch tsconfig to be self-contained — handle monorepo extends
   const tsconfigPath = join(serverDir, 'tsconfig.json')
   try {

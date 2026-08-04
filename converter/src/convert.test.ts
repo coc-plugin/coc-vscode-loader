@@ -290,6 +290,26 @@ describe('convert main flow', () => {
     expect(esbuild).toContain("entryPoints: ['src/index.ts']")
   })
 
+  it('generates server compile step that ensures typescript is installed', async () => {
+    writeInput('package.json', JSON.stringify({ name: 'ls-ext' }))
+    writeInput('src/extension.ts', `import * as vscode from 'vscode'\nexport function activate() {}`)
+    const { convert } = await import('./convert.js')
+    await convert({
+      input: tmpdir,
+      output: outdir,
+      convert: [
+        {
+          type: 'language-client',
+          server: { kind: 'module', package: '../server/out/node/cssServerMain' },
+          languages: ['css'],
+        },
+      ],
+    })
+    const esbuild = fs.readFileSync(path.join(outdir, 'esbuild.mjs'), 'utf-8')
+    expect(esbuild).toContain("Installing typescript for server")
+    expect(esbuild).toContain('typescript@">=5.0.0 <7.0.0"')
+  })
+
   it('converts css-modules-style direct-api extension with completion and definition providers', async () => {
     writeInput('package.json', JSON.stringify({
       name: 'vscode-css-modules',
