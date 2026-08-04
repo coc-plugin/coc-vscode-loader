@@ -937,10 +937,10 @@
   },
   "vscode-es7-react-snippets": {
     "coc-convert.json": "c7962edc5b58c89d5465340a13265d8342135651113ccd15a1bb28721870318b",
-    "package.json": "36cd771f7b18c216aced4309860a28f5da1d933268ff6bc9317797c316c12961",
+    "package.json": "8d3b152e3a9b18023178c271f4c90c4ec3b39830bed130ae3d6204916d68cce8",
     "_source": {
       "repo": "r5n-labs/vscode-react-javascript-snippets",
-      "commit": "9406ac00dac82f430f9d12c3fe26a82ead99ec00"
+      "commit": "07f8c60079172f56b81df328e6a1f651063304ec"
     }
   },
   "vscode-full-react": {
