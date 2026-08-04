@@ -20,7 +20,7 @@
   "vscode-rust-analyzer": {
     "esbuild.mjs": "594c6d1aec168f22f3f6aa4c4b4cbe4a5042cd3f36d5621fab224e6b0bc1dd38",
     "package.json": "b224ac6d4a0585b7a1d234cdcb95266ace7c02890c05f2c29bf133efd3a6a1d9",
-    "src/bootstrap.ts": "8e75aebfe5a7c6e240667bca5ddd367e53b5a8619a5842b5576c613a200aa246",
+    "src/bootstrap.ts": "bbfc9499fb0fca4b32ec8e937bd1df608ec54776e0d5f6239dc9d50389aa4a32",
     "src/client.ts": "a76cbde14ea858e16e943d8bf30de2b5700b9204da6d6beffaaf4cc6cf8b850e",
     "src/commands.ts": "53e830b301e8a0072a7e76872643e96176672950c29168d6d9a68c503b0cdd2f",
     "src/config.ts": "d5bf7e109c1c4c5e760254bb601c19aaddc8e1badd240437b3497d9dae54cec2",
@@ -43,7 +43,7 @@
     "src/util.ts": "7fca35b9b00275b3e4e3c5406815445a4305c826c53270d4be65fd7374ebc3d9",
     "_source": {
       "repo": "rust-lang/rust-analyzer",
-      "commit": "1174734d9c6453d13d2b5e3d578512c579ca37f1"
+      "commit": "5f258f4534e3b4bdaa45a1299b53a66cf014d803"
     }
   },
   "vscode-clangd": {
