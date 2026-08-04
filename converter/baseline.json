@@ -56,12 +56,12 @@
     }
   },
   "vscode-ruff": {
-    "esbuild.mjs": "9860acd4fab8a7987734b75acd0c248c56be25fa0a4f8586f7f60c9877580c5a",
-    "package.json": "b1016bb49a1369d1af337b5b1610e39a9df907104c35bde4d6b5fd728a7f25ce",
+    "esbuild.mjs": "3a13177d7b42885968b4a6a8d0322d398fce1301a6e4ec7a2435cee550b6ac9c",
+    "package.json": "b2c578d58be439cd8fef4b3220820ec07830e936f38e0b3eac1f3bc479b72a07",
     "src/index.ts": "31d017025438c9d02668028d211b403720a02bffc2b84d855390745ea8528eec",
     "_source": {
       "repo": "astral-sh/ruff-vscode",
-      "commit": "ab977c00b4a2494f16be3ea6afabe280d2eb039e"
+      "commit": "db907c78c6e8e35e938443b478d7d2081296c01b"
     }
   },
   "vscode-volar": {
