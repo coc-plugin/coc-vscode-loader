@@ -371,7 +371,7 @@
     "src/extension.ts": "87d14a29ffd74e3dff759845e9fe135f9af46416105a32acab4ec681c4ff944e",
     "src/index.ts": "f37f0fb513756bbf87be6e63283fa6bdd6ade2435b1ae2dc96a670a5f6af1f04",
     "src/lsp-commands.ts": "2205a762ea5f65c3877b70f6565091088b7280551ed0087e84fb844bd11d862b",
-    "src/markdownPreviewProvider.ts": "866465975848c3c6a4aa6e33c8b22423a35e87652b7a06db7a2ddaaecedf5288",
+    "src/markdownPreviewProvider.ts": "650d19a44cc941b1efc833d2650c2363b90312d4fc82d37b552f733d90abf9eb",
     "src/plugin.ts": "64bd580f692d7f1f7788c2ca93106de12e4159ece174115334277389f1b3f81e",
     "src/server/binary/binaryHashManager.ts": "d440fd925e5c3579d76d3e8474f0db211df5863ec26d077429a772ace05e6d48",
     "src/server/binary/binaryServerStarter.ts": "fa177cf4adee0b3df334d0d98656cfa4c61a6d25edb8fe755d1b49e086755687",
@@ -388,7 +388,7 @@
     "src/utils/fileUtils.ts": "d30f2c091f64ed72cb6a0b8c016ad1b330d0440e9b24daeacb5811f2bb211531",
     "_source": {
       "repo": "redhat-developer/vscode-xml",
-      "commit": "ac784ed123b2ae0ec42b23f190c1d4402094d3dd"
+      "commit": "4e2f94eb99e1401c9c27ba84f9f2f1bc8dfc583e"
     }
   },
   "vscode-bash-language-server": {
