@@ -461,7 +461,7 @@
   },
   "vscode-stylelint": {
     "esbuild.mjs": "ecaa1282c160892bf2393f3b1f76b934e138930350c529fd6983fe0ba3033cee",
-    "package.json": "776bc4a7a4e5ad8471fc343b81df206cecf8e8b0c7e2b5b783c4cc92aaf53cb7",
+    "package.json": "280ed6f59285ba487101f2936d12cecfd4453c02ed77f186ca5b39d94f2f9619",
     "src/extension/__tests__/extension.test.ts": "835078287c76d01c70a485baf7c992ff1f0c6b29190a2a2b8f25c43226085deb",
     "src/extension/di-tokens.ts": "e8a156d6d50e932af5c73d74e7ec991db17e452d91bb6e79438aeb3a84764c79",
     "src/extension/extension-runtime.service.ts": "443ed485ce502cfc999fb935f2827ba7f8cf8797b9730bfb760770a5af68ca53",
@@ -481,7 +481,7 @@
     "src/index.ts": "9c990939a7e26b4fcf1b0b33f82935ccdbcf660fcfffe0a7af8e9eebbd5a41a1",
     "_source": {
       "repo": "stylelint/vscode-stylelint",
-      "commit": "1223943bd48848569bc48135fb64dcfa14b17b5b"
+      "commit": "9e91f16577803bde9ba366b342115575db466f32"
     }
   },
   "vscode-ansible": {
