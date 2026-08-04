@@ -402,7 +402,7 @@
   },
   "vscode-taplo": {
     "esbuild.mjs": "633b5cebe1a7bab6f20a147a60f39e39f5ac81fe440702e4f08e1f85641e1586",
-    "package.json": "f3b46d12b5a2dc6002f900d98f6e867de9f4322e227ec57cbf63eb4abc4a53af",
+    "package.json": "aeadb1373b1117df96c9312d7e1592f8cf503267bae3c5b549c7a5bd9ec999d5",
     "src/client.ts": "b8cc17d5c43bd9f517130801c256efb267307ddea6b8cbde29847ddd6effe508",
     "src/commands/conversion.ts": "9ef6f4ecbda60322d3b5256953eb513bc09bb04f0b3494e266a8c0cab9c5e4b2",
     "src/commands/index.ts": "73674d49476808b9e559f36dd244cee816779f4d29c1649632593273c9ade660",
@@ -428,7 +428,7 @@
     "src/util.ts": "3e17bebf68c6346412ae3f988a8e64a0c598a1a67b23c28d1383ef8c33d03649",
     "_source": {
       "repo": "tamasfe/taplo",
-      "commit": "b673b44df2773db8673a00df2e7654b769f7fde7"
+      "commit": "08f343be02ce1b20296470396a42f0fa47820449"
     }
   },
   "vscode-css-peek": {
