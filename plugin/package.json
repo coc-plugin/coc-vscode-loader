@@ -31,7 +31,11 @@
   "scripts": {
     "bundle-converter": "if [ -d ../converter ]; then rm -rf converter && cp -r ../converter ./converter && cd converter && npm install --legacy-peer-deps 2>/dev/null; fi",
     "build": "npm run bundle-converter && node esbuild.mjs",
-    "prepare": "npm run bundle-converter && node esbuild.mjs"
+    "prepare": "npm run bundle-converter && node esbuild.mjs",
+    "test": "node esbuild.mjs && coc-test 'test/**/*.test.ts'",
+    "test:nvim": "node esbuild.mjs && coc-test --nvim 'test/**/*.test.ts'",
+    "test:vim": "node esbuild.mjs && coc-test --vim 'test/**/*.test.ts'",
+    "test:watch": "node esbuild.mjs && coc-test --watch 'test/**/*.test.ts'"
   },
   "dependencies": {
     "commander": "^15.0.0",
@@ -39,6 +43,7 @@
     "typescript": "^7.0.2"
   },
   "devDependencies": {
+    "coc-test": "^0.1.1",
     "coc.nvim": "^0.0.83-next.18",
     "esbuild": "^0.28.1"
   },

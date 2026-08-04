@@ -1,0 +1,36 @@
+name: plugin-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  integration:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        editor: [nvim, vim]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: plugin/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: plugin
+
+      - name: Install Vim and Neovim
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y vim neovim
+
+      - name: Run coc-test integration tests
+        run: npm run test:${{ matrix.editor }}
+        working-directory: plugin
