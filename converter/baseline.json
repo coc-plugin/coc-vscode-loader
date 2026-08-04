@@ -2,54 +2,16 @@
   "vscode-gleam": {
     "esbuild.mjs": "091538f6b932a4c081324a2b30584ea77ca0fd1ec84eeadc537bfa0d62d36466",
     "package.json": "1a3a4271948ddb6d4f95981f41f8a04872b148dc72bd40178f020e25e7108a2f",
-    "src/index.ts": "00ce855e7ed1f384bef27eaa68cd60307593ce0b44ed75ab25534f6ab71541c2",
+    "src/index.ts": "3c87b5231ceeb0ae6a03aade8168f6c481de353269b45195c95f86184786b853",
     "_source": {
       "repo": "gleam-lang/vscode-gleam",
-      "commit": "1aa610135f1b3f3835109b3ccf0985a12445fba1"
-    }
-  },
-  "vscode-pyright": {
-    "esbuild.mjs": "3315fb7bdeae449c43dd37893169507dfb127a16e085741cc33bfd4d8a6838e7",
-    "package.json": "c3ca30438144fca3a83162bcf0a276f78302c6dafa2e53567e83b8aa2a94399d",
-    "src/index.ts": "21f17bca573f292f7e4eddaf2cc23791e5131d03d4b190ae343c62d807fa7549",
-    "_source": {
-      "repo": "microsoft/pyright",
-      "commit": "93ea6468a40c7c8cdab5643f66411da5e0414742"
-    }
-  },
-  "vscode-rust-analyzer": {
-    "esbuild.mjs": "594c6d1aec168f22f3f6aa4c4b4cbe4a5042cd3f36d5621fab224e6b0bc1dd38",
-    "package.json": "b224ac6d4a0585b7a1d234cdcb95266ace7c02890c05f2c29bf133efd3a6a1d9",
-    "src/bootstrap.ts": "8e75aebfe5a7c6e240667bca5ddd367e53b5a8619a5842b5576c613a200aa246",
-    "src/client.ts": "a76cbde14ea858e16e943d8bf30de2b5700b9204da6d6beffaaf4cc6cf8b850e",
-    "src/commands.ts": "53e830b301e8a0072a7e76872643e96176672950c29168d6d9a68c503b0cdd2f",
-    "src/config.ts": "d5bf7e109c1c4c5e760254bb601c19aaddc8e1badd240437b3497d9dae54cec2",
-    "src/ctx.ts": "4893fea042a1fff2580eed7b0b85e98307bf4ee181526f8d4df4fd7af5b4c832",
-    "src/debug.ts": "7865bd0c840a9b62e471dabcf957f5ab6ccf038113b5dc757f16343e05b59230",
-    "src/dependencies_provider.ts": "85f7294e829afa9d3f2d37c1ba5e855f31963839755ba7f234444ac231e40b0f",
-    "src/diagnostics.ts": "2b47871571ee7c53ae7adc5df9d99c404fd7d82ea7a842afa624db0422d4e4af",
-    "src/index.ts": "ac759fd4255a23b36b4b2c445d3c3185790a9903b44a70247e22078353403389",
-    "src/lang_client.ts": "32fa239829d8c4b75cd6bb7a99c0a037adb589300dbc95c9badd45a0e564455b",
-    "src/lsp_ext.ts": "76378393048ddfa3035b8089ad2d29d1f6de47963476fb97ba635feea8c0fb00",
-    "src/main.ts": "e7150c556d8b7ab270a942434e96b972a77145ad4b8ffa96b9e0e502a61fcacf",
-    "src/new_project.ts": "9a43240e55aa2e17f7e262f59047d682839be6288099cd52e38af921f7b1a4a6",
-    "src/persistent_state.ts": "ce29440e8a62950a8f18c0834c1ddf395c0e7e0e5bc13f639afbb67380788089",
-    "src/run.ts": "a54ca120478090d2a7b9f9c95dc7bb4309bd400401322247bdc039b2b7408803",
-    "src/snippets.ts": "95a75f66e06c54abbd36c1eeb4f33c0ba175e30564077ebd954c5ca7049666b8",
-    "src/syntax_tree_provider.ts": "86929aad0bc71f64edeabb0212f1eb90149ad793366c457a5e82d6140b75bb5d",
-    "src/tasks.ts": "7feb735a8df794b41d68d3d06966e068c7e65f191b8b8fdbcc51ec7f8cf1c51a",
-    "src/test_explorer.ts": "ec1f50d582b382608a87fbed9bcc8b663e2aa4819b0e2e17a858a418d97cd2bf",
-    "src/toolchain.ts": "5a02e2c2502f7002e665f0513642c0de5e2323d866b072f2889ca7c7d4a7db4c",
-    "src/util.ts": "7fca35b9b00275b3e4e3c5406815445a4305c826c53270d4be65fd7374ebc3d9",
-    "_source": {
-      "repo": "rust-lang/rust-analyzer",
-      "commit": "1174734d9c6453d13d2b5e3d578512c579ca37f1"
+      "commit": "369b35c02c6fcdafbd199654fe0380951e6dc0ce"
     }
   },
   "vscode-clangd": {
     "esbuild.mjs": "f26c1389529f37b0ca1d3e2bbfa049c260baf4fa2dffcf01af2683eeb1dce396",
     "package.json": "af22095eb2c98903cf59377589707d51d418bd391e570f9d89f6e16f46ae0684",
-    "src/index.ts": "8d9be2c97cff5d4f24937deee8229c3029aa692af58697e5134e047695cb6022",
+    "src/index.ts": "4a6849dff08737c81dd8183b6821c8ecd2185aeeba2606b9ef11b354fc7b234b",
     "_source": {
       "repo": "clangd/vscode-clangd",
       "commit": "662d348663dc5bbe645a6c1e5fb91ecd4fe96490"
@@ -58,24 +20,40 @@
   "vscode-ruff": {
     "esbuild.mjs": "3a13177d7b42885968b4a6a8d0322d398fce1301a6e4ec7a2435cee550b6ac9c",
     "package.json": "b2c578d58be439cd8fef4b3220820ec07830e936f38e0b3eac1f3bc479b72a07",
-    "src/index.ts": "31d017025438c9d02668028d211b403720a02bffc2b84d855390745ea8528eec",
+    "src/index.ts": "f74d13153a7ff1d6dec532a0d434343198be020aa175f07e18266fa45edfcf5b",
     "_source": {
       "repo": "astral-sh/ruff-vscode",
       "commit": "db907c78c6e8e35e938443b478d7d2081296c01b"
     }
   },
-  "vscode-volar": {
-    "esbuild.mjs": "1b39e12f550648d7f674f7e9af5f71d32e3de4ed1e2089320e8c554ae7200398",
-    "package.json": "d9308046f5d95cc05cd919d250c7db24fa9acab9b1f93b973d34fa1f16d45c8d",
-    "src/bridge.ts": "efaf15df49c70728f96ef8f907926ba274bf85514029233cabbb461b6e80de59",
-    "src/generated-meta.ts": "4410c97f23d7e0087330e89d3b9350c24f1b4fb5f168511aa1c44179d95d61c1",
-    "src/index.ts": "c95523037d01d65857283e34543f1fd12f3a9ff28bcc125abc41671e48d0cae1",
-    "src/rangeFormatting.ts": "ddfea084b75ca87c75d53ddb04159ad2727fd9416f25bcb55fe457244234533b",
-    "src/reactivityAnalysisPlugin.ts": "291dcdff967bfe9fe60434ab95d07c74cfea1d2d8494240cba8ef5941dba6335",
-    "src/welcome.ts": "81ed97734fd1206b02b606c6d2435f7965c66d8c9b4740f31b9566cc39fbb9e7",
+  "vscode-eslint": {
+    "esbuild.mjs": "618f1d9b3b123a9c50884838459136d1f0ae1a3416567760e3c8152590810a48",
+    "package.json": "f336b597b05dda91a833f7266da255b5c9b7036509bb2cd3697ad17d4d33a9f7",
+    "src/index.ts": "8cf0e1fc0b9d3666e730bb0df33c7b1734f8039d28aa9ea06b866c73feca4e2e",
     "_source": {
-      "repo": "vuejs/language-tools",
-      "commit": "8e78c5dc3017a9bae511123d49ec92d5719668f5"
+      "repo": "microsoft/vscode-eslint",
+      "commit": "138995dbe18d01627ab99c8fc1770373db2e1cb1"
+    }
+  },
+  "vscode-biome": {
+    "esbuild.mjs": "1ce6343ae783b009fb0349fb4d14c10e972f71383d8adc6538a0817f708c9a52",
+    "package.json": "bb3fdd08ace163933ae59475701273dd9308b72c3547a97f2ff1a86cac1e26d1",
+    "src/biome.ts": "270734b08e227eb843d3a2619c01067f69568fc2a96ac33f32f40be5ead7df0e",
+    "src/constants.ts": "f9ea5211c862b155f44277c8733b321b5dc2a7224db25840fe5e4880134274dd",
+    "src/extension.ts": "1f6c9a18e2a2de3e5129f65a3b95eb58605c9fd0d80e628b9a47fcbf44ec5dbc",
+    "src/gritql/index.ts": "a8276fa7b91e5e7e5c6e6db9b1ff61b2e4b262527a2a21d66ccccd65dd86f1aa",
+    "src/gritql/node_to_token.ts": "76b77c2dcb42acc7d08685b1b6ddcb7548282965ac62c5a486441f5bac5b00d5",
+    "src/index.ts": "ffdbcff1d6286cdc4ff31925c5c21d07bdf52aab04d0cc4cf29278878e8f9bc5",
+    "src/locator.ts": "fd74e5fc4ab8620c737b544cc41348bfbb74f8e97205b056241fb9b68e4062e5",
+    "src/logger.ts": "f2390c2d09576fb13a82e19d97a5ed241990f10a30c20d2df7b28c203f7cab14",
+    "src/main.ts": "8ca0b3a9a0a99fe7a086cabd349456e8c57de1a0a5cb44bf09105e2be0ec59d2",
+    "src/session.ts": "e2f384a8401d2869c0535fdf6b8ba02f988e7e2ed349dd376f0908347ca143fe",
+    "src/status-bar.ts": "c5ee11237579f99548fc41eef9339dc1eaa74919b8c77ff231586e567f0f74ee",
+    "src/types.ts": "849b578c0626fe14e456c24816bbdade87b60a672ebfed48d28bb936f8bb3a0a",
+    "src/utils.ts": "d097c336e31f3596baea4024eb8a9b8f06e8da3104e43c8630b9193d2e4c585a",
+    "_source": {
+      "repo": "biomejs/biome-vscode",
+      "commit": "969aff1be13eba2754bad97e15299f6866412310"
     }
   },
   "vscode-deno": {
@@ -103,32 +81,11 @@
     "src/client/src/upgrade.ts": "c063ab80311eb6ac72862c11e927622605723fa2ddd83f657ed464c0a29a4366",
     "src/client/src/util.ts": "8897e976d31e929379d99851ec6189f2247ceed63090e13014f11f88184870ff",
     "src/client/src/welcome.ts": "126a0cbdb62f11f077a656466e896620cdab5d3d53376af3d47c35aec5d97019",
-    "src/index.ts": "6ba7aaa1a4e23c23004ceee98d71ad40bb514354f366d9929993a09f1a74871b",
+    "src/index.ts": "90089f407299dd1fbf6c00173fd732854d4d9dfd8aca630273618ae40a89324f",
     "src/typescript-deno-plugin/src/index.ts": "30dfe7a576ea22b3f4af4143f87771e9a0785cacbfcecb4a872997a5140b172c",
     "_source": {
       "repo": "denoland/vscode_deno",
       "commit": "84ce77afa2968f3e22a2c18e6f25fb6db749a370"
-    }
-  },
-  "vscode-biome": {
-    "esbuild.mjs": "1ce6343ae783b009fb0349fb4d14c10e972f71383d8adc6538a0817f708c9a52",
-    "package.json": "bb3fdd08ace163933ae59475701273dd9308b72c3547a97f2ff1a86cac1e26d1",
-    "src/biome.ts": "270734b08e227eb843d3a2619c01067f69568fc2a96ac33f32f40be5ead7df0e",
-    "src/constants.ts": "f9ea5211c862b155f44277c8733b321b5dc2a7224db25840fe5e4880134274dd",
-    "src/extension.ts": "1f6c9a18e2a2de3e5129f65a3b95eb58605c9fd0d80e628b9a47fcbf44ec5dbc",
-    "src/gritql/index.ts": "a8276fa7b91e5e7e5c6e6db9b1ff61b2e4b262527a2a21d66ccccd65dd86f1aa",
-    "src/gritql/node_to_token.ts": "76b77c2dcb42acc7d08685b1b6ddcb7548282965ac62c5a486441f5bac5b00d5",
-    "src/index.ts": "689da4e7df7ad6551c86944574d7a22e8d818daf78b7d591d1f3edb13107c6e9",
-    "src/locator.ts": "fd74e5fc4ab8620c737b544cc41348bfbb74f8e97205b056241fb9b68e4062e5",
-    "src/logger.ts": "f2390c2d09576fb13a82e19d97a5ed241990f10a30c20d2df7b28c203f7cab14",
-    "src/main.ts": "8ca0b3a9a0a99fe7a086cabd349456e8c57de1a0a5cb44bf09105e2be0ec59d2",
-    "src/session.ts": "e2f384a8401d2869c0535fdf6b8ba02f988e7e2ed349dd376f0908347ca143fe",
-    "src/status-bar.ts": "c5ee11237579f99548fc41eef9339dc1eaa74919b8c77ff231586e567f0f74ee",
-    "src/types.ts": "849b578c0626fe14e456c24816bbdade87b60a672ebfed48d28bb936f8bb3a0a",
-    "src/utils.ts": "d097c336e31f3596baea4024eb8a9b8f06e8da3104e43c8630b9193d2e4c585a",
-    "_source": {
-      "repo": "biomejs/biome-vscode",
-      "commit": "969aff1be13eba2754bad97e15299f6866412310"
     }
   },
   "vscode-ember": {
@@ -149,13 +106,42 @@
       "commit": "f034b2290793951e0548c8a4d6c938867ace5264"
     }
   },
-  "vscode-eslint": {
-    "esbuild.mjs": "618f1d9b3b123a9c50884838459136d1f0ae1a3416567760e3c8152590810a48",
-    "package.json": "f336b597b05dda91a833f7266da255b5c9b7036509bb2cd3697ad17d4d33a9f7",
-    "src/index.ts": "8cf0e1fc0b9d3666e730bb0df33c7b1734f8039d28aa9ea06b866c73feca4e2e",
+  "vscode-pyright": {
+    "esbuild.mjs": "3315fb7bdeae449c43dd37893169507dfb127a16e085741cc33bfd4d8a6838e7",
+    "package.json": "c3ca30438144fca3a83162bcf0a276f78302c6dafa2e53567e83b8aa2a94399d",
+    "src/index.ts": "21f17bca573f292f7e4eddaf2cc23791e5131d03d4b190ae343c62d807fa7549",
     "_source": {
-      "repo": "microsoft/vscode-eslint",
-      "commit": "22853d89978f3a3715dafbe6a668b5bbf854f3ef"
+      "repo": "microsoft/pyright",
+      "commit": "de94b525d69e6b9554f39947d6c1eaefab5c41ab"
+    }
+  },
+  "vscode-rust-analyzer": {
+    "esbuild.mjs": "594c6d1aec168f22f3f6aa4c4b4cbe4a5042cd3f36d5621fab224e6b0bc1dd38",
+    "package.json": "b224ac6d4a0585b7a1d234cdcb95266ace7c02890c05f2c29bf133efd3a6a1d9",
+    "src/bootstrap.ts": "bbfc9499fb0fca4b32ec8e937bd1df608ec54776e0d5f6239dc9d50389aa4a32",
+    "src/client.ts": "a76cbde14ea858e16e943d8bf30de2b5700b9204da6d6beffaaf4cc6cf8b850e",
+    "src/commands.ts": "53e830b301e8a0072a7e76872643e96176672950c29168d6d9a68c503b0cdd2f",
+    "src/config.ts": "d5bf7e109c1c4c5e760254bb601c19aaddc8e1badd240437b3497d9dae54cec2",
+    "src/ctx.ts": "4893fea042a1fff2580eed7b0b85e98307bf4ee181526f8d4df4fd7af5b4c832",
+    "src/debug.ts": "7865bd0c840a9b62e471dabcf957f5ab6ccf038113b5dc757f16343e05b59230",
+    "src/dependencies_provider.ts": "85f7294e829afa9d3f2d37c1ba5e855f31963839755ba7f234444ac231e40b0f",
+    "src/diagnostics.ts": "2b47871571ee7c53ae7adc5df9d99c404fd7d82ea7a842afa624db0422d4e4af",
+    "src/index.ts": "15c875e3c2d6710b184e58f1417b2c9d793d9a189de17c80126c33a302c9e029",
+    "src/lang_client.ts": "32fa239829d8c4b75cd6bb7a99c0a037adb589300dbc95c9badd45a0e564455b",
+    "src/lsp_ext.ts": "76378393048ddfa3035b8089ad2d29d1f6de47963476fb97ba635feea8c0fb00",
+    "src/main.ts": "e7150c556d8b7ab270a942434e96b972a77145ad4b8ffa96b9e0e502a61fcacf",
+    "src/new_project.ts": "9a43240e55aa2e17f7e262f59047d682839be6288099cd52e38af921f7b1a4a6",
+    "src/persistent_state.ts": "ce29440e8a62950a8f18c0834c1ddf395c0e7e0e5bc13f639afbb67380788089",
+    "src/run.ts": "a54ca120478090d2a7b9f9c95dc7bb4309bd400401322247bdc039b2b7408803",
+    "src/snippets.ts": "95a75f66e06c54abbd36c1eeb4f33c0ba175e30564077ebd954c5ca7049666b8",
+    "src/syntax_tree_provider.ts": "86929aad0bc71f64edeabb0212f1eb90149ad793366c457a5e82d6140b75bb5d",
+    "src/tasks.ts": "7feb735a8df794b41d68d3d06966e068c7e65f191b8b8fdbcc51ec7f8cf1c51a",
+    "src/test_explorer.ts": "ec1f50d582b382608a87fbed9bcc8b663e2aa4819b0e2e17a858a418d97cd2bf",
+    "src/toolchain.ts": "5a02e2c2502f7002e665f0513642c0de5e2323d866b072f2889ca7c7d4a7db4c",
+    "src/util.ts": "7fca35b9b00275b3e4e3c5406815445a4305c826c53270d4be65fd7374ebc3d9",
+    "_source": {
+      "repo": "rust-lang/rust-analyzer",
+      "commit": "5f258f4534e3b4bdaa45a1299b53a66cf014d803"
     }
   },
   "vscode-intelephense": {
@@ -170,39 +156,104 @@
       "commit": "8935a6dba162b36ea22137baa14934544ea7cd43"
     }
   },
-  "vscode-svelte": {
-    "esbuild.mjs": "9daa6ba8505b7d00f4a798d937b3fc539d653e4eaeca33c19dd994b98fd73e26",
-    "package.json": "6c44b4d36a70904be50a9e00fad4c8fff8b5a940167cb64010405a01f6f4cf78",
-    "src/CompiledCodeContentProvider.ts": "bdc034c7ec0c1383a6936c46f5eb36626b108002e690330578061ceb87c7f536",
-    "src/extension.ts": "70fa0b660cbde1d4f7e084735158cfddf5bf6466c8a9b0c373f666ec0218cd69",
-    "src/html/autoClose.ts": "05ef3ba58862da49708cabc4a8b9c04c08a789ad82cc1f21fdd7c54802ef5d3c",
-    "src/html/htmlEmptyTagsShared.ts": "f96130b4963e68097656e182932e825d870e6e6e0da173c9e78e21207e2f0dce",
-    "src/index.ts": "a17d2afe4c4a99b2f59ff4758a5248761db4dd744684fc74089be73942743158",
-    "src/sveltekit/generateFiles/commands.ts": "d82ad34ca39cca12a3f265e0524c64fd2fb295f4fb292c15472dafdcd4065875",
-    "src/sveltekit/generateFiles/generate.ts": "f4b5266f967d08578dc9379145ec580453e308f9566b2a4812ce3ae32114ffa7",
-    "src/sveltekit/generateFiles/index.ts": "affc66c70a49243841555546e557d3e2245e30983910c0e3c6f7a9abb7063d0a",
-    "src/sveltekit/generateFiles/resources.ts": "8227e4f70f566dd58639810a54f694e46e6628c0ba806168114f563d71472faa",
-    "src/sveltekit/generateFiles/templates/error.ts": "9305367c8b93a762ef3d180b4235fea3696af6170c8e8c1d5f45dfa80d32c9d4",
-    "src/sveltekit/generateFiles/templates/layout-load.ts": "dd2f68e89401b9a4763b4aa8b74214dc18855d29a351141ff21fe001bc5b691b",
-    "src/sveltekit/generateFiles/templates/layout-server.ts": "fa5ee01a399db5f39b4f5a9e5485084e370ea6e2804d64a9b6a8280954a9c7c8",
-    "src/sveltekit/generateFiles/templates/layout.ts": "6ca8bf68488f84b24777f5857850390e51b49e807418a01aa58de258e6fbe054",
-    "src/sveltekit/generateFiles/templates/page-load.ts": "5113d253c751fe6738682f787582b2179a40fec816d56cc14df04ec07a6fcf74",
-    "src/sveltekit/generateFiles/templates/page-server.ts": "6e405aff365997a22da9ee12b094a344fb1ca76001719945d3dd64a26b919d76",
-    "src/sveltekit/generateFiles/templates/page.ts": "62bb1c0fe3f6f85f10a9a035a8eca0d19966d9dd2287780488d1ec7096f272cb",
-    "src/sveltekit/generateFiles/templates/server.ts": "dc371547935dc6dd091f6a3f17ec84fbcd25e83dbba22f86d8ae5b4b65f8957e",
-    "src/sveltekit/generateFiles/types.ts": "ae9b751e4259142f7c92f608ccc9680503456608516fa814e3f5c533543a200f",
-    "src/sveltekit/index.ts": "ae1ed85467f85944632c271a78e621f0e8f48f71157f57c025b0b077d4ecc251",
-    "src/sveltekit/utils.ts": "d1e6c3bbdd9d34a28af89c8f739e1254df5cdaf80b0c7821f694d57863217898",
-    "src/tsplugin.ts": "7390c91a9fd20bbc3dbf97279198f51fd27df3a5383a8a07fe1526c425dfb420",
-    "src/typescript/codeLensMiddleware.ts": "a006b0f5eef43e46ec618fa7efff35c02ce411ecab579180449b9fd53938baf1",
-    "src/typescript/configurationMiddleware.ts": "5fcd14e819a5083cda7bc109de397c46fe51c03f2aa8d196fe7f90a48f291f35",
-    "src/typescript/findComponentReferences.ts": "3c2589c3219656337ba75770e8526ac2ca10211c8c59db9187389c49a3cdf965",
-    "src/typescript/findFileReferences.ts": "49ab95d7ba76f21c87e8b30a77fe4474b337443f93099218482519a4b34b93fb",
-    "src/utils.ts": "da6f0c1762e82891da1dbff5bc599a1b23202b0752bbdda101fc5db9548ba251",
-    "src/version.ts": "63477116394a4dfcfa67edc6df81814d00bd4e6c5cd0baffdf807eecf0fe53ac",
+  "vscode-volar": {
+    "esbuild.mjs": "1b39e12f550648d7f674f7e9af5f71d32e3de4ed1e2089320e8c554ae7200398",
+    "package.json": "d9308046f5d95cc05cd919d250c7db24fa9acab9b1f93b973d34fa1f16d45c8d",
+    "src/bridge.ts": "efaf15df49c70728f96ef8f907926ba274bf85514029233cabbb461b6e80de59",
+    "src/generated-meta.ts": "4410c97f23d7e0087330e89d3b9350c24f1b4fb5f168511aa1c44179d95d61c1",
+    "src/index.ts": "c95523037d01d65857283e34543f1fd12f3a9ff28bcc125abc41671e48d0cae1",
+    "src/rangeFormatting.ts": "ddfea084b75ca87c75d53ddb04159ad2727fd9416f25bcb55fe457244234533b",
+    "src/reactivityAnalysisPlugin.ts": "291dcdff967bfe9fe60434ab95d07c74cfea1d2d8494240cba8ef5941dba6335",
+    "src/welcome.ts": "81ed97734fd1206b02b606c6d2435f7965c66d8c9b4740f31b9566cc39fbb9e7",
     "_source": {
-      "repo": "sveltejs/language-tools",
-      "commit": "84d54a142ebf1f29d24a7e64237310f57aa07312"
+      "repo": "vuejs/language-tools",
+      "commit": "8e78c5dc3017a9bae511123d49ec92d5719668f5"
+    }
+  },
+  "vscode-ng-language-service": {
+    "esbuild.mjs": "7c02396fc33bafbd7dfb585f5b512513ed3b01f0c076d4b46ddff97d4c5d1611",
+    "package.json": "8ce0ca300fdf837b02976ba5952e0cc60598ee0d6992b2f914fcb24a84f2ee8c",
+    "src/client/src/client.ts": "8eff801c98e1f859c5db2b6374be62d1c8859589e95eb5e7235363b38ce00fa4",
+    "src/client/src/commands.ts": "fe94454b8186e94548e67f7ff690324a301cbadfdc040770c7cb47c8ba3f35a3",
+    "src/client/src/config_change.ts": "f028cd1e2244499a92131c58c17955b4254bdf959b52f305132b3e578c528630",
+    "src/client/src/embedded_support.ts": "4238499ecce37b069a0d55a85a12cdd6f675cb8f0c85419af97a15cd75624c87",
+    "src/client/src/extension.ts": "80aa2a7aaef4060a29d8d6adfc3cd32c1b997b276ee0bcbdfc662ebdc72f2229",
+    "src/client/src/providers.ts": "54eff18eb49d846a6f1517d605adfafaf70ceedddfd33ea60d25ed84d5ebf68d",
+    "src/client/src/tests/embedded_support_spec.ts": "99e9cb8d0920536ab3e039a68074d8e32273236e69d0f5073a24ede60312b1ad",
+    "src/client/src/tests/extension_spec.ts": "8a44377b8d32e327c1b0560445773dc0e82c3d717b8879eb7ef6f01786cd23af",
+    "src/common/initialize.ts": "bd8f0b043c80e2f14a30e8846c9be275d27ca5eb8644f00b22691388f3b6e3ae",
+    "src/common/notifications.ts": "d24a35f5be4087d8b56ffedf774ff103a758305d490e229b0e6d1ab9fa5c72a7",
+    "src/common/requests.ts": "20d766c3d788b248c7261e5d9677063f98dadfd84fa00a9a2f706e39ec2154de",
+    "src/common/resolver.ts": "d3f85549bea25ed46bffedb182d155393c11357b2c085965cac9cbcf838e0151",
+    "src/common/tests/resolver_spec.ts": "5ad8dec291e297f31331346d74893ed63e3fe7ba2b7bc683b6771f7500b6fcab",
+    "src/index.ts": "52847501aa5f6b5d2441059b02218129abf4c780454350eed0f475e09a3e54a2",
+    "src/integration/e2e/completion_spec.ts": "f6b19d4b3481925f2a3dd46758035cd144f8c5f55e319e2fd2eaf78afb384cc1",
+    "src/integration/e2e/definition_spec.ts": "0fc2ffa95170bc6997648b26fe5586d0820624b2da87ca52cc5c0ef440d6e037",
+    "src/integration/e2e/helper.ts": "c037042541ec20a8f005d423121ee67f32a9e8e5631eff9299f6d6dab9e645ce",
+    "src/integration/e2e/hover_spec.ts": "0b751b9226dd9360aef537c51a6063b14c9cd922650dbb20f038bd9871677a4b",
+    "src/integration/e2e/index.ts": "03180e9e1ed592a31aa173dbc0a5cbb1a51c44c673117e01f3373949b0e0b8ce",
+    "src/integration/e2e/jasmine.ts": "411402f2107ea7693777e2a00db67395f0542ae133d15349757ce163ba291500",
+    "src/integration/lsp/ivy_spec.ts": "5b3822407a2eabb240ef42ace2a916346e7ddff45991222aed766c2293df503d",
+    "src/integration/lsp/test_utils.ts": "3218b3af3f85403d5275e2c5821ecc3d94f5e090d5d951c2668e51231d5e88f1",
+    "src/integration/project/app/app.component.ts": "1842d09fe4bb33dbbd219b11d0388311b7c8664e68523adadd6f99837641d438",
+    "src/integration/project/app/app.module.ts": "fd77f6e7040b8d68f5244102ed7251bfbbae1030710acfe9f2392e411115b804",
+    "src/integration/project/app/bar.component.ts": "fa830672dcb40322bf6834f9199a7233607663e5e16e9e3523d54ceaa96c9ee3",
+    "src/integration/project/app/foo.component.ts": "d2220a95bb5c1dd48076db657673b7bdd7dd2119d4b601b63c99ef38fe5fb060",
+    "src/integration/project/app/highlight.directive.ts": "5119c34c0b2408d37677e7e28da9be88018568533944bb8632bd9da7b075ab6e",
+    "src/integration/project/libs/post/src/index.ts": "9552dc9b7591d3555a2dfd6ec0f1380c642b259588665804dfd5768a46d402bd",
+    "src/integration/project/libs/post/src/lib/post.component.ts": "ab84f5ef8a37bc51f2c2e7edad86a9d2d2a7e875e424591190ea99b816fc15b5",
+    "src/integration/test_constants.ts": "1ea2ce2727ec8ed9a33a21fd0a522179a45c5796c36d044740d4969d85271d20",
+    "src/server/src/banner.ts": "e1d7b056a8bb2d25b42ac43bd1f5bc43a13e65837c22bccdbb8563293e312689",
+    "src/server/src/cmdline_utils.ts": "ddaf38f1c94d7070b0e2de04cb4cf58e43b95e6b7639be001a79319bb992bd3a",
+    "src/server/src/config.ts": "944306a4d62b839768bc04ea9fa50eeab2b29f454dc3b7a55aa04d14a6a391cc",
+    "src/server/src/diagnostic.ts": "ba261eb12658f3bc738d486e92b3414e63b3907befb66e11789097136926add5",
+    "src/server/src/embedded_support.ts": "586a9edb1ed6ff01b39340bb9452be7dbac28e58f5c44b5ddc08b4f3cbaaaa45",
+    "src/server/src/handlers/code_actions.ts": "e839131a9160a32a1313e2828b3cd361527979bff33146e4b2fa891a5c8a2c0f",
+    "src/server/src/handlers/code_lens.ts": "c93a5ebad2691c7c679d8b7ca00d92128d939af8214c5f816cf107d40283ca58",
+    "src/server/src/handlers/completions.ts": "32680d4e13f899e4d94780d6c36541704fa3ba684be45a7f67b870292cbbfb2c",
+    "src/server/src/handlers/definitions.ts": "bc416c8bc9e7bf733a941f520d0d2ab79e8cb599afc5a2bbdc36f1aa7ccda5e1",
+    "src/server/src/handlers/did_change_watched_files.ts": "f99bef3b5e4155d59be0450025ed7461529e34bbef3e581ca32de2e35733c216",
+    "src/server/src/handlers/document_symbols.ts": "8e241fd0f27ae6d33458c80de2fa2b57794972a61fba1857c0b0ae31a007c72d",
+    "src/server/src/handlers/folding.ts": "aeaf04986bc73d0cc4a4fa708cf584e3d6d45d02c1a763a8d9502fb564851679",
+    "src/server/src/handlers/hover.ts": "f76564a0a4580c9623cca13e09545b5dbe026b102326ec932c85074e8d02ef68",
+    "src/server/src/handlers/initialization.ts": "8d585e660b8018ed44c5600525e96fd36d11c9664002e88c7af0b097dedd29d5",
+    "src/server/src/handlers/inlay_hints.ts": "2bdc4f21130dd0054a1945e8ea96c6a47816c48e743d1e4c385cd8871e745270",
+    "src/server/src/handlers/linked_editing_range.ts": "2e26badb1e40a156d884a0620cb08817ffad78cdd1318fec88b4b818daf53dfe",
+    "src/server/src/handlers/rename.ts": "48d7ef572320085a4e86986a3eb440aaed9b543de767ca15dcd558870087346f",
+    "src/server/src/handlers/signature.ts": "9652373c559d9bc353afb6843ed7cb21bba9dd11b7cbb3d99545b4b2f86348c2",
+    "src/server/src/handlers/tcb.ts": "8749403799f61e80640f5ccb05300eed4846fdc3b70342d238605eb78960d0f5",
+    "src/server/src/handlers/template_info.ts": "3459a3ce0f97eb5123f9a9a1c50c86e0b051db38b87f9670c05518ed8f756d11",
+    "src/server/src/logger.ts": "1b2cdab13456b2bd6f9cec7db61a562aecb632b46d561baaabc3b0258168fa4c",
+    "src/server/src/server.ts": "8147d35b0e1265898f69c3f0b8c0d084e6c99b032b9effe947de06211c325ef2",
+    "src/server/src/server_host.ts": "5860cf77d9533321798c26960464e6d73f4740de75e74d0222c18ec4f8b118d9",
+    "src/server/src/session.ts": "97687cd40147ddad3018dc688ec16971d921da671b67a3a14e21a34c2f5f2ca1",
+    "src/server/src/tests/cmdline_utils_spec.ts": "54c0db6582350e2cf873353db57cc2685579c09df78760cf189edcd94e7f007c",
+    "src/server/src/tests/config_spec.ts": "d8bdabf5fba59d1f234d7ca647d6e2b51012572d2dbaff8c1e359fb6becc6416",
+    "src/server/src/tests/embedded_support_spec.ts": "2d3725eef9c50ac0514b605bb82228915c713fea52b9e75db5d5f6c67a959f21",
+    "src/server/src/tests/text_render_spec.ts": "3f4143b06e6c570928e307d388d4642046ddbe84d993251ae9c7de8f389dae5f",
+    "src/server/src/tests/utils_spec.ts": "602887485e05315e6ee94fc9a56a53dbbfd7a0b4fd45116e31ccf0d7952b8813",
+    "src/server/src/tests/version_provider_spec.ts": "bfe1c4420544e82ba338f74f1b89ebbc4e1df80ec04d90b97714cdfd24e7ebb7",
+    "src/server/src/text_render.ts": "905fe8b6faa5c781f71eec804cfe55f60d97932cbdbbd6eb7a41e354c950426f",
+    "src/server/src/utils.ts": "7c3a5ec08590fb3c27dc61005d72b04e7c3e97d9986498cd0164671e554b87ad",
+    "src/server/src/version_provider.ts": "6fbc9a87011ae8e95d0bd55d6c5262a63292eae54ae93ca65a4bcbcaa9a1dc3a",
+    "src/syntaxes/src/build.ts": "cfae8d1f8d9c455c0d96218dec151e73d4220b93b9846b365f9d128073b3fb70",
+    "src/syntaxes/src/expression.ts": "5928e4228ebd8899318ed32af09a3f23dbdcf79a5ff3ac2c27457e473fccf382",
+    "src/syntaxes/src/host-object-literal.ts": "41dfa592e04bc4decbcbe264fc9fdbcdcda9e80cec5d49b4e8d0cb336b2d3208",
+    "src/syntaxes/src/inline-styles.ts": "e9608361a4d3c02eb35889da4092e5a23d251a8b3fe8541a1c79f1b14739daf0",
+    "src/syntaxes/src/inline-template.ts": "68991255544331c7d0c322bc4434f7fbc7d090a0a6c1e0ae02c7b9b51ff02ea7",
+    "src/syntaxes/src/template-blocks.ts": "1d5bae44b09a91ed216521eae397e1cb51c511f176303de58450243e65ec2cd4",
+    "src/syntaxes/src/template-let-declaration.ts": "538b5d037d7dc97e3e312d17ff56620bcbb5019d1f4da366f1bf70a685fc331c",
+    "src/syntaxes/src/template-tag.ts": "df2936f6511902dd9c71cfda9a1a605a8941a7eb8f6fe2616b8d1190024b7961",
+    "src/syntaxes/src/template.ts": "a06ffba6862b597a83984ff5348e247a5d791bc7e15aba08dcd4542a3d4b0199",
+    "src/syntaxes/src/types.ts": "6c2c27d57941585e29c31025bcdd5e4c8f2de5f7dace7fd0d7ddd543a666d8ea",
+    "src/syntaxes/test/cases.ts": "2239746854c16d9975e632dd6cd4bc095bd7d95562bd6f793f8fd8f6f6623bf3",
+    "src/syntaxes/test/data/host-object-literal.ts": "5750c9ba4df9652eeac24521b4fc1c94b3897c855e971b3a02959389148a982b",
+    "src/syntaxes/test/data/inline-styles.ts": "dd12814af4655b3934ff1d318226e490c517b23d4edcc21ed96b18891a4f3e72",
+    "src/syntaxes/test/data/inline-template.ts": "2e67bdd46f3d2ad2437a0408939f3486e9f987b18b46869502506fdaf690641a",
+    "src/syntaxes/test/driver.ts": "4133559698fefcaf5fb2535160be3fc3d430b7b7a9b2f6e774780dd4b8e16989",
+    "_source": {
+      "repo": "angular/angular",
+      "commit": "337053ef1ab6400c3641984511b45c341d306e87"
     }
   },
   "vscode-language-viml": {
@@ -212,122 +263,6 @@
     "_source": {
       "repo": "XadillaX/vscode-language-viml",
       "commit": "f31f4ede6e1586c4b4ee946228a704f9f1f320d7"
-    }
-  },
-  "vscode-tailwindcss": {
-    "esbuild.mjs": "445f707c0df9f1b5c77f675eed7ddd7004a9f9d8033a8d52cc14b87700b95bc2",
-    "package.json": "2091e646da198c0f807fdf4ac28ba1bf1ef467913d3362b82c6707213f06ded6",
-    "src/analyze.ts": "60932b2b89c87e8238865f6ec047551ee0ddfd9df65ddedc90fd576749e5c939",
-    "src/api.ts": "006dae0259c1047a055be49652dfa3c01276d37fcd8833f4519c2dc412e87f7d",
-    "src/cssServer.ts": "c8710c0278db0425ad10d1a2fc7efcaeedb14624b2336c8e162da84c667016e6",
-    "src/exclusions.ts": "24cfdab3f5594c3d238e139689949540a6a6388b22639bf5c79efb9de6d7bd30",
-    "src/extension.ts": "b0adedf243a3e92a1cffc99c796095cb999d89fff6c673693a73d77ed45c9b52",
-    "src/index.ts": "01759e31064b84a7f86fab269f79b62dc3d2af69b4730da6ff77fb4983fd5213",
-    "src/oxide-helper.ts": "0748a32387dd5e29d95631e958d7aea0261a9fd5c5080f5fabfd20fb45e184cb",
-    "src/server.ts": "165964bd5d246c072d58c607986175868094a3433553899de71163c032697059",
-    "src/servers/css.ts": "dc7e01d4e8e86ebc55a5efc0682bd4f23ebe5877e27d411e5dca83df23392c13",
-    "src/servers/index.ts": "b58a418ac4a7fd10d6d055bf3e10388071424140105228cffdc37a61fe5b76cf",
-    "_source": {
-      "repo": "tailwindlabs/tailwindcss-intellisense",
-      "commit": "5067ff7ec0b4b8bb5c3325a69c1f3410eb5b350a"
-    }
-  },
-  "vscode-lua": {
-    "esbuild.mjs": "4699bb544128e6798fead66f88972e526ebb14691a58a90cc2ad86287c3cd0d0",
-    "package.json": "a19d75ba986912f1c77e2c46362f9b2047ad590319032a5063781020285c2f91",
-    "src/addon_manager/commands/disable.ts": "f9a25b2f69e9bf8c3f5134f6c607aa1c5e58b3bea53403e22500a06550e4b0ae",
-    "src/addon_manager/commands/enable.ts": "7502431b1d7b8a6938267bd57b66b96a8839dea245bb0556eb8d21a2b79f6797",
-    "src/addon_manager/commands/getAddons.ts": "df59f3d8fccf9b3098a9c8e5c17d8cb4b7b5afcb2245aafa5581e954575d21f6",
-    "src/addon_manager/commands/index.ts": "d7180e683666a2b25b867a2c633feb504cdeaf8cebfb3f1c5b83fb173a1fbe1b",
-    "src/addon_manager/commands/open.ts": "13d06366ade4cdeb1d63023c30c4fe26b5bf6ef5f725505dd2b21c5c800d2e47",
-    "src/addon_manager/commands/openLog.ts": "afa6615b7f4485940a2afd8f9780ee8f42384920a6f7fd284516db1c3a87b639",
-    "src/addon_manager/commands/refreshAddons.ts": "20e9a0e6d636c251ba698cb2af06b8e70fddc7429a785a11234b7e4274c7b17f",
-    "src/addon_manager/commands/setVersion.ts": "bf4dc8bdfbf87d117ff0409ff5ae00370983d65e1337f52430ddd3ce6b0b0efb",
-    "src/addon_manager/commands/uninstall.ts": "66787febe905b1c33e9a4e87d057f9975059dd92b65f2d12f43108a63f145c43",
-    "src/addon_manager/commands/update.ts": "228c9acd62e73192e13982ea2caabe21aebc4dfab7044a61e36be341ed523ba0",
-    "src/addon_manager/config.ts": "52f1673bd291357be500d6580dbed0e71f26244344e0d812fc2862f0f800d511",
-    "src/addon_manager/models/addon.ts": "f4df48c0aca838f63b59be27daf25161d346d262fa61b63120b42a9f5dbb92ed",
-    "src/addon_manager/panels/WebVue.ts": "3759266c33a807968d08347a075d2288871f73782a167749acb05f4403568414",
-    "src/addon_manager/registration.ts": "5bcf581e868400edd87bfa46d2a458eab4f985d8a24176e9a25e903e940c91f9",
-    "src/addon_manager/services/addonManager.service.ts": "923aecfcd97b25196565e13f39b6f21cc37b49184e453c6b5a30368b88154721",
-    "src/addon_manager/services/filesystem.service.ts": "e9b7af0e6e8ade539ec33eef9b1cc557fa699d3c8277ba71d9045c31793a4c4d",
-    "src/addon_manager/services/git.service.ts": "a9d0db184d6912c8a26c731c71613ec4daf2448270761b068e2198a4f9fcf9bf",
-    "src/addon_manager/services/logging/vsCodeLogFileTransport.ts": "0ef9e3a78a52896b1e388b72ec166f8de85a100124ef939cd0ef2ac34deca48f",
-    "src/addon_manager/services/logging/vsCodeOutputTransport.ts": "2ffcbfa1374c6427ea5b23538dca6fdf04cb3603ec71b7014dbdd506a1d185e4",
-    "src/addon_manager/services/logging.service.ts": "91de28cd3c925ad90a73cc921d660b7353832084966fe6207504ae2272cbe271",
-    "src/addon_manager/services/settings.service.ts": "dedb22b3fe607da008e4d895f999f457e27930ec467def75ffbe7326ad22849f",
-    "src/addon_manager/services/string.service.ts": "f4dd1c37d708afccaa08cb78bc08b467ea66a53dc4ac10dfad8e56e4865c2974",
-    "src/addon_manager/types/addon.d.ts": "e2dc72803bbaac1f486e91ac1d6ea6f4b35121bd8f3098363e966b0876044a09",
-    "src/addon_manager/types/webvue.ts": "24148cd416384dc50f65a7eca0dbf455cd7be31fa0589ba2f90423d126cc757c",
-    "src/extension.ts": "e2c6c32c0d2c7f8667cc92e25b6642a42afbcc8d91571f2590d0b41be3b30a2b",
-    "src/index.ts": "5f22f9c7b27182388fafc2195f33985c464b99bd11b97e9204bd57ec76368214",
-    "src/languageserver.ts": "be436c696c87b704f2bec8f766ec8af7ddb94b7479c1010d3651633651be225a",
-    "src/psi/psiViewer.ts": "a2fb12d633494a5691d346028e8ccc78a8c34d042e6c805c968d73e2dbd67ea5",
-    "src/vscode.proposed/editorHoverVerbosityLevel.d.ts": "d8f4989bded779c8e75fac0d54527634c44ad41f0647476f9100ee5faf57d5c0",
-    "_source": {
-      "repo": "sumneko/vscode-lua",
-      "commit": "d9042c543e50ca6e9cc3ac1f9d703c25d37f7ffe"
-    }
-  },
-  "vscode-prisma": {
-    "esbuild.mjs": "6be05034e374bf67ca100c59d92289a7cdd16e1513ee2b0271589167b9003d26",
-    "package.json": "3ba4dd6305e85eb8d377d34b875d33392067bbda629e0d64de50e1f4c59e7da7",
-    "src/CodeLensProvider.ts": "68b98245ff699dbc9ed62ca02c398602e0ec9c902f8146ad2afbcf6d45a9e163",
-    "src/__test__/helper.ts": "61d82466969475462e83c2b14a8e3c04925106f1f62a7b0d865965d7637fc78f",
-    "src/__test__/index.ts": "eaa1e12939dc8d3a9cc56bbe25f00e4928bca136927795a95a91a6129d0abcc2",
-    "src/__test__/language-server/completion.test.ts": "a1243aee29e3c3de201f4dd35fc4063f904a6f458fa111e69bd1c478d8dc4a00",
-    "src/__test__/language-server/format.test.ts": "c14dc3d7c31c0a0d6d2e28b5fb4d3c61717864ce0f21beb30ff9f88797bfce31",
-    "src/__test__/language-server/hover.test.ts": "a7e95b1a74de2be4359d6bb7f4305fb092190345ce3a82d77a87efd1ba081117",
-    "src/__test__/language-server/jumpToDefinition.test.ts": "75aa4f918bd4f000bd7a5ca72b774459fb4ec4cfb532942b1a1a88a83b3d079d",
-    "src/__test__/language-server/linting.test.ts": "91f6897a8b46cdbb9ca19b5460b12c9c0167a2e6325ba4a90de3ea0204325ce4",
-    "src/__test__/language-server/prisma6Handling.test.ts": "cd82b99bdcb7c747a30734cdf09500d466af724e85fa5cdf46bc065770440b6b",
-    "src/__test__/language-server/prismaNext.test.ts": "9329f149d45c6b884ddca1227354f8095e23405823e21770419cda92c2381764",
-    "src/__test__/runTest.ts": "c6f493da3621b7e3bdf3d8716deeddbb96952e56f65b5e806080c1f271a33b0d",
-    "src/denyListColorThemes.ts": "117a15311b74a354a7ff2abe72365e7c1b96f0b64c1db7f15c5dc740df656872",
-    "src/extension.ts": "8b074d5946ddabb6f296171498d3fcd6d5ad139abae82b66735c993e838fb37a",
-    "src/getPackageJSON.ts": "f658cc416776c4589ec9c4cff2e27234202f03c681e42d74335b409a215ca830",
-    "src/hashes.ts": "43beec11fd1eec15d45b6ff80113ee16871fdf9b9e1f90631dddd16b0651f7ea",
-    "src/index.ts": "4691104090317863ffb5c958f68ddf1248377ee41df724f2f5dcd3e76ca7af8d",
-    "src/manual-test-client-raw-sql-highlight.ts": "530ffb4fc7048378bd03744834cdae8fa2c561c255f8845b9266c084ae9f9706",
-    "src/plugins/ai-tools/index.ts": "4daabe93cc2ebdb9538d30d0da648049536994a7acc298de43deaad7cbbc451c",
-    "src/plugins/index.ts": "fd8d329ac7c79392da4e2f5741c2c796fd60a6f129c67eb6365c3c70a8db4056",
-    "src/plugins/prisma-language-server/index.ts": "fb36b88f688d443bc13ae6a9e39909713b7c7fb9bee8513f40243c900c6032bd",
-    "src/plugins/prisma-postgres-manager/ConnectionStringStorage.ts": "5137b97158e565785411e7be167f42c333af85d973c57f8f687fe3cb2cff67ff",
-    "src/plugins/prisma-postgres-manager/PrismaDevRepository.ts": "3224c9c53042e09f5bda5e83def88cc5a1bce806e44587f303fbf23262ff90ff",
-    "src/plugins/prisma-postgres-manager/PrismaDevTreeDataProvider.ts": "023593d9dfb0674764470f6b03c72a2836ea1d0c0aff9c56ecbac4bcc3532cac",
-    "src/plugins/prisma-postgres-manager/PrismaPostgresRepository.ts": "b029432639da8e0a8d63fbaa21a0d986f36b45e3b1f005a1d2524d993a0ccf8c",
-    "src/plugins/prisma-postgres-manager/PrismaPostgresTreeDataProvider.ts": "be4e691042a1c3f22de058ca3e79e259b6a5fe41a2fa761a4f1a8e6e199fac92",
-    "src/plugins/prisma-postgres-manager/WorkspaceTokenStorage.ts": "090f7ef4a8e11cbdda014b91e6f9c7cf8e0cb456e8c454a8afc334bd197911b3",
-    "src/plugins/prisma-postgres-manager/ai-tools/PDPAuthLoginTool.ts": "3a2c79da5e86211356f69a5d045198a981a8bf1a974ee57721f1de10452f8799",
-    "src/plugins/prisma-postgres-manager/ai-tools/PDPCreatePPGTool.ts": "8cd526b6e0290a83dcd48bd33f0ab9bf2a9a00ba67df6f280241f8b362fc6d06",
-    "src/plugins/prisma-postgres-manager/commands/createProjectInclDatabase.ts": "5a9e1251b06364477e4a281a1766d2668d691df3c4bc9f27e838ce29581af162",
-    "src/plugins/prisma-postgres-manager/commands/createRemoteDatabase.ts": "271c1f7c3fcd049d1660caf5f78bcb504c08b190bd368668fc1244c6c9e54b74",
-    "src/plugins/prisma-postgres-manager/commands/deleteProject.ts": "416a79fd8dd4bace0e73628aa00042b220a794a6c71f8733567896b24b61160a",
-    "src/plugins/prisma-postgres-manager/commands/deleteRemoteDatabase.ts": "a7163909fd070c3550885cc06163c43398af5401b10542db369d69b30b14d5a5",
-    "src/plugins/prisma-postgres-manager/commands/deployPrismaDevInstance.ts": "56d7f87cea7016f2f812001101be0c19d17c8227507342c1c10ac2c6e8ddfc9d",
-    "src/plugins/prisma-postgres-manager/commands/getRemoteDatabaseConnectionString.ts": "6d45c5f03ec9d8257e954b467d09a814f063f9e9d68a8997e9c97165085aaa30",
-    "src/plugins/prisma-postgres-manager/commands/launchStudio.ts": "57c0df26ff8a32c501cb7dc4d112cf13c6c0f25b612ad0c8592fdedaca58c820",
-    "src/plugins/prisma-postgres-manager/commands/login.ts": "c5e1c42163813d821bc558acf34bea0936a4ca7f24ae758f2e3040576299c1dc",
-    "src/plugins/prisma-postgres-manager/commands/logout.ts": "a3efd7097a60931c69f48cbbd1dfa9f2c2e607a397fab804e60e14b29c88f0b6",
-    "src/plugins/prisma-postgres-manager/index.ts": "2051e661442ec90d11c6d9efc1041171ed91e0593bda4ea608f4f22136c863d5",
-    "src/plugins/prisma-postgres-manager/shared-ui/connectionStringMessage.ts": "7f4894c457b02789fffdf1e97285e81d7ec1a062feb0f2684ed476550f4f3107",
-    "src/plugins/prisma-postgres-manager/shared-ui/handleCommandError.ts": "06ccc047dc70382257ca5400f13b24487afd88ef06004b1c8c6c1ed3f7f49349",
-    "src/plugins/prisma-postgres-manager/shared-ui/pickRegion.ts": "cd67dd4357a2a0c14b17eef8f4e6fd1cf543222c4e520866fc6a6dd30afe932a",
-    "src/plugins/prisma-postgres-manager/shared-ui/pickWorkspace.ts": "2acf015c8de04ef7b641786d77f6ed40da5de69aeccf851010d467fc95ff6cf0",
-    "src/plugins/prisma-postgres-manager/utils/ensureLoggedIn.ts": "ddda9484e366b6449ca1cc60b5a75a06192c78176e5ecfe1f258a81bbeaec6e5",
-    "src/plugins/prisma-studio/commands/launch/getStudioPageHtml.ts": "47b63cfef80feaa5e281c529388d2681e4eee3c795f5aca1defc056499ada1f9",
-    "src/plugins/prisma-studio/commands/launch/openNewStudioTab.ts": "faba081fa62454edbfcd7d98f0d08c79542675d9094fc99ad321d1f2b36aacc7",
-    "src/plugins/prisma-studio/commands/launch/startStudioServer.ts": "b66c3079318c30038bc80ce5c78e267f07e08e18bc9fe6ddeb9498cb63fe66fc",
-    "src/plugins/prisma-studio/commands/launch.ts": "f026feb8ae27df12e83da1d5f0ad55752ab8b9f30bfd56e42549910f46d4c744",
-    "src/plugins/prisma-studio/index.ts": "4d49d636de93aae25db81fd6dfa725615a5a5c54b0352b5f55514178d85c887a",
-    "src/plugins/types.ts": "79c95e41b9f4b75e44fb1f0416dd37ab16ae4edaf597c1c5b21c0ea038d927ad",
-    "src/prisma6Handling.ts": "4ee9e8a0f1fe02f6429ebbaef0fcbb86ea53fcefd5919a99e44ff4ca0dcc94cd",
-    "src/telemetryReporter.ts": "1e9d69598ea1b39a9efabd024378a8223cb2bee4f3ae503580369913384eb3c2",
-    "src/util.ts": "7dc13ea23ca339bea3b758251f03e9f292920e824960fe83319243c3363e2312",
-    "src/workers/prisma6-language-server.ts": "8c87b243098a85a5bb2b3583621ad96e74d50556be60ceefada41fb15f01b8dd",
-    "_source": {
-      "repo": "prisma/language-tools",
-      "commit": "9c8f5b88cd7ac0502e76933cb4244c2ed198d3af"
     }
   },
   "vscode-yaml": {
@@ -369,7 +304,7 @@
     "src/commands/registerCommands.ts": "9419359dc1fd19a526083f2707ddedeee7b7197293cee7994e32b075347d1661",
     "src/commands/serverCommandConstants.ts": "374e6a1e70769d6ce0a2d773681997778b793e37410582ade4031117367e96c8",
     "src/extension.ts": "87d14a29ffd74e3dff759845e9fe135f9af46416105a32acab4ec681c4ff944e",
-    "src/index.ts": "f37f0fb513756bbf87be6e63283fa6bdd6ade2435b1ae2dc96a670a5f6af1f04",
+    "src/index.ts": "82857609ca64877befde6281c32887c4b98d8912f97d89ba7706ccda8ccee8f2",
     "src/lsp-commands.ts": "2205a762ea5f65c3877b70f6565091088b7280551ed0087e84fb844bd11d862b",
     "src/markdownPreviewProvider.ts": "866465975848c3c6a4aa6e33c8b22423a35e87652b7a06db7a2ddaaecedf5288",
     "src/plugin.ts": "64bd580f692d7f1f7788c2ca93106de12e4159ece174115334277389f1b3f81e",
@@ -388,100 +323,52 @@
     "src/utils/fileUtils.ts": "d30f2c091f64ed72cb6a0b8c016ad1b330d0440e9b24daeacb5811f2bb211531",
     "_source": {
       "repo": "redhat-developer/vscode-xml",
-      "commit": "ac784ed123b2ae0ec42b23f190c1d4402094d3dd"
+      "commit": "4e2f94eb99e1401c9c27ba84f9f2f1bc8dfc583e"
     }
   },
-  "vscode-bash-language-server": {
-    "esbuild.mjs": "7cdc5c18ae3a2aa2e0696b92fc6fffa6b892573817b1b5f82fdb5a2857a978ee",
-    "package.json": "3645ddd70b93bb2f703cbd02b85727ac67c8187b8862b6c41b42bdee6006bdb1",
-    "src/index.ts": "99477c491287159a264d0b5401bb3d24b9906dadef2a261eb6b2d412196178b1",
+  "vscode-svelte": {
+    "esbuild.mjs": "9daa6ba8505b7d00f4a798d937b3fc539d653e4eaeca33c19dd994b98fd73e26",
+    "package.json": "6c44b4d36a70904be50a9e00fad4c8fff8b5a940167cb64010405a01f6f4cf78",
+    "src/CompiledCodeContentProvider.ts": "bdc034c7ec0c1383a6936c46f5eb36626b108002e690330578061ceb87c7f536",
+    "src/extension.ts": "70fa0b660cbde1d4f7e084735158cfddf5bf6466c8a9b0c373f666ec0218cd69",
+    "src/html/autoClose.ts": "05ef3ba58862da49708cabc4a8b9c04c08a789ad82cc1f21fdd7c54802ef5d3c",
+    "src/html/htmlEmptyTagsShared.ts": "f96130b4963e68097656e182932e825d870e6e6e0da173c9e78e21207e2f0dce",
+    "src/index.ts": "a17d2afe4c4a99b2f59ff4758a5248761db4dd744684fc74089be73942743158",
+    "src/sveltekit/generateFiles/commands.ts": "d82ad34ca39cca12a3f265e0524c64fd2fb295f4fb292c15472dafdcd4065875",
+    "src/sveltekit/generateFiles/generate.ts": "f4b5266f967d08578dc9379145ec580453e308f9566b2a4812ce3ae32114ffa7",
+    "src/sveltekit/generateFiles/index.ts": "affc66c70a49243841555546e557d3e2245e30983910c0e3c6f7a9abb7063d0a",
+    "src/sveltekit/generateFiles/resources.ts": "8227e4f70f566dd58639810a54f694e46e6628c0ba806168114f563d71472faa",
+    "src/sveltekit/generateFiles/templates/error.ts": "9305367c8b93a762ef3d180b4235fea3696af6170c8e8c1d5f45dfa80d32c9d4",
+    "src/sveltekit/generateFiles/templates/layout-load.ts": "dd2f68e89401b9a4763b4aa8b74214dc18855d29a351141ff21fe001bc5b691b",
+    "src/sveltekit/generateFiles/templates/layout-server.ts": "fa5ee01a399db5f39b4f5a9e5485084e370ea6e2804d64a9b6a8280954a9c7c8",
+    "src/sveltekit/generateFiles/templates/layout.ts": "6ca8bf68488f84b24777f5857850390e51b49e807418a01aa58de258e6fbe054",
+    "src/sveltekit/generateFiles/templates/page-load.ts": "5113d253c751fe6738682f787582b2179a40fec816d56cc14df04ec07a6fcf74",
+    "src/sveltekit/generateFiles/templates/page-server.ts": "6e405aff365997a22da9ee12b094a344fb1ca76001719945d3dd64a26b919d76",
+    "src/sveltekit/generateFiles/templates/page.ts": "62bb1c0fe3f6f85f10a9a035a8eca0d19966d9dd2287780488d1ec7096f272cb",
+    "src/sveltekit/generateFiles/templates/server.ts": "dc371547935dc6dd091f6a3f17ec84fbcd25e83dbba22f86d8ae5b4b65f8957e",
+    "src/sveltekit/generateFiles/types.ts": "ae9b751e4259142f7c92f608ccc9680503456608516fa814e3f5c533543a200f",
+    "src/sveltekit/index.ts": "ae1ed85467f85944632c271a78e621f0e8f48f71157f57c025b0b077d4ecc251",
+    "src/sveltekit/utils.ts": "d1e6c3bbdd9d34a28af89c8f739e1254df5cdaf80b0c7821f694d57863217898",
+    "src/tsplugin.ts": "7390c91a9fd20bbc3dbf97279198f51fd27df3a5383a8a07fe1526c425dfb420",
+    "src/typescript/codeLensMiddleware.ts": "a006b0f5eef43e46ec618fa7efff35c02ce411ecab579180449b9fd53938baf1",
+    "src/typescript/configurationMiddleware.ts": "5fcd14e819a5083cda7bc109de397c46fe51c03f2aa8d196fe7f90a48f291f35",
+    "src/typescript/findComponentReferences.ts": "3c2589c3219656337ba75770e8526ac2ca10211c8c59db9187389c49a3cdf965",
+    "src/typescript/findFileReferences.ts": "49ab95d7ba76f21c87e8b30a77fe4474b337443f93099218482519a4b34b93fb",
+    "src/utils.ts": "da6f0c1762e82891da1dbff5bc599a1b23202b0752bbdda101fc5db9548ba251",
+    "src/version.ts": "63477116394a4dfcfa67edc6df81814d00bd4e6c5cd0baffdf807eecf0fe53ac",
     "_source": {
-      "repo": "bash-lsp/bash-language-server",
-      "commit": "3218a314d333b96f00cbe28e073a75425083fcbd"
+      "repo": "sveltejs/language-tools",
+      "commit": "784c0fe4c9b154965673ce5f009f1ad6cb76ffef"
     }
   },
-  "vscode-taplo": {
-    "esbuild.mjs": "633b5cebe1a7bab6f20a147a60f39e39f5ac81fe440702e4f08e1f85641e1586",
-    "package.json": "aeadb1373b1117df96c9312d7e1592f8cf503267bae3c5b549c7a5bd9ec999d5",
-    "src/client.ts": "b8cc17d5c43bd9f517130801c256efb267307ddea6b8cbde29847ddd6effe508",
-    "src/commands/conversion.ts": "9ef6f4ecbda60322d3b5256953eb513bc09bb04f0b3494e266a8c0cab9c5e4b2",
-    "src/commands/index.ts": "73674d49476808b9e559f36dd244cee816779f4d29c1649632593273c9ade660",
-    "src/commands/schema.ts": "ac820b98b17ea3b6f583ee181ee1f83b88bff0cd4191cfe044c0bf04af5d5b00",
-    "src/extension.ts": "ee25027fd2db962c598df69eca7b15d1e49845091c9eeca10fe37469f28ee1fe",
-    "src/import.d.ts": "e80e2df92cf8a07e70aa4d284e541714a4000812cfff3fba58e4ab06ffb1282c",
-    "src/index.ts": "573ccc95a3be94415d32fcc1f87c2ab892f21ca5288795423cd34e31eed59829",
-    "src/server-worker.ts": "8f8399f9a764f7882e7f6090565eb44a9b29c8a9591f53f359e0acbb42dc6ac6",
-    "src/server.ts": "04dfd7860ac70f199da8b7394f87fae6487cb0b9a02d7f7b84fcd580e36d1aaa",
-    "src/syntax/comment.ts": "8bfeb4ce7a68ca44b6e6de3c94b390c895c378435c0a06f0a315a0240e9b5669",
-    "src/syntax/composite/array.ts": "d12ace99679a1e26819befa13c63db9f5469047b0cd9f6729f929cc55f255086",
-    "src/syntax/composite/entry.ts": "9abd44391db00511be9cf80297fa7e6046bf825ed60c635e2ed653bbb073de22",
-    "src/syntax/composite/index.ts": "fcccfc8365a00ead03ce57aa8c3c36aac23543ca3667c1e32718490d7e5be5b4",
-    "src/syntax/composite/table.ts": "8c3a8b3aef161c31f2a1eea1a96f4e7bce93b0304d6a49c017b1362510ef86e9",
-    "src/syntax/composite/value.ts": "e53170c46061e5b0dce8cdfd7c1dbd3a5468dab03121132fe517b901f0d9dbce",
-    "src/syntax/index.ts": "550116b27cc95d9483944554f98be0f5171b5fc7d5ba6135a0edccebe4df6428",
-    "src/syntax/literal/boolean.ts": "1533eda3548c4978ee83655ff9481c5d52ed6143a19b5969f38f1d88f7281067",
-    "src/syntax/literal/datetime.ts": "3256fc150620bb830dd58737f6fae4bbb87354cd2b5f1c3a346146fce425aba6",
-    "src/syntax/literal/index.ts": "2c4d494af8438323ff3f2a82710cb1ffe77c62e040b917bdb6b06f6f43991789",
-    "src/syntax/literal/number.ts": "0689daa4fc232442574ebe960b2f26cabadc98ff6fc4125cb1fe460f4dd20205",
-    "src/syntax/literal/string.ts": "df6909e0fc6914bb08a8fe64eacdaca77b26c159a16c7fbe4a497b18b91775da",
-    "src/tomlValidation.ts": "ffd1a496307e938cab291ba6ca80a632aa91f87896ab7dec207d60a10997f08d",
-    "src/util.ts": "3e17bebf68c6346412ae3f988a8e64a0c598a1a67b23c28d1383ef8c33d03649",
+  "vscode-astro": {
+    "esbuild.mjs": "d79c7b59ed3d98e942d93531793e4386452d749428d04376137344e20275d255",
+    "package.json": "adf10725de932f1d2fd288b5dabb362194c1282e893ad089bf537d5e113e4441",
+    "src/client.ts": "0271f79c4d194bae7ef6139137fb28aaa7cfeb0bc0dde49f7d998bb9ca634c56",
+    "src/index.ts": "b3b5b1b3e27c044e509212020019a80c479cb1c359ff2de47f6c67077c8f719e",
     "_source": {
-      "repo": "tamasfe/taplo",
-      "commit": "08f343be02ce1b20296470396a42f0fa47820449"
-    }
-  },
-  "vscode-css-peek": {
-    "esbuild.mjs": "11482425c59a3ce2377a64bb3a6d509db2095409a2ca40c0174c10b7c685793a",
-    "package.json": "6ecd79c1186177e91a4e57b04cee4cdb93b6eca710a9e6d682e487c470d5986c",
-    "src/client/src/extension.ts": "95c7222f7f66215692570e24b9cf09dd545b5b0c0f8fcdbea1a9b9b535358398",
-    "src/client/src/gitignore.ts": "391e98890a06c44d38f04d26a4b9a8791201596b9ba7c554e1330765752de562",
-    "src/client/src/telemetry.ts": "d268e8fa51bad3cad00c2cafe0833f026e24dc9e17074e2f7861e9aa3b89328d",
-    "src/index.ts": "ccf5387a03d9f64534faeee7255d20589d0cb3e7c0567b90913418eb6d7926c2",
-    "src/server/src/core/embeddedStyles.ts": "490bf34ffaf9c6cd60fc2f3caf338f7c04685b1c0234b764cc15c43bf17db8d6",
-    "src/server/src/core/findDefinition.ts": "1c7cff8ae812eae323c7c6758ad00c240c6b618a216e717a52caf25f16ad2252",
-    "src/server/src/core/findHover.ts": "e894833cf0c67c7a71753e2b2aa06fd2a7a757fd88746dc9d29a756134e22964",
-    "src/server/src/core/findSelector.ts": "636fdc4617b34fb158fafa3187d1c9aeb5a6a0ff3482d51f8a68e3ba1b00a2a2",
-    "src/server/src/logger/index.ts": "0723dc5547c8813a2f5a6751f10e0d4ee8d8aec420555368a3a43b71d8239941",
-    "src/server/src/server.ts": "f3b4d6a32d705c1bf7ee4c79e81d0dd79a73e64aac22d0c6ee7c6fb76966a9bd",
-    "src/server/src/types.ts": "4d89f35b3704e5ddd7fe23b2e813e23a8c343262b07b7f76e1b0ce24d8cd948f",
-    "src/server/src/utils/linkedStylesheets.ts": "16bf7851afc8ad9043407f5aaa71feb91850f99ebf11b0ff7f77eec272a26ab0",
-    "src/server/src/utils/selectorToString.ts": "012cd6749193d6d59b43b71f75a432950362a04c4b810390bbe2fba0b81a422a",
-    "src/tests/src/findDefinition.test.ts": "6d1cef78c63a1cdde0cae2fd8bc13d2cdb93df360596003d69d611f1e447f3d2",
-    "src/tests/src/findHover.test.ts": "042befcd556dcb1c765a741396769abce92eeab8fc5c0ed47c76d5ee271264f4",
-    "src/tests/src/findSelector.test.ts": "29c49f8c0146141c2a774d173f591fbe5112e6ab3ded776643d1bc8f4e682133",
-    "src/tests/src/gitignore.test.ts": "f9067ea59bab00d7b7096da744134c44b60789c624dbf455a4ed91e029cb876f",
-    "src/tests/src/linkedOnly.test.ts": "e954b00e908e371027727b4588c84d99e100726d5bf59b24f11b811390975ea3",
-    "src/tests/src/selectorToString.test.ts": "1fc6d6ad9b39a4fa245bb428fd31a965b19295ee9aec679ac9e28162ad69b155",
-    "src/tests/src/stylesheetLifecycle.test.ts": "cd18ad7815a8de8a25f5182fc72bde2f7ba1de0705cdad8cdff064b4a6ec7a52",
-    "_source": {
-      "repo": "pranaygp/vscode-css-peek",
-      "commit": "402f861143dc6473b5c04db7b7ceceac1ae3e166"
-    }
-  },
-  "vscode-stylelint": {
-    "esbuild.mjs": "ecaa1282c160892bf2393f3b1f76b934e138930350c529fd6983fe0ba3033cee",
-    "package.json": "776bc4a7a4e5ad8471fc343b81df206cecf8e8b0c7e2b5b783c4cc92aaf53cb7",
-    "src/extension/__tests__/extension.test.ts": "835078287c76d01c70a485baf7c992ff1f0c6b29190a2a2b8f25c43226085deb",
-    "src/extension/di-tokens.ts": "e8a156d6d50e932af5c73d74e7ec991db17e452d91bb6e79438aeb3a84764c79",
-    "src/extension/extension-runtime.service.ts": "443ed485ce502cfc999fb935f2827ba7f8cf8797b9730bfb760770a5af68ca53",
-    "src/extension/extension.module.ts": "b21fa360108cf241a59aab854fe343a1768171f810808607b8e1f61a432bc2f2",
-    "src/extension/extension.ts": "ea555565162af0f02330a967e775a64dbc8454ae6b29ac47e841bc8b1255c819",
-    "src/extension/index.ts": "af3f93968ae1ff527b361c3e402491e4d043d20075a7aade37eadb8641eddde0",
-    "src/extension/platform.module.ts": "721913e51942919962fb9dd56dcd4b14ffd9397af7f2c672987f39f5527411f0",
-    "src/extension/services/__tests__/language-client.service.test.ts": "1e3f8f16096cf19c1c3dbab28eb712a100151f601fda991f73dc1341c9e12b22",
-    "src/extension/services/__tests__/language-client.test.ts": "52bc31a016eb63ce772ce73a2eb0d2c1ff30b8d8cc06bfc9fffc009ec5848218",
-    "src/extension/services/__tests__/server-options.service.test.ts": "4d08b6485c7c66d9d5948dff720bad3fc6dcebcf34f36231a9ada363dcf0f512",
-    "src/extension/services/environment.ts": "86c6deb2ac79f00aaf42413e31568f442838ce82d419c5af339dc71933723f0a",
-    "src/extension/services/index.ts": "9f4207056f6652065b0c829b8f605deab0db0850dc5e62c465bf203187db9e23",
-    "src/extension/services/language-client.service.ts": "0eb209301934fd2a53b25d2ba3cb941501e80f62f49fa5547b86222f413d56a8",
-    "src/extension/services/language-client.ts": "3bfe68159f1a718c8bb57e8d2fa94a3226b6cde141c927edb0d63582c4d8d911",
-    "src/extension/services/server-options.service.ts": "7fae23877f1acaa766f2b6a0ac3053ed5560e38f9f2f566594faf4f48542c36a",
-    "src/extension/start-server.ts": "3ea9468f4387e01cbad5c2e6e0dab0d864439e874a62428964a1d0bb17a5dbac",
-    "src/index.ts": "9c990939a7e26b4fcf1b0b33f82935ccdbcf660fcfffe0a7af8e9eebbd5a41a1",
-    "_source": {
-      "repo": "stylelint/vscode-stylelint",
-      "commit": "1223943bd48848569bc48135fb64dcfa14b17b5b"
+      "repo": "withastro/astro",
+      "commit": "5462b81b8c13552a78131494ccf649b2d92b2968"
     }
   },
   "vscode-ansible": {
@@ -594,89 +481,212 @@
     "src/webviewHtml.ts": "bf4c4ca6d5224e022e4cd6fe4eef4ebab585b4d314701e39bce68710f3509e55",
     "_source": {
       "repo": "ansible/vscode-ansible",
-      "commit": "599b0aa855fb480ab78687e89576fc1dca694a71"
+      "commit": "d2398ed4b9006849b763713e21831af3c7d2e90c"
+    }
+  },
+  "vscode-lua": {
+    "esbuild.mjs": "4699bb544128e6798fead66f88972e526ebb14691a58a90cc2ad86287c3cd0d0",
+    "package.json": "a19d75ba986912f1c77e2c46362f9b2047ad590319032a5063781020285c2f91",
+    "src/addon_manager/commands/disable.ts": "f9a25b2f69e9bf8c3f5134f6c607aa1c5e58b3bea53403e22500a06550e4b0ae",
+    "src/addon_manager/commands/enable.ts": "7502431b1d7b8a6938267bd57b66b96a8839dea245bb0556eb8d21a2b79f6797",
+    "src/addon_manager/commands/getAddons.ts": "df59f3d8fccf9b3098a9c8e5c17d8cb4b7b5afcb2245aafa5581e954575d21f6",
+    "src/addon_manager/commands/index.ts": "d7180e683666a2b25b867a2c633feb504cdeaf8cebfb3f1c5b83fb173a1fbe1b",
+    "src/addon_manager/commands/open.ts": "13d06366ade4cdeb1d63023c30c4fe26b5bf6ef5f725505dd2b21c5c800d2e47",
+    "src/addon_manager/commands/openLog.ts": "afa6615b7f4485940a2afd8f9780ee8f42384920a6f7fd284516db1c3a87b639",
+    "src/addon_manager/commands/refreshAddons.ts": "20e9a0e6d636c251ba698cb2af06b8e70fddc7429a785a11234b7e4274c7b17f",
+    "src/addon_manager/commands/setVersion.ts": "bf4dc8bdfbf87d117ff0409ff5ae00370983d65e1337f52430ddd3ce6b0b0efb",
+    "src/addon_manager/commands/uninstall.ts": "66787febe905b1c33e9a4e87d057f9975059dd92b65f2d12f43108a63f145c43",
+    "src/addon_manager/commands/update.ts": "228c9acd62e73192e13982ea2caabe21aebc4dfab7044a61e36be341ed523ba0",
+    "src/addon_manager/config.ts": "52f1673bd291357be500d6580dbed0e71f26244344e0d812fc2862f0f800d511",
+    "src/addon_manager/models/addon.ts": "f4df48c0aca838f63b59be27daf25161d346d262fa61b63120b42a9f5dbb92ed",
+    "src/addon_manager/panels/WebVue.ts": "3759266c33a807968d08347a075d2288871f73782a167749acb05f4403568414",
+    "src/addon_manager/registration.ts": "5bcf581e868400edd87bfa46d2a458eab4f985d8a24176e9a25e903e940c91f9",
+    "src/addon_manager/services/addonManager.service.ts": "923aecfcd97b25196565e13f39b6f21cc37b49184e453c6b5a30368b88154721",
+    "src/addon_manager/services/filesystem.service.ts": "e9b7af0e6e8ade539ec33eef9b1cc557fa699d3c8277ba71d9045c31793a4c4d",
+    "src/addon_manager/services/git.service.ts": "a9d0db184d6912c8a26c731c71613ec4daf2448270761b068e2198a4f9fcf9bf",
+    "src/addon_manager/services/logging/vsCodeLogFileTransport.ts": "0ef9e3a78a52896b1e388b72ec166f8de85a100124ef939cd0ef2ac34deca48f",
+    "src/addon_manager/services/logging/vsCodeOutputTransport.ts": "2ffcbfa1374c6427ea5b23538dca6fdf04cb3603ec71b7014dbdd506a1d185e4",
+    "src/addon_manager/services/logging.service.ts": "91de28cd3c925ad90a73cc921d660b7353832084966fe6207504ae2272cbe271",
+    "src/addon_manager/services/settings.service.ts": "dedb22b3fe607da008e4d895f999f457e27930ec467def75ffbe7326ad22849f",
+    "src/addon_manager/services/string.service.ts": "f4dd1c37d708afccaa08cb78bc08b467ea66a53dc4ac10dfad8e56e4865c2974",
+    "src/addon_manager/types/addon.d.ts": "e2dc72803bbaac1f486e91ac1d6ea6f4b35121bd8f3098363e966b0876044a09",
+    "src/addon_manager/types/webvue.ts": "24148cd416384dc50f65a7eca0dbf455cd7be31fa0589ba2f90423d126cc757c",
+    "src/extension.ts": "e2c6c32c0d2c7f8667cc92e25b6642a42afbcc8d91571f2590d0b41be3b30a2b",
+    "src/index.ts": "fc8c172bc90f5068dbfd17af8620b2b4277551822f7e070aa9d3d8e6a57b89ee",
+    "src/languageserver.ts": "be436c696c87b704f2bec8f766ec8af7ddb94b7479c1010d3651633651be225a",
+    "src/psi/psiViewer.ts": "a2fb12d633494a5691d346028e8ccc78a8c34d042e6c805c968d73e2dbd67ea5",
+    "src/vscode.proposed/editorHoverVerbosityLevel.d.ts": "d8f4989bded779c8e75fac0d54527634c44ad41f0647476f9100ee5faf57d5c0",
+    "_source": {
+      "repo": "sumneko/vscode-lua",
+      "commit": "d9042c543e50ca6e9cc3ac1f9d703c25d37f7ffe"
+    }
+  },
+  "vscode-stylelint": {
+    "esbuild.mjs": "ecaa1282c160892bf2393f3b1f76b934e138930350c529fd6983fe0ba3033cee",
+    "package.json": "280ed6f59285ba487101f2936d12cecfd4453c02ed77f186ca5b39d94f2f9619",
+    "src/extension/__tests__/extension.test.ts": "835078287c76d01c70a485baf7c992ff1f0c6b29190a2a2b8f25c43226085deb",
+    "src/extension/di-tokens.ts": "e8a156d6d50e932af5c73d74e7ec991db17e452d91bb6e79438aeb3a84764c79",
+    "src/extension/extension-runtime.service.ts": "443ed485ce502cfc999fb935f2827ba7f8cf8797b9730bfb760770a5af68ca53",
+    "src/extension/extension.module.ts": "b21fa360108cf241a59aab854fe343a1768171f810808607b8e1f61a432bc2f2",
+    "src/extension/extension.ts": "ea555565162af0f02330a967e775a64dbc8454ae6b29ac47e841bc8b1255c819",
+    "src/extension/index.ts": "af3f93968ae1ff527b361c3e402491e4d043d20075a7aade37eadb8641eddde0",
+    "src/extension/platform.module.ts": "721913e51942919962fb9dd56dcd4b14ffd9397af7f2c672987f39f5527411f0",
+    "src/extension/services/__tests__/language-client.service.test.ts": "1e3f8f16096cf19c1c3dbab28eb712a100151f601fda991f73dc1341c9e12b22",
+    "src/extension/services/__tests__/language-client.test.ts": "52bc31a016eb63ce772ce73a2eb0d2c1ff30b8d8cc06bfc9fffc009ec5848218",
+    "src/extension/services/__tests__/server-options.service.test.ts": "4d08b6485c7c66d9d5948dff720bad3fc6dcebcf34f36231a9ada363dcf0f512",
+    "src/extension/services/environment.ts": "86c6deb2ac79f00aaf42413e31568f442838ce82d419c5af339dc71933723f0a",
+    "src/extension/services/index.ts": "9f4207056f6652065b0c829b8f605deab0db0850dc5e62c465bf203187db9e23",
+    "src/extension/services/language-client.service.ts": "0eb209301934fd2a53b25d2ba3cb941501e80f62f49fa5547b86222f413d56a8",
+    "src/extension/services/language-client.ts": "3bfe68159f1a718c8bb57e8d2fa94a3226b6cde141c927edb0d63582c4d8d911",
+    "src/extension/services/server-options.service.ts": "7fae23877f1acaa766f2b6a0ac3053ed5560e38f9f2f566594faf4f48542c36a",
+    "src/extension/start-server.ts": "3ea9468f4387e01cbad5c2e6e0dab0d864439e874a62428964a1d0bb17a5dbac",
+    "src/index.ts": "9c990939a7e26b4fcf1b0b33f82935ccdbcf660fcfffe0a7af8e9eebbd5a41a1",
+    "_source": {
+      "repo": "stylelint/vscode-stylelint",
+      "commit": "9e91f16577803bde9ba366b342115575db466f32"
+    }
+  },
+  "vscode-css-peek": {
+    "esbuild.mjs": "11482425c59a3ce2377a64bb3a6d509db2095409a2ca40c0174c10b7c685793a",
+    "package.json": "6ecd79c1186177e91a4e57b04cee4cdb93b6eca710a9e6d682e487c470d5986c",
+    "src/client/src/extension.ts": "95c7222f7f66215692570e24b9cf09dd545b5b0c0f8fcdbea1a9b9b535358398",
+    "src/client/src/gitignore.ts": "391e98890a06c44d38f04d26a4b9a8791201596b9ba7c554e1330765752de562",
+    "src/client/src/telemetry.ts": "d268e8fa51bad3cad00c2cafe0833f026e24dc9e17074e2f7861e9aa3b89328d",
+    "src/index.ts": "ccf5387a03d9f64534faeee7255d20589d0cb3e7c0567b90913418eb6d7926c2",
+    "src/server/src/core/embeddedStyles.ts": "490bf34ffaf9c6cd60fc2f3caf338f7c04685b1c0234b764cc15c43bf17db8d6",
+    "src/server/src/core/findDefinition.ts": "1c7cff8ae812eae323c7c6758ad00c240c6b618a216e717a52caf25f16ad2252",
+    "src/server/src/core/findHover.ts": "e894833cf0c67c7a71753e2b2aa06fd2a7a757fd88746dc9d29a756134e22964",
+    "src/server/src/core/findSelector.ts": "636fdc4617b34fb158fafa3187d1c9aeb5a6a0ff3482d51f8a68e3ba1b00a2a2",
+    "src/server/src/logger/index.ts": "0723dc5547c8813a2f5a6751f10e0d4ee8d8aec420555368a3a43b71d8239941",
+    "src/server/src/server.ts": "f3b4d6a32d705c1bf7ee4c79e81d0dd79a73e64aac22d0c6ee7c6fb76966a9bd",
+    "src/server/src/types.ts": "4d89f35b3704e5ddd7fe23b2e813e23a8c343262b07b7f76e1b0ce24d8cd948f",
+    "src/server/src/utils/linkedStylesheets.ts": "16bf7851afc8ad9043407f5aaa71feb91850f99ebf11b0ff7f77eec272a26ab0",
+    "src/server/src/utils/selectorToString.ts": "012cd6749193d6d59b43b71f75a432950362a04c4b810390bbe2fba0b81a422a",
+    "src/tests/src/findDefinition.test.ts": "6d1cef78c63a1cdde0cae2fd8bc13d2cdb93df360596003d69d611f1e447f3d2",
+    "src/tests/src/findHover.test.ts": "042befcd556dcb1c765a741396769abce92eeab8fc5c0ed47c76d5ee271264f4",
+    "src/tests/src/findSelector.test.ts": "29c49f8c0146141c2a774d173f591fbe5112e6ab3ded776643d1bc8f4e682133",
+    "src/tests/src/gitignore.test.ts": "f9067ea59bab00d7b7096da744134c44b60789c624dbf455a4ed91e029cb876f",
+    "src/tests/src/linkedOnly.test.ts": "e954b00e908e371027727b4588c84d99e100726d5bf59b24f11b811390975ea3",
+    "src/tests/src/selectorToString.test.ts": "1fc6d6ad9b39a4fa245bb428fd31a965b19295ee9aec679ac9e28162ad69b155",
+    "src/tests/src/stylesheetLifecycle.test.ts": "cd18ad7815a8de8a25f5182fc72bde2f7ba1de0705cdad8cdff064b4a6ec7a52",
+    "_source": {
+      "repo": "pranaygp/vscode-css-peek",
+      "commit": "402f861143dc6473b5c04db7b7ceceac1ae3e166"
+    }
+  },
+  "vscode-tailwindcss": {
+    "esbuild.mjs": "445f707c0df9f1b5c77f675eed7ddd7004a9f9d8033a8d52cc14b87700b95bc2",
+    "package.json": "2091e646da198c0f807fdf4ac28ba1bf1ef467913d3362b82c6707213f06ded6",
+    "src/analyze.ts": "60932b2b89c87e8238865f6ec047551ee0ddfd9df65ddedc90fd576749e5c939",
+    "src/api.ts": "006dae0259c1047a055be49652dfa3c01276d37fcd8833f4519c2dc412e87f7d",
+    "src/cssServer.ts": "c8710c0278db0425ad10d1a2fc7efcaeedb14624b2336c8e162da84c667016e6",
+    "src/exclusions.ts": "24cfdab3f5594c3d238e139689949540a6a6388b22639bf5c79efb9de6d7bd30",
+    "src/extension.ts": "b0adedf243a3e92a1cffc99c796095cb999d89fff6c673693a73d77ed45c9b52",
+    "src/index.ts": "01759e31064b84a7f86fab269f79b62dc3d2af69b4730da6ff77fb4983fd5213",
+    "src/oxide-helper.ts": "0748a32387dd5e29d95631e958d7aea0261a9fd5c5080f5fabfd20fb45e184cb",
+    "src/server.ts": "165964bd5d246c072d58c607986175868094a3433553899de71163c032697059",
+    "src/servers/css.ts": "dc7e01d4e8e86ebc55a5efc0682bd4f23ebe5877e27d411e5dca83df23392c13",
+    "src/servers/index.ts": "b58a418ac4a7fd10d6d055bf3e10388071424140105228cffdc37a61fe5b76cf",
+    "_source": {
+      "repo": "tailwindlabs/tailwindcss-intellisense",
+      "commit": "5067ff7ec0b4b8bb5c3325a69c1f3410eb5b350a"
+    }
+  },
+  "vscode-bash-language-server": {
+    "esbuild.mjs": "7cdc5c18ae3a2aa2e0696b92fc6fffa6b892573817b1b5f82fdb5a2857a978ee",
+    "package.json": "3645ddd70b93bb2f703cbd02b85727ac67c8187b8862b6c41b42bdee6006bdb1",
+    "src/index.ts": "99477c491287159a264d0b5401bb3d24b9906dadef2a261eb6b2d412196178b1",
+    "_source": {
+      "repo": "bash-lsp/bash-language-server",
+      "commit": "3218a314d333b96f00cbe28e073a75425083fcbd"
     }
   },
   "vscode-marksman": {
     "esbuild.mjs": "7e061714429ec5a88cce2f77765f90f1a167dd4fc31a0516edd6c6cbd9a6340c",
     "package.json": "90d9cb1b982044189c750b3528b5d673b92785aecca2984984f08fa820503fa0",
-    "src/index.ts": "8d259245949240b91eb9ac51e49cc7a7ba10f769438cf3072cd965297c62ad1e",
+    "src/index.ts": "1fcd09b4cd2cbff9c00ff8c76f237bff3c025d3359187422254b763b7b8263dc",
     "_source": {
       "repo": "artempyanykh/marksman-vscode",
       "commit": "41fe090146b998f1f58f340027c652c1d2f8525e"
     }
   },
-  "vscode-html-ls": {
-    "esbuild.mjs": "b7f88c3e96928d820b9636c935dee4843637067d47e68c14af5d7ef51a83a896",
-    "package.json": "389b2f66da33b92adf8adbfec1adc09b6075344ae7ff2b8369579ebe30c2dba2",
-    "src/client/src/autoInsertion.ts": "66b699bc8bdf9a3ab930e7e0650e17e70191f2dc15e9da0a82ad544f45653d22",
-    "src/client/src/browser/htmlClientMain.ts": "30b9f4f2cc583249ddb64575d911492e29f8dd38260934ad1bf33017334fd942",
-    "src/client/src/customData.ts": "53706fd008237b9fe5aaea65972e43beecee3f9837f3b806066fc34feeafaee1",
-    "src/client/src/htmlClient.ts": "81d8af2cf3a89b2bfa479d9f25cdb9f923f23b8487ab43b18f15794264591c36",
-    "src/client/src/languageParticipants.ts": "59e4c4ef814405d0f13803bfb71f1b83293964ee3ae497658cf9ee90f5ea5d56",
-    "src/client/src/node/htmlClientMain.ts": "05481e192c72cd1f04a5244550aa153a0d2bcf0d664a735a1d9d85ed0fbbdf8b",
-    "src/client/src/node/nodeFs.ts": "42c128fcbb3c81dddd1f1b7358ee9f4c7f1cfadbde9177d3d669b5a498e0d49b",
-    "src/client/src/requests.ts": "c94112d286893a3ece3d8c678e6f606bbbfa48ae753d2865f3b3764272b8fbcf",
-    "src/index.ts": "1bf5f088e88be0e88a9026d251b3437e4d65b6168af0d378f5644e89de8a0998",
-    "src/server/lib/jquery.d.ts": "a7643a906bd7427edcb32bdabd4e5006ab32ea8becb2f2e24e280cbe04e3805e",
-    "src/server/src/browser/htmlServerMain.ts": "7b91cb569142f9a7d104e177ee980f26577e5a5f5c78b5d482ddf5243eb3b493",
-    "src/server/src/browser/htmlServerWorkerMain.ts": "6cf779c6f929af8c080ab3a47af5f84df835b09ae1d4b6b3eb85a53fff10f1d6",
-    "src/server/src/customData.ts": "71c245f25574cdaf748908d66a9a19060ec73a697fa0dc21c22cd3443f260c7f",
-    "src/server/src/htmlServer.ts": "2806d337aa60c1dbc2082bb1144c49c65234d804dc0721160cd5e68077670229",
-    "src/server/src/languageModelCache.ts": "063ec82a07e94e7bc2197050b27155a5beca9d4c6b019ce4c957e01a54295781",
-    "src/server/src/modes/cssMode.ts": "579949a581fb74ae5a438d0d6c30e038eae268df5fadbb8d0ffae155c48bb7a0",
-    "src/server/src/modes/embeddedSupport.ts": "12d56edee6f90b226249a9e0d3790d3d915ca192218a4d651b623f0313857e98",
-    "src/server/src/modes/formatting.ts": "0dd140cc4b64721cd454d25be7d0fb3e72bbcff9155f8045767fcd81d1784327",
-    "src/server/src/modes/htmlFolding.ts": "7c0a166d1da0c721eb3f1fc91d0bbba01a6762b45f57cf8ea4cecb2d65b2ebc4",
-    "src/server/src/modes/htmlMode.ts": "aff7dfaf4dade09fee33e2730be87a6250836a5d38aef533de9032711ce06ac6",
-    "src/server/src/modes/javascriptLibs.ts": "56fba3f1bb3a5a23f9c97ca705beed192296e28eeaa2d5cd28b34e13b0f53453",
-    "src/server/src/modes/javascriptMode.ts": "a38eaa3b5963763df9450ba516e02ee53b927b010c591e071bb33fd450093d54",
-    "src/server/src/modes/javascriptSemanticTokens.ts": "7b936047026a72614f70be9590c11c49f8743771b4905bb3a6606a5217cd9947",
-    "src/server/src/modes/languageModes.ts": "d9e6503c0ee9cd0314e9ba5b6985495ab1ee21a512204e1bf64a9842b2b44704",
-    "src/server/src/modes/selectionRanges.ts": "2f81d43a414fa27996d70f231c2b29cac2b2961c42e1831d2361117e6042dfc3",
-    "src/server/src/modes/semanticTokens.ts": "6fab408f6c7fb4193ccbae1d8e9317728ac41c359804fb09477b992a3e4edb85",
-    "src/server/src/node/htmlServerMain.ts": "5d6a1bad66efa6013e250e13f657acfe1f17753fe67136f4b420f1bd0cece5f1",
-    "src/server/src/node/htmlServerNodeMain.ts": "97c48184214e6738119a03b85179be2246b797c2a09f7b8ecfb2b632e339eef9",
-    "src/server/src/node/nodeFs.ts": "74e4c502362ebba5f209a4e877901d15d436610d3e6719142d5a1df3852d4952",
-    "src/server/src/requests.ts": "4318bc2ba1a72eb3525e3923ca266ba819e99b1cad097ebe927fdf953b6d3cfe",
-    "src/server/src/test/completions.test.ts": "dbb245137450b4408a8d38faae89617cc288bf2fcc1cc2ae17c8c5579b3853b5",
-    "src/server/src/test/documentContext.test.ts": "34c7edb965720f64a27d44e332e73921df118c2639ab2ebb73f16114cc8011bc",
-    "src/server/src/test/embedded.test.ts": "8aefcc009188592a1d6ff377bd4a5322b18ae668c00f7180d2d323b8159bb2f3",
-    "src/server/src/test/folding.test.ts": "b09f64ee6886014d7e4097297751786cc5baa9f3a2e207fd8b7b0dc122a2b952",
-    "src/server/src/test/formatting.test.ts": "ac24a30333f658c4c82b20f4e94b2f87ad77d299242f20e94e38fc034f1da5a6",
-    "src/server/src/test/hover.test.ts": "6ae3bf0d8eb08138bc88a3977ff8ba1c06402d0c6aeb12b770a9e7955c22d01d",
-    "src/server/src/test/javascriptMode.test.ts": "3a0ab5fb06ced544439068b45c32b591dbc2a290ef07eda1c8b9a07bebb975f3",
-    "src/server/src/test/rename.test.ts": "3c73d5f2a8568f488b4c04825909ae10a4220d8d9555a27760e18cbc42cd5419",
-    "src/server/src/test/selectionRanges.test.ts": "acd625ef5faaea3b1480ac102a1f272fc22bb437c869f528a7061fc541f17fb3",
-    "src/server/src/test/semanticTokens.test.ts": "b09c520a4229fe971acfd11d4722ffc021951ee8f7493e18843f98570277f6ca",
-    "src/server/src/test/words.test.ts": "8d3432b31b4a9f69b3dfd074920389acc523c55c1da8e34877c0184bf7415f2f",
-    "src/server/src/utils/arrays.ts": "fd0c3990422ded99b480f42f18a56cce1d94b6535651c791c9f691c8795f8763",
-    "src/server/src/utils/documentContext.ts": "7ae74db3945036bf1d59e1ab96cc3866f17b113864c51d33dc26598e552a8b4a",
-    "src/server/src/utils/positions.ts": "d6d417ae4fc846016b9de9a9a6090dd4b063c2bf8558672dcb6845ab701656e7",
-    "src/server/src/utils/runner.ts": "daf2a8aad93d8f560b649ffc110580ff27e0348cc8112a66a5c4a792398300e0",
-    "src/server/src/utils/strings.ts": "b5c399d7f18e4b5704d4dca8beefa527b29e9fc653639610d48ecc75b33dca19",
-    "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
+  "vscode-prisma": {
+    "esbuild.mjs": "6be05034e374bf67ca100c59d92289a7cdd16e1513ee2b0271589167b9003d26",
+    "package.json": "3ba4dd6305e85eb8d377d34b875d33392067bbda629e0d64de50e1f4c59e7da7",
+    "src/CodeLensProvider.ts": "68b98245ff699dbc9ed62ca02c398602e0ec9c902f8146ad2afbcf6d45a9e163",
+    "src/__test__/helper.ts": "61d82466969475462e83c2b14a8e3c04925106f1f62a7b0d865965d7637fc78f",
+    "src/__test__/index.ts": "eaa1e12939dc8d3a9cc56bbe25f00e4928bca136927795a95a91a6129d0abcc2",
+    "src/__test__/language-server/completion.test.ts": "a1243aee29e3c3de201f4dd35fc4063f904a6f458fa111e69bd1c478d8dc4a00",
+    "src/__test__/language-server/format.test.ts": "c14dc3d7c31c0a0d6d2e28b5fb4d3c61717864ce0f21beb30ff9f88797bfce31",
+    "src/__test__/language-server/hover.test.ts": "a7e95b1a74de2be4359d6bb7f4305fb092190345ce3a82d77a87efd1ba081117",
+    "src/__test__/language-server/jumpToDefinition.test.ts": "75aa4f918bd4f000bd7a5ca72b774459fb4ec4cfb532942b1a1a88a83b3d079d",
+    "src/__test__/language-server/linting.test.ts": "91f6897a8b46cdbb9ca19b5460b12c9c0167a2e6325ba4a90de3ea0204325ce4",
+    "src/__test__/language-server/prisma6Handling.test.ts": "cd82b99bdcb7c747a30734cdf09500d466af724e85fa5cdf46bc065770440b6b",
+    "src/__test__/language-server/prismaNext.test.ts": "9329f149d45c6b884ddca1227354f8095e23405823e21770419cda92c2381764",
+    "src/__test__/runTest.ts": "c6f493da3621b7e3bdf3d8716deeddbb96952e56f65b5e806080c1f271a33b0d",
+    "src/denyListColorThemes.ts": "117a15311b74a354a7ff2abe72365e7c1b96f0b64c1db7f15c5dc740df656872",
+    "src/extension.ts": "8b074d5946ddabb6f296171498d3fcd6d5ad139abae82b66735c993e838fb37a",
+    "src/getPackageJSON.ts": "f658cc416776c4589ec9c4cff2e27234202f03c681e42d74335b409a215ca830",
+    "src/hashes.ts": "43beec11fd1eec15d45b6ff80113ee16871fdf9b9e1f90631dddd16b0651f7ea",
+    "src/index.ts": "4691104090317863ffb5c958f68ddf1248377ee41df724f2f5dcd3e76ca7af8d",
+    "src/manual-test-client-raw-sql-highlight.ts": "530ffb4fc7048378bd03744834cdae8fa2c561c255f8845b9266c084ae9f9706",
+    "src/plugins/ai-tools/index.ts": "4daabe93cc2ebdb9538d30d0da648049536994a7acc298de43deaad7cbbc451c",
+    "src/plugins/index.ts": "fd8d329ac7c79392da4e2f5741c2c796fd60a6f129c67eb6365c3c70a8db4056",
+    "src/plugins/prisma-language-server/index.ts": "fb36b88f688d443bc13ae6a9e39909713b7c7fb9bee8513f40243c900c6032bd",
+    "src/plugins/prisma-postgres-manager/ConnectionStringStorage.ts": "5137b97158e565785411e7be167f42c333af85d973c57f8f687fe3cb2cff67ff",
+    "src/plugins/prisma-postgres-manager/PrismaDevRepository.ts": "3224c9c53042e09f5bda5e83def88cc5a1bce806e44587f303fbf23262ff90ff",
+    "src/plugins/prisma-postgres-manager/PrismaDevTreeDataProvider.ts": "023593d9dfb0674764470f6b03c72a2836ea1d0c0aff9c56ecbac4bcc3532cac",
+    "src/plugins/prisma-postgres-manager/PrismaPostgresRepository.ts": "b029432639da8e0a8d63fbaa21a0d986f36b45e3b1f005a1d2524d993a0ccf8c",
+    "src/plugins/prisma-postgres-manager/PrismaPostgresTreeDataProvider.ts": "be4e691042a1c3f22de058ca3e79e259b6a5fe41a2fa761a4f1a8e6e199fac92",
+    "src/plugins/prisma-postgres-manager/WorkspaceTokenStorage.ts": "090f7ef4a8e11cbdda014b91e6f9c7cf8e0cb456e8c454a8afc334bd197911b3",
+    "src/plugins/prisma-postgres-manager/ai-tools/PDPAuthLoginTool.ts": "3a2c79da5e86211356f69a5d045198a981a8bf1a974ee57721f1de10452f8799",
+    "src/plugins/prisma-postgres-manager/ai-tools/PDPCreatePPGTool.ts": "8cd526b6e0290a83dcd48bd33f0ab9bf2a9a00ba67df6f280241f8b362fc6d06",
+    "src/plugins/prisma-postgres-manager/commands/createProjectInclDatabase.ts": "5a9e1251b06364477e4a281a1766d2668d691df3c4bc9f27e838ce29581af162",
+    "src/plugins/prisma-postgres-manager/commands/createRemoteDatabase.ts": "271c1f7c3fcd049d1660caf5f78bcb504c08b190bd368668fc1244c6c9e54b74",
+    "src/plugins/prisma-postgres-manager/commands/deleteProject.ts": "416a79fd8dd4bace0e73628aa00042b220a794a6c71f8733567896b24b61160a",
+    "src/plugins/prisma-postgres-manager/commands/deleteRemoteDatabase.ts": "a7163909fd070c3550885cc06163c43398af5401b10542db369d69b30b14d5a5",
+    "src/plugins/prisma-postgres-manager/commands/deployPrismaDevInstance.ts": "56d7f87cea7016f2f812001101be0c19d17c8227507342c1c10ac2c6e8ddfc9d",
+    "src/plugins/prisma-postgres-manager/commands/getRemoteDatabaseConnectionString.ts": "6d45c5f03ec9d8257e954b467d09a814f063f9e9d68a8997e9c97165085aaa30",
+    "src/plugins/prisma-postgres-manager/commands/launchStudio.ts": "57c0df26ff8a32c501cb7dc4d112cf13c6c0f25b612ad0c8592fdedaca58c820",
+    "src/plugins/prisma-postgres-manager/commands/login.ts": "c5e1c42163813d821bc558acf34bea0936a4ca7f24ae758f2e3040576299c1dc",
+    "src/plugins/prisma-postgres-manager/commands/logout.ts": "a3efd7097a60931c69f48cbbd1dfa9f2c2e607a397fab804e60e14b29c88f0b6",
+    "src/plugins/prisma-postgres-manager/index.ts": "2051e661442ec90d11c6d9efc1041171ed91e0593bda4ea608f4f22136c863d5",
+    "src/plugins/prisma-postgres-manager/shared-ui/connectionStringMessage.ts": "7f4894c457b02789fffdf1e97285e81d7ec1a062feb0f2684ed476550f4f3107",
+    "src/plugins/prisma-postgres-manager/shared-ui/handleCommandError.ts": "06ccc047dc70382257ca5400f13b24487afd88ef06004b1c8c6c1ed3f7f49349",
+    "src/plugins/prisma-postgres-manager/shared-ui/pickRegion.ts": "cd67dd4357a2a0c14b17eef8f4e6fd1cf543222c4e520866fc6a6dd30afe932a",
+    "src/plugins/prisma-postgres-manager/shared-ui/pickWorkspace.ts": "2acf015c8de04ef7b641786d77f6ed40da5de69aeccf851010d467fc95ff6cf0",
+    "src/plugins/prisma-postgres-manager/utils/ensureLoggedIn.ts": "ddda9484e366b6449ca1cc60b5a75a06192c78176e5ecfe1f258a81bbeaec6e5",
+    "src/plugins/prisma-studio/commands/launch/getStudioPageHtml.ts": "47b63cfef80feaa5e281c529388d2681e4eee3c795f5aca1defc056499ada1f9",
+    "src/plugins/prisma-studio/commands/launch/openNewStudioTab.ts": "faba081fa62454edbfcd7d98f0d08c79542675d9094fc99ad321d1f2b36aacc7",
+    "src/plugins/prisma-studio/commands/launch/startStudioServer.ts": "b66c3079318c30038bc80ce5c78e267f07e08e18bc9fe6ddeb9498cb63fe66fc",
+    "src/plugins/prisma-studio/commands/launch.ts": "f026feb8ae27df12e83da1d5f0ad55752ab8b9f30bfd56e42549910f46d4c744",
+    "src/plugins/prisma-studio/index.ts": "4d49d636de93aae25db81fd6dfa725615a5a5c54b0352b5f55514178d85c887a",
+    "src/plugins/types.ts": "79c95e41b9f4b75e44fb1f0416dd37ab16ae4edaf597c1c5b21c0ea038d927ad",
+    "src/prisma6Handling.ts": "4ee9e8a0f1fe02f6429ebbaef0fcbb86ea53fcefd5919a99e44ff4ca0dcc94cd",
+    "src/telemetryReporter.ts": "1e9d69598ea1b39a9efabd024378a8223cb2bee4f3ae503580369913384eb3c2",
+    "src/util.ts": "7dc13ea23ca339bea3b758251f03e9f292920e824960fe83319243c3363e2312",
+    "src/workers/prisma6-language-server.ts": "8c87b243098a85a5bb2b3583621ad96e74d50556be60ceefada41fb15f01b8dd",
     "_source": {
-      "repo": "microsoft/vscode",
-      "commit": "cc2c348481a823001d78e67c5082951d9a257005"
+      "repo": "prisma/language-tools",
+      "commit": "9c8f5b88cd7ac0502e76933cb4244c2ed198d3af"
     }
   },
   "vscode-texlab": {
     "esbuild.mjs": "a0af761c1b418c19a1667f4a4e357e38bdbc45c7dd7d2495ac054c7e8dff1f13",
     "package.json": "9a7ec0cda36f7d4473ff365c93c43efcd5621bca7acc3748bf55d69663f5868d",
-    "src/index.ts": "dd5f2535908b0576b6c0160670c059a62b310cbdab0e12f73613efb60454bf1c",
+    "src/index.ts": "235f069219ab8ad890e67db909cede560d897ee1034a39beb7f0920a008a6670",
     "_source": {
       "repo": "latex-lsp/texlab-vscode",
-      "commit": "af63f863217d4222420ae20f1723fdc429c8968c"
+      "commit": "c8d3ecd629616aee74a31ce4280436f9b6ab7343"
     }
   },
-  "vscode-css-ls": {
-    "esbuild.mjs": "ac1846bb5e862458853d0a057855f3f6c1d1f041fa07eb86a0cd5889e4045126",
-    "package.json": "cbbd87b61d23bc9892f213c35ed07f5a10d75be9c76b0f2f1b9d599c8c73a5f4",
-    "src/index.ts": "2b3215aa10f11d8a7178601d4068d80e6090f2357527dc02cc73cbc7aa3cce0f",
+  "vscode-docker": {
+    "esbuild.mjs": "a829710b490cb937e9740e428c14956b71ececd901ded2c0d17f3f13f85beee9",
+    "package.json": "038c74df63294e3fb0e377789e73b0ace54158792d05d376e317b85a8f4d224a",
+    "src/index.ts": "7db626772b103bc127d5ccc533c71ecb3e02a45db260d9fd711818475332aea3",
     "_source": {
-      "repo": "microsoft/vscode",
-      "commit": "396ff629f0fcec277ed6e235e3d5a5a865e0e06c"
+      "repo": "microsoft/vscode-containers",
+      "commit": "ebf491f11c6d4897d453b1ce121fbda00d575b1a"
     }
   },
   "vscode-jq": {
@@ -794,6 +804,37 @@
       "commit": "b3d5ea136fadf5a4cac835df074dc12fcb398b0c"
     }
   },
+  "vscode-taplo": {
+    "esbuild.mjs": "633b5cebe1a7bab6f20a147a60f39e39f5ac81fe440702e4f08e1f85641e1586",
+    "package.json": "aeadb1373b1117df96c9312d7e1592f8cf503267bae3c5b549c7a5bd9ec999d5",
+    "src/client.ts": "b8cc17d5c43bd9f517130801c256efb267307ddea6b8cbde29847ddd6effe508",
+    "src/commands/conversion.ts": "9ef6f4ecbda60322d3b5256953eb513bc09bb04f0b3494e266a8c0cab9c5e4b2",
+    "src/commands/index.ts": "73674d49476808b9e559f36dd244cee816779f4d29c1649632593273c9ade660",
+    "src/commands/schema.ts": "ac820b98b17ea3b6f583ee181ee1f83b88bff0cd4191cfe044c0bf04af5d5b00",
+    "src/extension.ts": "ee25027fd2db962c598df69eca7b15d1e49845091c9eeca10fe37469f28ee1fe",
+    "src/import.d.ts": "e80e2df92cf8a07e70aa4d284e541714a4000812cfff3fba58e4ab06ffb1282c",
+    "src/index.ts": "bfb2b2c17a6dd3353b6a30b07c45fac14ac58f45496105c2b7d211667ce737a4",
+    "src/server-worker.ts": "8f8399f9a764f7882e7f6090565eb44a9b29c8a9591f53f359e0acbb42dc6ac6",
+    "src/server.ts": "04dfd7860ac70f199da8b7394f87fae6487cb0b9a02d7f7b84fcd580e36d1aaa",
+    "src/syntax/comment.ts": "8bfeb4ce7a68ca44b6e6de3c94b390c895c378435c0a06f0a315a0240e9b5669",
+    "src/syntax/composite/array.ts": "d12ace99679a1e26819befa13c63db9f5469047b0cd9f6729f929cc55f255086",
+    "src/syntax/composite/entry.ts": "9abd44391db00511be9cf80297fa7e6046bf825ed60c635e2ed653bbb073de22",
+    "src/syntax/composite/index.ts": "fcccfc8365a00ead03ce57aa8c3c36aac23543ca3667c1e32718490d7e5be5b4",
+    "src/syntax/composite/table.ts": "8c3a8b3aef161c31f2a1eea1a96f4e7bce93b0304d6a49c017b1362510ef86e9",
+    "src/syntax/composite/value.ts": "e53170c46061e5b0dce8cdfd7c1dbd3a5468dab03121132fe517b901f0d9dbce",
+    "src/syntax/index.ts": "550116b27cc95d9483944554f98be0f5171b5fc7d5ba6135a0edccebe4df6428",
+    "src/syntax/literal/boolean.ts": "1533eda3548c4978ee83655ff9481c5d52ed6143a19b5969f38f1d88f7281067",
+    "src/syntax/literal/datetime.ts": "3256fc150620bb830dd58737f6fae4bbb87354cd2b5f1c3a346146fce425aba6",
+    "src/syntax/literal/index.ts": "2c4d494af8438323ff3f2a82710cb1ffe77c62e040b917bdb6b06f6f43991789",
+    "src/syntax/literal/number.ts": "0689daa4fc232442574ebe960b2f26cabadc98ff6fc4125cb1fe460f4dd20205",
+    "src/syntax/literal/string.ts": "df6909e0fc6914bb08a8fe64eacdaca77b26c159a16c7fbe4a497b18b91775da",
+    "src/tomlValidation.ts": "ffd1a496307e938cab291ba6ca80a632aa91f87896ab7dec207d60a10997f08d",
+    "src/util.ts": "3e17bebf68c6346412ae3f988a8e64a0c598a1a67b23c28d1383ef8c33d03649",
+    "_source": {
+      "repo": "tamasfe/taplo",
+      "commit": "08f343be02ce1b20296470396a42f0fa47820449"
+    }
+  },
   "vscode-gitignore": {
     "esbuild.mjs": "75e48ca943490d8c0ccde6d6c9ab5fcbfcd026be89c5972fd7318f1b84230dfe",
     "package.json": "045124db447f2479a097f2c7eaced4af28ff13ee7301f174934b85e68dc33942",
@@ -815,15 +856,6 @@
       "commit": "d4cd4a90bb232b8d861d5f026713519cb12693f1"
     }
   },
-  "vscode-docker": {
-    "esbuild.mjs": "a829710b490cb937e9740e428c14956b71ececd901ded2c0d17f3f13f85beee9",
-    "package.json": "038c74df63294e3fb0e377789e73b0ace54158792d05d376e317b85a8f4d224a",
-    "src/index.ts": "7db626772b103bc127d5ccc533c71ecb3e02a45db260d9fd711818475332aea3",
-    "_source": {
-      "repo": "microsoft/vscode-containers",
-      "commit": "22db362843f4e4b2069f7f4fd9df9d3d1e42bbe4"
-    }
-  },
   "vscode-live-server": {
     "esbuild.mjs": "935f41f24455964c6a1417a67d6aa78603903d96c4ba7f782f60f69379590e82",
     "package.json": "fe644fdabdc5124c4f0e19eac0625467f42e1aa8362163191bb6194b395f3e90",
@@ -842,16 +874,6 @@
       "commit": "4153b4ba737f003804c3d9acbce78ad4fad19b36"
     }
   },
-  "vscode-write-good": {
-    "esbuild.mjs": "ea8e01bd6759cd0dfef35cc0e44a721f93d1e8f308d382185906a073f66c61c1",
-    "package.json": "fb9eacd0dd6f990e54d81405dbaf2e1f25063b16590ff83b60c9c926c0636e23",
-    "src/extension.ts": "4c7257f6d0338aadc9bfea18802ee6e8d4f90aed37b9ca7747c00652f63825ff",
-    "src/linter.ts": "d731a49f9588b87aa180086243a61e1b16c90bd9fe8a6a04de64d76de40b976e",
-    "_source": {
-      "repo": "TravisTheTechie/vscode-write-good",
-      "commit": "c1bf30a5983fd390d63e3d2392f84ca162a72e7b"
-    }
-  },
   "vscode-code-runner": {
     "esbuild.mjs": "a347825d52e648087e26214dec7ecd5d69b9a06c02babd96b361c513be79f920",
     "package.json": "b6545be7be3df340750369f754811805a0577edcfded0830b0fe922ec9216312",
@@ -865,10 +887,20 @@
       "commit": "97af1080d09046e0129acce592f0033ff2df9f26"
     }
   },
+  "vscode-write-good": {
+    "esbuild.mjs": "ea8e01bd6759cd0dfef35cc0e44a721f93d1e8f308d382185906a073f66c61c1",
+    "package.json": "fb9eacd0dd6f990e54d81405dbaf2e1f25063b16590ff83b60c9c926c0636e23",
+    "src/extension.ts": "4c7257f6d0338aadc9bfea18802ee6e8d4f90aed37b9ca7747c00652f63825ff",
+    "src/linter.ts": "d731a49f9588b87aa180086243a61e1b16c90bd9fe8a6a04de64d76de40b976e",
+    "_source": {
+      "repo": "TravisTheTechie/vscode-write-good",
+      "commit": "c1bf30a5983fd390d63e3d2392f84ca162a72e7b"
+    }
+  },
   "vscode-clojure-lsp": {
     "esbuild.mjs": "417528df26d2350b7fe56d0538d6b2eb53742488b791584bb3f7a69c914bb165",
     "package.json": "5b885ec49759c36a4b5b466802f5e4a22567df0116915b6c0c572cde10bdf82f",
-    "src/index.ts": "40dc1146ddde6648d2199d62dce75bee9a026d05bd983f8cea73abca0071920a",
+    "src/index.ts": "0fd4ab66e633ec6e2e120d1bace6c66cd11f7b241a679bc07b75b8d967612c7a",
     "_source": {
       "repo": "dvbeato/vscode-clojure-lsp",
       "commit": "c9b7c258ca94b7f32c42476b7c04721848c40f0f"
@@ -903,16 +935,94 @@
       "commit": "6d1c4f6b20e289d6c15a2f9ad87c47d0b4bbdefc"
     }
   },
-  "vscode-vue2": {
-    "coc-convert.json": "5fe2a69e2d85ebfc374901c4cbd18a4142f52eb63061db6a6ec53354be6b9848",
-    "package.json": "fabf13764b49f848b6c10d7ef70f073fa2c92ee17c28820908a170916feda2f7",
-    "snippets/css.json": "0000000000000000000000000000000000000000000000000000000000000000",
-    "snippets/html.json": "0000000000000000000000000000000000000000000000000000000000000000",
-    "snippets/javascript.json": "0000000000000000000000000000000000000000000000000000000000000000",
-    "snippets/vue.json": "0000000000000000000000000000000000000000000000000000000000000000",
+  "vscode-css-ls": {
+    "esbuild.mjs": "ac1846bb5e862458853d0a057855f3f6c1d1f041fa07eb86a0cd5889e4045126",
+    "package.json": "cbbd87b61d23bc9892f213c35ed07f5a10d75be9c76b0f2f1b9d599c8c73a5f4",
+    "src/index.ts": "2b3215aa10f11d8a7178601d4068d80e6090f2357527dc02cc73cbc7aa3cce0f",
     "_source": {
-      "repo": "xianghongai/vscode-vue2-snippets",
-      "commit": "9a1e249060ff6d09d71f203cc225ae552f28c60a"
+      "repo": "microsoft/vscode",
+      "commit": "106a3a45eec09d92d4a23da89337f25521d73ccd"
+    }
+  },
+  "vscode-bitbake": {
+    "esbuild.mjs": "52f30577da4e71fca14d77d22dbcd9b933d8bf1d23e49ab12d3f303104a7e91d",
+    "package.json": "9732b2f6f3f81d014547a8d0a2cec9b08877ff237b3238ff169fc900b59f57dc",
+    "src/index.ts": "8fc029419fa84eb9ad8b66f7f19ad92e32337d46a1141c03a3262b2a03b8779d",
+    "_source": {
+      "repo": "yoctoproject/vscode-bitbake",
+      "commit": "71358f684a652fe8743d126a285b76655fcfe133"
+    }
+  },
+  "vscode-es7-javascript-react": {
+    "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
+    "package.json": "b7bbb1728e92da6dfd56a67ed6b66458018e104e3736d3314dbcedc7de876c52",
+    "snippets/snippets.json": "16f23c623684edd4d26c439084b3098012f72d0eda308ee6c54b3feebd3de544",
+    "_source": {
+      "repo": "rodrigovallades/vscode-es7-javascript-react-snippets",
+      "commit": "018da751eb32eb63927fbb6276947b4e81f6ca2d"
+    }
+  },
+  "vscode-html-ls": {
+    "esbuild.mjs": "b7f88c3e96928d820b9636c935dee4843637067d47e68c14af5d7ef51a83a896",
+    "package.json": "389b2f66da33b92adf8adbfec1adc09b6075344ae7ff2b8369579ebe30c2dba2",
+    "src/client/src/autoInsertion.ts": "66b699bc8bdf9a3ab930e7e0650e17e70191f2dc15e9da0a82ad544f45653d22",
+    "src/client/src/browser/htmlClientMain.ts": "30b9f4f2cc583249ddb64575d911492e29f8dd38260934ad1bf33017334fd942",
+    "src/client/src/customData.ts": "53706fd008237b9fe5aaea65972e43beecee3f9837f3b806066fc34feeafaee1",
+    "src/client/src/htmlClient.ts": "81d8af2cf3a89b2bfa479d9f25cdb9f923f23b8487ab43b18f15794264591c36",
+    "src/client/src/languageParticipants.ts": "59e4c4ef814405d0f13803bfb71f1b83293964ee3ae497658cf9ee90f5ea5d56",
+    "src/client/src/node/htmlClientMain.ts": "05481e192c72cd1f04a5244550aa153a0d2bcf0d664a735a1d9d85ed0fbbdf8b",
+    "src/client/src/node/nodeFs.ts": "42c128fcbb3c81dddd1f1b7358ee9f4c7f1cfadbde9177d3d669b5a498e0d49b",
+    "src/client/src/requests.ts": "c94112d286893a3ece3d8c678e6f606bbbfa48ae753d2865f3b3764272b8fbcf",
+    "src/index.ts": "1bf5f088e88be0e88a9026d251b3437e4d65b6168af0d378f5644e89de8a0998",
+    "src/server/lib/jquery.d.ts": "a7643a906bd7427edcb32bdabd4e5006ab32ea8becb2f2e24e280cbe04e3805e",
+    "src/server/src/browser/htmlServerMain.ts": "7b91cb569142f9a7d104e177ee980f26577e5a5f5c78b5d482ddf5243eb3b493",
+    "src/server/src/browser/htmlServerWorkerMain.ts": "6cf779c6f929af8c080ab3a47af5f84df835b09ae1d4b6b3eb85a53fff10f1d6",
+    "src/server/src/customData.ts": "71c245f25574cdaf748908d66a9a19060ec73a697fa0dc21c22cd3443f260c7f",
+    "src/server/src/htmlServer.ts": "2806d337aa60c1dbc2082bb1144c49c65234d804dc0721160cd5e68077670229",
+    "src/server/src/languageModelCache.ts": "063ec82a07e94e7bc2197050b27155a5beca9d4c6b019ce4c957e01a54295781",
+    "src/server/src/modes/cssMode.ts": "579949a581fb74ae5a438d0d6c30e038eae268df5fadbb8d0ffae155c48bb7a0",
+    "src/server/src/modes/embeddedSupport.ts": "12d56edee6f90b226249a9e0d3790d3d915ca192218a4d651b623f0313857e98",
+    "src/server/src/modes/formatting.ts": "0dd140cc4b64721cd454d25be7d0fb3e72bbcff9155f8045767fcd81d1784327",
+    "src/server/src/modes/htmlFolding.ts": "7c0a166d1da0c721eb3f1fc91d0bbba01a6762b45f57cf8ea4cecb2d65b2ebc4",
+    "src/server/src/modes/htmlMode.ts": "aff7dfaf4dade09fee33e2730be87a6250836a5d38aef533de9032711ce06ac6",
+    "src/server/src/modes/javascriptLibs.ts": "56fba3f1bb3a5a23f9c97ca705beed192296e28eeaa2d5cd28b34e13b0f53453",
+    "src/server/src/modes/javascriptMode.ts": "a38eaa3b5963763df9450ba516e02ee53b927b010c591e071bb33fd450093d54",
+    "src/server/src/modes/javascriptSemanticTokens.ts": "7b936047026a72614f70be9590c11c49f8743771b4905bb3a6606a5217cd9947",
+    "src/server/src/modes/languageModes.ts": "d9e6503c0ee9cd0314e9ba5b6985495ab1ee21a512204e1bf64a9842b2b44704",
+    "src/server/src/modes/selectionRanges.ts": "2f81d43a414fa27996d70f231c2b29cac2b2961c42e1831d2361117e6042dfc3",
+    "src/server/src/modes/semanticTokens.ts": "6fab408f6c7fb4193ccbae1d8e9317728ac41c359804fb09477b992a3e4edb85",
+    "src/server/src/node/htmlServerMain.ts": "5d6a1bad66efa6013e250e13f657acfe1f17753fe67136f4b420f1bd0cece5f1",
+    "src/server/src/node/htmlServerNodeMain.ts": "97c48184214e6738119a03b85179be2246b797c2a09f7b8ecfb2b632e339eef9",
+    "src/server/src/node/nodeFs.ts": "74e4c502362ebba5f209a4e877901d15d436610d3e6719142d5a1df3852d4952",
+    "src/server/src/requests.ts": "4318bc2ba1a72eb3525e3923ca266ba819e99b1cad097ebe927fdf953b6d3cfe",
+    "src/server/src/test/completions.test.ts": "dbb245137450b4408a8d38faae89617cc288bf2fcc1cc2ae17c8c5579b3853b5",
+    "src/server/src/test/documentContext.test.ts": "34c7edb965720f64a27d44e332e73921df118c2639ab2ebb73f16114cc8011bc",
+    "src/server/src/test/embedded.test.ts": "8aefcc009188592a1d6ff377bd4a5322b18ae668c00f7180d2d323b8159bb2f3",
+    "src/server/src/test/folding.test.ts": "b09f64ee6886014d7e4097297751786cc5baa9f3a2e207fd8b7b0dc122a2b952",
+    "src/server/src/test/formatting.test.ts": "ac24a30333f658c4c82b20f4e94b2f87ad77d299242f20e94e38fc034f1da5a6",
+    "src/server/src/test/hover.test.ts": "6ae3bf0d8eb08138bc88a3977ff8ba1c06402d0c6aeb12b770a9e7955c22d01d",
+    "src/server/src/test/javascriptMode.test.ts": "3a0ab5fb06ced544439068b45c32b591dbc2a290ef07eda1c8b9a07bebb975f3",
+    "src/server/src/test/rename.test.ts": "3c73d5f2a8568f488b4c04825909ae10a4220d8d9555a27760e18cbc42cd5419",
+    "src/server/src/test/selectionRanges.test.ts": "acd625ef5faaea3b1480ac102a1f272fc22bb437c869f528a7061fc541f17fb3",
+    "src/server/src/test/semanticTokens.test.ts": "b09c520a4229fe971acfd11d4722ffc021951ee8f7493e18843f98570277f6ca",
+    "src/server/src/test/words.test.ts": "8d3432b31b4a9f69b3dfd074920389acc523c55c1da8e34877c0184bf7415f2f",
+    "src/server/src/utils/arrays.ts": "fd0c3990422ded99b480f42f18a56cce1d94b6535651c791c9f691c8795f8763",
+    "src/server/src/utils/documentContext.ts": "7ae74db3945036bf1d59e1ab96cc3866f17b113864c51d33dc26598e552a8b4a",
+    "src/server/src/utils/positions.ts": "d6d417ae4fc846016b9de9a9a6090dd4b063c2bf8558672dcb6845ab701656e7",
+    "src/server/src/utils/runner.ts": "daf2a8aad93d8f560b649ffc110580ff27e0348cc8112a66a5c4a792398300e0",
+    "src/server/src/utils/strings.ts": "b5c399d7f18e4b5704d4dca8beefa527b29e9fc653639610d48ecc75b33dca19",
+    "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
+    "_source": {
+      "repo": "microsoft/vscode",
+      "commit": "106a3a45eec09d92d4a23da89337f25521d73ccd"
+    }
+  },
+  "vscode-es7-react-snippets": {
+    "coc-convert.json": "c7962edc5b58c89d5465340a13265d8342135651113ccd15a1bb28721870318b",
+    "package.json": "8d3b152e3a9b18023178c271f4c90c4ec3b39830bed130ae3d6204916d68cce8",
+    "_source": {
+      "repo": "r5n-labs/vscode-react-javascript-snippets",
+      "commit": "07f8c60079172f56b81df328e6a1f651063304ec"
     }
   },
   "vscode-vue3-snippets-for": {
@@ -927,21 +1037,16 @@
       "commit": "aad819e64e13f19a0b815e08f05db907c23bb57c"
     }
   },
-  "vscode-es7-javascript-react": {
-    "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
-    "package.json": "b7bbb1728e92da6dfd56a67ed6b66458018e104e3736d3314dbcedc7de876c52",
-    "snippets/snippets.json": "16f23c623684edd4d26c439084b3098012f72d0eda308ee6c54b3feebd3de544",
+  "vscode-vue2": {
+    "coc-convert.json": "5fe2a69e2d85ebfc374901c4cbd18a4142f52eb63061db6a6ec53354be6b9848",
+    "package.json": "fabf13764b49f848b6c10d7ef70f073fa2c92ee17c28820908a170916feda2f7",
+    "snippets/css.json": "0000000000000000000000000000000000000000000000000000000000000000",
+    "snippets/html.json": "0000000000000000000000000000000000000000000000000000000000000000",
+    "snippets/javascript.json": "0000000000000000000000000000000000000000000000000000000000000000",
+    "snippets/vue.json": "0000000000000000000000000000000000000000000000000000000000000000",
     "_source": {
-      "repo": "rodrigovallades/vscode-es7-javascript-react-snippets",
-      "commit": "018da751eb32eb63927fbb6276947b4e81f6ca2d"
-    }
-  },
-  "vscode-es7-react-snippets": {
-    "coc-convert.json": "c7962edc5b58c89d5465340a13265d8342135651113ccd15a1bb28721870318b",
-    "package.json": "8d3b152e3a9b18023178c271f4c90c4ec3b39830bed130ae3d6204916d68cce8",
-    "_source": {
-      "repo": "r5n-labs/vscode-react-javascript-snippets",
-      "commit": "07f8c60079172f56b81df328e6a1f651063304ec"
+      "repo": "xianghongai/vscode-vue2-snippets",
+      "commit": "9a1e249060ff6d09d71f203cc225ae552f28c60a"
     }
   },
   "vscode-full-react": {
@@ -953,16 +1058,6 @@
       "commit": "41cb637cad9dfa5cf8f342a9ae87362c29eea862"
     }
   },
-  "vscode-js-jsx-snippets": {
-    "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
-    "package.json": "9bc997c45395b3753c260981b85c8dba741dafef9d6e12a01699f65081bc50bb",
-    "snippets/javascript-snippets.json": "69f5b485fb721761579722070e273bd9f3672ff283dfbf203119ebaf60b1f5a4",
-    "snippets/typescript-snippets.json": "b4a4428abd4071a0ab1d3d4c2ddd3d32359db4453af809acce5acbaece149cd8",
-    "_source": {
-      "repo": "skyran1278/js-jsx-snippets",
-      "commit": "5dc80e535367c1a021976e4af32d66bec4f892a3"
-    }
-  },
   "vscode-react-native-redux-snippets": {
     "coc-convert.json": "dcfe501e95385b2a0df1391679ec5a4b97bda1b025ee674f3cc0754d5205445b",
     "package.json": "ca042c0df5185e949df1dce14d284c8b859a3383a1e7114a8641ac558ddc138a",
@@ -972,13 +1067,14 @@
       "commit": "c3a5165546caea90ccc3caf07ae073e3f8d3573f"
     }
   },
-  "vscode-bitbake": {
-    "esbuild.mjs": "52f30577da4e71fca14d77d22dbcd9b933d8bf1d23e49ab12d3f303104a7e91d",
-    "package.json": "9732b2f6f3f81d014547a8d0a2cec9b08877ff237b3238ff169fc900b59f57dc",
-    "src/index.ts": "8fc029419fa84eb9ad8b66f7f19ad92e32337d46a1141c03a3262b2a03b8779d",
+  "vscode-js-jsx-snippets": {
+    "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
+    "package.json": "9bc997c45395b3753c260981b85c8dba741dafef9d6e12a01699f65081bc50bb",
+    "snippets/javascript-snippets.json": "69f5b485fb721761579722070e273bd9f3672ff283dfbf203119ebaf60b1f5a4",
+    "snippets/typescript-snippets.json": "b4a4428abd4071a0ab1d3d4c2ddd3d32359db4453af809acce5acbaece149cd8",
     "_source": {
-      "repo": "yoctoproject/vscode-bitbake",
-      "commit": "d25a097e421ccd3c906a9ee1dc8e4d7aa4b0bffa"
+      "repo": "skyran1278/js-jsx-snippets",
+      "commit": "5dc80e535367c1a021976e4af32d66bec4f892a3"
     }
   },
   "vscode-react-redux-react-router": {
@@ -999,14 +1095,13 @@
       "commit": "9c54fbfbb4e299035439f32d63ed50fd70832fd5"
     }
   },
-  "vscode-simple-react-snippets": {
-    "coc-convert.json": "021d9753316d950bfb182f2b3d60a032856dc723c603f84e9285d7f01640162a",
-    "package.json": "d0603a45776890c5882514c3d6bd028dc19937357659fe50614a5ef7e2183bd5",
-    "snippets/snippets-ts.json": "7e52996cade44d68faf6c2e12599e96a48ffa4e74dbde841c1d6f9978e57806c",
-    "snippets/snippets.json": "f90ae4ad2e337195f56aa9dd311be7998d04f7f9c07e1e133d77b5b3104040df",
+  "vscode-typescript-react-snippets": {
+    "coc-convert.json": "858270df07179400213a541f8a1f7c87b8c4b171719c2c2917d3b273682ba7fc",
+    "package.json": "67cbb73db73f160dc81496162d7a5f65e2c0dcc919853b6c8e612aa5d2d2a6fd",
+    "snippets/snippets.json": "3e66b12276dfa6519de218b78a1210c9074e742fb784031011918a07b649b1bc",
     "_source": {
-      "repo": "burkeholland/simple-react-snippets",
-      "commit": "b85240f17d6622648cbd1e285c161334fb1730bd"
+      "repo": "infeng/vscode-react-typescript",
+      "commit": "100fbb39a2207fc8cd6c4f99afd4773f5d83a7a4"
     }
   },
   "vscode-styled-components-snippets": {
@@ -1018,21 +1113,22 @@
       "commit": "0d541dc25bbc54e653ec58b27617bc39443a4560"
     }
   },
-  "vscode-typescript-react-snippets": {
-    "coc-convert.json": "858270df07179400213a541f8a1f7c87b8c4b171719c2c2917d3b273682ba7fc",
-    "package.json": "67cbb73db73f160dc81496162d7a5f65e2c0dcc919853b6c8e612aa5d2d2a6fd",
-    "snippets/snippets.json": "3e66b12276dfa6519de218b78a1210c9074e742fb784031011918a07b649b1bc",
-    "_source": {
-      "repo": "infeng/vscode-react-typescript",
-      "commit": "100fbb39a2207fc8cd6c4f99afd4773f5d83a7a4"
-    }
-  },
   "vscode-next.js": {
     "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
     "package.json": "531bb8e66b0ef2450956b678932bb259e29857e6c80881dc5c474f4fcd74c456",
     "_source": {
       "repo": "pulkitgangwar/next.js-snippets",
       "commit": "17da94a91993145177d13207c8f6512938208390"
+    }
+  },
+  "vscode-simple-react-snippets": {
+    "coc-convert.json": "021d9753316d950bfb182f2b3d60a032856dc723c603f84e9285d7f01640162a",
+    "package.json": "d0603a45776890c5882514c3d6bd028dc19937357659fe50614a5ef7e2183bd5",
+    "snippets/snippets-ts.json": "7e52996cade44d68faf6c2e12599e96a48ffa4e74dbde841c1d6f9978e57806c",
+    "snippets/snippets.json": "f90ae4ad2e337195f56aa9dd311be7998d04f7f9c07e1e133d77b5b3104040df",
+    "_source": {
+      "repo": "burkeholland/simple-react-snippets",
+      "commit": "b85240f17d6622648cbd1e285c161334fb1730bd"
     }
   },
   "vscode-nextjs-snippets": {
@@ -1043,6 +1139,16 @@
     "_source": {
       "repo": "ijsto/reactnextjssnippets",
       "commit": "002b6a86b989ca5473814ecd249744b0cd1e9371"
+    }
+  },
+  "vscode-angular-2": {
+    "coc-convert.json": "f30b4cd12bbfaa9241b71eb42a5ff7fa9fa52918b8a2c43c67e842e7836d9b44",
+    "package.json": "f71414f4a84c4184930e04313e6d57ba31c0c99c6bad73b929ac312ae769a5f7",
+    "snippets/html.json": "89905f2c253f640ff898ea8799cd8dfee63f374fee37841add8d87ba4a5d2eca",
+    "snippets/typescript.json": "a18e308847ea69a1ae4d3ee6e2effaab2f5564889586b8d2cc9818e8d58ab257",
+    "_source": {
+      "repo": "danwahlin/angular-snippets",
+      "commit": "bc221211de69fc3f1483316ac5fcc9f59608d362"
     }
   },
   "vscode-solidjs-snippets": {
@@ -1059,35 +1165,6 @@
       "commit": "b02b3cd966f54bc5eb148618f4960f24c727cf48"
     }
   },
-  "vscode-tinymist": {
-    "esbuild.mjs": "7f8daeb2738bef8c10749ac47366910986422e30db026df99a4e1e16413281fe",
-    "package.json": "07dca886fb43c63f005897b28e6b1726d43fc53174eeb3054c37fd266e62d492",
-    "src/index.ts": "7d22c73a6605c39d28d71d8a3d7e9ed682d65df9eb38b4a06a0791b5a6233942",
-    "_source": {
-      "repo": "Myriad-Dreamin/tinymist",
-      "commit": "6dcee3285f7eb4af51e3b1efc6e664096fbfcb1f"
-    }
-  },
-  "vscode-angular-2": {
-    "coc-convert.json": "f30b4cd12bbfaa9241b71eb42a5ff7fa9fa52918b8a2c43c67e842e7836d9b44",
-    "package.json": "f71414f4a84c4184930e04313e6d57ba31c0c99c6bad73b929ac312ae769a5f7",
-    "snippets/html.json": "89905f2c253f640ff898ea8799cd8dfee63f374fee37841add8d87ba4a5d2eca",
-    "snippets/typescript.json": "a18e308847ea69a1ae4d3ee6e2effaab2f5564889586b8d2cc9818e8d58ab257",
-    "_source": {
-      "repo": "danwahlin/angular-snippets",
-      "commit": "bc221211de69fc3f1483316ac5fcc9f59608d362"
-    }
-  },
-  "vscode-angular-bootstrap-code": {
-    "coc-convert.json": "eba84e109889d3b2ee06a0df4cf60a248cad8d0e922c4cb7b234ca62d89c4974",
-    "package.json": "a88c975e8efe22e0c2f32d9eaaf8870416714952dafe21b9668aa9dc3d1907be",
-    "snippets/html-snippets.json": "6500849345b49950c1aa389f9801fae1de5f794e83def40b5ef6aa2012afac34",
-    "snippets/js-snippets.json": "f0cace2255582c11468f286f12f27b36329cadb7162a22f96b4ff4b14fc4064b",
-    "_source": {
-      "repo": "herrherrmann/angular-bootstrap-code",
-      "commit": "3cc48c7bcf410c7167a00e0ceeec77b1b20afea9"
-    }
-  },
   "vscode-angular": {
     "coc-convert.json": "5565751d15f2827e46bee621795b5c62e6e8a7cfb797c00aeb77f9cbc86c21ba",
     "package.json": "99d6ec870441deb68ee6f97e8d5cf9fb23a57537d48686b76239ef7c547f27fd",
@@ -1101,15 +1178,23 @@
       "commit": "6a438919d30cd8507b7096afc52ec65e16c3e7a7"
     }
   },
-  "vscode-angular-ngrx-snippets": {
-    "coc-convert.json": "b2c13472a61fcfd5af1d464d601ac9eceb7edafd9401da99068a586d5105a638",
-    "package.json": "0a9ea8752df1cd46c9168036850d6a9cf765a89ac084c087600b84ae8de2692c",
-    "snippets/html.json": "14ba71460e9dc6494144fbd38222e5cb1348020ebc462363be8ba3d593e33b19",
-    "snippets/json.json": "f8f03b09016163700944aa47f19279fa39f1c7ba6f4c153d96e6a64cfff6a782",
-    "snippets/typescript.json": "7eb212f27ff391b9bcfda1340b4861a68cc5c998671c70d0178a1243d0cb1708",
+  "vscode-angular2-test": {
+    "coc-convert.json": "4c0eab54e86e3453d0e72f47773ab62625d24cd4352f09b1ce1137e4c8b196a2",
+    "package.json": "b4d7f1270dd12e3b95b49c96ccce7f8d135c3165264a2bffc21c99391cd8a7b9",
+    "snippets/typescript.json": "b0a6a4cc2039af20fe031f507834aaf0100a473a5f8470dc416aa6443984988c",
     "_source": {
-      "repo": "BeastCode/VSCode-Angular-TypeScript-Snippets",
-      "commit": "64059a59039905bad17f1900f4b28c253e648125"
+      "repo": "marinho/vscode-angular2-test-snippets",
+      "commit": "95f97b94c2bdd4ccdcccb72b6449bbd0f55618ea"
+    }
+  },
+  "vscode-angular-bootstrap-code": {
+    "coc-convert.json": "eba84e109889d3b2ee06a0df4cf60a248cad8d0e922c4cb7b234ca62d89c4974",
+    "package.json": "a88c975e8efe22e0c2f32d9eaaf8870416714952dafe21b9668aa9dc3d1907be",
+    "snippets/html-snippets.json": "6500849345b49950c1aa389f9801fae1de5f794e83def40b5ef6aa2012afac34",
+    "snippets/js-snippets.json": "f0cace2255582c11468f286f12f27b36329cadb7162a22f96b4ff4b14fc4064b",
+    "_source": {
+      "repo": "herrherrmann/angular-bootstrap-code",
+      "commit": "3cc48c7bcf410c7167a00e0ceeec77b1b20afea9"
     }
   },
   "vscode-angular1": {
@@ -1122,13 +1207,35 @@
       "commit": "f6d62364534ddb6fcd3dfea9d1944dd50df2f4d5"
     }
   },
-  "vscode-angular2-test": {
-    "coc-convert.json": "4c0eab54e86e3453d0e72f47773ab62625d24cd4352f09b1ce1137e4c8b196a2",
-    "package.json": "b4d7f1270dd12e3b95b49c96ccce7f8d135c3165264a2bffc21c99391cd8a7b9",
-    "snippets/typescript.json": "b0a6a4cc2039af20fe031f507834aaf0100a473a5f8470dc416aa6443984988c",
+  "vscode-angular-ngrx-snippets": {
+    "coc-convert.json": "b2c13472a61fcfd5af1d464d601ac9eceb7edafd9401da99068a586d5105a638",
+    "package.json": "0a9ea8752df1cd46c9168036850d6a9cf765a89ac084c087600b84ae8de2692c",
+    "snippets/html.json": "14ba71460e9dc6494144fbd38222e5cb1348020ebc462363be8ba3d593e33b19",
+    "snippets/json.json": "f8f03b09016163700944aa47f19279fa39f1c7ba6f4c153d96e6a64cfff6a782",
+    "snippets/typescript.json": "7eb212f27ff391b9bcfda1340b4861a68cc5c998671c70d0178a1243d0cb1708",
     "_source": {
-      "repo": "marinho/vscode-angular2-test-snippets",
-      "commit": "95f97b94c2bdd4ccdcccb72b6449bbd0f55618ea"
+      "repo": "BeastCode/VSCode-Angular-TypeScript-Snippets",
+      "commit": "64059a59039905bad17f1900f4b28c253e648125"
+    }
+  },
+  "vscode-bootstrap-3": {
+    "coc-convert.json": "2e0400bae763e597e3f69134ee6c7711a3b45bf89aa5014dc007ad30c1266cbe",
+    "package.json": "7fac3efee267ee397d255fbe90a9d3fc387e8e1a75aecc292e12fd2f5bb84c9f",
+    "snippets/snippets.json": "a7a7f131408d7acdd8fbb1e253752a99b460929193f37af102d3cdf3079dbe4c",
+    "_source": {
+      "repo": "wcwhitehead/bootstrap-3-snippets",
+      "commit": "ac234a0e3701a44cbdf66e786e98a10c7a61ac86"
+    }
+  },
+  "vscode-svelte-snippets": {
+    "coc-convert.json": "bfeb2e7f0407a3f10676f7a74a42fc15a524a9dca4b9d38ad556d8b77a7d3ea8",
+    "package.json": "3a790d99d92f757f23a16d2436655e6d5bee334e286d6032fe78ab658e282acf",
+    "snippets/svelte-script.json": "c8497d009e679f60d5e09c75fa9b4c9632c350848b3240ac9c142ee5ae1df94a",
+    "snippets/svelte-style.json": "0679e4b3305c1dde1319f6dbeae94dfe453edcd119eb57abc66b6c7785f51fd4",
+    "snippets/svelte.json": "4bde2f620e80e59f3494d8d85acc0f533805a7ee523056be5ad59fc2a4062dd5",
+    "_source": {
+      "repo": "ryanyang52/vscode-svelte-snippets",
+      "commit": "3647de1e4c8a8c6832005792b79ac9d1448dcf05"
     }
   },
   "vscode-svelte-2": {
@@ -1151,41 +1258,12 @@
       "commit": "2c03a621a7e93ef68e103200568817515972240a"
     }
   },
-  "vscode-svelte-snippets": {
-    "coc-convert.json": "bfeb2e7f0407a3f10676f7a74a42fc15a524a9dca4b9d38ad556d8b77a7d3ea8",
-    "package.json": "3a790d99d92f757f23a16d2436655e6d5bee334e286d6032fe78ab658e282acf",
-    "snippets/svelte-script.json": "c8497d009e679f60d5e09c75fa9b4c9632c350848b3240ac9c142ee5ae1df94a",
-    "snippets/svelte-style.json": "0679e4b3305c1dde1319f6dbeae94dfe453edcd119eb57abc66b6c7785f51fd4",
-    "snippets/svelte.json": "4bde2f620e80e59f3494d8d85acc0f533805a7ee523056be5ad59fc2a4062dd5",
-    "_source": {
-      "repo": "ryanyang52/vscode-svelte-snippets",
-      "commit": "3647de1e4c8a8c6832005792b79ac9d1448dcf05"
-    }
-  },
-  "vscode-bootstrap-3": {
-    "coc-convert.json": "2e0400bae763e597e3f69134ee6c7711a3b45bf89aa5014dc007ad30c1266cbe",
-    "package.json": "7fac3efee267ee397d255fbe90a9d3fc387e8e1a75aecc292e12fd2f5bb84c9f",
-    "snippets/snippets.json": "a7a7f131408d7acdd8fbb1e253752a99b460929193f37af102d3cdf3079dbe4c",
-    "_source": {
-      "repo": "wcwhitehead/bootstrap-3-snippets",
-      "commit": "ac234a0e3701a44cbdf66e786e98a10c7a61ac86"
-    }
-  },
   "vscode-javascript": {
     "coc-convert.json": "08ffb12836d98eb9152847cb12461dade43dcdf24637271924e28b3eb60a0737",
     "package.json": "b05fc2a1302b574c2b3b948999a02322834e565d58261b0ca7c12f16011c341f",
     "_source": {
       "repo": "nathanchapman/vscode-javascript-snippets",
       "commit": "22f2503e27e11f54e226a033086626d166d6f432"
-    }
-  },
-  "vscode-node": {
-    "coc-convert.json": "f41bc30587fe80d961fa8e5cc1395576bdb27752da8475031c0b881b83ddf75d",
-    "package.json": "86f7fe3bec05b078cbc69fd416b7dd4e872636da5595a75c695dbd550f921552",
-    "snippets/snippets.json": "626941e7b27a78033ee0fdc7719b58a9f19391218cdfd6c47e21173ceccaf730",
-    "_source": {
-      "repo": "softchris/node-snippets",
-      "commit": "8b2cb2ddb6696de5e1e9c682f90cc8042a1c131f"
     }
   },
   "vscode-javascript-snippets": {
@@ -1195,15 +1273,6 @@
     "_source": {
       "repo": "xabikos/vscode-javascript",
       "commit": "cec7ed6cb44ae354df02bbd367b1e5a005978b1a"
-    }
-  },
-  "vscode-bootstrap5-snippets": {
-    "coc-convert.json": "438028cbe9a5e70dc47edfcd4637d1fde35434ce9fa30884e7c945ecc461f5d8",
-    "package.json": "c3e259b767136b108ff6ebb16fccc32553a819c582401b46928d8860cb0d53df",
-    "snippets/bootstrap.json": "ea6d640973a9cca8a3eaa98c67180729ddff2f3dadede61736622ac0cd02082e",
-    "_source": {
-      "repo": "HansUXdev/B5-SNIPPETS",
-      "commit": "bb01a5db9fb847d40445899aeeb24280223111d7"
     }
   },
   "vscode-node-js": {
@@ -1224,6 +1293,23 @@
     "_source": {
       "repo": "capaj/vscode-standardjs-snippets",
       "commit": "76a82d459e2c1c027a4b7aeb63cc9f69616e0a78"
+    }
+  },
+  "vscode-django": {
+    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
+    "package.json": "976af195d671a917089aca72dca022bf9d88e64039f36ca8cbae851f4f644fd7",
+    "snippets/django-snippets.json": "850d68d1014579cb30526f7a12df5c53e7fcbfd2a11513f6f7fb13ef5b29143f",
+    "_source": {
+      "repo": "iambibhas/vscode-django-snippets",
+      "commit": "df45c956c8cf04b90c4b8e6e13ca4c59bc9eff9d"
+    }
+  },
+  "vscode-fastapi-snippets": {
+    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
+    "package.json": "8b50b4f75303792da9597fc5ae946d1c363e638a05d01fa4213ed715d15cf8cf",
+    "_source": {
+      "repo": "damildrizzy/fastapi-snippets",
+      "commit": "ff43c35af812821e0cc9167e5d8801d2e77dba3c"
     }
   },
   "vscode-djaneiro": {
@@ -1257,12 +1343,13 @@
       "commit": "f1386bf938cd4d3ca4da190961f4202ce97a8cbd"
     }
   },
-  "vscode-fastapi-snippets": {
-    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
-    "package.json": "8b50b4f75303792da9597fc5ae946d1c363e638a05d01fa4213ed715d15cf8cf",
+  "vscode-node": {
+    "coc-convert.json": "f41bc30587fe80d961fa8e5cc1395576bdb27752da8475031c0b881b83ddf75d",
+    "package.json": "86f7fe3bec05b078cbc69fd416b7dd4e872636da5595a75c695dbd550f921552",
+    "snippets/snippets.json": "626941e7b27a78033ee0fdc7719b58a9f19391218cdfd6c47e21173ceccaf730",
     "_source": {
-      "repo": "damildrizzy/fastapi-snippets",
-      "commit": "ff43c35af812821e0cc9167e5d8801d2e77dba3c"
+      "repo": "softchris/node-snippets",
+      "commit": "8b2cb2ddb6696de5e1e9c682f90cc8042a1c131f"
     }
   },
   "vscode-flask": {
@@ -1276,6 +1363,15 @@
       "commit": "db0a50c214b541c5514cdfcae221bdd236cd39d1"
     }
   },
+  "vscode-pygame-snippets": {
+    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
+    "package.json": "074150df0f623879e19f9af336902fa0401532240c648b453c5f306fad4d687c",
+    "snippets/pygame.json": "ba785082e300942c46c91f93f04c249f8c4a667544016278c71d9f1f24aed329",
+    "_source": {
+      "repo": "tushortz/vscode-Pygame-Snippets",
+      "commit": "87cbf48783fa3875bb437706b51cc90831c383da"
+    }
+  },
   "vscode-opencv-snippets": {
     "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
     "package.json": "d06c176f29a6aebeb2ad371ac18fcf3e408bf6af15833a94157324048cbdfa39",
@@ -1285,24 +1381,6 @@
     "_source": {
       "repo": "gsGupta11/vscode-OpencvSnippets",
       "commit": "09a834f3fcc7159fb307aadd5e704f1a75df31ee"
-    }
-  },
-  "vscode-django": {
-    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
-    "package.json": "976af195d671a917089aca72dca022bf9d88e64039f36ca8cbae851f4f644fd7",
-    "snippets/django-snippets.json": "850d68d1014579cb30526f7a12df5c53e7fcbfd2a11513f6f7fb13ef5b29143f",
-    "_source": {
-      "repo": "iambibhas/vscode-django-snippets",
-      "commit": "df45c956c8cf04b90c4b8e6e13ca4c59bc9eff9d"
-    }
-  },
-  "vscode-pygame-snippets": {
-    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
-    "package.json": "074150df0f623879e19f9af336902fa0401532240c648b453c5f306fad4d687c",
-    "snippets/pygame.json": "ba785082e300942c46c91f93f04c249f8c4a667544016278c71d9f1f24aed329",
-    "_source": {
-      "repo": "tushortz/vscode-Pygame-Snippets",
-      "commit": "87cbf48783fa3875bb437706b51cc90831c383da"
     }
   },
   "vscode-python-snippet-pack": {
@@ -1324,29 +1402,12 @@
       "commit": "6cdf65101dfaf66609fa94387c57b12282d7ac77"
     }
   },
-  "vscode-tensorflow2snippets": {
-    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
-    "package.json": "5f85163ab89ecddee0a479c155a9131cab2a9d41e199ce0972259a5389dbf02a",
-    "src/snippets.json": "12b2f54ccfa9b26f85b6e998b901d96c6b22e81484450fc96bb8f2b9af8a21a4",
-    "_source": {
-      "repo": "changkaiyan/tensorflow2snippets",
-      "commit": "b7867b484ec1dc466f580af25857935bb3ea688e"
-    }
-  },
   "vscode-snp-pandas-basic": {
     "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
     "package.json": "1fef417124df318bbf20dddfda9997e0ec1ac963e35e23b67fd10e66cbf26eda",
     "_source": {
       "repo": "snippington/snp-pandas-basic",
       "commit": "ae21e0497c910273b91672a0d587df2215fd294d"
-    }
-  },
-  "vscode-tkinter": {
-    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
-    "package.json": "4ebea762cdf639470ae8f633f41e36245ffd6f424776d5eb00a3154344d2479d",
-    "_source": {
-      "repo": "lunaluvgood/tkinter-snippets",
-      "commit": "9d385d360802848ed754ec86f86f323df83019bd"
     }
   },
   "vscode-python-snippet-pack-2.0": {
@@ -1378,6 +1439,32 @@
       "commit": "a37c28b71ba740e330554c7efeabc0909a0ce55c"
     }
   },
+  "vscode-tkinter": {
+    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
+    "package.json": "4ebea762cdf639470ae8f633f41e36245ffd6f424776d5eb00a3154344d2479d",
+    "_source": {
+      "repo": "lunaluvgood/tkinter-snippets",
+      "commit": "9d385d360802848ed754ec86f86f323df83019bd"
+    }
+  },
+  "vscode-tensorflow2snippets": {
+    "coc-convert.json": "4860341abe7e0e1f9a761f3660edbc269c4088ccf6c9015372a9ee731ab7fd38",
+    "package.json": "5f85163ab89ecddee0a479c155a9131cab2a9d41e199ce0972259a5389dbf02a",
+    "src/snippets.json": "12b2f54ccfa9b26f85b6e998b901d96c6b22e81484450fc96bb8f2b9af8a21a4",
+    "_source": {
+      "repo": "changkaiyan/tensorflow2snippets",
+      "commit": "b7867b484ec1dc466f580af25857935bb3ea688e"
+    }
+  },
+  "vscode-phpstorm-snippets-for": {
+    "coc-convert.json": "0afdda769b41970712eb60f1856d07b9b7d61b432e050a90f39697f6d5637732",
+    "package.json": "5d36f7c68ed93e6cb079efe8ceeee32b35fc85529594e39add8bbcf1160afb9d",
+    "snippets/snippets.json": "15bb393b514e5dfb672ebe5347436c570a51b255b32f80f00ea66f55c06bba84",
+    "_source": {
+      "repo": "phiterf/phpstorm-snippets-for-vscode",
+      "commit": "eeffdbf774ad5ce91eb9cddaec321729c7eb86ac"
+    }
+  },
   "vscode-wordpress-toolbox": {
     "coc-convert.json": "88d760be20f995e3126ce637838d5be74742b6f890629a4177fd0c7945ecc321",
     "package.json": "fafc27519d8444fbf7d08e0dfa466caaa0e8025aa150113f1147284e3da1e345",
@@ -1385,26 +1472,6 @@
     "_source": {
       "repo": "jason-pomerleau/vscode-wordpress-toolbox",
       "commit": "f1875ed43b44238a7052c3f677fdcc33aede126d"
-    }
-  },
-  "vscode-php-awesome": {
-    "coc-convert.json": "000012b14b9d0c698d4724e6104ee01e4927d9b3b6852259f18e1fa18c22ce3f",
-    "package.json": "81d9a38419a40d89ea65ca39934ab0beca3fcaf17f216ffd051f5f7cb538bb6d",
-    "snippets/array.json": "43178f834181be58dc7d24561ff20ff8d966b3d3ce34cdde4bbc44c559b871e1",
-    "snippets/class.json": "c74d5822bff1ca55bcb619cb5c75371cd759f3af8341e5a5894f0f69cf95c4ce",
-    "snippets/control.json": "0c3c3965b3fd60773bda31ab5b2acad92b6548a4a97b79572c341ba4ed49e202",
-    "snippets/error.json": "70f42d19b793ce2afa716ebd6715df111c6e47374c569752c5c3d980f8610432",
-    "snippets/function.json": "5d59feb1ff5813193eb7a222e192f2d0ec5770fd82720c150963b05398ffb336",
-    "snippets/function.php5.json": "5d712a3922208bd31a87c12d8e32064a2540f6bff6f3db8808cf32a02d328d2c",
-    "snippets/globalvar.json": "874bea867e341458db9a52c970d4d8b837c6f155d67c5073f1d35e846683adab",
-    "snippets/loop.json": "8350c57f061dfda7853f138356c8a75775aeae049ecd0d10e1ea05ca0d54a659",
-    "snippets/method.json": "843ed450e737bab6b7051a9a33dc18ab471483fa25a024d72126e021a7e4061a",
-    "snippets/method.php5.json": "0656865edf9466b9a3560f52b57cb8943be5c9f15b063341a2bc39d42eee53a3",
-    "snippets/statement.json": "c318d3b1c4876214519e5de5f323cde8f630dfd17b71481204e95035cd74877a",
-    "snippets/tag.json": "0c37b287d9bbbb504386951124e60ba21d72aeb4b26a1261f11bc1e3e1c48901",
-    "_source": {
-      "repo": "h4kst3r/php-awesome-snippets",
-      "commit": "df0fa89381b2c1b3af5fe128dafabf2240e1d266"
     }
   },
   "vscode-laravel5-snippets": {
@@ -1443,24 +1510,6 @@
       "commit": "c47f80f835d273e10f919a51aa7e1cbd436f60cd"
     }
   },
-  "vscode-phpstorm-snippets-for": {
-    "coc-convert.json": "0afdda769b41970712eb60f1856d07b9b7d61b432e050a90f39697f6d5637732",
-    "package.json": "5d36f7c68ed93e6cb079efe8ceeee32b35fc85529594e39add8bbcf1160afb9d",
-    "snippets/snippets.json": "15bb393b514e5dfb672ebe5347436c570a51b255b32f80f00ea66f55c06bba84",
-    "_source": {
-      "repo": "phiterf/phpstorm-snippets-for-vscode",
-      "commit": "eeffdbf774ad5ce91eb9cddaec321729c7eb86ac"
-    }
-  },
-  "vscode-arduino": {
-    "coc-convert.json": "6e2c4f4a51fa08b5e27583528663ad9b45c941cd0f362f652f6f28a439e4d3c9",
-    "package.json": "15b63db91f6fbc132d657f46fa66961a921df42de4bc08087e00181d4c3fb85d",
-    "snippets/snippets.json": "12f6dafe627d5d59111bab3bab754978b76cb6851b7dcc606d9b7d872caceaca",
-    "_source": {
-      "repo": "ronaldosena/arduino-snippets",
-      "commit": "7030a50be9f7cb3daf295f23a3ec4281e4be6cd7"
-    }
-  },
   "vscode-cpp": {
     "coc-convert.json": "c99b8ca1d5a395a17be1154d7b5e6c301ee10955628d5c5023cdc1c53dc9bcf9",
     "package.json": "0242549d3940ed999de14b4e17e9ee0495d8a215f3bce67ac63faa73dda8a8e6",
@@ -1479,13 +1528,42 @@
       "commit": "76e7cda54910c2f8455cd717c18bb9843f5af3df"
     }
   },
-  "vscode-csharp": {
-    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
-    "package.json": "c9ceba55dafeb7c46677d997e9f6e15662bc61ec7ea9f04cb02028e983947efb",
-    "snippets/csharp.json": "49d049291bfbfac6684e26b5a126dbdf4f95de23adc7a3dcdf2e974f3b667b4b",
+  "vscode-arduino": {
+    "coc-convert.json": "6e2c4f4a51fa08b5e27583528663ad9b45c941cd0f362f652f6f28a439e4d3c9",
+    "package.json": "15b63db91f6fbc132d657f46fa66961a921df42de4bc08087e00181d4c3fb85d",
+    "snippets/snippets.json": "12f6dafe627d5d59111bab3bab754978b76cb6851b7dcc606d9b7d872caceaca",
     "_source": {
-      "repo": "J0rgeSerran0/vscode-csharp-snippets",
-      "commit": "3522981cf1700ce0e7ae13a5b57cfd5d2b67a9d8"
+      "repo": "ronaldosena/arduino-snippets",
+      "commit": "7030a50be9f7cb3daf295f23a3ec4281e4be6cd7"
+    }
+  },
+  "vscode-php-awesome": {
+    "coc-convert.json": "000012b14b9d0c698d4724e6104ee01e4927d9b3b6852259f18e1fa18c22ce3f",
+    "package.json": "81d9a38419a40d89ea65ca39934ab0beca3fcaf17f216ffd051f5f7cb538bb6d",
+    "snippets/array.json": "43178f834181be58dc7d24561ff20ff8d966b3d3ce34cdde4bbc44c559b871e1",
+    "snippets/class.json": "c74d5822bff1ca55bcb619cb5c75371cd759f3af8341e5a5894f0f69cf95c4ce",
+    "snippets/control.json": "0c3c3965b3fd60773bda31ab5b2acad92b6548a4a97b79572c341ba4ed49e202",
+    "snippets/error.json": "70f42d19b793ce2afa716ebd6715df111c6e47374c569752c5c3d980f8610432",
+    "snippets/function.json": "5d59feb1ff5813193eb7a222e192f2d0ec5770fd82720c150963b05398ffb336",
+    "snippets/function.php5.json": "5d712a3922208bd31a87c12d8e32064a2540f6bff6f3db8808cf32a02d328d2c",
+    "snippets/globalvar.json": "874bea867e341458db9a52c970d4d8b837c6f155d67c5073f1d35e846683adab",
+    "snippets/loop.json": "8350c57f061dfda7853f138356c8a75775aeae049ecd0d10e1ea05ca0d54a659",
+    "snippets/method.json": "843ed450e737bab6b7051a9a33dc18ab471483fa25a024d72126e021a7e4061a",
+    "snippets/method.php5.json": "0656865edf9466b9a3560f52b57cb8943be5c9f15b063341a2bc39d42eee53a3",
+    "snippets/statement.json": "c318d3b1c4876214519e5de5f323cde8f630dfd17b71481204e95035cd74877a",
+    "snippets/tag.json": "0c37b287d9bbbb504386951124e60ba21d72aeb4b26a1261f11bc1e3e1c48901",
+    "_source": {
+      "repo": "h4kst3r/php-awesome-snippets",
+      "commit": "df0fa89381b2c1b3af5fe128dafabf2240e1d266"
+    }
+  },
+  "vscode-awesome-flutter": {
+    "coc-convert.json": "ff9d52b425b84c0eab59ba1b5149d487fa2e0b114a741130664564ab8dc2c426",
+    "package.json": "5fc41b13df34e866b06c524c28c41473219518b8aba292951a24826c90eece1c",
+    "snippets/snippets.json": "3a90688c436f302fc74519f613c2948adaf0523ebf353af19549a5cb70abb320",
+    "_source": {
+      "repo": "Neevash/awesome-flutter-snippets",
+      "commit": "48d4b8ba44dc0133c2299d9d810eceb5efa441a7"
     }
   },
   "vscode-java-imports-snippets": {
@@ -1505,15 +1583,6 @@
     "_source": {
       "repo": "Alexisvt/flutter-snippets",
       "commit": "6186b0fc875af7ef1f91d2b3ba8f1aea55c7b925"
-    }
-  },
-  "vscode-awesome-flutter": {
-    "coc-convert.json": "ff9d52b425b84c0eab59ba1b5149d487fa2e0b114a741130664564ab8dc2c426",
-    "package.json": "5fc41b13df34e866b06c524c28c41473219518b8aba292951a24826c90eece1c",
-    "snippets/snippets.json": "3a90688c436f302fc74519f613c2948adaf0523ebf353af19549a5cb70abb320",
-    "_source": {
-      "repo": "Neevash/awesome-flutter-snippets",
-      "commit": "48d4b8ba44dc0133c2299d9d810eceb5efa441a7"
     }
   },
   "vscode-flutter-2": {
@@ -1546,6 +1615,26 @@
       "commit": "69223eb1dc52893a43b91f02698b3bfee5d0f30d"
     }
   },
+  "vscode-springboot": {
+    "coc-convert.json": "df7660b5ddbe6ca63bf770157c26b895e9f7e296ce54a82769647df0162eddfa",
+    "package.json": "53a9072e85a7d676012bcf50adc59c77fe0c681b6916e093d3cca17a9a669925",
+    "snippets/java.json": "259af18940dd1fca29854632d6d357b986b2ab0516af48ad97720e2b8282c0d3",
+    "snippets/spring-boot-properties-yaml.json": "76745cbb2a20877e7650e797b6f9100c4764646e22445bb41bb7e7330d40839e",
+    "snippets/spring-boot-properties.json": "08d3a44b3935293bb7122f9842e19ec01e5c4d40cde8b9c059081dc6fdc01a2e",
+    "_source": {
+      "repo": "DeveloperSoapbox/vscode-springboot-snippets",
+      "commit": "33aea3237d6519c91dfa0acdb5668f2082e37a32"
+    }
+  },
+  "vscode-csharp": {
+    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
+    "package.json": "c9ceba55dafeb7c46677d997e9f6e15662bc61ec7ea9f04cb02028e983947efb",
+    "snippets/csharp.json": "49d049291bfbfac6684e26b5a126dbdf4f95de23adc7a3dcdf2e974f3b667b4b",
+    "_source": {
+      "repo": "J0rgeSerran0/vscode-csharp-snippets",
+      "commit": "3522981cf1700ce0e7ae13a5b57cfd5d2b67a9d8"
+    }
+  },
   "vscode-nestsjs": {
     "coc-convert.json": "4c0eab54e86e3453d0e72f47773ab62625d24cd4352f09b1ce1137e4c8b196a2",
     "package.json": "84672d38aa1c7e3b524724c373dc4a36fc6ccbf5213bcff1cf9a39f92e19ae4b",
@@ -1561,17 +1650,6 @@
     "_source": {
       "repo": "ManuelGil/vscode-nestjs-snippets",
       "commit": "804f182d8b69332cf5a6c5aa891fa17af7521179"
-    }
-  },
-  "vscode-springboot": {
-    "coc-convert.json": "df7660b5ddbe6ca63bf770157c26b895e9f7e296ce54a82769647df0162eddfa",
-    "package.json": "53a9072e85a7d676012bcf50adc59c77fe0c681b6916e093d3cca17a9a669925",
-    "snippets/java.json": "259af18940dd1fca29854632d6d357b986b2ab0516af48ad97720e2b8282c0d3",
-    "snippets/spring-boot-properties-yaml.json": "76745cbb2a20877e7650e797b6f9100c4764646e22445bb41bb7e7330d40839e",
-    "snippets/spring-boot-properties.json": "08d3a44b3935293bb7122f9842e19ec01e5c4d40cde8b9c059081dc6fdc01a2e",
-    "_source": {
-      "repo": "DeveloperSoapbox/vscode-springboot-snippets",
-      "commit": "33aea3237d6519c91dfa0acdb5668f2082e37a32"
     }
   },
   "vscode-chai-snippets": {
@@ -1601,15 +1679,6 @@
       "commit": "2ea81c27c53f1709d94d9940c94986a5fc2c7fc8"
     }
   },
-  "vscode-playwright-snippets": {
-    "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
-    "package.json": "82d0dd6ca86276aa6ea7d73b93ae4adfca1e629d930f86b1a22f2c07417df990",
-    "snippets/snippets.json": "8555c8b8c4d8a53028d47ebb39c50f015889d4b98ac96174d69e2da84d473d33",
-    "_source": {
-      "repo": "nitayneeman/vscode-playwright-snippets",
-      "commit": "acdca57f6a4a3c2c8a12b88690e96d6f23d19f4e"
-    }
-  },
   "vscode-mysql-snippets": {
     "coc-convert.json": "2822d7d3ec2b4137ede868da1c5b468fa248eb10134f72a6c1ad2c57903d2afc",
     "package.json": "56f6e1f77357aa768e5a549f24b95c4aa5eefe2b5c296be6217d8910b718a27e",
@@ -1617,6 +1686,14 @@
     "_source": {
       "repo": "zendobk/vscode-mysql",
       "commit": "7f108bdd732d3bd304b2dac48aa1f50288d42295"
+    }
+  },
+  "vscode-postgresql-snippets": {
+    "coc-convert.json": "25cc32bb422d8f8fcc4a24d370dc04ebcf11643da922c73daecd5348dba24dff",
+    "package.json": "56823e91daf31738c1020380d6bbc55acd56505d22fc6411c449a7d17d120078",
+    "_source": {
+      "repo": "Manuel7806/postgresql-snippets",
+      "commit": "3e4129db275564b0f494a012f0ea4fca7b920d5a"
     }
   },
   "vscode-uni-app-snippets": {
@@ -1631,12 +1708,22 @@
       "commit": "31bfcb4d622976e7c5012336e6209ec3283aa5f2"
     }
   },
-  "vscode-postgresql-snippets": {
-    "coc-convert.json": "25cc32bb422d8f8fcc4a24d370dc04ebcf11643da922c73daecd5348dba24dff",
-    "package.json": "56823e91daf31738c1020380d6bbc55acd56505d22fc6411c449a7d17d120078",
+  "vscode-playwright-snippets": {
+    "coc-convert.json": "1d9d4550d97306832a5844069a76b75e88fa313965fdb55e3322a7678366762f",
+    "package.json": "82d0dd6ca86276aa6ea7d73b93ae4adfca1e629d930f86b1a22f2c07417df990",
+    "snippets/snippets.json": "8555c8b8c4d8a53028d47ebb39c50f015889d4b98ac96174d69e2da84d473d33",
     "_source": {
-      "repo": "Manuel7806/postgresql-snippets",
-      "commit": "3e4129db275564b0f494a012f0ea4fca7b920d5a"
+      "repo": "nitayneeman/vscode-playwright-snippets",
+      "commit": "acdca57f6a4a3c2c8a12b88690e96d6f23d19f4e"
+    }
+  },
+  "vscode-ue4-snippets-vs": {
+    "coc-convert.json": "6e2c4f4a51fa08b5e27583528663ad9b45c941cd0f362f652f6f28a439e4d3c9",
+    "package.json": "6d6fc09ece9ec47e1195dc41b880992e7fdebf43a10493e147dc572e8e4fcc95",
+    "snippets/snippets.json": "938916a3106d2482df3eb3839deb5c78a9970f3f7874405319f0194a85b37871",
+    "_source": {
+      "repo": "CAPTNCAPS/ue4-snippets-vs",
+      "commit": "17ddf8688f60edc34156aeffab84dc401844cf31"
     }
   },
   "vscode-uni-cloud-snippets": {
@@ -1649,15 +1736,6 @@
       "commit": "0c0f588e7f6f14e22b1556461ac36b68fb1b7a4d"
     }
   },
-  "vscode-unity": {
-    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
-    "package.json": "77dd112ac07f498ef6d863cf8a44d30c0b7a36df94ba6c6bd3574749afad6dd0",
-    "snippets/snippets.json": "2229216a578c41164c072ad1192fc4ca617678b04c3ff0bb574005e3befd6cef",
-    "_source": {
-      "repo": "YclepticStudios/vscode-unity-snippets",
-      "commit": "32021f2aa91211ac198c71f01ad5207fbfb766a9"
-    }
-  },
   "vscode-uni-ui-snippets": {
     "coc-convert.json": "8531958e94968c71bca0fc70432e85e6604ca6f3b0a795c6abd2d9618cfcd1c0",
     "package.json": "9cc20af60e73ce15f1a8d0f18d716627bf4e2344e3e2c6bfca9752532568e102",
@@ -1667,31 +1745,22 @@
       "commit": "82463eba0549354ac37a51d94c85013f0bbee873"
     }
   },
-  "vscode-unity-2": {
+  "vscode-unity": {
     "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
-    "package.json": "d17775eededd813ba85801d5df448e0d951209af971ed020b463050d654bfb59",
-    "snippets/snippets.json": "b9bc9da52472e2f04e11206207a79a8d87afdec872431f0243c80e0b342e3412",
+    "package.json": "77dd112ac07f498ef6d863cf8a44d30c0b7a36df94ba6c6bd3574749afad6dd0",
+    "snippets/snippets.json": "2229216a578c41164c072ad1192fc4ca617678b04c3ff0bb574005e3befd6cef",
     "_source": {
-      "repo": "lionize/vscode-unity-snippets",
-      "commit": "837f998f7134e287eff843f40132475c81eb72e8"
+      "repo": "YclepticStudios/vscode-unity-snippets",
+      "commit": "32021f2aa91211ac198c71f01ad5207fbfb766a9"
     }
   },
-  "vscode-ue4-snippets-vs": {
-    "coc-convert.json": "6e2c4f4a51fa08b5e27583528663ad9b45c941cd0f362f652f6f28a439e4d3c9",
-    "package.json": "6d6fc09ece9ec47e1195dc41b880992e7fdebf43a10493e147dc572e8e4fcc95",
-    "snippets/snippets.json": "938916a3106d2482df3eb3839deb5c78a9970f3f7874405319f0194a85b37871",
+  "vscode-bootstrap5-snippets": {
+    "coc-convert.json": "438028cbe9a5e70dc47edfcd4637d1fde35434ce9fa30884e7c945ecc461f5d8",
+    "package.json": "c3e259b767136b108ff6ebb16fccc32553a819c582401b46928d8860cb0d53df",
+    "snippets/bootstrap.json": "ea6d640973a9cca8a3eaa98c67180729ddff2f3dadede61736622ac0cd02082e",
     "_source": {
-      "repo": "CAPTNCAPS/ue4-snippets-vs",
-      "commit": "17ddf8688f60edc34156aeffab84dc401844cf31"
-    }
-  },
-  "vscode-apacheconf": {
-    "coc-convert.json": "e0bbe02ec1a6e5a48d9498e72406d33d360b78495c1d3081cdffb89c672d7bed",
-    "package.json": "c7169689ab6ba1a6123ee6b29c0546e644d43c38c6b92c384c682324cba8d93d",
-    "snippets/apacheconf.json": "f341f97c273cd97a325d8a4107c2aca3a0dd015a14c5931d89c97d0df7ad58bc",
-    "_source": {
-      "repo": "hrdtbs/vscode-apacheconf-snippets",
-      "commit": "5472944d8151404cbd0ab9748b3a140166c55c01"
+      "repo": "HansUXdev/B5-SNIPPETS",
+      "commit": "bb01a5db9fb847d40445899aeeb24280223111d7"
     }
   },
   "vscode-unity-code": {
@@ -1710,6 +1779,24 @@
     "_source": {
       "repo": "jtjoo/vscode-classic-asp-extension",
       "commit": "68ed4f6716ed69278832a8cefeb902d5b74665b1"
+    }
+  },
+  "vscode-apacheconf": {
+    "coc-convert.json": "e0bbe02ec1a6e5a48d9498e72406d33d360b78495c1d3081cdffb89c672d7bed",
+    "package.json": "c7169689ab6ba1a6123ee6b29c0546e644d43c38c6b92c384c682324cba8d93d",
+    "snippets/apacheconf.json": "f341f97c273cd97a325d8a4107c2aca3a0dd015a14c5931d89c97d0df7ad58bc",
+    "_source": {
+      "repo": "hrdtbs/vscode-apacheconf-snippets",
+      "commit": "5472944d8151404cbd0ab9748b3a140166c55c01"
+    }
+  },
+  "vscode-unity-2": {
+    "coc-convert.json": "ef45f22476ba94d761c18e9dd177abbb6aaa6d8741a03eab3860f7d8bd42744c",
+    "package.json": "d17775eededd813ba85801d5df448e0d951209af971ed020b463050d654bfb59",
+    "snippets/snippets.json": "b9bc9da52472e2f04e11206207a79a8d87afdec872431f0243c80e0b342e3412",
+    "_source": {
+      "repo": "lionize/vscode-unity-snippets",
+      "commit": "837f998f7134e287eff843f40132475c81eb72e8"
     }
   },
   "vscode-ejs-snippets": {
@@ -1748,15 +1835,6 @@
       "commit": "1552f0f3ca5f1d3dd808b92745e4212ea4f103f7"
     }
   },
-  "vscode-jquery-snippets": {
-    "coc-convert.json": "330f665ab12c445f28a98ced40ef1096bdb83a1e9aed057e4a4fd8857ece2f51",
-    "package.json": "170e5f7bf828429b9a204a347ea38ec81ff6da6cce73c9e3258a456b2853e3e4",
-    "snippets/javascript.json": "91c2760eb82d4d4f9901c053bf357430fc6fa46efeb2a6f35b896b741cdb27f0",
-    "_source": {
-      "repo": "DonJayamanne/jquerysnippets",
-      "commit": "f1c2f7e27f292e581a95038c7af1a0c67c28db03"
-    }
-  },
   "vscode-ionic": {
     "coc-convert.json": "307f4f06e29b937dd59404bc44a9718c819b47f459be26395f119dcfb92c11d6",
     "package.json": "9e1deee7bfa18bbd507e25781dae9c70fab14d85b04095bfb00e7d2d607abcda",
@@ -1770,6 +1848,15 @@
     "_source": {
       "repo": "fivethree-team/vscode-ionic-snippets",
       "commit": "a7f519d68805488e112d2accf0d13f522147915b"
+    }
+  },
+  "vscode-jquery-snippets": {
+    "coc-convert.json": "330f665ab12c445f28a98ced40ef1096bdb83a1e9aed057e4a4fd8857ece2f51",
+    "package.json": "170e5f7bf828429b9a204a347ea38ec81ff6da6cce73c9e3258a456b2853e3e4",
+    "snippets/javascript.json": "91c2760eb82d4d4f9901c053bf357430fc6fa46efeb2a6f35b896b741cdb27f0",
+    "_source": {
+      "repo": "DonJayamanne/jquerysnippets",
+      "commit": "f1c2f7e27f292e581a95038c7af1a0c67c28db03"
     }
   },
   "vscode-rxjs-snippets": {
@@ -1799,100 +1886,13 @@
       "commit": "a7eeb66f1525226e7c7a6419c6f9b507b0441aa3"
     }
   },
-  "vscode-astro": {
-    "esbuild.mjs": "d79c7b59ed3d98e942d93531793e4386452d749428d04376137344e20275d255",
-    "package.json": "adf10725de932f1d2fd288b5dabb362194c1282e893ad089bf537d5e113e4441",
-    "src/client.ts": "0271f79c4d194bae7ef6139137fb28aaa7cfeb0bc0dde49f7d998bb9ca634c56",
-    "src/index.ts": "b3b5b1b3e27c044e509212020019a80c479cb1c359ff2de47f6c67077c8f719e",
+  "vscode-tinymist": {
+    "esbuild.mjs": "7f8daeb2738bef8c10749ac47366910986422e30db026df99a4e1e16413281fe",
+    "package.json": "07dca886fb43c63f005897b28e6b1726d43fc53174eeb3054c37fd266e62d492",
+    "src/index.ts": "18f69d8d913d10ca0ca06609a6c6ed842c22c1cc70ad8c6108efe9929f1411b9",
     "_source": {
-      "repo": "withastro/astro",
-      "commit": "5462b81b8c13552a78131494ccf649b2d92b2968"
-    }
-  },
-  "vscode-ng-language-service": {
-    "esbuild.mjs": "7c02396fc33bafbd7dfb585f5b512513ed3b01f0c076d4b46ddff97d4c5d1611",
-    "package.json": "8ce0ca300fdf837b02976ba5952e0cc60598ee0d6992b2f914fcb24a84f2ee8c",
-    "src/client/src/client.ts": "8eff801c98e1f859c5db2b6374be62d1c8859589e95eb5e7235363b38ce00fa4",
-    "src/client/src/commands.ts": "fe94454b8186e94548e67f7ff690324a301cbadfdc040770c7cb47c8ba3f35a3",
-    "src/client/src/config_change.ts": "f028cd1e2244499a92131c58c17955b4254bdf959b52f305132b3e578c528630",
-    "src/client/src/embedded_support.ts": "4238499ecce37b069a0d55a85a12cdd6f675cb8f0c85419af97a15cd75624c87",
-    "src/client/src/extension.ts": "80aa2a7aaef4060a29d8d6adfc3cd32c1b997b276ee0bcbdfc662ebdc72f2229",
-    "src/client/src/providers.ts": "54eff18eb49d846a6f1517d605adfafaf70ceedddfd33ea60d25ed84d5ebf68d",
-    "src/client/src/tests/embedded_support_spec.ts": "99e9cb8d0920536ab3e039a68074d8e32273236e69d0f5073a24ede60312b1ad",
-    "src/client/src/tests/extension_spec.ts": "8a44377b8d32e327c1b0560445773dc0e82c3d717b8879eb7ef6f01786cd23af",
-    "src/common/initialize.ts": "bd8f0b043c80e2f14a30e8846c9be275d27ca5eb8644f00b22691388f3b6e3ae",
-    "src/common/notifications.ts": "d24a35f5be4087d8b56ffedf774ff103a758305d490e229b0e6d1ab9fa5c72a7",
-    "src/common/requests.ts": "20d766c3d788b248c7261e5d9677063f98dadfd84fa00a9a2f706e39ec2154de",
-    "src/common/resolver.ts": "d3f85549bea25ed46bffedb182d155393c11357b2c085965cac9cbcf838e0151",
-    "src/common/tests/resolver_spec.ts": "5ad8dec291e297f31331346d74893ed63e3fe7ba2b7bc683b6771f7500b6fcab",
-    "src/index.ts": "52847501aa5f6b5d2441059b02218129abf4c780454350eed0f475e09a3e54a2",
-    "src/integration/e2e/completion_spec.ts": "f6b19d4b3481925f2a3dd46758035cd144f8c5f55e319e2fd2eaf78afb384cc1",
-    "src/integration/e2e/definition_spec.ts": "0fc2ffa95170bc6997648b26fe5586d0820624b2da87ca52cc5c0ef440d6e037",
-    "src/integration/e2e/helper.ts": "c037042541ec20a8f005d423121ee67f32a9e8e5631eff9299f6d6dab9e645ce",
-    "src/integration/e2e/hover_spec.ts": "0b751b9226dd9360aef537c51a6063b14c9cd922650dbb20f038bd9871677a4b",
-    "src/integration/e2e/index.ts": "03180e9e1ed592a31aa173dbc0a5cbb1a51c44c673117e01f3373949b0e0b8ce",
-    "src/integration/e2e/jasmine.ts": "411402f2107ea7693777e2a00db67395f0542ae133d15349757ce163ba291500",
-    "src/integration/lsp/ivy_spec.ts": "5b3822407a2eabb240ef42ace2a916346e7ddff45991222aed766c2293df503d",
-    "src/integration/lsp/test_utils.ts": "3218b3af3f85403d5275e2c5821ecc3d94f5e090d5d951c2668e51231d5e88f1",
-    "src/integration/project/app/app.component.ts": "1842d09fe4bb33dbbd219b11d0388311b7c8664e68523adadd6f99837641d438",
-    "src/integration/project/app/app.module.ts": "fd77f6e7040b8d68f5244102ed7251bfbbae1030710acfe9f2392e411115b804",
-    "src/integration/project/app/bar.component.ts": "fa830672dcb40322bf6834f9199a7233607663e5e16e9e3523d54ceaa96c9ee3",
-    "src/integration/project/app/foo.component.ts": "d2220a95bb5c1dd48076db657673b7bdd7dd2119d4b601b63c99ef38fe5fb060",
-    "src/integration/project/app/highlight.directive.ts": "5119c34c0b2408d37677e7e28da9be88018568533944bb8632bd9da7b075ab6e",
-    "src/integration/project/libs/post/src/index.ts": "9552dc9b7591d3555a2dfd6ec0f1380c642b259588665804dfd5768a46d402bd",
-    "src/integration/project/libs/post/src/lib/post.component.ts": "ab84f5ef8a37bc51f2c2e7edad86a9d2d2a7e875e424591190ea99b816fc15b5",
-    "src/integration/test_constants.ts": "1ea2ce2727ec8ed9a33a21fd0a522179a45c5796c36d044740d4969d85271d20",
-    "src/server/src/banner.ts": "e1d7b056a8bb2d25b42ac43bd1f5bc43a13e65837c22bccdbb8563293e312689",
-    "src/server/src/cmdline_utils.ts": "ddaf38f1c94d7070b0e2de04cb4cf58e43b95e6b7639be001a79319bb992bd3a",
-    "src/server/src/config.ts": "944306a4d62b839768bc04ea9fa50eeab2b29f454dc3b7a55aa04d14a6a391cc",
-    "src/server/src/diagnostic.ts": "ba261eb12658f3bc738d486e92b3414e63b3907befb66e11789097136926add5",
-    "src/server/src/embedded_support.ts": "586a9edb1ed6ff01b39340bb9452be7dbac28e58f5c44b5ddc08b4f3cbaaaa45",
-    "src/server/src/handlers/code_actions.ts": "e839131a9160a32a1313e2828b3cd361527979bff33146e4b2fa891a5c8a2c0f",
-    "src/server/src/handlers/code_lens.ts": "c93a5ebad2691c7c679d8b7ca00d92128d939af8214c5f816cf107d40283ca58",
-    "src/server/src/handlers/completions.ts": "32680d4e13f899e4d94780d6c36541704fa3ba684be45a7f67b870292cbbfb2c",
-    "src/server/src/handlers/definitions.ts": "bc416c8bc9e7bf733a941f520d0d2ab79e8cb599afc5a2bbdc36f1aa7ccda5e1",
-    "src/server/src/handlers/did_change_watched_files.ts": "f99bef3b5e4155d59be0450025ed7461529e34bbef3e581ca32de2e35733c216",
-    "src/server/src/handlers/document_symbols.ts": "8e241fd0f27ae6d33458c80de2fa2b57794972a61fba1857c0b0ae31a007c72d",
-    "src/server/src/handlers/folding.ts": "aeaf04986bc73d0cc4a4fa708cf584e3d6d45d02c1a763a8d9502fb564851679",
-    "src/server/src/handlers/hover.ts": "f76564a0a4580c9623cca13e09545b5dbe026b102326ec932c85074e8d02ef68",
-    "src/server/src/handlers/initialization.ts": "8d585e660b8018ed44c5600525e96fd36d11c9664002e88c7af0b097dedd29d5",
-    "src/server/src/handlers/inlay_hints.ts": "2bdc4f21130dd0054a1945e8ea96c6a47816c48e743d1e4c385cd8871e745270",
-    "src/server/src/handlers/linked_editing_range.ts": "2e26badb1e40a156d884a0620cb08817ffad78cdd1318fec88b4b818daf53dfe",
-    "src/server/src/handlers/rename.ts": "48d7ef572320085a4e86986a3eb440aaed9b543de767ca15dcd558870087346f",
-    "src/server/src/handlers/signature.ts": "9652373c559d9bc353afb6843ed7cb21bba9dd11b7cbb3d99545b4b2f86348c2",
-    "src/server/src/handlers/tcb.ts": "8749403799f61e80640f5ccb05300eed4846fdc3b70342d238605eb78960d0f5",
-    "src/server/src/handlers/template_info.ts": "3459a3ce0f97eb5123f9a9a1c50c86e0b051db38b87f9670c05518ed8f756d11",
-    "src/server/src/logger.ts": "1b2cdab13456b2bd6f9cec7db61a562aecb632b46d561baaabc3b0258168fa4c",
-    "src/server/src/server.ts": "8147d35b0e1265898f69c3f0b8c0d084e6c99b032b9effe947de06211c325ef2",
-    "src/server/src/server_host.ts": "5860cf77d9533321798c26960464e6d73f4740de75e74d0222c18ec4f8b118d9",
-    "src/server/src/session.ts": "97687cd40147ddad3018dc688ec16971d921da671b67a3a14e21a34c2f5f2ca1",
-    "src/server/src/tests/cmdline_utils_spec.ts": "54c0db6582350e2cf873353db57cc2685579c09df78760cf189edcd94e7f007c",
-    "src/server/src/tests/config_spec.ts": "d8bdabf5fba59d1f234d7ca647d6e2b51012572d2dbaff8c1e359fb6becc6416",
-    "src/server/src/tests/embedded_support_spec.ts": "2d3725eef9c50ac0514b605bb82228915c713fea52b9e75db5d5f6c67a959f21",
-    "src/server/src/tests/text_render_spec.ts": "3f4143b06e6c570928e307d388d4642046ddbe84d993251ae9c7de8f389dae5f",
-    "src/server/src/tests/utils_spec.ts": "602887485e05315e6ee94fc9a56a53dbbfd7a0b4fd45116e31ccf0d7952b8813",
-    "src/server/src/tests/version_provider_spec.ts": "bfe1c4420544e82ba338f74f1b89ebbc4e1df80ec04d90b97714cdfd24e7ebb7",
-    "src/server/src/text_render.ts": "905fe8b6faa5c781f71eec804cfe55f60d97932cbdbbd6eb7a41e354c950426f",
-    "src/server/src/utils.ts": "7c3a5ec08590fb3c27dc61005d72b04e7c3e97d9986498cd0164671e554b87ad",
-    "src/server/src/version_provider.ts": "6fbc9a87011ae8e95d0bd55d6c5262a63292eae54ae93ca65a4bcbcaa9a1dc3a",
-    "src/syntaxes/src/build.ts": "cfae8d1f8d9c455c0d96218dec151e73d4220b93b9846b365f9d128073b3fb70",
-    "src/syntaxes/src/expression.ts": "5928e4228ebd8899318ed32af09a3f23dbdcf79a5ff3ac2c27457e473fccf382",
-    "src/syntaxes/src/host-object-literal.ts": "41dfa592e04bc4decbcbe264fc9fdbcdcda9e80cec5d49b4e8d0cb336b2d3208",
-    "src/syntaxes/src/inline-styles.ts": "e9608361a4d3c02eb35889da4092e5a23d251a8b3fe8541a1c79f1b14739daf0",
-    "src/syntaxes/src/inline-template.ts": "68991255544331c7d0c322bc4434f7fbc7d090a0a6c1e0ae02c7b9b51ff02ea7",
-    "src/syntaxes/src/template-blocks.ts": "1d5bae44b09a91ed216521eae397e1cb51c511f176303de58450243e65ec2cd4",
-    "src/syntaxes/src/template-let-declaration.ts": "538b5d037d7dc97e3e312d17ff56620bcbb5019d1f4da366f1bf70a685fc331c",
-    "src/syntaxes/src/template-tag.ts": "df2936f6511902dd9c71cfda9a1a605a8941a7eb8f6fe2616b8d1190024b7961",
-    "src/syntaxes/src/template.ts": "a06ffba6862b597a83984ff5348e247a5d791bc7e15aba08dcd4542a3d4b0199",
-    "src/syntaxes/src/types.ts": "6c2c27d57941585e29c31025bcdd5e4c8f2de5f7dace7fd0d7ddd543a666d8ea",
-    "src/syntaxes/test/cases.ts": "2239746854c16d9975e632dd6cd4bc095bd7d95562bd6f793f8fd8f6f6623bf3",
-    "src/syntaxes/test/data/host-object-literal.ts": "5750c9ba4df9652eeac24521b4fc1c94b3897c855e971b3a02959389148a982b",
-    "src/syntaxes/test/data/inline-styles.ts": "dd12814af4655b3934ff1d318226e490c517b23d4edcc21ed96b18891a4f3e72",
-    "src/syntaxes/test/data/inline-template.ts": "2e67bdd46f3d2ad2437a0408939f3486e9f987b18b46869502506fdaf690641a",
-    "src/syntaxes/test/driver.ts": "4133559698fefcaf5fb2535160be3fc3d430b7b7a9b2f6e774780dd4b8e16989",
-    "_source": {
-      "repo": "angular/angular",
-      "commit": "3bf24306be2ad639fa6bbe4a45dee546534f3a58"
+      "repo": "Myriad-Dreamin/tinymist",
+      "commit": "b1119249df66ae99ce7c38fe2a958b1a9d0848e2"
     }
   }
 }

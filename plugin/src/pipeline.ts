@@ -541,15 +541,22 @@ async function buildPackage(
           fs.chmodSync(flat, 0o755)
         }
       }
-      // Resolve {{version}} in lib/index.js (only available after GitHub API call)
-      if (version) {
-        const verPath = path.join(build, 'lib', 'index.js')
-        if (fs.existsSync(verPath)) {
-          let vc = fs.readFileSync(verPath, 'utf-8')
-          if (vc.includes('{{version}}')) {
-            fs.writeFileSync(verPath, vc.replace(/\{\{version}}/g, version))
-          }
+      // Resolve {{version}} and {{serverBinary}} in lib/index.js ({{version}} only
+      // known after the GitHub API call; {{serverBinary}} is the platform-matched
+      // binary name from targetAssets, which may differ from the top-level binaryPath)
+      const verPath = path.join(build, 'lib', 'index.js')
+      if (fs.existsSync(verPath)) {
+        let vc = fs.readFileSync(verPath, 'utf-8')
+        let vcChanged = false
+        if (version && vc.includes('{{version}}')) {
+          vc = vc.replace(/\{\{version}}/g, version)
+          vcChanged = true
         }
+        if (resolvedBinaryPath && vc.includes('{{serverBinary}}')) {
+          vc = vc.replace(/\{\{serverBinary}}/g, resolvedBinaryPath)
+          vcChanged = true
+        }
+        if (vcChanged) fs.writeFileSync(verPath, vc)
       }
       if (resolvedBinaryPath || filename.match(/\.(zip|tar\.gz|tgz|gz)$/)) {
         const archivePath = path.join(build, filename)

@@ -57,7 +57,7 @@ describe('language-client step', () => {
     expect(code).toContain('LanguageClient')
     expect(code).toContain("from 'coc.nvim'")
     expect(code).toContain('require.resolve')
-    expect(code).toContain("'bin/server'")
+    expect(code).toContain('{{serverBinary}}')
   })
 
   it('generates stdio transport for binary kind', async () => {

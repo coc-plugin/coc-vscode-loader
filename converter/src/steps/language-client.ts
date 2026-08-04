@@ -34,7 +34,9 @@ export const languageClientGenerator: StepGenerator = {
     if (ls.server.kind === 'binary') {
       const pkg = ls.server.package
       const binary = ls.server.binary
-      const fallbackName = binary ? (binary.binaryPath || pkg) : pkg
+      // Placeholder resolved by the loader after binary download: the top-level
+      // binaryPath may not match the platform-specific name picked via targetAssets.
+      const fallbackName = binary && binary.binaryPath ? '{{serverBinary}}' : pkg
       const args = ls.server.args || []
       const argsStr = args.length ? `[${args.map(a => `'${escapeStr(a)}'`).join(', ')}]` : '[]'
 
