@@ -625,12 +625,12 @@
     "src/server/src/htmlServer.ts": "2806d337aa60c1dbc2082bb1144c49c65234d804dc0721160cd5e68077670229",
     "src/server/src/languageModelCache.ts": "063ec82a07e94e7bc2197050b27155a5beca9d4c6b019ce4c957e01a54295781",
     "src/server/src/modes/cssMode.ts": "579949a581fb74ae5a438d0d6c30e038eae268df5fadbb8d0ffae155c48bb7a0",
-    "src/server/src/modes/embeddedSupport.ts": "96334d237bd0a93886dd1350d231726543d12752a14742a6208cb1084361e387",
+    "src/server/src/modes/embeddedSupport.ts": "12d56edee6f90b226249a9e0d3790d3d915ca192218a4d651b623f0313857e98",
     "src/server/src/modes/formatting.ts": "0dd140cc4b64721cd454d25be7d0fb3e72bbcff9155f8045767fcd81d1784327",
     "src/server/src/modes/htmlFolding.ts": "7c0a166d1da0c721eb3f1fc91d0bbba01a6762b45f57cf8ea4cecb2d65b2ebc4",
     "src/server/src/modes/htmlMode.ts": "aff7dfaf4dade09fee33e2730be87a6250836a5d38aef533de9032711ce06ac6",
     "src/server/src/modes/javascriptLibs.ts": "56fba3f1bb3a5a23f9c97ca705beed192296e28eeaa2d5cd28b34e13b0f53453",
-    "src/server/src/modes/javascriptMode.ts": "8a68d46cbb1e5803f0f0df3f85146ba57bd0d545443e68ef5a94fe233daf63d3",
+    "src/server/src/modes/javascriptMode.ts": "a38eaa3b5963763df9450ba516e02ee53b927b010c591e071bb33fd450093d54",
     "src/server/src/modes/javascriptSemanticTokens.ts": "7b936047026a72614f70be9590c11c49f8743771b4905bb3a6606a5217cd9947",
     "src/server/src/modes/languageModes.ts": "d9e6503c0ee9cd0314e9ba5b6985495ab1ee21a512204e1bf64a9842b2b44704",
     "src/server/src/modes/selectionRanges.ts": "2f81d43a414fa27996d70f231c2b29cac2b2961c42e1831d2361117e6042dfc3",
@@ -641,10 +641,11 @@
     "src/server/src/requests.ts": "4318bc2ba1a72eb3525e3923ca266ba819e99b1cad097ebe927fdf953b6d3cfe",
     "src/server/src/test/completions.test.ts": "dbb245137450b4408a8d38faae89617cc288bf2fcc1cc2ae17c8c5579b3853b5",
     "src/server/src/test/documentContext.test.ts": "34c7edb965720f64a27d44e332e73921df118c2639ab2ebb73f16114cc8011bc",
-    "src/server/src/test/embedded.test.ts": "1a0642e6edf41c17b599eb7baae014cd2fe78d260571de2c5e5efd2c0de32c12",
+    "src/server/src/test/embedded.test.ts": "8aefcc009188592a1d6ff377bd4a5322b18ae668c00f7180d2d323b8159bb2f3",
     "src/server/src/test/folding.test.ts": "b09f64ee6886014d7e4097297751786cc5baa9f3a2e207fd8b7b0dc122a2b952",
     "src/server/src/test/formatting.test.ts": "ac24a30333f658c4c82b20f4e94b2f87ad77d299242f20e94e38fc034f1da5a6",
     "src/server/src/test/hover.test.ts": "6ae3bf0d8eb08138bc88a3977ff8ba1c06402d0c6aeb12b770a9e7955c22d01d",
+    "src/server/src/test/javascriptMode.test.ts": "3a0ab5fb06ced544439068b45c32b591dbc2a290ef07eda1c8b9a07bebb975f3",
     "src/server/src/test/rename.test.ts": "3c73d5f2a8568f488b4c04825909ae10a4220d8d9555a27760e18cbc42cd5419",
     "src/server/src/test/selectionRanges.test.ts": "acd625ef5faaea3b1480ac102a1f272fc22bb437c869f528a7061fc541f17fb3",
     "src/server/src/test/semanticTokens.test.ts": "b09c520a4229fe971acfd11d4722ffc021951ee8f7493e18843f98570277f6ca",
@@ -657,7 +658,7 @@
     "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "396ff629f0fcec277ed6e235e3d5a5a865e0e06c"
+      "commit": "cc2c348481a823001d78e67c5082951d9a257005"
     }
   },
   "vscode-texlab": {
