@@ -1800,12 +1800,12 @@
   },
   "vscode-astro": {
     "esbuild.mjs": "d79c7b59ed3d98e942d93531793e4386452d749428d04376137344e20275d255",
-    "package.json": "2c6b47f4c027dc3906558cd2d0a777abbe1226d6c1605a9ac766cdb1451e0ccf",
+    "package.json": "adf10725de932f1d2fd288b5dabb362194c1282e893ad089bf537d5e113e4441",
     "src/client.ts": "0271f79c4d194bae7ef6139137fb28aaa7cfeb0bc0dde49f7d998bb9ca634c56",
     "src/index.ts": "b3b5b1b3e27c044e509212020019a80c479cb1c359ff2de47f6c67077c8f719e",
     "_source": {
       "repo": "withastro/astro",
-      "commit": "8e2b64b66ae52e0a3767b10bb82fa617c365c9e4"
+      "commit": "5462b81b8c13552a78131494ccf649b2d92b2968"
     }
   },
   "vscode-ng-language-service": {
