@@ -104,24 +104,43 @@ function getDefaultBranch(): string {
 // ── Source Repo ────────────────────────────────────────────
 function cachePath(name: string) { return path.join(CACHE_DIR, name.replace(/[^a-z0-9_-]/gi, '_')) }
 
+// Partial (blobless) and sparse clones can't be reliably updated via fetch+reset:
+// reset only materializes the sparse cone and needs on-demand blob fetches, which
+// can silently leave an incomplete worktree (observed as false "Subdir not found").
+function isPartialOrSparse(cp: string): boolean {
+  const promisor = run('git', ['config', '--get', 'remote.origin.promisor'], { cwd: cp, ignoreError: true }).stdout === 'true'
+  const sparse = run('git', ['config', '--get', 'core.sparseCheckout'], { cwd: cp, ignoreError: true }).stdout === 'true'
+  return promisor || sparse
+}
+
+function cloneFresh(cp: string, url: string): { ok: true } | { ok: false; error: string } {
+  fs.rmSync(cp, { recursive: true, force: true })
+  fs.mkdirSync(cp, { recursive: true })
+  const c = run('git', ['clone', '--depth', '1', '--single-branch', url, cp], { timeout: 300000 })
+  if (!c.ok) return { ok: false, error: `git clone: ${c.error}` }
+  return { ok: true }
+}
+
 function syncSourceRepo(entry: RegistryEntry): { ok: true; inputDir: string; commit: string } | { ok: false; error: string } {
   const cp = cachePath(entry.name)
   const expectedUrl = `https://github.com/${entry.source!.repo}.git`
-  if (fs.existsSync(cp) && fs.existsSync(path.join(cp, '.git'))) {
+  const subdir = entry.source!.subdir
+  const inputDir = subdir ? path.join(cp, subdir) : cp
+
+  let needFresh = !fs.existsSync(path.join(cp, '.git'))
+  if (!needFresh) {
     // Verify cached clone points to the correct remote URL (repo may have changed)
     const originUrl = run('git', ['remote', 'get-url', 'origin'], { cwd: cp }).stdout
     if (originUrl !== expectedUrl) {
       log(`Cached remote URL (${originUrl}) differs from expected (${expectedUrl}), re-cloning`)
-      fs.rmSync(cp, { recursive: true, force: true })
-      fs.mkdirSync(cp, { recursive: true })
-      const c = run('git', ['clone', '--depth', '1', '--single-branch', expectedUrl, cp], { timeout: 300000 })
-      if (!c.ok) return { ok: false, error: `git clone: ${c.error}` }
-      const hr = run('git', ['rev-parse', 'HEAD'], { cwd: cp })
-      if (!hr.ok) return { ok: false, error: `rev-parse: ${hr.error}` }
-      const inputDir = entry.source!.subdir ? path.join(cp, entry.source!.subdir) : cp
-      if (!fs.existsSync(inputDir)) return { ok: false, error: `Subdir not found: ${inputDir}` }
-      return { ok: true, inputDir, commit: hr.stdout }
+      needFresh = true
+    } else if (isPartialOrSparse(cp)) {
+      log(`Cached clone is a partial/sparse checkout, re-cloning a plain shallow clone`)
+      needFresh = true
     }
+  }
+
+  if (!needFresh) {
     const f1 = run('git', ['fetch', '--depth', '1', 'origin'], { cwd: cp, timeout: 30000, ignoreError: true })
     if (!f1.ok) return { ok: false, error: `git fetch: ${f1.error}` }
     run('git', ['remote', 'set-head', 'origin', '--auto'], { cwd: cp, ignoreError: true })
@@ -129,14 +148,26 @@ function syncSourceRepo(entry: RegistryEntry): { ok: true; inputDir: string; com
     if (!r1.ok) return { ok: false, error: `git reset --hard origin/HEAD failed: ${r1.error}` }
     const r2 = run('git', ['clean', '-fd'], { cwd: cp, timeout: 30000 })
     if (!r2.ok) return { ok: false, error: `git clean -fd failed: ${r2.error}` }
-  } else {
-    fs.mkdirSync(cp, { recursive: true })
-    const c = run('git', ['clone', '--depth', '1', '--single-branch', expectedUrl, cp], { timeout: 300000 })
-    if (!c.ok) return { ok: false, error: `git clone: ${c.error}` }
+
+    // Fallback: an incremental sync can still leave the worktree incomplete. If the
+    // subdir exists in the committed tree but not on disk, re-clone fresh instead of
+    // reporting a false "Subdir not found".
+    if (subdir && !fs.existsSync(inputDir)) {
+      const inTree = run('git', ['ls-tree', 'HEAD', '--', subdir], { cwd: cp, ignoreError: true })
+      if (inTree.ok && inTree.stdout.trim()) {
+        log(`Subdir exists in HEAD tree but is missing on disk, re-cloning fresh`)
+        needFresh = true
+      }
+    }
   }
+
+  if (needFresh) {
+    const fresh = cloneFresh(cp, expectedUrl)
+    if (!fresh.ok) return { ok: false, error: fresh.error }
+  }
+
   const hr = run('git', ['rev-parse', 'HEAD'], { cwd: cp })
   if (!hr.ok) return { ok: false, error: `rev-parse: ${hr.error}` }
-  const inputDir = entry.source!.subdir ? path.join(cp, entry.source!.subdir) : cp
   if (!fs.existsSync(inputDir)) return { ok: false, error: `Subdir not found: ${inputDir}` }
   return { ok: true, inputDir, commit: hr.stdout }
 }
