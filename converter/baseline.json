@@ -1520,12 +1520,12 @@
     }
   },
   "vscode-bitbake": {
-    "esbuild.mjs": "0457548e4bdfdfc9206f8f0272ff65ec63f903d33baa073f7e5b0735139fc92e",
-    "package.json": "9732b2f6f3f81d014547a8d0a2cec9b08877ff237b3238ff169fc900b59f57dc",
+    "esbuild.mjs": "fd58c51b6dc77bf6f2a90df892fc19ef519ba133debaf7869732633b130b7aca",
+    "package.json": "0234e5c3b6d8285c2b42e5667d792051476b50779e97ee2e3b0b8b9761ef8456",
     "src/index.ts": "8fc029419fa84eb9ad8b66f7f19ad92e32337d46a1141c03a3262b2a03b8779d",
     "_source": {
       "repo": "yoctoproject/vscode-bitbake",
-      "commit": "71358f684a652fe8743d126a285b76655fcfe133"
+      "commit": "3156bceebf86127ac64948625b1c279b5b7edb4d"
     }
   },
   "vscode-php-awesome": {
