@@ -22,6 +22,14 @@ jobs:
           cache: 'npm'
           cache-dependency-path: plugin/package-lock.json
 
+      - name: Checkout coc.nvim (release)
+        uses: actions/checkout@v7
+        with:
+          repository: neoclide/coc.nvim
+          ref: release
+          path: coc.nvim
+          fetch-depth: 1
+
       - name: Install dependencies
         run: npm ci
         working-directory: plugin
@@ -32,5 +40,7 @@ jobs:
           sudo apt-get install -y vim neovim
 
       - name: Run coc-test integration tests
+        env:
+          COC_TEST_COC_PATH: ${{ github.workspace }}/coc.nvim
         run: npm run test:${{ matrix.editor }}
         working-directory: plugin
