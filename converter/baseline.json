@@ -108,11 +108,11 @@
   },
   "vscode-pyright": {
     "esbuild.mjs": "3315fb7bdeae449c43dd37893169507dfb127a16e085741cc33bfd4d8a6838e7",
-    "package.json": "c3ca30438144fca3a83162bcf0a276f78302c6dafa2e53567e83b8aa2a94399d",
+    "package.json": "26b2a74ebc2dafa41b03c436844cbe407ff082d49e43f700fcf13fcac40edf2b",
     "src/index.ts": "21f17bca573f292f7e4eddaf2cc23791e5131d03d4b190ae343c62d807fa7549",
     "_source": {
       "repo": "microsoft/pyright",
-      "commit": "de94b525d69e6b9554f39947d6c1eaefab5c41ab"
+      "commit": "fceca4d133a83034fc195dbba8b3814992b0b26b"
     }
   },
   "vscode-rust-analyzer": {
