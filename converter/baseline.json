@@ -418,11 +418,11 @@
     }
   },
   "vscode-prisma": {
-    "esbuild.mjs": "6be05034e374bf67ca100c59d92289a7cdd16e1513ee2b0271589167b9003d26",
-    "package.json": "3ba4dd6305e85eb8d377d34b875d33392067bbda629e0d64de50e1f4c59e7da7",
+    "esbuild.mjs": "10e357fba2099e09481567dd729263de13e6924fd68eb7503650633bb45ae034",
+    "package.json": "7f6ed510b2a444b551251295475cc222f9791b366022eb8b9fe85a80e652447d",
     "src/CodeLensProvider.ts": "68b98245ff699dbc9ed62ca02c398602e0ec9c902f8146ad2afbcf6d45a9e163",
-    "src/__test__/helper.ts": "61d82466969475462e83c2b14a8e3c04925106f1f62a7b0d865965d7637fc78f",
-    "src/__test__/index.ts": "eaa1e12939dc8d3a9cc56bbe25f00e4928bca136927795a95a91a6129d0abcc2",
+    "src/__test__/helper.ts": "66c431526de6125b2ecf5f694eac077810a4198321d8057afcc8a591d21e8cc2",
+    "src/__test__/index.ts": "a178b7c5c23d3d058cc82768d6eb2f87083840df41d79a133d120b4c020c45e2",
     "src/__test__/language-server/completion.test.ts": "a1243aee29e3c3de201f4dd35fc4063f904a6f458fa111e69bd1c478d8dc4a00",
     "src/__test__/language-server/format.test.ts": "c14dc3d7c31c0a0d6d2e28b5fb4d3c61717864ce0f21beb30ff9f88797bfce31",
     "src/__test__/language-server/hover.test.ts": "a7e95b1a74de2be4359d6bb7f4305fb092190345ce3a82d77a87efd1ba081117",
@@ -430,16 +430,18 @@
     "src/__test__/language-server/linting.test.ts": "91f6897a8b46cdbb9ca19b5460b12c9c0167a2e6325ba4a90de3ea0204325ce4",
     "src/__test__/language-server/prisma6Handling.test.ts": "cd82b99bdcb7c747a30734cdf09500d466af724e85fa5cdf46bc065770440b6b",
     "src/__test__/language-server/prismaNext.test.ts": "9329f149d45c6b884ddca1227354f8095e23405823e21770419cda92c2381764",
-    "src/__test__/runTest.ts": "c6f493da3621b7e3bdf3d8716deeddbb96952e56f65b5e806080c1f271a33b0d",
+    "src/__test__/runTest.ts": "7aaba65c7ddf4c9d4fda048604af830f3226b5f629403bcc8f219ce42369d9f8",
+    "src/__test__/workspace.test.ts": "dcaf902578d7ea0985425da47dd9d85f95b8e84f5e827aafac8d8687bb02be32",
     "src/denyListColorThemes.ts": "117a15311b74a354a7ff2abe72365e7c1b96f0b64c1db7f15c5dc740df656872",
-    "src/extension.ts": "8b074d5946ddabb6f296171498d3fcd6d5ad139abae82b66735c993e838fb37a",
+    "src/extension.ts": "32190a817b035878121cc0a4f95acb5349f771e42e13878d0f43fba23d99a447",
     "src/getPackageJSON.ts": "f658cc416776c4589ec9c4cff2e27234202f03c681e42d74335b409a215ca830",
     "src/hashes.ts": "43beec11fd1eec15d45b6ff80113ee16871fdf9b9e1f90631dddd16b0651f7ea",
-    "src/index.ts": "4691104090317863ffb5c958f68ddf1248377ee41df724f2f5dcd3e76ca7af8d",
+    "src/index.ts": "16c8a76c13c902ccf8f4e232bcf2a7e1a194cb4a395cc035d4277e0b4995e08f",
     "src/manual-test-client-raw-sql-highlight.ts": "530ffb4fc7048378bd03744834cdae8fa2c561c255f8845b9266c084ae9f9706",
     "src/plugins/ai-tools/index.ts": "4daabe93cc2ebdb9538d30d0da648049536994a7acc298de43deaad7cbbc451c",
     "src/plugins/index.ts": "fd8d329ac7c79392da4e2f5741c2c796fd60a6f129c67eb6365c3c70a8db4056",
-    "src/plugins/prisma-language-server/index.ts": "fb36b88f688d443bc13ae6a9e39909713b7c7fb9bee8513f40243c900c6032bd",
+    "src/plugins/prisma-language-server/index.ts": "b583a85b11cf8587cdff38a2a4505c0f5b53ce5b0015e1f4289638560da8f6e5",
+    "src/plugins/prisma-language-server/prismaNextClients.ts": "b015663979131198de4d32ae29c2834c1372c5c271b205ddca4da6aaaddcfb6b",
     "src/plugins/prisma-postgres-manager/ConnectionStringStorage.ts": "5137b97158e565785411e7be167f42c333af85d973c57f8f687fe3cb2cff67ff",
     "src/plugins/prisma-postgres-manager/PrismaDevRepository.ts": "3224c9c53042e09f5bda5e83def88cc5a1bce806e44587f303fbf23262ff90ff",
     "src/plugins/prisma-postgres-manager/PrismaDevTreeDataProvider.ts": "023593d9dfb0674764470f6b03c72a2836ea1d0c0aff9c56ecbac4bcc3532cac",
@@ -471,11 +473,11 @@
     "src/plugins/types.ts": "79c95e41b9f4b75e44fb1f0416dd37ab16ae4edaf597c1c5b21c0ea038d927ad",
     "src/prisma6Handling.ts": "4ee9e8a0f1fe02f6429ebbaef0fcbb86ea53fcefd5919a99e44ff4ca0dcc94cd",
     "src/telemetryReporter.ts": "1e9d69598ea1b39a9efabd024378a8223cb2bee4f3ae503580369913384eb3c2",
-    "src/util.ts": "7dc13ea23ca339bea3b758251f03e9f292920e824960fe83319243c3363e2312",
-    "src/workers/prisma6-language-server.ts": "8c87b243098a85a5bb2b3583621ad96e74d50556be60ceefada41fb15f01b8dd",
+    "src/util.ts": "07c101d0b81f5fc12be8eebabf8953dccfecf9cbb559e356242e54b5eb10e078",
+    "src/workers/prisma6-language-server.ts": "0d79e57586857af50ca3c804f3609fd721818dece5222e28c175da8ea39ba259",
     "_source": {
       "repo": "prisma/language-tools",
-      "commit": "9c8f5b88cd7ac0502e76933cb4244c2ed198d3af"
+      "commit": "480ccd713a6a6e64830f8c7a1bb51b6892f322d7"
     }
   },
   "vscode-ansible": {
