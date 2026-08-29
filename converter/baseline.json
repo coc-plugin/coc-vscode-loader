@@ -593,8 +593,8 @@
   },
   "vscode-stylelint": {
     "esbuild.mjs": "ecaa1282c160892bf2393f3b1f76b934e138930350c529fd6983fe0ba3033cee",
-    "package.json": "2943364f3ceca57412604cae2776e581f3b5a125c0371cea0cbdfd2150a0c19d",
-    "src/extension/__tests__/extension.test.ts": "835078287c76d01c70a485baf7c992ff1f0c6b29190a2a2b8f25c43226085deb",
+    "package.json": "44d01ba633f9ecaca70c5097dccc5164a36459be9493ba6ccae3e66df0db269e",
+    "src/extension/__tests__/extension.test.ts": "f61ad3e147b902f2aa586acc78d61dc48563d384a7d56f81964913927e4feccb",
     "src/extension/di-tokens.ts": "e8a156d6d50e932af5c73d74e7ec991db17e452d91bb6e79438aeb3a84764c79",
     "src/extension/extension-runtime.service.ts": "443ed485ce502cfc999fb935f2827ba7f8cf8797b9730bfb760770a5af68ca53",
     "src/extension/extension.module.ts": "b21fa360108cf241a59aab854fe343a1768171f810808607b8e1f61a432bc2f2",
@@ -607,13 +607,13 @@
     "src/extension/services/environment.ts": "86c6deb2ac79f00aaf42413e31568f442838ce82d419c5af339dc71933723f0a",
     "src/extension/services/index.ts": "9f4207056f6652065b0c829b8f605deab0db0850dc5e62c465bf203187db9e23",
     "src/extension/services/language-client.service.ts": "0eb209301934fd2a53b25d2ba3cb941501e80f62f49fa5547b86222f413d56a8",
-    "src/extension/services/language-client.ts": "3bfe68159f1a718c8bb57e8d2fa94a3226b6cde141c927edb0d63582c4d8d911",
+    "src/extension/services/language-client.ts": "d1e726bd983bf3698450a4e2f4e1c1ae590be1d149c0bee262be4903c6279fec",
     "src/extension/services/server-options.service.ts": "7fae23877f1acaa766f2b6a0ac3053ed5560e38f9f2f566594faf4f48542c36a",
     "src/extension/start-server.ts": "3ea9468f4387e01cbad5c2e6e0dab0d864439e874a62428964a1d0bb17a5dbac",
     "src/index.ts": "9c990939a7e26b4fcf1b0b33f82935ccdbcf660fcfffe0a7af8e9eebbd5a41a1",
     "_source": {
       "repo": "stylelint/vscode-stylelint",
-      "commit": "a7d4cb57ed226107b6b18c98212ccf936d569796"
+      "commit": "d4cd8fd4b4b33df95c84d798d10d1d9273eefbc1"
     }
   },
   "vscode-css-peek": {
