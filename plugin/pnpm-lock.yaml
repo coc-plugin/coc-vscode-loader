@@ -23,7 +23,7 @@ importers:
         version: 0.2.0
       coc.nvim:
         specifier: ^0.0.83-next.18
-        version: 0.0.83-next.24(@types/node@16.18.126)
+        version: 0.0.83-next.27(@types/node@26.3.0)
       esbuild:
         specifier: ^0.28.1
         version: 0.28.1
@@ -357,8 +357,8 @@ packages:
   '@ts-morph/common@0.29.0':
     resolution: {integrity: sha512-35oUmphHbJvQ/+UTwFNme/t2p3FoKiGJ5auTjjpNTop2dyREspirjMy82PLSC1pnDJ8ah1GU98hwpVt64YXQsg==}
 
-  '@types/node@16.18.126':
-    resolution: {integrity: sha512-OTcgaiwfGFBKacvfwuHzzn1KLxH/er8mluiy8/uM3sGXHaRe73RrSIj01jow9t4kJEW633Ov+cOexXeiApTyAw==}
+  '@types/node@26.3.0':
+    resolution: {integrity: sha512-L3fgrnchriRC2ExBflb8j4uZZURHZfQsmQeyVzhjcHW4kkwVyo8/0h1B2MVzMTrYUJYu6G7EWs14hW/L9putqw==}
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     resolution: {integrity: sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==}
@@ -497,11 +497,11 @@ packages:
     engines: {node: '>=22.15.0'}
     hasBin: true
 
-  coc.nvim@0.0.83-next.24:
-    resolution: {integrity: sha512-5U1efxofnRxNlr4Y05n/bqsd/TSNYrIAoL0AOs55n2l4bUz6IeekmTL0V47mi0/P8fkQQokOuYbV4qELCxxbWA==}
-    engines: {node: '>=16.18.0'}
+  coc.nvim@0.0.83-next.27:
+    resolution: {integrity: sha512-iSc0ElN7uA/nVOqMr8n8DgDJMD7dDX4p6H7o9Q2eDYW53BDrfq9GYIY7ToY8Xdt44gfHnHFYLoAHSW8ludw7Eg==}
+    engines: {node: '>=20.19.0'}
     peerDependencies:
-      '@types/node': ^16.18.0
+      '@types/node': '>=20.19.39 <30'
 
   code-block-writer@13.0.3:
     resolution: {integrity: sha512-Oofo0pq3IKnsFtuHqSF7TqBfr71aeyZDVJ0HpmqB7FBM2qEigL0iPONSCZSO9pE9dZTAxANe5XHG9Uy0YMv8cg==}
@@ -607,6 +607,9 @@ packages:
     resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
     engines: {node: '>=16.20.0'}
     hasBin: true
+
+  undici-types@8.3.0:
+    resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
 
 snapshots:
 
@@ -784,7 +787,9 @@ snapshots:
       path-browserify: 1.0.1
       tinyglobby: 0.2.17
 
-  '@types/node@16.18.126': {}
+  '@types/node@26.3.0':
+    dependencies:
+      undici-types: 8.3.0
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     optional: true
@@ -862,9 +867,9 @@ snapshots:
       fast-glob: 3.3.3
       fflate: 0.8.3
 
-  coc.nvim@0.0.83-next.24(@types/node@16.18.126):
+  coc.nvim@0.0.83-next.27(@types/node@26.3.0):
     dependencies:
-      '@types/node': 16.18.126
+      '@types/node': 26.3.0
 
   code-block-writer@13.0.3: {}
 
@@ -1023,3 +1028,5 @@ snapshots:
       '@typescript/typescript-sunos-x64': 7.0.2
       '@typescript/typescript-win32-arm64': 7.0.2
       '@typescript/typescript-win32-x64': 7.0.2
+
+  undici-types@8.3.0: {}
