@@ -19,8 +19,8 @@ importers:
         version: 7.0.2
     devDependencies:
       coc-test:
-        specifier: ^0.1.1
-        version: 0.1.7
+        specifier: ^0.2.0
+        version: 0.2.0
       coc.nvim:
         specifier: ^0.0.83-next.18
         version: 0.0.83-next.24(@types/node@16.18.126)
@@ -492,8 +492,8 @@ packages:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
 
-  coc-test@0.1.7:
-    resolution: {integrity: sha512-e+KwNBbL4Z1PhSDqFNxFOQzAxVPN/fiPSjGrsQK0Hj9Qk1bLrirJ1AgGCk5+SQ9mIIZOYTo6w0imcuWSJHfLWQ==}
+  coc-test@0.2.0:
+    resolution: {integrity: sha512-ba3Dp60+fOYv7C+ndnz/h8el8rb5/mB0iCIF61IiOBthnWMpMpxbbO7fi0EwCuy/bQ65ZBzfbNZw3m6h7QkEVw==}
     engines: {node: '>=22.15.0'}
     hasBin: true
 
@@ -856,7 +856,7 @@ snapshots:
     dependencies:
       fill-range: 7.1.1
 
-  coc-test@0.1.7:
+  coc-test@0.2.0:
     dependencies:
       esbuild: 0.28.2
       fast-glob: 3.3.3

@@ -43,7 +43,7 @@
     "typescript": "^7.0.2"
   },
   "devDependencies": {
-    "coc-test": "^0.1.1",
+    "coc-test": "^0.2.0",
     "coc.nvim": "^0.0.83-next.18",
     "esbuild": "^0.28.1"
   },
