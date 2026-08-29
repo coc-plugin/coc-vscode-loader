@@ -1521,11 +1521,11 @@
   },
   "vscode-bitbake": {
     "esbuild.mjs": "fd58c51b6dc77bf6f2a90df892fc19ef519ba133debaf7869732633b130b7aca",
-    "package.json": "0234e5c3b6d8285c2b42e5667d792051476b50779e97ee2e3b0b8b9761ef8456",
+    "package.json": "e1325b1e3dfcc3f7b7cedf8b24680dd9b0080e2fa3f535030c2f4e978ae6db59",
     "src/index.ts": "8fc029419fa84eb9ad8b66f7f19ad92e32337d46a1141c03a3262b2a03b8779d",
     "_source": {
       "repo": "yoctoproject/vscode-bitbake",
-      "commit": "3156bceebf86127ac64948625b1c279b5b7edb4d"
+      "commit": "3010afc5ca0ce2d395265773479b3b4f32fbabd4"
     }
   },
   "vscode-php-awesome": {
