@@ -486,7 +486,7 @@
     "src/definitions/constants.ts": "2178939bde280160d7bcd36eb5be4cc6307dcf9eaacd02d3391f37ea224ca23a",
     "src/definitions/lightspeed.ts": "562937cada1b60b0d8ab20462f8e2c384679d6f3b2770cecc540012091be483d",
     "src/env.d.ts": "82a074b3d1b2a651efa300eb631cc4259092711e7fb2be2ee7b30a7b7cf26008",
-    "src/extension.ts": "0864955b5e23d17aaa9c9f3db634f5d9cfc2b21cf0d9a6fa97fe14717347b52f",
+    "src/extension.ts": "b828547931dc83a1797949132bf571ef7d5d590a1edf0e8117336f061087ee59",
     "src/extensionConflicts.ts": "4041cb6de2b7c199bcd623ac17656719b2f3656fac824a47e79c774e0515fcb9",
     "src/features/ansibleMetaData.ts": "ec4731e88019ecee569759d55f93c0680da381322d2818ec76a5a0afd3aab4e8",
     "src/features/ansibleTox/constants.ts": "6e53e11dfb015de9034e835fd5a4ed18258ef0dae0380ee2fecafea76456ce11",
@@ -575,7 +575,7 @@
     "src/index.ts": "d4332c5dadbd555643304f585c31c9504c3fee91f40d8ae3ec91ffb8b2ffd3f8",
     "src/interfaces/extensionSettings.d.ts": "a81ab1684c64b53ec36bbeaed43cfc1fd40bdba35c50c5a30a8f3ea88113f91e",
     "src/interfaces/lightspeed.ts": "a6d26ec8d54600f78ee1a8dd5eae8aae79a06c29731831c96f1e36dfb72cc711",
-    "src/services/PythonEnvironmentService.ts": "2e9d45ee027f1e58577ed6de24a719e54d78734ddd3b03cbc8adc03344e83175",
+    "src/services/PythonEnvironmentService.ts": "f1604affa8a1b792e4125e1f4e24af756b47177ced1308611534dc13b8cb1c27",
     "src/services/TerminalService.ts": "f730930d6b9778e76c7bf398a6023ef729d7a0cc82c5008f2c109e458af9fd14",
     "src/settings.ts": "121f82f97f39630e0cdd41b09fd447f8f5c0ca083770a9ed7ddb95e352227f93",
     "src/types/pythonEnvApi.ts": "30f770d9c6f8c9c3474e2136c07b8fcbd75814e3ab1ed07a949c86b262b866f2",
@@ -590,7 +590,7 @@
     "src/webviewHtml.ts": "bf4c4ca6d5224e022e4cd6fe4eef4ebab585b4d314701e39bce68710f3509e55",
     "_source": {
       "repo": "ansible/vscode-ansible",
-      "commit": "b66dd9a0330de06f34819b0a4e26bef84d6a440e"
+      "commit": "017c37a2f35efde4f1aea8d6b8ee438de0b38613"
     }
   },
   "vscode-stylelint": {
