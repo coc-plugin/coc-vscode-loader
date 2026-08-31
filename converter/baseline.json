@@ -46,7 +46,7 @@
   },
   "vscode-biome": {
     "esbuild.mjs": "1ce6343ae783b009fb0349fb4d14c10e972f71383d8adc6538a0817f708c9a52",
-    "package.json": "4607f6293429e53a80b8d2ca66d4637a73e2f09ec2c169bcc7f3f42bed4b2e77",
+    "package.json": "473a75b22138d051c3a796d34de143afe4f6b248bc47ca0d4b610ba619faa185",
     "src/biome.ts": "d142e9d7b3ebf5f73df8b4e7af81c0cf78146c555de9b068b06fccd34e7e511d",
     "src/constants.ts": "19657ef2ef25c2bbf72138a8ce2a114ec491f2992cab6d43b2c2919f9ea59fe8",
     "src/extension.ts": "1f6c9a18e2a2de3e5129f65a3b95eb58605c9fd0d80e628b9a47fcbf44ec5dbc",
@@ -62,7 +62,7 @@
     "src/utils.ts": "f0f7061fcca9774deefca69d601498aeef336617e500eef6b58a4cb607901ef7",
     "_source": {
       "repo": "biomejs/biome-vscode",
-      "commit": "47eb14ee8725360c4602ffa8f7e07d7c1bb39839"
+      "commit": "27b1ee2abe9c2aef32a15fd27392efb08e7c6e59"
     }
   },
   "vscode-deno": {
