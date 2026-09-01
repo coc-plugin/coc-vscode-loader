@@ -37,11 +37,11 @@
   },
   "vscode-eslint": {
     "esbuild.mjs": "3498b3391add6cbcc9c223a96a1c51d22491fe4b91327e5a28ed8e251153e800",
-    "package.json": "f336b597b05dda91a833f7266da255b5c9b7036509bb2cd3697ad17d4d33a9f7",
+    "package.json": "31fcfe2e7aef7f9b909dc37783a17e03ff750105a4775b5816f115bc67ea1cf4",
     "src/index.ts": "8cf0e1fc0b9d3666e730bb0df33c7b1734f8039d28aa9ea06b866c73feca4e2e",
     "_source": {
       "repo": "microsoft/vscode-eslint",
-      "commit": "138995dbe18d01627ab99c8fc1770373db2e1cb1"
+      "commit": "2ec7b768ee89afaaae641de7237378b4362a4e32"
     }
   },
   "vscode-biome": {
