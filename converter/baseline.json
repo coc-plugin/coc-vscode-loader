@@ -860,7 +860,7 @@
   },
   "vscode-html-ls": {
     "esbuild.mjs": "4a903c0d0adf1a59258e94b46d0fefffca2be34fa9aa76014ccb674eb246ae97",
-    "package.json": "389b2f66da33b92adf8adbfec1adc09b6075344ae7ff2b8369579ebe30c2dba2",
+    "package.json": "93b3aacfc44407c2bb2b91bebc00bd85c1e6bd65ac0305b9675de29a0b2f1279",
     "src/client/src/autoInsertion.ts": "66b699bc8bdf9a3ab930e7e0650e17e70191f2dc15e9da0a82ad544f45653d22",
     "src/client/src/browser/htmlClientMain.ts": "30b9f4f2cc583249ddb64575d911492e29f8dd38260934ad1bf33017334fd942",
     "src/client/src/customData.ts": "53706fd008237b9fe5aaea65972e43beecee3f9837f3b806066fc34feeafaee1",
@@ -910,7 +910,7 @@
     "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "106a3a45eec09d92d4a23da89337f25521d73ccd"
+      "commit": "fde1a8ddde8edd5b27a95d57e04178ccdc9c013b"
     }
   },
   "vscode-css-ls": {
