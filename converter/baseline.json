@@ -172,9 +172,9 @@
   },
   "vscode-ng-language-service": {
     "esbuild.mjs": "7c02396fc33bafbd7dfb585f5b512513ed3b01f0c076d4b46ddff97d4c5d1611",
-    "package.json": "8ce0ca300fdf837b02976ba5952e0cc60598ee0d6992b2f914fcb24a84f2ee8c",
-    "src/client/src/client.ts": "8eff801c98e1f859c5db2b6374be62d1c8859589e95eb5e7235363b38ce00fa4",
-    "src/client/src/commands.ts": "fe94454b8186e94548e67f7ff690324a301cbadfdc040770c7cb47c8ba3f35a3",
+    "package.json": "edd2f7a207ab69e1166aabc1200bc595cd3e7e83f4025ce5127ae1b2fe44732a",
+    "src/client/src/client.ts": "1fa5599d35aa7c387e083d1a48df1ad585f5335be050f9850d214de3cb3b8315",
+    "src/client/src/commands.ts": "478f8590c5b1ebcbdcaccaae40b46834ec4b4d26900ca9246bee787b6af16ad9",
     "src/client/src/config_change.ts": "f028cd1e2244499a92131c58c17955b4254bdf959b52f305132b3e578c528630",
     "src/client/src/embedded_support.ts": "4238499ecce37b069a0d55a85a12cdd6f675cb8f0c85419af97a15cd75624c87",
     "src/client/src/extension.ts": "80aa2a7aaef4060a29d8d6adfc3cd32c1b997b276ee0bcbdfc662ebdc72f2229",
@@ -193,7 +193,7 @@
     "src/integration/e2e/hover_spec.ts": "0b751b9226dd9360aef537c51a6063b14c9cd922650dbb20f038bd9871677a4b",
     "src/integration/e2e/index.ts": "03180e9e1ed592a31aa173dbc0a5cbb1a51c44c673117e01f3373949b0e0b8ce",
     "src/integration/e2e/jasmine.ts": "411402f2107ea7693777e2a00db67395f0542ae133d15349757ce163ba291500",
-    "src/integration/lsp/ivy_spec.ts": "5b3822407a2eabb240ef42ace2a916346e7ddff45991222aed766c2293df503d",
+    "src/integration/lsp/ivy_spec.ts": "36441869f9fb23266ddba1b2f9c6e837c188e088be572fdc398287d881c10d15",
     "src/integration/lsp/test_utils.ts": "3218b3af3f85403d5275e2c5821ecc3d94f5e090d5d951c2668e51231d5e88f1",
     "src/integration/project/app/app.component.ts": "1842d09fe4bb33dbbd219b11d0388311b7c8664e68523adadd6f99837641d438",
     "src/integration/project/app/app.module.ts": "fd77f6e7040b8d68f5244102ed7251bfbbae1030710acfe9f2392e411115b804",
@@ -226,7 +226,7 @@
     "src/server/src/logger.ts": "1b2cdab13456b2bd6f9cec7db61a562aecb632b46d561baaabc3b0258168fa4c",
     "src/server/src/server.ts": "8147d35b0e1265898f69c3f0b8c0d084e6c99b032b9effe947de06211c325ef2",
     "src/server/src/server_host.ts": "5860cf77d9533321798c26960464e6d73f4740de75e74d0222c18ec4f8b118d9",
-    "src/server/src/session.ts": "97687cd40147ddad3018dc688ec16971d921da671b67a3a14e21a34c2f5f2ca1",
+    "src/server/src/session.ts": "3d66ac77924015f60fef6004bb7708b981d105e6f94f4cb6082b94d27827959c",
     "src/server/src/tests/cmdline_utils_spec.ts": "54c0db6582350e2cf873353db57cc2685579c09df78760cf189edcd94e7f007c",
     "src/server/src/tests/config_spec.ts": "d8bdabf5fba59d1f234d7ca647d6e2b51012572d2dbaff8c1e359fb6becc6416",
     "src/server/src/tests/embedded_support_spec.ts": "2d3725eef9c50ac0514b605bb82228915c713fea52b9e75db5d5f6c67a959f21",
@@ -239,8 +239,8 @@
     "src/syntaxes/src/build.ts": "cfae8d1f8d9c455c0d96218dec151e73d4220b93b9846b365f9d128073b3fb70",
     "src/syntaxes/src/expression.ts": "5928e4228ebd8899318ed32af09a3f23dbdcf79a5ff3ac2c27457e473fccf382",
     "src/syntaxes/src/host-object-literal.ts": "41dfa592e04bc4decbcbe264fc9fdbcdcda9e80cec5d49b4e8d0cb336b2d3208",
-    "src/syntaxes/src/inline-styles.ts": "e9608361a4d3c02eb35889da4092e5a23d251a8b3fe8541a1c79f1b14739daf0",
-    "src/syntaxes/src/inline-template.ts": "68991255544331c7d0c322bc4434f7fbc7d090a0a6c1e0ae02c7b9b51ff02ea7",
+    "src/syntaxes/src/inline-styles.ts": "602207b20f5e42389615338630284665e3da4527de773bedd9b7a2bd643de5d4",
+    "src/syntaxes/src/inline-template.ts": "7c62fc017b7bab3dd11998a78f30c910606bd9c61bb47f0a286f96cad6a593d4",
     "src/syntaxes/src/template-blocks.ts": "1d5bae44b09a91ed216521eae397e1cb51c511f176303de58450243e65ec2cd4",
     "src/syntaxes/src/template-let-declaration.ts": "538b5d037d7dc97e3e312d17ff56620bcbb5019d1f4da366f1bf70a685fc331c",
     "src/syntaxes/src/template-tag.ts": "df2936f6511902dd9c71cfda9a1a605a8941a7eb8f6fe2616b8d1190024b7961",
@@ -248,12 +248,12 @@
     "src/syntaxes/src/types.ts": "6c2c27d57941585e29c31025bcdd5e4c8f2de5f7dace7fd0d7ddd543a666d8ea",
     "src/syntaxes/test/cases.ts": "2239746854c16d9975e632dd6cd4bc095bd7d95562bd6f793f8fd8f6f6623bf3",
     "src/syntaxes/test/data/host-object-literal.ts": "5750c9ba4df9652eeac24521b4fc1c94b3897c855e971b3a02959389148a982b",
-    "src/syntaxes/test/data/inline-styles.ts": "dd12814af4655b3934ff1d318226e490c517b23d4edcc21ed96b18891a4f3e72",
-    "src/syntaxes/test/data/inline-template.ts": "2e67bdd46f3d2ad2437a0408939f3486e9f987b18b46869502506fdaf690641a",
+    "src/syntaxes/test/data/inline-styles.ts": "6023969e41a77d0b4a6f4892a71a265380656294ba30fc7f34b3b7e87ce6c65a",
+    "src/syntaxes/test/data/inline-template.ts": "c8763264c662c323ba1bd28f0dd377c3c41f71eef963a270282da17fa3d2d8e3",
     "src/syntaxes/test/driver.ts": "4133559698fefcaf5fb2535160be3fc3d430b7b7a9b2f6e774780dd4b8e16989",
     "_source": {
       "repo": "angular/angular",
-      "commit": "337053ef1ab6400c3641984511b45c341d306e87"
+      "commit": "9a58353b1b680f162a55969965ae6a90ae20316d"
     }
   },
   "vscode-language-viml": {
