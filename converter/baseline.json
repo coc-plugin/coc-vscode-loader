@@ -10,11 +10,11 @@
   },
   "vscode-ruff": {
     "esbuild.mjs": "1824b5a1c3cc26b3c27ed84266c847429363adadbb86d3260369363a5d4f7aca",
-    "package.json": "6265e3130c418e8c705c7d3bed1d55810fff14f7bab75afdad000348f57e17e1",
+    "package.json": "23c9e3c830efa844a38ae2366ff822fe379380efd56e6b021baa59fb96de402e",
     "src/index.ts": "f74d13153a7ff1d6dec532a0d434343198be020aa175f07e18266fa45edfcf5b",
     "_source": {
       "repo": "astral-sh/ruff-vscode",
-      "commit": "9836d64b5fd9657692ac1db236b676c402d23d8d"
+      "commit": "ab348e92218d31af39ca281c6dc6fd6da67b8c85"
     }
   },
   "vscode-clangd": {
