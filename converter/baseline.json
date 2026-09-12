@@ -419,7 +419,7 @@
   },
   "vscode-prisma": {
     "esbuild.mjs": "10e357fba2099e09481567dd729263de13e6924fd68eb7503650633bb45ae034",
-    "package.json": "7f6ed510b2a444b551251295475cc222f9791b366022eb8b9fe85a80e652447d",
+    "package.json": "0e7fc9041898d247f0de132d1a3851c6182d462a4e4c590ab5fb816871c070d2",
     "src/CodeLensProvider.ts": "68b98245ff699dbc9ed62ca02c398602e0ec9c902f8146ad2afbcf6d45a9e163",
     "src/__test__/helper.ts": "66c431526de6125b2ecf5f694eac077810a4198321d8057afcc8a591d21e8cc2",
     "src/__test__/index.ts": "a178b7c5c23d3d058cc82768d6eb2f87083840df41d79a133d120b4c020c45e2",
@@ -436,7 +436,7 @@
     "src/extension.ts": "32190a817b035878121cc0a4f95acb5349f771e42e13878d0f43fba23d99a447",
     "src/getPackageJSON.ts": "f658cc416776c4589ec9c4cff2e27234202f03c681e42d74335b409a215ca830",
     "src/hashes.ts": "43beec11fd1eec15d45b6ff80113ee16871fdf9b9e1f90631dddd16b0651f7ea",
-    "src/index.ts": "16c8a76c13c902ccf8f4e232bcf2a7e1a194cb4a395cc035d4277e0b4995e08f",
+    "src/index.ts": "4691104090317863ffb5c958f68ddf1248377ee41df724f2f5dcd3e76ca7af8d",
     "src/manual-test-client-raw-sql-highlight.ts": "530ffb4fc7048378bd03744834cdae8fa2c561c255f8845b9266c084ae9f9706",
     "src/plugins/ai-tools/index.ts": "4daabe93cc2ebdb9538d30d0da648049536994a7acc298de43deaad7cbbc451c",
     "src/plugins/index.ts": "fd8d329ac7c79392da4e2f5741c2c796fd60a6f129c67eb6365c3c70a8db4056",
@@ -477,7 +477,7 @@
     "src/workers/prisma6-language-server.ts": "0d79e57586857af50ca3c804f3609fd721818dece5222e28c175da8ea39ba259",
     "_source": {
       "repo": "prisma/language-tools",
-      "commit": "480ccd713a6a6e64830f8c7a1bb51b6892f322d7"
+      "commit": "3c526c3ca6f6fbe869230130a21836f62776a774"
     }
   },
   "vscode-ansible": {
