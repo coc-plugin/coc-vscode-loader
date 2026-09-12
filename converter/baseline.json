@@ -336,14 +336,15 @@
     "src/client/languageParticipants.ts": "27757760363fab0d0f802fd929254179688ffd65c4a2e7d80af2edee7c06f406",
     "src/client/tagClosing.ts": "16b8fa3b993be41d1d464540ef059599830ab5b61e0af4bed89d472496bc69d2",
     "src/client/xmlClient.ts": "e92856c868a710fac4fdf5b12ffb1c0c8a01335044c87244442983d6c3f743c9",
+    "src/client/xmlEncoding.ts": "afcf3402f2136e075beb318e5800322d9e3b0bb798d17e10afdd8c40a5096389",
     "src/commands/clientCommandConstants.ts": "2fd830850cd02f350c9f7b994789e2abf4b789827d4b1aa8be74d64bdb217118",
     "src/commands/lspCommandConstants.ts": "136aa0e314e7ebca2e3d2c06cf8afc5d011f490ef78c1d0f7f8b0e0f7cf77bf6",
     "src/commands/registerCommands.ts": "9419359dc1fd19a526083f2707ddedeee7b7197293cee7994e32b075347d1661",
     "src/commands/serverCommandConstants.ts": "374e6a1e70769d6ce0a2d773681997778b793e37410582ade4031117367e96c8",
-    "src/extension.ts": "87d14a29ffd74e3dff759845e9fe135f9af46416105a32acab4ec681c4ff944e",
+    "src/extension.ts": "22695092d4478811a0e9cd525d7628fe2d2de639b24127d9ff68ab50230d3d4d",
     "src/index.ts": "82857609ca64877befde6281c32887c4b98d8912f97d89ba7706ccda8ccee8f2",
     "src/lsp-commands.ts": "2205a762ea5f65c3877b70f6565091088b7280551ed0087e84fb844bd11d862b",
-    "src/markdownPreviewProvider.ts": "866465975848c3c6a4aa6e33c8b22423a35e87652b7a06db7a2ddaaecedf5288",
+    "src/markdownPreviewProvider.ts": "650d19a44cc941b1efc833d2650c2363b90312d4fc82d37b552f733d90abf9eb",
     "src/plugin.ts": "64bd580f692d7f1f7788c2ca93106de12e4159ece174115334277389f1b3f81e",
     "src/server/binary/binaryHashManager.ts": "d440fd925e5c3579d76d3e8474f0db211df5863ec26d077429a772ace05e6d48",
     "src/server/binary/binaryServerStarter.ts": "fa177cf4adee0b3df334d0d98656cfa4c61a6d25edb8fe755d1b49e086755687",
@@ -357,10 +358,11 @@
     "src/settings/variableSubstitution.ts": "132cbcbfe2baa52361f4331ade702ad9d416a2e79bb4b94751fa029df6852aee",
     "src/telemetry.ts": "8f6ad28cc5fb3158d029f9ef89440270219a14ab7d3ebc4537419889351b4c56",
     "src/test/smoke.test.ts": "f19331d4c9516d6da503081d10da17333697fde676b2e11e76ffacd0f6347fee",
+    "src/test/xmlEncoding.test.ts": "1f4701a6e521dd43382799c873d1b2cc0a215d481e2777a58b1e8d9466a59598",
     "src/utils/fileUtils.ts": "d30f2c091f64ed72cb6a0b8c016ad1b330d0440e9b24daeacb5811f2bb211531",
     "_source": {
       "repo": "redhat-developer/vscode-xml",
-      "commit": "4e2f94eb99e1401c9c27ba84f9f2f1bc8dfc583e"
+      "commit": "76b64531a9d662209b77154c0be6b333e54bff2b"
     }
   },
   "vscode-svelte": {
