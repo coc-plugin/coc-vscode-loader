@@ -1727,12 +1727,12 @@
   },
   "vscode-uni-cloud-snippets": {
     "coc-convert.json": "c77ea56b75f4d37bf7b4929e3d3188034e30e13e035569dfcbbd499460843e79",
-    "package.json": "0f40d5bda5a63264c526a8f264ae678c8731a712c83795a39b26235c54e2ddd3",
-    "snippets/javascript.json": "e9cb17054458dcec0900477dce09f18341ad6dc41b7e246082f688a403ff5887",
-    "snippets/vue-html.json": "f165a9e3b7dae37b90a52fbf7e4833374eedb36043598ac532f08432cf2fb5ad",
+    "package.json": "2f461f66cd778635e775d2e817d6f508c108b144cd4a3214264958aa10b23e78",
+    "snippets/javascript.json": "a4965b3f5e0babdbafe8bdbb48e20a458923b2144dc4c6e669026aba01cd25b3",
+    "snippets/vue-html.json": "e0edd1400378790b35b982097fc906bd9970a719818c15d936c352e432b69dca",
     "_source": {
       "repo": "uni-helper/uni-cloud-snippets-vscode",
-      "commit": "0c0f588e7f6f14e22b1556461ac36b68fb1b7a4d"
+      "commit": "e32c292218c653e438b122d01ef22394d1e09b21"
     }
   },
   "vscode-uni-app-snippets": {
