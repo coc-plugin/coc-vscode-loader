@@ -482,7 +482,7 @@
   },
   "vscode-ansible": {
     "esbuild.mjs": "3cf56dbcd46461e055cd7512e738931d5163bc20225fbf16f40ecede04994560",
-    "package.json": "51a490a455d5564671c953afa09a33561039a3c00869e95620b7a0fe907cc254",
+    "package.json": "c1aaf062a22b56f90963065db02d2be8dd4a73cd9a3763506906e5f83650d246",
     "src/definitions/constants.ts": "2178939bde280160d7bcd36eb5be4cc6307dcf9eaacd02d3391f37ea224ca23a",
     "src/definitions/lightspeed.ts": "562937cada1b60b0d8ab20462f8e2c384679d6f3b2770cecc540012091be483d",
     "src/env.d.ts": "82a074b3d1b2a651efa300eb631cc4259092711e7fb2be2ee7b30a7b7cf26008",
@@ -590,7 +590,7 @@
     "src/webviewHtml.ts": "bf4c4ca6d5224e022e4cd6fe4eef4ebab585b4d314701e39bce68710f3509e55",
     "_source": {
       "repo": "ansible/vscode-ansible",
-      "commit": "017c37a2f35efde4f1aea8d6b8ee438de0b38613"
+      "commit": "300cf443e4b801bc7e58fad54356793407e544cc"
     }
   },
   "vscode-stylelint": {
