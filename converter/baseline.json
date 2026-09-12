@@ -915,11 +915,11 @@
   },
   "vscode-css-ls": {
     "esbuild.mjs": "70be6af4ceae699cf0710b447b7417d9e769a3d413dd5b79a1ef3220d047fc93",
-    "package.json": "cbbd87b61d23bc9892f213c35ed07f5a10d75be9c76b0f2f1b9d599c8c73a5f4",
+    "package.json": "4e510e32c0991380c9dca17077dbdae9f3028eb838e4202e0fb5f3f8ee85550a",
     "src/index.ts": "2b3215aa10f11d8a7178601d4068d80e6090f2357527dc02cc73cbc7aa3cce0f",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "106a3a45eec09d92d4a23da89337f25521d73ccd"
+      "commit": "a8f49160195d9e967d2d51e8544dc895207518e7"
     }
   },
   "vscode-live-server": {
