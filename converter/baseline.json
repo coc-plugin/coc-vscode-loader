@@ -1737,14 +1737,14 @@
   },
   "vscode-uni-app-snippets": {
     "coc-convert.json": "f81a09116efddf940b6830e9669167a50a91427b9391667eafa8dcf8c32d673e",
-    "package.json": "1f7030da60cb75fd78a9a2389c83b9ca3919b15025a65c7ea0761f5744ff3354",
-    "snippets/css.json": "d0e6465bc0dc7218b771d4c39920a0a543c9593c517ca2b16b5641d9248c7df9",
-    "snippets/javascript.json": "22549cef52f0f29b37dc4ff0a79decbdf092e059f6a606f438d5e993cfdb3580",
+    "package.json": "dcad00605c416a23efa963c472fe93b828a52c7227d454abbb6d980093b298be",
+    "snippets/css.json": "a4d5682ddb398f7d420a026b842fe22965c311518f305658db9cca2978ddeecd",
+    "snippets/javascript.json": "f281382b22cf9f107a775580f7d15b1d454ae5263e848b84e16416ee02a5ecc3",
     "snippets/jsonc.json": "6f3c836e2aa8e8e403309203480552b5830a522d60660b2de01853547ca3e5f4",
-    "snippets/vue-html.json": "cdb060f0fcb87ce8db6a94d0eb1241561026553e85bc25f9caffa97a46a07cce",
+    "snippets/vue-html.json": "1d5a8a113eec5d57fb9fd5503fb7ef989516dc08145000ef80136791a39e2897",
     "_source": {
       "repo": "uni-helper/uni-app-snippets-vscode",
-      "commit": "31bfcb4d622976e7c5012336e6209ec3283aa5f2"
+      "commit": "8eb360a4fe7ff66b2fc1bd92dba92d329189f154"
     }
   },
   "vscode-uni-ui-snippets": {
