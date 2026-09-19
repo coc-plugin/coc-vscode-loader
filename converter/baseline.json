@@ -307,11 +307,11 @@
     "esbuild.mjs": "4b8080fc072bd0f57c754bbc29b62f2a3177cd769df680e3b91e53e60b502097",
     "package.json": "bea1d95d895d85bba7c3c2c5f8d085535ea4a7bc91537ed2f3cb2a628e893bb5",
     "src/autoDisableSchemaDetection.ts": "4de5b4412cf9471ced61f3ffb146e56223cb33d8d9127b0b665ceb9250166e72",
-    "src/extension.ts": "557ba9cba7acb142892576f625186541c55fc4d07141c5d8ab90426a7eff0086",
+    "src/extension.ts": "055e2c8125ed02915996b447e5898e5ee7371fbfd3f06c9ca6be3508c1fbd12b",
     "src/extensionConflicts.ts": "f4bf08c842142ca24a29c9445d459490a6e28ed93ddc57353038c52580b1fc1d",
     "src/index.ts": "080c2dc683629b4bd7c22654dc985019d981cd2d270dcb2e374ed2d54fbc83ae",
     "src/json-schema-cache.ts": "f1ab95d341c57cf881515181795bb83a0f7f0cf1a7a9f1d4d40fed47fd4118ef",
-    "src/json-schema-content-provider.ts": "aed056e7a62eea382c9086cb17e59bbb0b02d3045ebe1ccbd11d5091d2649f48",
+    "src/json-schema-content-provider.ts": "4c1d152f7c0a407079377c8eacf9ca72584248a9fb6d7d79ea2fb0b7d07d4ee1",
     "src/node/yamlClientMain.ts": "481563bdc6e9102a068091aad20b54752b43dc8b1fb48c211ca4ebd75abd400d",
     "src/paths.ts": "a0f6ec47945121b7397b5d0b8bf076eee92309c5c504b343d14bfd805f2ca9d3",
     "src/recommendation/handler.ts": "f86e0ec4a87a889e4d824fe53869c743ec0d7a9617c07ef2e22b0c82daabcbe2",
@@ -324,7 +324,7 @@
     "src/webworker/yamlClientMain.ts": "16a57755a8669c5eb9eec70f7e5b6cfcfcc4dea73949566a6b52b66017046a4f",
     "_source": {
       "repo": "redhat-developer/vscode-yaml",
-      "commit": "939c313604c1889215c32654ace41ee5e060c236"
+      "commit": "66fcb7383522253f9fc344727d1a72da1dab181d"
     }
   },
   "vscode-xml": {
