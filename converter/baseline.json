@@ -1731,12 +1731,12 @@
   },
   "vscode-uni-cloud-snippets": {
     "coc-convert.json": "c77ea56b75f4d37bf7b4929e3d3188034e30e13e035569dfcbbd499460843e79",
-    "package.json": "2f461f66cd778635e775d2e817d6f508c108b144cd4a3214264958aa10b23e78",
+    "package.json": "6ee0fc0c257397800fa220182cc0ed9a9b700f98bc7b4a5149279092254fe349",
     "snippets/javascript.json": "a4965b3f5e0babdbafe8bdbb48e20a458923b2144dc4c6e669026aba01cd25b3",
     "snippets/vue-html.json": "e0edd1400378790b35b982097fc906bd9970a719818c15d936c352e432b69dca",
     "_source": {
       "repo": "uni-helper/uni-cloud-snippets-vscode",
-      "commit": "e32c292218c653e438b122d01ef22394d1e09b21"
+      "commit": "a0bd4ac68960bbab13faa07494214be6c418efef"
     }
   },
   "vscode-uni-app-snippets": {
