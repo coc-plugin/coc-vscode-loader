@@ -305,7 +305,7 @@
   },
   "vscode-yaml": {
     "esbuild.mjs": "4b8080fc072bd0f57c754bbc29b62f2a3177cd769df680e3b91e53e60b502097",
-    "package.json": "bea1d95d895d85bba7c3c2c5f8d085535ea4a7bc91537ed2f3cb2a628e893bb5",
+    "package.json": "ad1a88eadaaa59f9bdd8f0e63a8638d3793e4878b9f8d0d9fe4dcee5f40aa3bb",
     "src/autoDisableSchemaDetection.ts": "4de5b4412cf9471ced61f3ffb146e56223cb33d8d9127b0b665ceb9250166e72",
     "src/extension.ts": "055e2c8125ed02915996b447e5898e5ee7371fbfd3f06c9ca6be3508c1fbd12b",
     "src/extensionConflicts.ts": "f4bf08c842142ca24a29c9445d459490a6e28ed93ddc57353038c52580b1fc1d",
@@ -319,12 +319,12 @@
     "src/recommendation/index.ts": "3eb5fbcebd3ab3e775031b99e8b4a46e3453ccc51e647e22eb003ab2c5481844",
     "src/recommendation/openShiftToolkit.ts": "01ea209e3b5b895370e6ab51818d79c2cc492f5d557f9e7fb0653229f5c4c70a",
     "src/schema-extension-api.ts": "eac07cf3658ee88baf4378ecc2f5329559243bc9769e06bb2e4ea5b2b448f47e",
-    "src/schema-status-bar-item.ts": "a365779a814c128677674a7ea33d14985d8f6d33908a7976c89c6282fd1a1e58",
+    "src/schema-status-bar-item.ts": "6558fa039b3b871efe9bec4bacebd31abf445ee1bdb890f0a1baa690f5ca76b6",
     "src/telemetry.ts": "01e6c27b51027facb4ee5b8d3c049fd4aa3a1b20fa4a9cee99c71eb775f995e3",
     "src/webworker/yamlClientMain.ts": "16a57755a8669c5eb9eec70f7e5b6cfcfcc4dea73949566a6b52b66017046a4f",
     "_source": {
       "repo": "redhat-developer/vscode-yaml",
-      "commit": "66fcb7383522253f9fc344727d1a72da1dab181d"
+      "commit": "0ce73af446b80070f128892e3e4c5a60260fbec2"
     }
   },
   "vscode-xml": {
