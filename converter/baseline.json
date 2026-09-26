@@ -118,18 +118,18 @@
   "vscode-rust-analyzer": {
     "esbuild.mjs": "594c6d1aec168f22f3f6aa4c4b4cbe4a5042cd3f36d5621fab224e6b0bc1dd38",
     "package.json": "b224ac6d4a0585b7a1d234cdcb95266ace7c02890c05f2c29bf133efd3a6a1d9",
-    "src/bootstrap.ts": "bbfc9499fb0fca4b32ec8e937bd1df608ec54776e0d5f6239dc9d50389aa4a32",
+    "src/bootstrap.ts": "d3bb61551513439a27f7e35db876d06abdd5bab55531364d944ea7ca3be6d02d",
     "src/client.ts": "a76cbde14ea858e16e943d8bf30de2b5700b9204da6d6beffaaf4cc6cf8b850e",
     "src/commands.ts": "53e830b301e8a0072a7e76872643e96176672950c29168d6d9a68c503b0cdd2f",
     "src/config.ts": "d5bf7e109c1c4c5e760254bb601c19aaddc8e1badd240437b3497d9dae54cec2",
-    "src/ctx.ts": "4893fea042a1fff2580eed7b0b85e98307bf4ee181526f8d4df4fd7af5b4c832",
+    "src/ctx.ts": "c546a7238ee4d155f6c4ffe939032576d9a42c5c9d17c8372566a9d48a38e5eb",
     "src/debug.ts": "7865bd0c840a9b62e471dabcf957f5ab6ccf038113b5dc757f16343e05b59230",
     "src/dependencies_provider.ts": "85f7294e829afa9d3f2d37c1ba5e855f31963839755ba7f234444ac231e40b0f",
     "src/diagnostics.ts": "2b47871571ee7c53ae7adc5df9d99c404fd7d82ea7a842afa624db0422d4e4af",
     "src/index.ts": "15c875e3c2d6710b184e58f1417b2c9d793d9a189de17c80126c33a302c9e029",
     "src/lang_client.ts": "32fa239829d8c4b75cd6bb7a99c0a037adb589300dbc95c9badd45a0e564455b",
     "src/lsp_ext.ts": "76378393048ddfa3035b8089ad2d29d1f6de47963476fb97ba635feea8c0fb00",
-    "src/main.ts": "e7150c556d8b7ab270a942434e96b972a77145ad4b8ffa96b9e0e502a61fcacf",
+    "src/main.ts": "75262a25fd7f4aa92518dd61448307aaf30075776b470e46a7a0f3d9a78a33e4",
     "src/new_project.ts": "9a43240e55aa2e17f7e262f59047d682839be6288099cd52e38af921f7b1a4a6",
     "src/persistent_state.ts": "ce29440e8a62950a8f18c0834c1ddf395c0e7e0e5bc13f639afbb67380788089",
     "src/run.ts": "a54ca120478090d2a7b9f9c95dc7bb4309bd400401322247bdc039b2b7408803",
@@ -141,7 +141,7 @@
     "src/util.ts": "7fca35b9b00275b3e4e3c5406815445a4305c826c53270d4be65fd7374ebc3d9",
     "_source": {
       "repo": "rust-lang/rust-analyzer",
-      "commit": "5f258f4534e3b4bdaa45a1299b53a66cf014d803"
+      "commit": "1ad44dc58e65304b594063e70c144ecb58643671"
     }
   },
   "vscode-intelephense": {
