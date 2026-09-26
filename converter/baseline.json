@@ -162,13 +162,14 @@
     "src/bridge.ts": "efaf15df49c70728f96ef8f907926ba274bf85514029233cabbb461b6e80de59",
     "src/generated-meta.ts": "7874d6374a2feea4b26d476488a3a09271166fe05fa784f7d07074edd6fe1472",
     "src/index.ts": "ac63503067c7517c0329bd2dce1aa237bacf0b0768b088c162d4380eb54e72c8",
-    "src/patch-tsserver.ts": "f4f3c5538a0495d5e52642fd28c6f0f3851c799b8af6466dae5ac20614955cd5",
+    "src/patch-tsserver.ts": "ac81d24981624c21f9461145bba34ed0e6d92f100cc166fc8242f7cca0cbbb05",
     "src/rangeFormatting.ts": "ddfea084b75ca87c75d53ddb04159ad2727fd9416f25bcb55fe457244234533b",
     "src/reactivityAnalysisPlugin.ts": "291dcdff967bfe9fe60434ab95d07c74cfea1d2d8494240cba8ef5941dba6335",
+    "src/registerModuleTransform.ts": "dacaae03ca28807ef781e0adc98e3ef7307695749bb349496232124bc8477414",
     "src/welcome.ts": "bdb7fe441601673d896b563756edf6f827a40d1c1657ae0c3c9493b198908a65",
     "_source": {
       "repo": "vuejs/language-tools",
-      "commit": "88e8500c1e5f1b29d80f42c8ca065cc9cbd56899"
+      "commit": "1be73b8f944fc4b571e2122255403f1f9b8fdad2"
     }
   },
   "vscode-ng-language-service": {
