@@ -404,11 +404,11 @@
   },
   "vscode-bash-language-server": {
     "esbuild.mjs": "7cdc5c18ae3a2aa2e0696b92fc6fffa6b892573817b1b5f82fdb5a2857a978ee",
-    "package.json": "f0fd276d219cbd1c5fae4008a69a106e6e3dd8f134eda762c41b2d5205281115",
+    "package.json": "5323182eacddc452400276b9ac323ad0e98f83a2fe631460eba2dcd3eb29b6cf",
     "src/index.ts": "99477c491287159a264d0b5401bb3d24b9906dadef2a261eb6b2d412196178b1",
     "_source": {
       "repo": "bash-lsp/bash-language-server",
-      "commit": "3db951437043befa71f78fb3f994a91a0b41f1b4"
+      "commit": "f7fb3d880ab7c3e0164e3909f9f8275b2cb10df1"
     }
   },
   "vscode-astro": {
