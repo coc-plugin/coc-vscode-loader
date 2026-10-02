@@ -308,8 +308,8 @@
     }
   },
   "vscode-yaml": {
-    "esbuild.mjs": "4b8080fc072bd0f57c754bbc29b62f2a3177cd769df680e3b91e53e60b502097",
-    "package.json": "ad1a88eadaaa59f9bdd8f0e63a8638d3793e4878b9f8d0d9fe4dcee5f40aa3bb",
+    "esbuild.mjs": "18d83381823e75797ffb20315a460fb88c32ca6a92b2c7d5f936ae989d7b9a85",
+    "package.json": "73e68b12f952f1dbf763c8ddd36522f7b1f42d1d75cc8ef1ce4de9805623c8f4",
     "src/autoDisableSchemaDetection.ts": "4de5b4412cf9471ced61f3ffb146e56223cb33d8d9127b0b665ceb9250166e72",
     "src/extension.ts": "055e2c8125ed02915996b447e5898e5ee7371fbfd3f06c9ca6be3508c1fbd12b",
     "src/extensionConflicts.ts": "f4bf08c842142ca24a29c9445d459490a6e28ed93ddc57353038c52580b1fc1d",
@@ -328,7 +328,7 @@
     "src/webworker/yamlClientMain.ts": "16a57755a8669c5eb9eec70f7e5b6cfcfcc4dea73949566a6b52b66017046a4f",
     "_source": {
       "repo": "redhat-developer/vscode-yaml",
-      "commit": "0ce73af446b80070f128892e3e4c5a60260fbec2"
+      "commit": "003f606d9b300eeeed77bccc0aa74f4b209a7053"
     }
   },
   "vscode-xml": {
