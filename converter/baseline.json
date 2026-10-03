@@ -308,14 +308,14 @@
     }
   },
   "vscode-yaml": {
-    "esbuild.mjs": "18d83381823e75797ffb20315a460fb88c32ca6a92b2c7d5f936ae989d7b9a85",
-    "package.json": "73e68b12f952f1dbf763c8ddd36522f7b1f42d1d75cc8ef1ce4de9805623c8f4",
+    "esbuild.mjs": "24a082a81b5e721cf6cb9ed6387bdfbde89231ad5428d03692be99ab34c3feb4",
+    "package.json": "506a47e1a97eeb6770ffe33a9a7508b0d3135f0224469ca7b77fdd2a800f9469",
     "src/autoDisableSchemaDetection.ts": "4de5b4412cf9471ced61f3ffb146e56223cb33d8d9127b0b665ceb9250166e72",
     "src/extension.ts": "055e2c8125ed02915996b447e5898e5ee7371fbfd3f06c9ca6be3508c1fbd12b",
     "src/extensionConflicts.ts": "f4bf08c842142ca24a29c9445d459490a6e28ed93ddc57353038c52580b1fc1d",
     "src/index.ts": "080c2dc683629b4bd7c22654dc985019d981cd2d270dcb2e374ed2d54fbc83ae",
     "src/json-schema-cache.ts": "f1ab95d341c57cf881515181795bb83a0f7f0cf1a7a9f1d4d40fed47fd4118ef",
-    "src/json-schema-content-provider.ts": "4c1d152f7c0a407079377c8eacf9ca72584248a9fb6d7d79ea2fb0b7d07d4ee1",
+    "src/json-schema-content-provider.ts": "7a063a5c4dc16b58a8e1e5cfd127d2ac88e41b0b1e5e91a5773fe7e73741268b",
     "src/node/yamlClientMain.ts": "481563bdc6e9102a068091aad20b54752b43dc8b1fb48c211ca4ebd75abd400d",
     "src/paths.ts": "a0f6ec47945121b7397b5d0b8bf076eee92309c5c504b343d14bfd805f2ca9d3",
     "src/recommendation/handler.ts": "f86e0ec4a87a889e4d824fe53869c743ec0d7a9617c07ef2e22b0c82daabcbe2",
@@ -323,12 +323,13 @@
     "src/recommendation/index.ts": "3eb5fbcebd3ab3e775031b99e8b4a46e3453ccc51e647e22eb003ab2c5481844",
     "src/recommendation/openShiftToolkit.ts": "01ea209e3b5b895370e6ab51818d79c2cc492f5d557f9e7fb0653229f5c4c70a",
     "src/schema-extension-api.ts": "eac07cf3658ee88baf4378ecc2f5329559243bc9769e06bb2e4ea5b2b448f47e",
+    "src/schema-request-retry.ts": "c0b4d72d3d6451b945f02ea15b34421f1e747f7ed4a7abb8b9803795db7d4f9c",
     "src/schema-status-bar-item.ts": "6558fa039b3b871efe9bec4bacebd31abf445ee1bdb890f0a1baa690f5ca76b6",
     "src/telemetry.ts": "01e6c27b51027facb4ee5b8d3c049fd4aa3a1b20fa4a9cee99c71eb775f995e3",
     "src/webworker/yamlClientMain.ts": "16a57755a8669c5eb9eec70f7e5b6cfcfcc4dea73949566a6b52b66017046a4f",
     "_source": {
       "repo": "redhat-developer/vscode-yaml",
-      "commit": "003f606d9b300eeeed77bccc0aa74f4b209a7053"
+      "commit": "cdfb5a6702fc71e99284b04375eda40dd67262c3"
     }
   },
   "vscode-xml": {
