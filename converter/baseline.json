@@ -262,12 +262,12 @@
     }
   },
   "vscode-language-viml": {
-    "esbuild.mjs": "247517c1ab1a8ae73800883a4e1761125901d6b7da65d7efdaffe7c6ed213a7c",
-    "package.json": "b62d0c4c23c87acdc83b4d79b7ca5239ddcf6fe47c4baa8f57bd2be80c308ccd",
+    "esbuild.mjs": "44e62cce56ba95a6ec4320348797be11f144ae3c5e468bc1173a3b90f1b3bb9b",
+    "package.json": "1b9e1615e6d7cc14565ec04d9672c6c22767dd13e66a879331dfb3f87a32f6da",
     "src/index.ts": "cc947cedcee432db598391578a7fedb685ceae23e8cb80dfb2e3684aa73fe15f",
     "_source": {
       "repo": "XadillaX/vscode-language-viml",
-      "commit": "8725197032791cb6beae7c80ae94a207faf608b1"
+      "commit": "78c46d0fb089e39ec1554ff1d0bd2f31406641c7"
     }
   },
   "vscode-lua": {
