@@ -1735,12 +1735,12 @@
   },
   "vscode-uni-cloud-snippets": {
     "coc-convert.json": "c77ea56b75f4d37bf7b4929e3d3188034e30e13e035569dfcbbd499460843e79",
-    "package.json": "7f3d848c432fb3c746c7329c471ff81002d978483a92184eae6c4f8a1004b8f7",
+    "package.json": "ef3bf4bbad7933492b0abf518ab7b3127eb1ccfba6083dbf3e6444f48e58da28",
     "snippets/javascript.json": "a4965b3f5e0babdbafe8bdbb48e20a458923b2144dc4c6e669026aba01cd25b3",
     "snippets/vue-html.json": "e0edd1400378790b35b982097fc906bd9970a719818c15d936c352e432b69dca",
     "_source": {
       "repo": "uni-helper/uni-cloud-snippets-vscode",
-      "commit": "44a147ae45eaa75059ecaba1f8765f94a3bb3470"
+      "commit": "95146ad0ca1cbfdb261bb6fdfc2071df4bef9207"
     }
   },
   "vscode-uni-app-snippets": {
