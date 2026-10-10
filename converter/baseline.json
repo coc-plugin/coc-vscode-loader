@@ -426,8 +426,8 @@
     }
   },
   "vscode-prisma": {
-    "esbuild.mjs": "10e357fba2099e09481567dd729263de13e6924fd68eb7503650633bb45ae034",
-    "package.json": "0e7fc9041898d247f0de132d1a3851c6182d462a4e4c590ab5fb816871c070d2",
+    "esbuild.mjs": "f05c6731996ad1c37296d0dd57cbe5cc9ddb29134f6062eb2b6b1e6902bd6fe5",
+    "package.json": "9467dd33404e296cb730a3ce7ee6e9b092edbcfa6772f4aaf12a781e56b2b281",
     "src/CodeLensProvider.ts": "68b98245ff699dbc9ed62ca02c398602e0ec9c902f8146ad2afbcf6d45a9e163",
     "src/__test__/helper.ts": "66c431526de6125b2ecf5f694eac077810a4198321d8057afcc8a591d21e8cc2",
     "src/__test__/index.ts": "a178b7c5c23d3d058cc82768d6eb2f87083840df41d79a133d120b4c020c45e2",
@@ -449,7 +449,9 @@
     "src/plugins/ai-tools/index.ts": "4daabe93cc2ebdb9538d30d0da648049536994a7acc298de43deaad7cbbc451c",
     "src/plugins/index.ts": "fd8d329ac7c79392da4e2f5741c2c796fd60a6f129c67eb6365c3c70a8db4056",
     "src/plugins/prisma-language-server/index.ts": "b583a85b11cf8587cdff38a2a4505c0f5b53ce5b0015e1f4289638560da8f6e5",
-    "src/plugins/prisma-language-server/prismaNextClients.ts": "3577d048e277ee8196db38f52857940c2d763160b743a8d3bf78c35391f7570a",
+    "src/plugins/prisma-language-server/installPrismaCli.ts": "58b6f0de5d23a9775688cb850381338c72f7d584e55043577db69355bbb9bc1a",
+    "src/plugins/prisma-language-server/prismaConfigLoadFailure.ts": "11d722c4584243754985d4b3cd0eae759697613bf4d7bafb2d66a2059009eda6",
+    "src/plugins/prisma-language-server/prismaNextClients.ts": "171a3be5578a7e9dda7afc353b311236caf740c2a70d25b4844814b1ad59f130",
     "src/plugins/prisma-postgres-manager/ConnectionStringStorage.ts": "5137b97158e565785411e7be167f42c333af85d973c57f8f687fe3cb2cff67ff",
     "src/plugins/prisma-postgres-manager/PrismaDevRepository.ts": "3224c9c53042e09f5bda5e83def88cc5a1bce806e44587f303fbf23262ff90ff",
     "src/plugins/prisma-postgres-manager/PrismaDevTreeDataProvider.ts": "023593d9dfb0674764470f6b03c72a2836ea1d0c0aff9c56ecbac4bcc3532cac",
@@ -485,7 +487,7 @@
     "src/workers/prisma6-language-server.ts": "0d79e57586857af50ca3c804f3609fd721818dece5222e28c175da8ea39ba259",
     "_source": {
       "repo": "prisma/language-tools",
-      "commit": "aa6c95d5c19dbd8eab74817f36fa809d1d0596dc"
+      "commit": "4c5c3d7d8e6187775b4b4d634e7eb87b56a777c3"
     }
   },
   "vscode-ansible": {
