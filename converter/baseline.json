@@ -28,11 +28,11 @@
   },
   "vscode-go": {
     "esbuild.mjs": "5821954ee8cd1533dc703920e8ce4598554fb59fc879b0922b5127ed05f889a6",
-    "package.json": "3de9856ef07af1b4b2e79c124678cf7edfae5c64987f0f8643e1a63383065131",
+    "package.json": "97da69f57829992cae255dc82e7bb040a69f2e3f29300dd6a5c4d4a7ac4cd61f",
     "src/index.ts": "375e6842df954721bd34a0ffdf2479b4ec38735573f824cba6781cad6b2f604a",
     "_source": {
       "repo": "golang/vscode-go",
-      "commit": "46048018519b6f727e920f5f5a4335acc436bdd3"
+      "commit": "e284c6e07e6737ddc99058827c5e40412ea2c69f"
     }
   },
   "vscode-eslint": {
