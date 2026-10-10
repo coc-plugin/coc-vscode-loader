@@ -874,7 +874,7 @@
     "src/client/src/customData.ts": "53706fd008237b9fe5aaea65972e43beecee3f9837f3b806066fc34feeafaee1",
     "src/client/src/htmlClient.ts": "81d8af2cf3a89b2bfa479d9f25cdb9f923f23b8487ab43b18f15794264591c36",
     "src/client/src/languageParticipants.ts": "59e4c4ef814405d0f13803bfb71f1b83293964ee3ae497658cf9ee90f5ea5d56",
-    "src/client/src/node/htmlClientMain.ts": "05481e192c72cd1f04a5244550aa153a0d2bcf0d664a735a1d9d85ed0fbbdf8b",
+    "src/client/src/node/htmlClientMain.ts": "8d45ae0aa11fc63b500030879a06ccb9bdee41530d1c50d72525589fdc43a9da",
     "src/client/src/node/nodeFs.ts": "42c128fcbb3c81dddd1f1b7358ee9f4c7f1cfadbde9177d3d669b5a498e0d49b",
     "src/client/src/requests.ts": "c94112d286893a3ece3d8c678e6f606bbbfa48ae753d2865f3b3764272b8fbcf",
     "src/index.ts": "1bf5f088e88be0e88a9026d251b3437e4d65b6168af0d378f5644e89de8a0998",
@@ -889,10 +889,10 @@
     "src/server/src/modes/formatting.ts": "0dd140cc4b64721cd454d25be7d0fb3e72bbcff9155f8045767fcd81d1784327",
     "src/server/src/modes/htmlFolding.ts": "7c0a166d1da0c721eb3f1fc91d0bbba01a6762b45f57cf8ea4cecb2d65b2ebc4",
     "src/server/src/modes/htmlMode.ts": "aff7dfaf4dade09fee33e2730be87a6250836a5d38aef533de9032711ce06ac6",
-    "src/server/src/modes/javascriptLibs.ts": "56fba3f1bb3a5a23f9c97ca705beed192296e28eeaa2d5cd28b34e13b0f53453",
+    "src/server/src/modes/javascriptLibs.ts": "6995c88e8bee7e439baf00115b8b9283f1c1ef2b93adf00ae7a51d9a7f4ab4a6",
     "src/server/src/modes/javascriptMode.ts": "a38eaa3b5963763df9450ba516e02ee53b927b010c591e071bb33fd450093d54",
     "src/server/src/modes/javascriptSemanticTokens.ts": "7b936047026a72614f70be9590c11c49f8743771b4905bb3a6606a5217cd9947",
-    "src/server/src/modes/languageModes.ts": "d6a89349b7a93e74655b6348262c6f5eb761d6fe2de18bc19b3e98b31a71738c",
+    "src/server/src/modes/languageModes.ts": "e427406795b09d864d206ca48b72e0fbe05bf62a35c5e96c203320c8ccfe85ab",
     "src/server/src/modes/selectionRanges.ts": "2f81d43a414fa27996d70f231c2b29cac2b2961c42e1831d2361117e6042dfc3",
     "src/server/src/modes/semanticTokens.ts": "6fab408f6c7fb4193ccbae1d8e9317728ac41c359804fb09477b992a3e4edb85",
     "src/server/src/node/htmlServerMain.ts": "5d6a1bad66efa6013e250e13f657acfe1f17753fe67136f4b420f1bd0cece5f1",
@@ -918,7 +918,7 @@
     "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "d3c24c3c4d7efab36b37acb1e91d9502c0c35b28"
+      "commit": "cc3fec8846d0e678357e476fa611774da26d7e24"
     }
   },
   "vscode-css-ls": {
