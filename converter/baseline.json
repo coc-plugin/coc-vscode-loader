@@ -174,7 +174,7 @@
   },
   "vscode-ng-language-service": {
     "esbuild.mjs": "7c02396fc33bafbd7dfb585f5b512513ed3b01f0c076d4b46ddff97d4c5d1611",
-    "package.json": "dc9082c8acac7da6f82a7777d650b377dfb5f90a5bd8baabd218ee0457bbcad2",
+    "package.json": "5507b21decac007fd366fa45e9378776719d567e55dd3d70a1611464da798ad0",
     "src/client/src/client.ts": "239618e1d5b272e0429f8f079446164d1c32bf810ebd8301643b9f184a219991",
     "src/client/src/commands.ts": "478f8590c5b1ebcbdcaccaae40b46834ec4b4d26900ca9246bee787b6af16ad9",
     "src/client/src/config_change.ts": "f028cd1e2244499a92131c58c17955b4254bdf959b52f305132b3e578c528630",
@@ -196,7 +196,7 @@
     "src/integration/e2e/index.ts": "03180e9e1ed592a31aa173dbc0a5cbb1a51c44c673117e01f3373949b0e0b8ce",
     "src/integration/e2e/inlay_hints_spec.ts": "8c750ad6f8f6aa29584da47cbbd712d78de832a3d279219fca0df2939fd43d4a",
     "src/integration/e2e/jasmine.ts": "411402f2107ea7693777e2a00db67395f0542ae133d15349757ce163ba291500",
-    "src/integration/lsp/ivy_spec.ts": "ecbe252e82757a6222329bed4890604de23ab7e433b772f5099c07eee5ac9bdf",
+    "src/integration/lsp/ivy_spec.ts": "80e74927a23fc7f5ed38352dd05a08ae7dd3dcf3fe6d85f5fb4f4bc8c8c9e983",
     "src/integration/lsp/test_utils.ts": "3218b3af3f85403d5275e2c5821ecc3d94f5e090d5d951c2668e51231d5e88f1",
     "src/integration/project/app/app.component.ts": "1842d09fe4bb33dbbd219b11d0388311b7c8664e68523adadd6f99837641d438",
     "src/integration/project/app/app.module.ts": "fd77f6e7040b8d68f5244102ed7251bfbbae1030710acfe9f2392e411115b804",
@@ -221,17 +221,18 @@
     "src/server/src/handlers/document_symbols.ts": "8e241fd0f27ae6d33458c80de2fa2b57794972a61fba1857c0b0ae31a007c72d",
     "src/server/src/handlers/folding.ts": "aeaf04986bc73d0cc4a4fa708cf584e3d6d45d02c1a763a8d9502fb564851679",
     "src/server/src/handlers/hover.ts": "f76564a0a4580c9623cca13e09545b5dbe026b102326ec932c85074e8d02ef68",
-    "src/server/src/handlers/initialization.ts": "8d585e660b8018ed44c5600525e96fd36d11c9664002e88c7af0b097dedd29d5",
+    "src/server/src/handlers/initialization.ts": "d8ff3ad608e18a1eabe85e0e06deb759c1ffea14e719d07028ac7f701ba9f26c",
     "src/server/src/handlers/inlay_hints.ts": "2bdc4f21130dd0054a1945e8ea96c6a47816c48e743d1e4c385cd8871e745270",
     "src/server/src/handlers/linked_editing_range.ts": "2e26badb1e40a156d884a0620cb08817ffad78cdd1318fec88b4b818daf53dfe",
     "src/server/src/handlers/rename.ts": "48d7ef572320085a4e86986a3eb440aaed9b543de767ca15dcd558870087346f",
+    "src/server/src/handlers/selection_range.ts": "672e92c1a61948f36c4ed77ea5fb49ce1cecc46bae6c14d89647d39bc8ed2634",
     "src/server/src/handlers/signature.ts": "9652373c559d9bc353afb6843ed7cb21bba9dd11b7cbb3d99545b4b2f86348c2",
     "src/server/src/handlers/tcb.ts": "8749403799f61e80640f5ccb05300eed4846fdc3b70342d238605eb78960d0f5",
     "src/server/src/handlers/template_info.ts": "3459a3ce0f97eb5123f9a9a1c50c86e0b051db38b87f9670c05518ed8f756d11",
     "src/server/src/logger.ts": "1b2cdab13456b2bd6f9cec7db61a562aecb632b46d561baaabc3b0258168fa4c",
     "src/server/src/server.ts": "8147d35b0e1265898f69c3f0b8c0d084e6c99b032b9effe947de06211c325ef2",
     "src/server/src/server_host.ts": "5860cf77d9533321798c26960464e6d73f4740de75e74d0222c18ec4f8b118d9",
-    "src/server/src/session.ts": "3d66ac77924015f60fef6004bb7708b981d105e6f94f4cb6082b94d27827959c",
+    "src/server/src/session.ts": "f3bad9898b3aa110d4bcea9d3940c12166d9225e89684816de3aacf9cd598a35",
     "src/server/src/tests/cmdline_utils_spec.ts": "54c0db6582350e2cf873353db57cc2685579c09df78760cf189edcd94e7f007c",
     "src/server/src/tests/config_spec.ts": "d8bdabf5fba59d1f234d7ca647d6e2b51012572d2dbaff8c1e359fb6becc6416",
     "src/server/src/tests/embedded_support_spec.ts": "2910b640ac82d8fba20fcebbb58fef84c4603a509925e4df07e5acc3bcabe738",
@@ -258,7 +259,7 @@
     "src/syntaxes/test/driver.ts": "4133559698fefcaf5fb2535160be3fc3d430b7b7a9b2f6e774780dd4b8e16989",
     "_source": {
       "repo": "angular/angular",
-      "commit": "fc9b2d64e32bf48d9782e0a679060f36cc9a1dc2"
+      "commit": "458f1d76b8a44c1b091e4239e1f95ec949390e73"
     }
   },
   "vscode-language-viml": {
