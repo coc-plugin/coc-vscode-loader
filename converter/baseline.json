@@ -333,7 +333,7 @@
   },
   "vscode-xml": {
     "esbuild.mjs": "6821744548ffa0e82d96e858adb569972cb273bc99d5331bf627c44fd3c91271",
-    "package.json": "4b41fa2c6864b995dc62ee8b9b9c208a595dc4f53d36cb77daaeb5b94369f74b",
+    "package.json": "4f22f94da40cbe8adbe14cd0fbc6614cadd4dc993b1453d5bb83371281faef4d",
     "src/api/xmlExtensionApi.ts": "289042130ff8d740dd6b155f0f45c421fe69dd25aa817050d4f64abb0a09ec35",
     "src/api/xmlExtensionApiImplementation.ts": "5a1dbff650af2dd43605e91849da0800c693abd852b20e16c908c1348024e981",
     "src/client/autoInsertion.ts": "90f7fb0051bde9514b50408b0da2f53fcbae94b2af7bd1c6167f24000bff02e5",
@@ -345,7 +345,7 @@
     "src/client/xmlEncoding.ts": "afcf3402f2136e075beb318e5800322d9e3b0bb798d17e10afdd8c40a5096389",
     "src/commands/clientCommandConstants.ts": "0b44a165bbfdcb864f9d94a15df77a77198afb350750fb85dce41ec2e86a0852",
     "src/commands/lspCommandConstants.ts": "136aa0e314e7ebca2e3d2c06cf8afc5d011f490ef78c1d0f7f8b0e0f7cf77bf6",
-    "src/commands/registerCommands.ts": "7a20ce90163959e293847972b66baa1eceaf0f379e4c358a231a218df54d85ef",
+    "src/commands/registerCommands.ts": "79940d028aff5551d918ef3658af700ad87115b659beaf436634ba8df2c92f34",
     "src/commands/serverCommandConstants.ts": "fc44c690a0b75f0b3d03348fc90249a70a1e3ec03f89cd00c40150f1ecaa53c3",
     "src/extension.ts": "84012feedee8891da062247ec1e866d8e6b583832f1e648e15cff32bd8e7c377",
     "src/index.ts": "82857609ca64877befde6281c32887c4b98d8912f97d89ba7706ccda8ccee8f2",
@@ -368,7 +368,7 @@
     "src/utils/fileUtils.ts": "d30f2c091f64ed72cb6a0b8c016ad1b330d0440e9b24daeacb5811f2bb211531",
     "_source": {
       "repo": "redhat-developer/vscode-xml",
-      "commit": "143d5edce4279c023f2f7ffe775e4d24555fddb6"
+      "commit": "c4ac82bb64b97f620980b84803518de298baf37a"
     }
   },
   "vscode-svelte": {
