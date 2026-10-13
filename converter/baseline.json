@@ -1757,11 +1757,11 @@
   },
   "vscode-uni-ui-snippets": {
     "coc-convert.json": "8531958e94968c71bca0fc70432e85e6604ca6f3b0a795c6abd2d9618cfcd1c0",
-    "package.json": "b9d01e9bf92ee9660bf42498da46988699c9bd444ffa06ae52ca4cdc74420089",
+    "package.json": "f5ead9617c07cef56f8e5c76e82079d9cbb5fd9c464dbd4746c78d8d4026a030",
     "snippets/vue-html.json": "c5a9626f0475be8d64246a8ba0ae8bae23bae73ed96250a3114b3173c8c1fb52",
     "_source": {
       "repo": "uni-helper/uni-ui-snippets-vscode",
-      "commit": "33b35f8d9edddb4ae130589d2464c1b26f08fefe"
+      "commit": "a974ea48ed34393792a79e6b9a4d2ebbd8aba49d"
     }
   },
   "vscode-ue4-snippets-vs": {
