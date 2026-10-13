@@ -158,18 +158,18 @@
   },
   "vscode-volar": {
     "esbuild.mjs": "1b39e12f550648d7f674f7e9af5f71d32e3de4ed1e2089320e8c554ae7200398",
-    "package.json": "ffd3a1b2ee86242a9cb5946583186c0f1bedf188566a2dd2bcae06ebdceb9c00",
+    "package.json": "28237c3e84ecdde1de9e5d210f6d10059fbfcc0e49847cffa8bcb6316b7a01bf",
     "src/bridge.ts": "efaf15df49c70728f96ef8f907926ba274bf85514029233cabbb461b6e80de59",
-    "src/generated-meta.ts": "7874d6374a2feea4b26d476488a3a09271166fe05fa784f7d07074edd6fe1472",
+    "src/generated-meta.ts": "bdc5908ec8fc309370e8ae89476635d7959f45bd51f9988efd5c12c3dd3723af",
     "src/index.ts": "ac63503067c7517c0329bd2dce1aa237bacf0b0768b088c162d4380eb54e72c8",
     "src/patch-tsserver.ts": "ac81d24981624c21f9461145bba34ed0e6d92f100cc166fc8242f7cca0cbbb05",
     "src/rangeFormatting.ts": "ddfea084b75ca87c75d53ddb04159ad2727fd9416f25bcb55fe457244234533b",
     "src/reactivityAnalysisPlugin.ts": "291dcdff967bfe9fe60434ab95d07c74cfea1d2d8494240cba8ef5941dba6335",
-    "src/registerModuleTransform.ts": "dacaae03ca28807ef781e0adc98e3ef7307695749bb349496232124bc8477414",
+    "src/registerModuleTransform.ts": "3d6827a55a55ea79cff689e441db4563f51dedc5b7cbe00d514e619b448b018b",
     "src/welcome.ts": "bdb7fe441601673d896b563756edf6f827a40d1c1657ae0c3c9493b198908a65",
     "_source": {
       "repo": "vuejs/language-tools",
-      "commit": "ead272ee9bafd75a39c71fb6bd64d5196d725686"
+      "commit": "f2d92d3f1cb5513268fff358993f163e78d4821a"
     }
   },
   "vscode-ng-language-service": {
