@@ -272,7 +272,7 @@
   },
   "vscode-lua": {
     "esbuild.mjs": "4699bb544128e6798fead66f88972e526ebb14691a58a90cc2ad86287c3cd0d0",
-    "package.json": "2790d6605fcb62a4435d6a152f539da01343b4319aa9518759b8c715b37803dc",
+    "package.json": "1eb0d95331a13fb3db643ad5cc1bc1c640607ce931ee64579def9d7acbe697af",
     "src/addon_manager/commands/disable.ts": "f9a25b2f69e9bf8c3f5134f6c607aa1c5e58b3bea53403e22500a06550e4b0ae",
     "src/addon_manager/commands/enable.ts": "7502431b1d7b8a6938267bd57b66b96a8839dea245bb0556eb8d21a2b79f6797",
     "src/addon_manager/commands/getAddons.ts": "df59f3d8fccf9b3098a9c8e5c17d8cb4b7b5afcb2245aafa5581e954575d21f6",
@@ -304,7 +304,7 @@
     "src/vscode.proposed/editorHoverVerbosityLevel.d.ts": "d8f4989bded779c8e75fac0d54527634c44ad41f0647476f9100ee5faf57d5c0",
     "_source": {
       "repo": "sumneko/vscode-lua",
-      "commit": "057a387572e7c50e3491c34e7f2e716aea967dfd"
+      "commit": "76ad79d8bf3260a78ce6ab3d967e27c39261dc95"
     }
   },
   "vscode-yaml": {
