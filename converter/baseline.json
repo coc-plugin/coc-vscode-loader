@@ -335,7 +335,7 @@
   },
   "vscode-xml": {
     "esbuild.mjs": "6821744548ffa0e82d96e858adb569972cb273bc99d5331bf627c44fd3c91271",
-    "package.json": "70d3d251b17863b372fa3817e813937fa30ff70a28ea903d6d0c46c3c0de5c7b",
+    "package.json": "4f36b9649a1aa93474b15ba731c8aaece06446fd84129bc006281ea888cde028",
     "src/api/xmlExtensionApi.ts": "289042130ff8d740dd6b155f0f45c421fe69dd25aa817050d4f64abb0a09ec35",
     "src/api/xmlExtensionApiImplementation.ts": "5a1dbff650af2dd43605e91849da0800c693abd852b20e16c908c1348024e981",
     "src/client/autoInsertion.ts": "90f7fb0051bde9514b50408b0da2f53fcbae94b2af7bd1c6167f24000bff02e5",
@@ -370,7 +370,7 @@
     "src/utils/fileUtils.ts": "d30f2c091f64ed72cb6a0b8c016ad1b330d0440e9b24daeacb5811f2bb211531",
     "_source": {
       "repo": "redhat-developer/vscode-xml",
-      "commit": "6d7aeaef4950084e86be0ff548ebe8d16a4c4503"
+      "commit": "028e8a90f8c3909d6ce65a664d1241e699200b2d"
     }
   },
   "vscode-svelte": {
