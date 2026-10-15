@@ -428,8 +428,8 @@
     }
   },
   "vscode-prisma": {
-    "esbuild.mjs": "f05c6731996ad1c37296d0dd57cbe5cc9ddb29134f6062eb2b6b1e6902bd6fe5",
-    "package.json": "9467dd33404e296cb730a3ce7ee6e9b092edbcfa6772f4aaf12a781e56b2b281",
+    "esbuild.mjs": "0937891f890467fdc2293a8064e90f8633cd3e9f503c3734c069650b4809fe5f",
+    "package.json": "9b9fa8de25ca7a0df757472c3bc971128af74b16edf233e4f3feaef48229620c",
     "src/CodeLensProvider.ts": "68b98245ff699dbc9ed62ca02c398602e0ec9c902f8146ad2afbcf6d45a9e163",
     "src/__test__/helper.ts": "66c431526de6125b2ecf5f694eac077810a4198321d8057afcc8a591d21e8cc2",
     "src/__test__/index.ts": "a178b7c5c23d3d058cc82768d6eb2f87083840df41d79a133d120b4c020c45e2",
@@ -489,7 +489,7 @@
     "src/workers/prisma6-language-server.ts": "0d79e57586857af50ca3c804f3609fd721818dece5222e28c175da8ea39ba259",
     "_source": {
       "repo": "prisma/language-tools",
-      "commit": "4c5c3d7d8e6187775b4b4d634e7eb87b56a777c3"
+      "commit": "0b0562e5674df974cc95199c44d907e8845f74a2"
     }
   },
   "vscode-ansible": {
