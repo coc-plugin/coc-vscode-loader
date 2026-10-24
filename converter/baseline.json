@@ -418,13 +418,13 @@
     }
   },
   "vscode-astro": {
-    "esbuild.mjs": "d79c7b59ed3d98e942d93531793e4386452d749428d04376137344e20275d255",
-    "package.json": "e8bc13e060ea80500002a7bdd027d3e2289b0ebcc799ed3fc05dea6fe121dc2d",
+    "esbuild.mjs": "ed838d3374c699a46fe84a991a06a64f5286ae4b9185fbbd9fb4f71259aa4127",
+    "package.json": "17adef52d46d0780a7b788b15d9b97ebfd302b7868b3a679aed5ccaed68a38b7",
     "src/client.ts": "0271f79c4d194bae7ef6139137fb28aaa7cfeb0bc0dde49f7d998bb9ca634c56",
     "src/index.ts": "b3b5b1b3e27c044e509212020019a80c479cb1c359ff2de47f6c67077c8f719e",
     "_source": {
       "repo": "withastro/astro",
-      "commit": "7c04f2edadbf05f311a0f7273a43d46e827c633e"
+      "commit": "5fe699c888d0423db75cac3f0939409d7eb28e37"
     }
   },
   "vscode-prisma": {
