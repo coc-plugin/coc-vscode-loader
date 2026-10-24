@@ -174,7 +174,7 @@
   },
   "vscode-ng-language-service": {
     "esbuild.mjs": "7c02396fc33bafbd7dfb585f5b512513ed3b01f0c076d4b46ddff97d4c5d1611",
-    "package.json": "5507b21decac007fd366fa45e9378776719d567e55dd3d70a1611464da798ad0",
+    "package.json": "b79974af10863726021fd57f30142e84c67b24a28f0ec1380f943e74736f3a3c",
     "src/client/src/client.ts": "239618e1d5b272e0429f8f079446164d1c32bf810ebd8301643b9f184a219991",
     "src/client/src/commands.ts": "478f8590c5b1ebcbdcaccaae40b46834ec4b4d26900ca9246bee787b6af16ad9",
     "src/client/src/config_change.ts": "f028cd1e2244499a92131c58c17955b4254bdf959b52f305132b3e578c528630",
@@ -259,7 +259,7 @@
     "src/syntaxes/test/driver.ts": "4133559698fefcaf5fb2535160be3fc3d430b7b7a9b2f6e774780dd4b8e16989",
     "_source": {
       "repo": "angular/angular",
-      "commit": "389db18cdd92c0ba4fc0d91dcfb073954f95b3fb"
+      "commit": "455b6270fc15e86d01b2ca022d8570433d2944fc"
     }
   },
   "vscode-language-viml": {
