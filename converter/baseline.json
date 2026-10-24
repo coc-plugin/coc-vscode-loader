@@ -310,27 +310,27 @@
   },
   "vscode-yaml": {
     "esbuild.mjs": "7d8f60f7a95d5c286a073bd04f494eab560acf7ed099fd6516078d4477a68568",
-    "package.json": "b487c305fd3781f03569057136516f5683456a9da8d5dd60d0df80acc2ac74c9",
+    "package.json": "a0f0ab6f8f37b256f8a4c3e0a7231f70fe1554008f108478be122d0e478f3092",
     "src/autoDisableSchemaDetection.ts": "4de5b4412cf9471ced61f3ffb146e56223cb33d8d9127b0b665ceb9250166e72",
-    "src/extension.ts": "27b6773e6e271619af10463c0b7bed4b5544f174837f6519eeb5ae8e3357d897",
+    "src/extension.ts": "c673f872ac289d7e6beb3cdf986eb1cf09914cf7dcc7b54044aaaf662eaeecec",
     "src/extensionConflicts.ts": "f3939681991a10b819375e016c2de3c510f807e5acf1fd4c3cd5dfa28e606409",
     "src/index.ts": "080c2dc683629b4bd7c22654dc985019d981cd2d270dcb2e374ed2d54fbc83ae",
     "src/json-schema-cache.ts": "55eeb8a18037bb95ab56ba26bc7c22f6a9a181cf6f3a4d0c5d9e965bfd1fff18",
     "src/json-schema-content-provider.ts": "e685e40d910c94b940737300bb60087b42a5a1cb333d437ef52e22517f474543",
-    "src/node/yamlClientMain.ts": "68c98893099faffc6561bd614778b39fac99320a46a85ed6d546c2e61cf0f204",
+    "src/node/yamlClientMain.ts": "7a5b3c44341cc93622670812c058cdc0700308ae4b28e0fb310e8694b9d60537",
     "src/paths.ts": "3afcf9dfc0f28f4aec1bb7b158f052748faae303d248e4fb337f0519e8cd839d",
     "src/recommendation/handler.ts": "f86e0ec4a87a889e4d824fe53869c743ec0d7a9617c07ef2e22b0c82daabcbe2",
     "src/recommendation/handlerImpl.ts": "b115decd365b1fcf87cbd21959f67d497b393556dda4d3abbc9bf1783100525d",
     "src/recommendation/index.ts": "119e0a21f72b45e77455c395990a6faa0893416c52587d608daec0810b5c3c2e",
     "src/recommendation/openShiftToolkit.ts": "395ac7f07202916274602b45d355c1a464a6c1b1cc1119b43f369bd787220883",
-    "src/schema-extension-api.ts": "7f1294135dc601e895b7884b9a034abc8f8cb236e744a5ec010d2adfa099829b",
+    "src/schema-extension-api.ts": "9753180efdee7b550163a61a54ec649ec406062ecb687f9a1a65fa0e9ccd2747",
     "src/schema-request-retry.ts": "c0b4d72d3d6451b945f02ea15b34421f1e747f7ed4a7abb8b9803795db7d4f9c",
-    "src/schema-status-bar-item.ts": "fec27ad35ca5f445b2da84671373f24e6ecfe6a24a7fcfbf865e1cad0f3e4962",
-    "src/telemetry.ts": "06f3d973a3db9c3eb25da54592135b305cc29f49130dc47d0472b03af84d8bfb",
-    "src/webworker/yamlClientMain.ts": "a873e56b118ca7134a0284a98d1e158ef622be915bf2f3f83f06fe964057cae9",
+    "src/schema-status-bar-item.ts": "cd7e0e9ea26e886442a90b718cf83e5dc8ea735c3eaa8bed14775d7848ca8a6c",
+    "src/telemetry.ts": "6bd6925cca35ef5979c6c5fece7264e327dbe0c17a5df0fc4f7587d529c6aa79",
+    "src/webworker/yamlClientMain.ts": "f4f23d736882d4063a61b21ee7d660641fc127529a4b8b89155775ccf20b942b",
     "_source": {
       "repo": "redhat-developer/vscode-yaml",
-      "commit": "2d5020b3571481a5fb6581b2c4820582c00435ef"
+      "commit": "ee915c0ff5164d1cf84d6369bf2f4934d52eafd4"
     }
   },
   "vscode-xml": {
