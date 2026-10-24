@@ -158,7 +158,7 @@
   },
   "vscode-volar": {
     "esbuild.mjs": "1b39e12f550648d7f674f7e9af5f71d32e3de4ed1e2089320e8c554ae7200398",
-    "package.json": "28237c3e84ecdde1de9e5d210f6d10059fbfcc0e49847cffa8bcb6316b7a01bf",
+    "package.json": "c7ffa45835bc23e3a94c19857d77a86cf941e11b526a038e0cfda0fff7b117c0",
     "src/bridge.ts": "efaf15df49c70728f96ef8f907926ba274bf85514029233cabbb461b6e80de59",
     "src/generated-meta.ts": "bdc5908ec8fc309370e8ae89476635d7959f45bd51f9988efd5c12c3dd3723af",
     "src/index.ts": "ac63503067c7517c0329bd2dce1aa237bacf0b0768b088c162d4380eb54e72c8",
@@ -169,7 +169,7 @@
     "src/welcome.ts": "bdb7fe441601673d896b563756edf6f827a40d1c1657ae0c3c9493b198908a65",
     "_source": {
       "repo": "vuejs/language-tools",
-      "commit": "f2d92d3f1cb5513268fff358993f163e78d4821a"
+      "commit": "ba534efe8566ab31794ca5e6dc701b758790fb27"
     }
   },
   "vscode-ng-language-service": {
