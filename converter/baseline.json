@@ -46,23 +46,23 @@
   },
   "vscode-biome": {
     "esbuild.mjs": "1ce6343ae783b009fb0349fb4d14c10e972f71383d8adc6538a0817f708c9a52",
-    "package.json": "f237c4306f095bc0567b67f68eafe29977db3fb210e7afa4906e52189a301b7b",
-    "src/biome.ts": "d142e9d7b3ebf5f73df8b4e7af81c0cf78146c555de9b068b06fccd34e7e511d",
+    "package.json": "e3391dfa79c8462e661578357e81cf66bfab57b00e8491bbe852d54a610a72dd",
+    "src/biome.ts": "5fbe4199e0ac3a9dae1df01302067f1a7226143dafc3ed717872bc8944717ee8",
     "src/constants.ts": "4816b8acc6e283f78a7f85e2890cb48514590adb3de6741a51e7fc659df50bb1",
     "src/extension.ts": "10fa38ca9e3393fd2941bb34ac9a2b83ee0fe58a3251c77ca7d479562bdc4ebf",
     "src/gritql/index.ts": "a8276fa7b91e5e7e5c6e6db9b1ff61b2e4b262527a2a21d66ccccd65dd86f1aa",
     "src/gritql/node_to_token.ts": "76b77c2dcb42acc7d08685b1b6ddcb7548282965ac62c5a486441f5bac5b00d5",
     "src/index.ts": "ffdbcff1d6286cdc4ff31925c5c21d07bdf52aab04d0cc4cf29278878e8f9bc5",
-    "src/locator.ts": "5c77e4e05061bc1fbe93534eadcf40bfa6734b9103fb816d18a348277a8980f6",
+    "src/locator.ts": "d5e42bc6b2402d32976341273fdfa12df303ec70fb79783a41cfe0367ea99810",
     "src/logger.ts": "f2390c2d09576fb13a82e19d97a5ed241990f10a30c20d2df7b28c203f7cab14",
     "src/main.ts": "8ca0b3a9a0a99fe7a086cabd349456e8c57de1a0a5cb44bf09105e2be0ec59d2",
-    "src/session.ts": "e2f384a8401d2869c0535fdf6b8ba02f988e7e2ed349dd376f0908347ca143fe",
+    "src/session.ts": "f31201ab17949ac67c88a5a9d54c9bfe8214b3c927adb6f3f4f29cff051a3977",
     "src/status-bar.ts": "c5ee11237579f99548fc41eef9339dc1eaa74919b8c77ff231586e567f0f74ee",
     "src/types.ts": "849b578c0626fe14e456c24816bbdade87b60a672ebfed48d28bb936f8bb3a0a",
-    "src/utils.ts": "f0f7061fcca9774deefca69d601498aeef336617e500eef6b58a4cb607901ef7",
+    "src/utils.ts": "9584bc0a21dcce2b22211bd3ee6fa59445abf77b409a5d33e34308bc7d49c25f",
     "_source": {
       "repo": "biomejs/biome-vscode",
-      "commit": "c6f72b5ecfcfe23c49fc01834bc29e57cc84ee52"
+      "commit": "ebcbc3806bf0ce058cb980bae7a286306768ae71"
     }
   },
   "vscode-deno": {
