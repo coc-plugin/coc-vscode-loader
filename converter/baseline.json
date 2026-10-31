@@ -158,9 +158,9 @@
   },
   "vscode-volar": {
     "esbuild.mjs": "1b39e12f550648d7f674f7e9af5f71d32e3de4ed1e2089320e8c554ae7200398",
-    "package.json": "28237c3e84ecdde1de9e5d210f6d10059fbfcc0e49847cffa8bcb6316b7a01bf",
+    "package.json": "bbba967916ed3b298abf4083f60677d191bb1b36f1af4c5a203bcb59b4b7085d",
     "src/bridge.ts": "efaf15df49c70728f96ef8f907926ba274bf85514029233cabbb461b6e80de59",
-    "src/generated-meta.ts": "bdc5908ec8fc309370e8ae89476635d7959f45bd51f9988efd5c12c3dd3723af",
+    "src/generated-meta.ts": "65af4ef5f3fe981ff4efeed70e21f21026e640817db215c605f457f3ce05329b",
     "src/index.ts": "ac63503067c7517c0329bd2dce1aa237bacf0b0768b088c162d4380eb54e72c8",
     "src/patch-tsserver.ts": "ac81d24981624c21f9461145bba34ed0e6d92f100cc166fc8242f7cca0cbbb05",
     "src/rangeFormatting.ts": "ddfea084b75ca87c75d53ddb04159ad2727fd9416f25bcb55fe457244234533b",
@@ -169,7 +169,7 @@
     "src/welcome.ts": "bdb7fe441601673d896b563756edf6f827a40d1c1657ae0c3c9493b198908a65",
     "_source": {
       "repo": "vuejs/language-tools",
-      "commit": "f2d92d3f1cb5513268fff358993f163e78d4821a"
+      "commit": "c59f9908b4912ee20141b53a99b1ce485bff0dc7"
     }
   },
   "vscode-ng-language-service": {
