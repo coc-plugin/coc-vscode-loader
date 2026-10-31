@@ -493,12 +493,12 @@
     }
   },
   "vscode-ansible": {
-    "esbuild.mjs": "3cf56dbcd46461e055cd7512e738931d5163bc20225fbf16f40ecede04994560",
-    "package.json": "2b4ce5f4b52292e602a27cb55ce187ccd623432bb70ccbce232aba421cfb27c9",
+    "esbuild.mjs": "20ee3c6f6eece3c8d32ceb34f859732b0456ddc1b2f3dc4c30bf4e4ad01323e5",
+    "package.json": "18fdc615cf686d34833e0b8f8df8784a5b244aec6db34c39da0e03ec28cbb249",
     "src/definitions/constants.ts": "2178939bde280160d7bcd36eb5be4cc6307dcf9eaacd02d3391f37ea224ca23a",
     "src/definitions/lightspeed.ts": "562937cada1b60b0d8ab20462f8e2c384679d6f3b2770cecc540012091be483d",
     "src/env.d.ts": "82a074b3d1b2a651efa300eb631cc4259092711e7fb2be2ee7b30a7b7cf26008",
-    "src/extension.ts": "b828547931dc83a1797949132bf571ef7d5d590a1edf0e8117336f061087ee59",
+    "src/extension.ts": "1390a5f5961b2136dec39897d4a1d4289859809b74d78343899c5d9ebfe78b7a",
     "src/extensionConflicts.ts": "4041cb6de2b7c199bcd623ac17656719b2f3656fac824a47e79c774e0515fcb9",
     "src/features/ansibleMetaData.ts": "ec4731e88019ecee569759d55f93c0680da381322d2818ec76a5a0afd3aab4e8",
     "src/features/ansibleTox/constants.ts": "6e53e11dfb015de9034e835fd5a4ed18258ef0dae0380ee2fecafea76456ce11",
@@ -602,7 +602,7 @@
     "src/webviewHtml.ts": "bf4c4ca6d5224e022e4cd6fe4eef4ebab585b4d314701e39bce68710f3509e55",
     "_source": {
       "repo": "ansible/vscode-ansible",
-      "commit": "52fa04da99c5f74b1502a3e96bdc55c39ce85bc1"
+      "commit": "0280a97493ae85e1372948bebcaead409661269e"
     }
   },
   "vscode-stylelint": {
