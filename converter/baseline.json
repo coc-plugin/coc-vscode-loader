@@ -1761,11 +1761,11 @@
   },
   "vscode-uni-ui-snippets": {
     "coc-convert.json": "8531958e94968c71bca0fc70432e85e6604ca6f3b0a795c6abd2d9618cfcd1c0",
-    "package.json": "f5ead9617c07cef56f8e5c76e82079d9cbb5fd9c464dbd4746c78d8d4026a030",
-    "snippets/vue-html.json": "c5a9626f0475be8d64246a8ba0ae8bae23bae73ed96250a3114b3173c8c1fb52",
+    "package.json": "981fdd9b6b030a5f154990b8158f80eee7dc4c70c5646b431291b8e0c6a3708e",
+    "snippets/vue-html.json": "c47551109ecbf82d598c7906db5136ceab956dd941045178579eb47acc4f65c6",
     "_source": {
       "repo": "uni-helper/uni-ui-snippets-vscode",
-      "commit": "a974ea48ed34393792a79e6b9a4d2ebbd8aba49d"
+      "commit": "5e06327ee9b0ac248d9cdb7e4d8f049aea1d4e3f"
     }
   },
   "vscode-ue4-snippets-vs": {
