@@ -374,10 +374,10 @@
     }
   },
   "vscode-svelte": {
-    "esbuild.mjs": "9daa6ba8505b7d00f4a798d937b3fc539d653e4eaeca33c19dd994b98fd73e26",
-    "package.json": "6c44b4d36a70904be50a9e00fad4c8fff8b5a940167cb64010405a01f6f4cf78",
+    "esbuild.mjs": "94f36b17dc19a7777c9e77bfa33c99c2ae694ac61cd5b87fa8a2a26ee481ace4",
+    "package.json": "16d897ab72268c5d3b5d48ff72db12f96a93b3e4282865a3bef42a6c4e7a8c75",
     "src/CompiledCodeContentProvider.ts": "bdc034c7ec0c1383a6936c46f5eb36626b108002e690330578061ceb87c7f536",
-    "src/extension.ts": "70fa0b660cbde1d4f7e084735158cfddf5bf6466c8a9b0c373f666ec0218cd69",
+    "src/extension.ts": "ab7ff0fa72cb2f94addda89dfa7fd15895b64d1774656441fc747be033eb5243",
     "src/html/autoClose.ts": "05ef3ba58862da49708cabc4a8b9c04c08a789ad82cc1f21fdd7c54802ef5d3c",
     "src/html/htmlEmptyTagsShared.ts": "f96130b4963e68097656e182932e825d870e6e6e0da173c9e78e21207e2f0dce",
     "src/index.ts": "a17d2afe4c4a99b2f59ff4758a5248761db4dd744684fc74089be73942743158",
@@ -396,16 +396,17 @@
     "src/sveltekit/generateFiles/types.ts": "ae9b751e4259142f7c92f608ccc9680503456608516fa814e3f5c533543a200f",
     "src/sveltekit/index.ts": "ae1ed85467f85944632c271a78e621f0e8f48f71157f57c025b0b077d4ecc251",
     "src/sveltekit/utils.ts": "d1e6c3bbdd9d34a28af89c8f739e1254df5cdaf80b0c7821f694d57863217898",
-    "src/tsplugin.ts": "7390c91a9fd20bbc3dbf97279198f51fd27df3a5383a8a07fe1526c425dfb420",
+    "src/tsplugin.ts": "b83bf3371c085b5001357e45eb400e32045ed5a74f448bb46b20c8947e3c97ff",
     "src/typescript/codeLensMiddleware.ts": "a006b0f5eef43e46ec618fa7efff35c02ce411ecab579180449b9fd53938baf1",
     "src/typescript/configurationMiddleware.ts": "5fcd14e819a5083cda7bc109de397c46fe51c03f2aa8d196fe7f90a48f291f35",
-    "src/typescript/findComponentReferences.ts": "3c2589c3219656337ba75770e8526ac2ca10211c8c59db9187389c49a3cdf965",
-    "src/typescript/findFileReferences.ts": "49ab95d7ba76f21c87e8b30a77fe4474b337443f93099218482519a4b34b93fb",
+    "src/typescript/findComponentReferences.ts": "ccb9619522a597f6826819dc9ad4d6c6291bb9f60d628c368f62d45aec27d4ec",
+    "src/typescript/findFileReferences.ts": "ce0193bdff7cda63263cf86b08658cf5b6e27ad29ca9ee4b268d28398a6acb68",
+    "src/typescript-go/contentMapper.ts": "02bbaf49ec4363e63fa3b34f171686ca73ca384290d9e38f6172defb5d536fdf",
     "src/utils.ts": "da6f0c1762e82891da1dbff5bc599a1b23202b0752bbdda101fc5db9548ba251",
     "src/version.ts": "63477116394a4dfcfa67edc6df81814d00bd4e6c5cd0baffdf807eecf0fe53ac",
     "_source": {
       "repo": "sveltejs/language-tools",
-      "commit": "784c0fe4c9b154965673ce5f009f1ad6cb76ffef"
+      "commit": "34a6fffc5022883564deaf9569722832316f5894"
     }
   },
   "vscode-bash-language-server": {
