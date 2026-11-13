@@ -15,7 +15,7 @@
     "check:tests": "tsx scripts/check-tests.ts"
   },
   "dependencies": {
-    "commander": "^15.0.0",
+    "commander": "^15.1.0",
     "ts-morph": "^28.0.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
