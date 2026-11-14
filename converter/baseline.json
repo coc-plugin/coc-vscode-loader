@@ -116,12 +116,13 @@
     }
   },
   "vscode-rust-analyzer": {
-    "esbuild.mjs": "594c6d1aec168f22f3f6aa4c4b4cbe4a5042cd3f36d5621fab224e6b0bc1dd38",
-    "package.json": "b224ac6d4a0585b7a1d234cdcb95266ace7c02890c05f2c29bf133efd3a6a1d9",
+    "esbuild.mjs": "a1934db03fb5b0fffa9585403904bfa2cfc8a51ddc187a799b823d0c3d2e903d",
+    "package.json": "4c2ee7615c081546a11460423e18384cee82fbd1f3286477ea1425626a624bbd",
     "src/bootstrap.ts": "d3bb61551513439a27f7e35db876d06abdd5bab55531364d944ea7ca3be6d02d",
     "src/client.ts": "a76cbde14ea858e16e943d8bf30de2b5700b9204da6d6beffaaf4cc6cf8b850e",
-    "src/commands.ts": "53e830b301e8a0072a7e76872643e96176672950c29168d6d9a68c503b0cdd2f",
+    "src/commands.ts": "422d2578f933e945ff1e0c690f5bd9791c1d2cf5561917445c4602403f0202a1",
     "src/config.ts": "d5bf7e109c1c4c5e760254bb601c19aaddc8e1badd240437b3497d9dae54cec2",
+    "src/crate_graph.ts": "b5a95be0c0320a45e3c9ced83c378563a10a05874f4c22f155e5bd2d61adf15d",
     "src/ctx.ts": "c546a7238ee4d155f6c4ffe939032576d9a42c5c9d17c8372566a9d48a38e5eb",
     "src/debug.ts": "7865bd0c840a9b62e471dabcf957f5ab6ccf038113b5dc757f16343e05b59230",
     "src/dependencies_provider.ts": "85f7294e829afa9d3f2d37c1ba5e855f31963839755ba7f234444ac231e40b0f",
@@ -138,10 +139,10 @@
     "src/tasks.ts": "7feb735a8df794b41d68d3d06966e068c7e65f191b8b8fdbcc51ec7f8cf1c51a",
     "src/test_explorer.ts": "ec1f50d582b382608a87fbed9bcc8b663e2aa4819b0e2e17a858a418d97cd2bf",
     "src/toolchain.ts": "5a02e2c2502f7002e665f0513642c0de5e2323d866b072f2889ca7c7d4a7db4c",
-    "src/util.ts": "7fca35b9b00275b3e4e3c5406815445a4305c826c53270d4be65fd7374ebc3d9",
+    "src/util.ts": "e01e6f54307a192421f00b0da4098a0248cbdd64a2066cdec369e4e48ad210f3",
     "_source": {
       "repo": "rust-lang/rust-analyzer",
-      "commit": "03fcb77246f2568adb0e9b2fa60d19c6cc1686f4"
+      "commit": "114dcb8d6f50aca1ef14d67b831a7560362f8f69"
     }
   },
   "vscode-intelephense": {
