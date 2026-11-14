@@ -19,11 +19,11 @@
   },
   "vscode-clangd": {
     "esbuild.mjs": "f26c1389529f37b0ca1d3e2bbfa049c260baf4fa2dffcf01af2683eeb1dce396",
-    "package.json": "a298e75aaea31689d30b16b42c0df6f4b6210719132cae05af8c382357f41d74",
+    "package.json": "dc0d4ee8be49d801c43c7d965c6d7b9db337fae238fb79122c04fb101a17ac55",
     "src/index.ts": "4a6849dff08737c81dd8183b6821c8ecd2185aeeba2606b9ef11b354fc7b234b",
     "_source": {
       "repo": "clangd/vscode-clangd",
-      "commit": "c055d254f2767b48d224a502f5028d5d18e3f695"
+      "commit": "4a6fe6386dd06745692662d1285d6ddccbe306a7"
     }
   },
   "vscode-go": {
