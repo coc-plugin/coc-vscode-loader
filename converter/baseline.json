@@ -871,8 +871,8 @@
     }
   },
   "vscode-html-ls": {
-    "esbuild.mjs": "4a903c0d0adf1a59258e94b46d0fefffca2be34fa9aa76014ccb674eb246ae97",
-    "package.json": "907aa2378e209724be9f7862935959da2e2d3cc2ef7cb76e4c6a717cd6103c1b",
+    "esbuild.mjs": "c9802e5f60743487c9b207405192e2cb47d779d9a8761b0ff10278ff4e603f11",
+    "package.json": "5e5cb694bffb0d72db90c2eb763e956b666b6ba2f3d7079af81ca6dd08aeb31a",
     "src/client/src/autoInsertion.ts": "34a20005ed4a99cf4246917dc14fc60836889d62ef2b2eda0c6576f9e69e9abb",
     "src/client/src/browser/htmlClientMain.ts": "30b9f4f2cc583249ddb64575d911492e29f8dd38260934ad1bf33017334fd942",
     "src/client/src/customData.ts": "53706fd008237b9fe5aaea65972e43beecee3f9837f3b806066fc34feeafaee1",
@@ -903,8 +903,8 @@
     "src/server/src/node/htmlServerNodeMain.ts": "97c48184214e6738119a03b85179be2246b797c2a09f7b8ecfb2b632e339eef9",
     "src/server/src/node/nodeFs.ts": "74e4c502362ebba5f209a4e877901d15d436610d3e6719142d5a1df3852d4952",
     "src/server/src/requests.ts": "4318bc2ba1a72eb3525e3923ca266ba819e99b1cad097ebe927fdf953b6d3cfe",
-    "src/server/src/test/completions.test.ts": "dbb245137450b4408a8d38faae89617cc288bf2fcc1cc2ae17c8c5579b3853b5",
-    "src/server/src/test/documentContext.test.ts": "34c7edb965720f64a27d44e332e73921df118c2639ab2ebb73f16114cc8011bc",
+    "src/server/src/test/completions.test.ts": "31fdc6be576f79b4ce27fcb6f2ef871eea89eacaf5352369e3c3e4aa83500699",
+    "src/server/src/test/documentContext.test.ts": "f2200582a8d728c8b6bf0b0b24bb13a901d475bca905f11facef710502564c8c",
     "src/server/src/test/embedded.test.ts": "8aefcc009188592a1d6ff377bd4a5322b18ae668c00f7180d2d323b8159bb2f3",
     "src/server/src/test/folding.test.ts": "b09f64ee6886014d7e4097297751786cc5baa9f3a2e207fd8b7b0dc122a2b952",
     "src/server/src/test/formatting.test.ts": "ac24a30333f658c4c82b20f4e94b2f87ad77d299242f20e94e38fc034f1da5a6",
@@ -915,14 +915,14 @@
     "src/server/src/test/semanticTokens.test.ts": "b09c520a4229fe971acfd11d4722ffc021951ee8f7493e18843f98570277f6ca",
     "src/server/src/test/words.test.ts": "8d3432b31b4a9f69b3dfd074920389acc523c55c1da8e34877c0184bf7415f2f",
     "src/server/src/utils/arrays.ts": "fd0c3990422ded99b480f42f18a56cce1d94b6535651c791c9f691c8795f8763",
-    "src/server/src/utils/documentContext.ts": "7ae74db3945036bf1d59e1ab96cc3866f17b113864c51d33dc26598e552a8b4a",
+    "src/server/src/utils/documentContext.ts": "6a738ae83d438fb810b4bc79793481e8c9a24177334f99100eff9da3854e776a",
     "src/server/src/utils/positions.ts": "d6d417ae4fc846016b9de9a9a6090dd4b063c2bf8558672dcb6845ab701656e7",
     "src/server/src/utils/runner.ts": "daf2a8aad93d8f560b649ffc110580ff27e0348cc8112a66a5c4a792398300e0",
     "src/server/src/utils/strings.ts": "b5c399d7f18e4b5704d4dca8beefa527b29e9fc653639610d48ecc75b33dca19",
     "src/server/src/utils/validation.ts": "6dd4343dce97fbfe37854bf2d7a0fbe712b657d44aae25f5fcb28fa48c267bea",
     "_source": {
       "repo": "microsoft/vscode",
-      "commit": "76cf4ac8bd6ec2c9e97b83e16cfe115782a0773b"
+      "commit": "d53b9e1def17b1919021ee08c87a5b9453207fe2"
     }
   },
   "vscode-css-ls": {
