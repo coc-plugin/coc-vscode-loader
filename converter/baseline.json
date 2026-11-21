@@ -1,11 +1,11 @@
 {
   "vscode-gleam": {
     "esbuild.mjs": "091538f6b932a4c081324a2b30584ea77ca0fd1ec84eeadc537bfa0d62d36466",
-    "package.json": "1a3a4271948ddb6d4f95981f41f8a04872b148dc72bd40178f020e25e7108a2f",
+    "package.json": "930c886afd538b75666de7db5a4bf75f391e6fc8c2989b7a58051934f02e56df",
     "src/index.ts": "3c87b5231ceeb0ae6a03aade8168f6c481de353269b45195c95f86184786b853",
     "_source": {
       "repo": "gleam-lang/vscode-gleam",
-      "commit": "369b35c02c6fcdafbd199654fe0380951e6dc0ce"
+      "commit": "9e8c2b4a28adc44ac05d53ab93d4d0abc38752e9"
     }
   },
   "vscode-ruff": {
