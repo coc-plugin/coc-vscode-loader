@@ -744,15 +744,15 @@
     }
   },
   "vscode-html-css-support": {
-    "esbuild.mjs": "4119ad1a0b216c234d98d9621171fa4af6753e8de5ca006af7d3b53d60f347b9",
-    "package.json": "45bf79cc23101d3d2b5c1ec28164697b12359ca81e8f61680062e5bcc0184e9a",
-    "src/extension.ts": "92f6b0bab7b3a64af622ebaecf2314fcfab93465d52b9d4b32385cd56012ff83",
-    "src/parser.ts": "3de5124fc7d084d92b12e0731f5ecc5f0904e3ed3d55c8f0535930106c469c9d",
-    "src/provider.ts": "5b37367fa9e465401d1fdd27ef9f5de7d4c665d23eba7b97ef8b2bd23a1ad4e5",
-    "src/settings.ts": "ee66822f8a185c3fd2dbceabad0b2e9a780936c255d0e3ea8c325f42fb50ef2f",
+    "esbuild.mjs": "0f15bbd578f37d18beb053e0452e48d5945733fc642748900a4243ae5e181d13",
+    "package.json": "36234d901d61f17ab39bd494647146090abb84ba55ce24b3821bb357bdfa1cd8",
+    "src/extension.ts": "32024799629c81c6409ce9c5693b8841d16c4f1f110056db234c4fe1cc986f3b",
+    "src/parser.ts": "f8b05cb14691ab1ef18c627fd2bac6f83d2ca7aec353fb69ecb74057ea9f4dc7",
+    "src/provider.ts": "0db55f1ad1d38b64f025b0bf2e079247ea7056146f2695112c934cd9e2d23a4f",
+    "src/settings.ts": "a4807f58926a170944d8f413422bd8bd5b3942970ab5a19a9fe922ea840b07f4",
     "_source": {
       "repo": "ecmel/vscode-html-css",
-      "commit": "0cc999cfe25edb9a4017d29878e89c735fb3b8be"
+      "commit": "1dcfc126b093f527f8356218653bdeb119f64827"
     }
   },
   "vscode-alex": {
